@@ -19,7 +19,9 @@ namespace MajorisFiles {
         uint generation;
         public void cancel()
         {
+            generation++;
             pending.cancel();
+            loading = false;
             if (monitor != null)
                 monitor.cancel();
             if (reload_source != 0)
@@ -45,8 +47,8 @@ namespace MajorisFiles {
             location = folder;
             loading = true;
             items.remove_all();
+            FileEnumerator? enumerator = null;
             try {
-                FileEnumerator enumerator;
                 try {
                     enumerator = yield folder.enumerate_children_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token);
                 }
@@ -79,6 +81,7 @@ namespace MajorisFiles {
                     }
                 }
                 yield enumerator.close_async(Priority.DEFAULT, null);
+                enumerator = null;
                 if (epoch != generation)
                     return;
                 monitor = folder.monitor_directory(FileMonitorFlags.WATCH_MOVES, token);
@@ -92,6 +95,13 @@ namespace MajorisFiles {
                 });
             }
             catch (Error e) {
+                if(enumerator != null)
+                {
+                    try {
+                        yield enumerator.close_async(Priority.DEFAULT, null);
+                    }
+                    catch(Error ignored) {}
+                }
                 if (!token.is_cancelled() && epoch == generation)
                     failed(e.message);
             }

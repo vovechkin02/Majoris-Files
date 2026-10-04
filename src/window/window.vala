@@ -27,6 +27,7 @@ namespace MajorisFiles {
                                           return false;
                 });
             providers.register_provider(new ScriptActions(metadata));
+            providers.register_provider(new DiskImageActions());
             var provider_action = new SimpleAction("provider-action", VariantType.STRING);
             provider_action.activate.connect((target) => {
                 providers.execute.begin(target.get_string(), current.selected(), this, (obj, res) => { try { providers.execute.end(res);
@@ -245,10 +246,10 @@ namespace MajorisFiles {
             var page = tabs.append(browser);
             page.title = location.get_basename() ?? "Files";
             browser.location_changed.connect((file) => page.title = file.get_basename() ?? file.get_parse_name());
-            browser.location_changed.connect(() => { var root = browser.get_root() as FilesWindow;
-                                                     var recorder = root == null ? null : root.application as SessionRecorder;
-                                                     if(recorder != null)
-                                                         recorder.queue_session_save();
+            browser.session_changed.connect(() => { var root = browser.get_root() as FilesWindow;
+                                                    var recorder = root == null ? null : root.application as SessionRecorder;
+                                                    if(recorder != null)
+                                                        recorder.queue_session_save();
                 });
             browser.error.connect((message) => { var root = browser.get_root() as Gtk.Window;
                                                  if(root != null)
@@ -289,7 +290,9 @@ namespace MajorisFiles {
             context.append("Reset Icon", "win.reset-icon");
             var quick = new Menu();
             quick.append("Compress…", "win.compress");
+            quick.append("Create Encrypted ZIP…", "win.compress-encrypted");
             quick.append("Extract…", "win.extract");
+            quick.append("Extract with Password…", "win.extract-encrypted");
             quick.append("Split File…", "win.split");
             quick.append("Join Split File…", "win.join");
             context.append_submenu("Quick Actions", quick);

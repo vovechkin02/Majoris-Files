@@ -5,7 +5,8 @@ Build on Debian with a current GTK4/libadwaita toolchain:
 ```sh
 apt install build-essential meson ninja-build valac libgtk-4-dev \
   libadwaita-1-dev libgee-0.8-dev libsqlite3-dev libjson-glib-dev \
-  libpoppler-glib-dev libarchive-dev libpolkit-gobject-1-dev libx11-dev
+  libpoppler-glib-dev libarchive-dev libpolkit-gobject-1-dev libx11-dev \
+  libfontconfig-dev libpango1.0-dev bubblewrap fonts-dejavu-core
 meson setup build --prefix=/usr
 meson compile -C build
 meson test -C build --print-errorlogs
@@ -23,6 +24,29 @@ linked system libraries. Install `xdg-terminal-exec` and register the Majoris
 terminal as the configured terminal provider. Runtime UI does not install packages.
 Install the `acl` utilities for advanced POSIX ACL editing. Normal permission
 changes use GIO, run as the desktop user, and report authorization failures.
+Owner/group pickers use bounded `getent` lookup through the platform account
+directory, with cancellation and a numeric-ID fallback.
+
+## Preview isolation
+
+Install bubblewrap and allow unprivileged user namespaces under the Majoris
+security policy. `majoris-files-preview-helper` is installed in libexec. Preview
+helpers get a read-only input file, trusted system libraries/fonts, private tmp,
+no home directory, and isolated network/PID namespaces. Their CPU budget is 10
+seconds, address space is 768 MiB, and the parent enforces a 15-second timeout and
+four concurrent helpers. Missing/denied sandbox capability returns an unavailable
+preview. Tests require a runner whose namespace policy allows bubblewrap.
+Media playback and decoding existing thumbnail-cache PNGs still require a separate
+isolation audit; archive extraction/creation remains in-process worker code.
+
+## Disk images
+
+Image quick actions use UDisks' [LoopSetup API](https://storaged.org/doc/udisks2-api/latest/gdbus-org.freedesktop.UDisks2.Manager.html)
+with a file descriptor opened read-only and `read-only=true`. Filesystem Mount,
+Unmount and Loop Delete calls retain UDisks/Polkit authorization. Existing writable
+loops are rejected for read-only mounting. Failed mounting rolls back only mounts
+created by that request; busy unmounts stop before detach. Validate real ISO images,
+partitioned images, authorization denial and busy mounts on a disposable VM.
 
 ## File chooser
 

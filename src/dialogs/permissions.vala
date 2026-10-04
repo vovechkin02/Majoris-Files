@@ -62,6 +62,8 @@ namespace MajorisFiles {
             var owning_group = new Adw.EntryRow();
             owning_group.title = "Group GID (blank preserves group)";
             group.add(owning_group);
+            account_picker.begin(group, owner, true);
+            account_picker.begin(group, owning_group, false);
             var recursive = new Adw.SwitchRow();
             recursive.title = "Apply to Folder Contents";
             group.add(recursive);
@@ -112,6 +114,38 @@ namespace MajorisFiles {
             }
             finally {
                 apply.sensitive = true;
+            }
+        }
+        async void account_picker(Adw.PreferencesGroup group, Adw.EntryRow numeric, bool users)
+        {
+            var row = new Adw.ComboRow();
+            row.title = users ? "Choose Owner Account" : "Choose Group";
+            if(items.size == 1)
+                row.subtitle = "Current: " + (items[0].info.get_attribute_string(users ? "owner::user" : "owner::group") ?? "Unavailable");
+            row.model = new Gtk.StringList({"Keep Current"});
+            row.enable_search = true;
+            group.add(row);
+            try {
+                var accounts = yield AccountDirectory.load(users, token);
+                if(token.is_cancelled())
+                    return;
+                var labels = new Gtk.StringList({"Keep Current"});
+                foreach(var account in accounts)
+                    labels.append(account.label);
+                row.model = labels;
+                row.notify["selected"].connect(() => {
+                    if(row.selected == 0)
+                        numeric.text = "";
+                    else if(row.selected <= accounts.size)
+                        numeric.text = accounts[(int)row.selected - 1].id.to_string();
+                });
+            }
+            catch(Error e) {
+                if(!token.is_cancelled())
+                {
+                    row.subtitle = "Account lookup unavailable; enter a numeric ID above";
+                    row.sensitive = false;
+                }
             }
         }
         async void edit_acl(File file)

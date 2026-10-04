@@ -30,6 +30,40 @@ namespace MajorisFiles {
             dialog.set_response_appearance("apply", Adw.ResponseAppearance.DESTRUCTIVE);
             return (yield dialog.choose(parent, null)) == "apply";
         }
+        public static async string? password(Gtk.Widget parent, string title, bool confirmation = false, string note = "")
+        {
+            string message = "The password is used for this operation and is not saved." + (note == "" ? "" : "\n" + note);
+            while(true)
+            {
+                var dialog = new Adw.AlertDialog(title, message);
+                var fields = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
+                var entry = new Adw.PasswordEntryRow();
+                entry.title = "Password";
+                fields.append(entry);
+                var repeat = new Adw.PasswordEntryRow();
+                repeat.title = "Confirm Password";
+                if(confirmation)
+                    fields.append(repeat);
+                dialog.extra_child = fields;
+                dialog.add_response("cancel", "Cancel");
+                dialog.add_response("apply", "Continue");
+                dialog.close_response = "cancel";
+                dialog.default_response = "apply";
+                dialog.set_response_appearance("apply", Adw.ResponseAppearance.SUGGESTED);
+                if((yield dialog.choose(parent, null)) != "apply")
+                    return null;
+                if(entry.text != "" && entry.text.length <= 4096 && (!confirmation || entry.text == repeat.text))
+                {
+                    string result = entry.text;
+                    entry.text = "";
+                    repeat.text = "";
+                    return result;
+                }
+                entry.text = "";
+                repeat.text = "";
+                message = "Enter a non-empty password up to 4096 bytes. Confirmation must match.";
+            }
+        }
         public static void show_properties(Gtk.Window parent, Gee.List<FileItem> items, MetadataStore metadata)
         {
             var dialog = new Adw.PreferencesDialog();
@@ -102,6 +136,8 @@ namespace MajorisFiles {
                     group.add(row("Owner", item.info.get_attribute_string("owner::user")));
                 if(item.info.has_attribute("owner::group"))
                     group.add(row("Group", item.info.get_attribute_string("owner::group")));
+                if(item.info.has_attribute("selinux::context"))
+                    group.add(row("SELinux Context", item.info.get_attribute_string("selinux::context") ?? "Unavailable"));
                 var created = item.info.get_creation_date_time();
                 if(created != null)
                     group.add(row("Created", created.format("%c")));

@@ -36,13 +36,8 @@ namespace MajorisFiles {
         {
             if (item.bytes > 64 * 1024 * 1024)
                 throw new FileError.UNSUPPORTED("This image exceeds the preview size limit");
-            var input = yield item.file.read_async(Priority.LOW, token);
-            var pixbuf = yield new Gdk.Pixbuf.from_stream_at_scale_async(input, 1200, 900, true, token);
-            yield input.close_async(Priority.LOW, null);
-            var picture = new Gtk.Picture.for_paintable(Gdk.Texture.for_pixbuf(pixbuf));
-            picture.can_shrink = true;
-            picture.content_fit = Gtk.ContentFit.CONTAIN;
-            return picture;
+            var bytes = yield PreviewSandbox.run(item, "image", {"0"}, token);
+            return new ImageView(item, Gdk.Texture.from_bytes(bytes), token);
         }
     }
     public class MediaPreview : Object, PreviewProvider {
@@ -74,6 +69,7 @@ namespace MajorisFiles {
             providers.add(new MediaPreview());
             providers.add(new PdfPreview());
             providers.add(new ArchivePreview());
+            providers.add(new FontPreview());
         }
         public void cancel()
         {

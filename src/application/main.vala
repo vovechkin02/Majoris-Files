@@ -6,6 +6,7 @@ namespace MajorisFiles {
         FileManagerService? manager;
         uint owner;
         string recovery_session = "";
+        string recovery_details = "";
         bool activated_once;
         uint session_save;
         public Application()
@@ -17,7 +18,11 @@ namespace MajorisFiles {
             base.startup();
             metadata = new MetadataStore();
             if(metadata.state("session-clean", "true") == "false")
+            {
                 recovery_session = metadata.state("session-last");
+                if(metadata.state("session-details-for") == Checksum.compute_for_string(ChecksumType.SHA256, recovery_session))
+                    recovery_details = metadata.state("session-details");
+            }
             metadata.set_state("session-clean", "false");
             window_added.connect(queue_session_save);
             window_removed.connect(queue_session_save);
@@ -58,6 +63,14 @@ namespace MajorisFiles {
                 activated_once = true;
                 try {
                     var snapshot = Variant.parse(new VariantType("a(a(ss)u)"), recovery_session);
+                    Variant? details = null;
+                    if(recovery_details != "")
+                    {
+                        try {
+                            details = Variant.parse(new VariantType("aas"), recovery_details);
+                        }
+                        catch(Error ignored) {}
+                    }
                     if(snapshot.n_children() > 32)
                         throw new FileError.INVALID("Too many saved windows");
                     for(size_t i = 0; i < snapshot.n_children(); i++)
@@ -75,6 +88,17 @@ namespace MajorisFiles {
                                 continue;
                             window.new_tab(File.new_for_uri(uri));
                             window.current.set_view(page.get_child_value(1).get_string());
+                            if(details != null && i < details.n_children())
+                            {
+                                var states = details.get_child_value(i);
+                                if(j < states.n_children())
+                                {
+                                    try {
+                                        window.current.restore_session_state(states.get_child_value(j).get_string());
+                                    }
+                                    catch(Error ignored) {}
+                                }
+                            }
                         }
                         if(window.tabs.n_pages > 0)
                         {
@@ -105,6 +129,7 @@ namespace MajorisFiles {
         void save_session()
         {
             var windows = new VariantBuilder(new VariantType("a(a(ss)u)"));
+            var details = new VariantBuilder(new VariantType("aas"));
             uint count = 0;
             foreach(var candidate in get_windows())
             {
@@ -112,16 +137,24 @@ namespace MajorisFiles {
                 if(window == null || window.tabs.n_pages == 0)
                     continue;
                 var tabs = new VariantBuilder(new VariantType("a(ss)"));
+                var states = new VariantBuilder(new VariantType("as"));
                 for(int i = 0; i < window.tabs.n_pages; i++)
                 {
                     var browser = (Browser)window.tabs.get_nth_page(i).child;
-                    tabs.add("(ss)", browser.directory.location.get_uri(), browser.view_mode);
+                    tabs.add("(ss)", browser.view_mode == "Columns" ? browser.location.get_uri() : browser.directory.location.get_uri(), browser.view_mode);
+                    states.add("s", browser.session_state());
                 }
                 windows.add_value(new Variant("(@a(ss)u)", tabs.end(), (uint)window.tabs.get_page_position(window.tabs.selected_page)));
+                details.add_value(states.end());
                 count++;
             }
             if(count > 0)
-                metadata.set_state("session-last", windows.end().print(true));
+            {
+                var snapshot = windows.end().print(true);
+                metadata.set_state("session-details", details.end().print(true));
+                metadata.set_state("session-details-for", Checksum.compute_for_string(ChecksumType.SHA256, snapshot));
+                metadata.set_state("session-last", snapshot);
+            }
         }
         protected override void open(File[] files, string hint)
         {

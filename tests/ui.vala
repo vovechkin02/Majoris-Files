@@ -43,6 +43,8 @@ int main(string[] args)
     Test.add_func("/ui/overwrite-confirmation", () => overwrite_test());
     Test.add_func("/ui/merge-move-and-persistent-undo", () => merge_test());
     Test.add_func("/ui/column-selection", () => columns_test());
+    Test.add_func("/ui/session-detail-recovery", () => session_details_test());
+    Test.add_func("/ui/disk-image-inventory", () => disk_image_inventory_test());
     Test.add_func("/ui/transferred-tab-routing", () => {
         try {
             var temp = DirUtils.make_tmp("majoris-tabs-XXXXXX");
@@ -214,6 +216,50 @@ async void preview_case() throws Error
     widget = yield provider.render(archive_item, new Cancellable());
     view = (Gtk.TextView)((Gtk.ScrolledWindow)widget).get_child();
     assert(view.buffer.text.contains("notes.md"));
+    var pdf_file = root.get_child("sample.pdf");
+    var surface = new Cairo.PdfSurface(pdf_file.get_path(), 200, 200);
+    var cr = new Cairo.Context(surface);
+    cr.move_to(20, 40);
+    cr.show_text("Preview fixture");
+    cr.show_page();
+    surface.finish();
+    var pdf_info = yield pdf_file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
+    var pdf_item = new FileItem(pdf_file, pdf_info);
+    var pages = yield PreviewSandbox.run(pdf_item, "pdf-info", {}, new Cancellable());
+    assert(pages.get_size() == 1 && pages.get_data()[0] == '1');
+    var image_bytes = yield PreviewSandbox.run(pdf_item, "pdf-page", {"0", "1"}, new Cancellable());
+    var texture = Gdk.Texture.from_bytes(image_bytes);
+    assert(texture.get_width() == 200 && texture.get_height() == 200);
+    var thumbnail = yield new ThumbnailService().texture(pdf_item, new Cancellable());
+    assert(thumbnail != null && thumbnail.get_width() <= 128 && thumbnail.get_height() <= 128);
+    var image_file = root.get_child("sample.png");
+    var image_surface = new Cairo.ImageSurface(Cairo.Format.ARGB32, 200, 100);
+    image_surface.write_to_png(image_file.get_path());
+    var image_info = yield image_file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
+    var image_item = new FileItem(image_file, image_info);
+    image_bytes = yield PreviewSandbox.run(image_item, "image", {"90"}, new Cancellable());
+    texture = Gdk.Texture.from_bytes(image_bytes);
+    assert(texture.get_width() == 100 && texture.get_height() == 200);
+    var font_file = File.new_for_path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
+    if(font_file.query_exists())
+    {
+        var font_info = yield font_file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
+        var font_item = new FileItem(font_file, font_info);
+        assert(new FontPreview().supports(font_item));
+        image_bytes = yield PreviewSandbox.run(font_item, "font", {}, new Cancellable());
+        texture = Gdk.Texture.from_bytes(image_bytes);
+        assert(texture.get_width() == 1200 && texture.get_height() == 480);
+    }
+    var preview_cancel = new Cancellable();
+    preview_cancel.cancel();
+    bool preview_cancelled = false;
+    try {
+        yield PreviewSandbox.run(pdf_item, "pdf-page", {"0", "1"}, preview_cancel);
+    }
+    catch(IOError.CANCELLED e) {
+        preview_cancelled = true;
+    }
+    assert(preview_cancelled);
     var selected = new Gee.ArrayList<FileItem>();
     selected.add(item);
     var metadata = new MetadataStore(Path.build_filename(temp, "meta.db"));
@@ -410,4 +456,114 @@ void initial_recovery()
     catch(Error e) {
         error("%s", e.message);
     }
+}
+
+void session_details_test()
+{
+    try {
+        var temp = DirUtils.make_tmp("majoris-session-details-XXXXXX");
+        var metadata = new MetadataStore(Path.build_filename(temp, "meta.db"));
+        var root = File.new_for_path(temp);
+        for(int i = 0; i < 120; i++)
+            FileUtils.set_contents(root.get_child("file-%03d.txt".printf(i)).get_path(), string.nfill(i + 1, 'x'));
+        var columns = new VariantBuilder(new VariantType("a(sbi)"));
+        columns.add("(sbi)", "Name", true, 240);
+        columns.add("(sbi)", "Owner", true, 120);
+        metadata.set_state("display:" + root.get_uri(), new Variant("(sbbib@a(sbi))", "Size", true, false, 32, true, columns.end()).print(true));
+        var browser = new Browser(metadata, new Places());
+        var window = new Gtk.Window();
+        window.set_default_size(900, 600);
+        window.child = browser;
+        browser.navigate(root);
+        browser.set_view("List");
+        window.present();
+        var query = new SearchQuery();
+        query.text = "file-";
+        var selected = new VariantBuilder(new VariantType("as"));
+        selected.add("s", root.get_child("file-002.txt").get_uri());
+        selected.add("s", root.get_child("file-100.txt").get_uri());
+        var snapshot = new Variant("(sbb@asdd)", query.serialize(), false, false, selected.end(), 0.0, 400.0).print(true);
+        browser.restore_session_state(snapshot);
+        var loop = new MainLoop();
+        Timeout.add(700, () => {
+            try {
+                assert(!browser.directory.loading);
+                assert(browser.selected().size == 2);
+                assert(((FileItem)browser.active_selection.get_item(0)).name == "file-000.txt");
+                var restored = Variant.parse(new VariantType("(sbbasdd)"), browser.session_state());
+                assert(SearchQuery.deserialize(restored.get_child_value(0).get_string()).text == "file-");
+                assert(restored.get_child_value(3).n_children() == 2);
+                assert(restored.get_child_value(5).get_double() > 300);
+                browser.set_sort("Created", false);
+                var display = Variant.parse(new VariantType("(sbbiba(sbi))"), metadata.state("display:" + root.get_uri()));
+                assert(display.get_child_value(0).get_string() == "Created");
+                assert(!display.get_child_value(1).get_boolean());
+                assert(display.get_child_value(3).get_int32() == 32);
+                assert(display.get_child_value(4).get_boolean());
+                bool owner_found = false;
+                var saved_columns = display.get_child_value(5);
+                for(size_t i = 0; i < saved_columns.n_children(); i++)
+                {
+                    var column = saved_columns.get_child_value(i);
+                    if(column.get_child_value(0).get_string() == "Owner")
+                    {
+                        assert(column.get_child_value(1).get_boolean());
+                        assert(column.get_child_value(2).get_int32() == 120);
+                        owner_found = true;
+                    }
+                }
+                assert(owner_found);
+                browser.cancel();
+                window.destroy();
+                loop.quit();
+            }
+            catch(Error e) { error("%s", e.message);
+            }
+            return Source.REMOVE;
+        });
+        loop.run();
+    }
+    catch(Error e) {
+        error("%s", e.message);
+    }
+}
+
+void disk_image_inventory_test()
+{
+    var objects = new VariantBuilder(new VariantType("a{oa{sa{sv}}}"));
+    var interfaces = new VariantBuilder(new VariantType("a{sa{sv}}"));
+    var backing = new VariantBuilder(VariantType.VARDICT);
+    backing.add("{sv}", "BackingFile", new Variant.bytestring("/tmp/image.iso"));
+    interfaces.add("{s@a{sv}}", "org.freedesktop.UDisks2.Loop", backing.end());
+    var filesystem = new VariantBuilder(VariantType.VARDICT);
+    filesystem.add("{sv}", "MountPoints", new VariantBuilder(new VariantType("aay")).end());
+    var properties = filesystem.end();
+    interfaces.add("{s@a{sv}}", "org.freedesktop.UDisks2.Filesystem", properties);
+    string loop = "/org/freedesktop/UDisks2/block_devices/loop0";
+    objects.add("{o@a{sa{sv}}}", loop, interfaces.end());
+    for(int i = 1; i <= 2; i++)
+    {
+        var partition_interfaces = new VariantBuilder(new VariantType("a{sa{sv}}"));
+        var partition = new VariantBuilder(VariantType.VARDICT);
+        partition.add("{sv}", "Table", new Variant.object_path(i == 1 ? loop : "/org/freedesktop/UDisks2/block_devices/other"));
+        partition_interfaces.add("{s@a{sv}}", "org.freedesktop.UDisks2.Partition", partition.end());
+        partition_interfaces.add("{s@a{sv}}", "org.freedesktop.UDisks2.Filesystem", properties);
+        objects.add("{o@a{sa{sv}}}", loop + "p" + i.to_string(), partition_interfaces.end());
+    }
+    var inventory = objects.end();
+    assert(DiskImages.find_loop(inventory, File.new_for_path("/tmp/image.iso")) == loop);
+    assert(DiskImages.find_loop(inventory, File.new_for_path("/tmp/other.iso")) == null);
+    var devices = DiskImages.filesystems(inventory, loop);
+    assert(devices.size == 2 && devices[0] == loop && devices[1] == loop + "p1");
+    var info = new FileInfo();
+    info.set_name("image.iso");
+    info.set_display_name("image.iso");
+    info.set_file_type(FileType.REGULAR);
+    info.set_is_symlink(false);
+    var selection = new Gee.ArrayList<FileItem>();
+    selection.add(new FileItem(File.new_for_path("/tmp/image.iso"), info));
+    var provider = new DiskImageActions();
+    assert(provider.actions(selection).size == 2);
+    selection.add(selection[0]);
+    assert(provider.actions(selection).size == 0);
 }

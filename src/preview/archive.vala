@@ -1,6 +1,4 @@
 namespace MajorisFiles {
-    [CCode(cname = "majoris_archive_list", cheader_filename = "src/archive/native.h")]
-    extern string archive_list(string source, Cancellable token) throws Error;
     public class ArchivePreview : Object, PreviewProvider {
         public bool supports(FileItem item)
         {
@@ -10,21 +8,11 @@ namespace MajorisFiles {
         {
             if(!item.file.is_native() || item.bytes > 256 * 1024 * 1024)
                 throw new FileError.UNSUPPORTED("Archive preview requires a local archive up to 256 MiB");
-            string text = "";
-            Error? failure = null;
-            SourceFunc resume = render.callback;
-            new Thread<void*>("archive-preview", () => {
-                try { text = archive_list(item.file.get_path(), token);
-                }
-                catch(Error e) { failure = e;
-                }
-                Idle.add((owned)resume);
-                return null;
-            });
-            yield;
-            token.set_error_if_cancelled();
-            if(failure != null)
-                throw failure;
+            var bytes = yield PreviewSandbox.run(item, "archive", {}, token);
+            var data = new ByteArray();
+            data.append(bytes.get_data());
+            data.append({0});
+            string text = ((string)data.data).make_valid();
             var view = new Gtk.TextView();
             view.editable = false;
             view.monospace = true;

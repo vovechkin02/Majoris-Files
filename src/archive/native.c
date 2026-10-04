@@ -36,9 +36,10 @@ char *majoris_archive_list(const char *source, GCancellable *cancel, GError **er
 fail:
     archive_read_free(reader); g_string_free(text, TRUE); return NULL;
 }
-gboolean majoris_archive_extract(const char *source, const char *destination, GCancellable *cancel, GError **error) {
+gboolean majoris_archive_extract(const char *source, const char *destination, const char *password, GCancellable *cancel, GError **error) {
     struct archive *reader = archive_read_new(), *writer = archive_write_disk_new(); gboolean ok = FALSE;
     archive_read_support_filter_all(reader); archive_read_support_format_all(reader);
+    if(password && archive_read_add_passphrase(reader, password) != ARCHIVE_OK) { failure(reader, error); goto out; }
     archive_write_disk_set_options(writer, ARCHIVE_EXTRACT_SECURE_SYMLINKS | ARCHIVE_EXTRACT_SECURE_NODOTDOT | ARCHIVE_EXTRACT_NO_OVERWRITE | ARCHIVE_EXTRACT_SAFE_WRITES);
     if (archive_read_open_filename(reader,source,1024*1024) != ARCHIVE_OK) { failure(reader,error); goto out; }
     struct archive_entry *entry; int result; guint count=0; guint64 bytes=0;
@@ -86,13 +87,17 @@ static gboolean add_path(struct archive *writer,const char *source,const char *n
     }
     return archive_write_finish_entry(writer)>=ARCHIVE_OK || failure(writer,error);
 }
-gboolean majoris_archive_create(const char *destination,const char *format,char **sources,GCancellable *cancel,GError **error) {
+gboolean majoris_archive_create(const char *destination,const char *format,char **sources,const char *password,GCancellable *cancel,GError **error) {
     int fd=open(destination,O_WRONLY|O_CREAT|O_EXCL,0600);
     if (fd<0) { g_set_error(error,G_IO_ERROR,g_io_error_from_errno(errno),"Cannot create archive: %s",g_strerror(errno)); return FALSE; }
     struct archive *writer=archive_write_new(); gboolean ok=FALSE; int result;
     if (!strcmp(format,"zip")) result=archive_write_set_format_zip(writer);
     else if (!strcmp(format,"7z")) result=archive_write_set_format_7zip(writer);
     else { result=archive_write_set_format_pax_restricted(writer); if (!strcmp(format,"tar.gz")) archive_write_add_filter_gzip(writer); else if (!strcmp(format,"tar.bz2")) archive_write_add_filter_bzip2(writer); else if (!strcmp(format,"tar.xz")) archive_write_add_filter_xz(writer); else if (!strcmp(format,"tar.zst")) archive_write_add_filter_zstd(writer); }
+    if(password) {
+        if(strcmp(format, "zip")) { g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED, "Encrypted creation supports ZIP only"); goto out; }
+        if(archive_write_set_passphrase(writer, password) != ARCHIVE_OK || archive_write_set_options(writer, "zip:encryption=aes256") != ARCHIVE_OK) { failure(writer, error); goto out; }
+    }
     if (result<ARCHIVE_OK || archive_write_open_fd(writer,fd)<ARCHIVE_OK) { failure(writer,error); goto out; }
     for (int i=0;sources[i];i++) { char *name=g_path_get_basename(sources[i]); gboolean added=add_path(writer,sources[i],name,cancel,error); g_free(name); if (!added) goto out; }
     ok=archive_write_close(writer)>=ARCHIVE_OK; if (!ok) failure(writer,error);

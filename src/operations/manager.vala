@@ -36,6 +36,8 @@ namespace MajorisFiles {
         public OperationKind kind;
         public File source;
         public File destination;
+        public string source_identity = "";
+        public string destination_identity = "";
         public JournalEntry(OperationKind kind, File source, File destination)
         {
             this.kind = kind;
@@ -48,6 +50,7 @@ namespace MajorisFiles {
         Gee.ArrayList<JournalEntry> undo_stack = new Gee.ArrayList<JournalEntry>();
         Gee.ArrayList<JournalEntry> redo_stack = new Gee.ArrayList<JournalEntry>();
         public MetadataStore metadata;
+        bool history_busy;
         public signal void changed();
         public OperationManager(MetadataStore metadata)
         {
@@ -71,7 +74,8 @@ namespace MajorisFiles {
             if(saved == "")
                 return;
             try {
-                var entries = Variant.parse(new VariantType("a(uss)"), saved);
+                bool version_two = saved.has_prefix("v2:");
+                var entries = Variant.parse(new VariantType(version_two ? "a(ussss)" : "a(uss)"), version_two ? saved.substring(3) : saved);
                 if(entries.n_children() > 100)
                     return;
                 for(size_t i = 0; i < entries.n_children(); i++)
@@ -81,7 +85,13 @@ namespace MajorisFiles {
                     string source = entry.get_child_value(1).get_string(), destination = entry.get_child_value(2).get_string();
                     if(kind > OperationKind.RENAME || kind == OperationKind.DELETE || Uri.parse_scheme(source) == null || Uri.parse_scheme(destination) == null)
                         continue;
-                    stack.add(new JournalEntry((OperationKind)kind, File.new_for_uri(source), File.new_for_uri(destination)));
+                    var restored = new JournalEntry((OperationKind)kind, File.new_for_uri(source), File.new_for_uri(destination));
+                    if(version_two)
+                    {
+                        restored.source_identity = entry.get_child_value(3).get_string();
+                        restored.destination_identity = entry.get_child_value(4).get_string();
+                    }
+                    stack.add(restored);
                 }
             }
             catch(Error e) {
@@ -97,10 +107,49 @@ namespace MajorisFiles {
         {
             while(stack.size > 100)
                 stack.remove_at(0);
-            var builder = new VariantBuilder(new VariantType("a(uss)"));
+            var builder = new VariantBuilder(new VariantType("a(ussss)"));
             foreach(var entry in stack)
-                builder.add("(uss)", (uint)entry.kind, entry.source.get_uri(), entry.destination.get_uri());
-            metadata.set_state("operations-" + key, builder.end().print(true));
+                builder.add("(ussss)", (uint)entry.kind, entry.source.get_uri(), entry.destination.get_uri(), entry.source_identity, entry.destination_identity);
+            metadata.set_state("operations-" + key, "v2:" + builder.end().print(true));
+        }
+        static async string file_identity(File file)
+        {
+            var token = new Cancellable();
+            bool timed_out = false;
+            uint timeout = Timeout.add_seconds(5, () => { timed_out = true;
+                                                          token.cancel();
+                                                          return Source.REMOVE;
+                });
+            try {
+                var info = yield file.query_info_async("id::file,id::filesystem,unix::device,unix::inode,time::created,time::created-usec,standard::type", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token);
+                string id = info.get_attribute_string("id::file") ?? "";
+                uint64 inode = info.get_attribute_uint64("unix::inode");
+                if(id == "" && inode == 0)
+                    return "";
+                return new Variant("(ssttttu)", id, info.get_attribute_string("id::filesystem") ?? "", (uint64)info.get_attribute_uint32("unix::device"), inode, info.get_attribute_uint64("time::created"), (uint64)info.get_attribute_uint32("time::created-usec"), (uint)info.get_file_type()).print(true);
+            }
+            catch(Error e) {
+                return "";
+            }
+            finally {
+                if(!timed_out)
+                    Source.remove(timeout);
+            }
+        }
+        async void record(OperationKind kind, File source, File destination)
+        {
+            var entry = new JournalEntry(kind, source, destination);
+            entry.source_identity = yield file_identity(source);
+            entry.destination_identity = yield file_identity(destination);
+            undo_stack.add(entry);
+            redo_stack.clear();
+        }
+        static async void require_identity(File file, string expected) throws Error
+        {
+            if(expected == "")
+                throw new FileError.UNSUPPORTED("This operation has no verified file identity and cannot safely be reversed");
+            if((yield file_identity(file)) != expected)
+                throw new FileError.CONFLICT("The original item is missing or has been replaced: " + file.get_parse_name());
         }
         void persist_jobs()
         {
@@ -285,7 +334,7 @@ namespace MajorisFiles {
                         // Copies can be removed on undo only if they were not replacements.
                         if (!exists)
                         {
-                            undo_stack.add(new JournalEntry(kind, source, destination));
+                            yield record(kind, source, destination);
                             redo_stack.clear();
                         }
                         if (kind == OperationKind.MOVE && !merge)
@@ -300,7 +349,7 @@ namespace MajorisFiles {
                             if(trashed != null)
                             {
                                 previous_trash.add(trashed.get_uri());
-                                undo_stack.add(new JournalEntry(OperationKind.TRASH, source, trashed));
+                                yield record(OperationKind.TRASH, source, trashed);
                                 redo_stack.clear();
                                 persist_history();
                             }
@@ -480,7 +529,7 @@ namespace MajorisFiles {
                             yield remove_tree(backup, job.cancellable);
                         if(existing == null)
                         {
-                            undo_stack.add(new JournalEntry(move ? OperationKind.MOVE : OperationKind.COPY, child, target));
+                            yield record(move ? OperationKind.MOVE : OperationKind.COPY, child, target);
                             redo_stack.clear();
                             persist_history();
                         }
@@ -607,7 +656,7 @@ namespace MajorisFiles {
                 throw new FileError.INVALID("Invalid filename");
             var result = yield file.set_display_name_async(name, Priority.DEFAULT, null);
             metadata.relocate(file, result);
-            undo_stack.add(new JournalEntry(OperationKind.RENAME, file, result));
+            yield record(OperationKind.RENAME, file, result);
             redo_stack.clear();
             persist_history();
             changed();
@@ -618,16 +667,34 @@ namespace MajorisFiles {
                 throw new FileError.INVALID("Invalid folder name");
             var file = parent.get_child(name);
             yield file.make_directory_async(Priority.DEFAULT, null);
-            undo_stack.add(new JournalEntry(OperationKind.CREATE_FOLDER, parent, file));
+            yield record(OperationKind.CREATE_FOLDER, parent, file);
             redo_stack.clear();
             persist_history();
             changed();
         }
         public async void undo(Gtk.Window? parent = null) throws Error
         {
+            if(history_busy)
+                throw new IOError.BUSY("An undo or redo is already running");
+            history_busy = true;
+            var application = GLib.Application.get_default();
+            if(application != null)
+                application.hold();
+            try {
+                yield undo_entry(parent);
+            }
+            finally {
+                history_busy = false;
+                if(application != null)
+                    application.release();
+            }
+        }
+        async void undo_entry(Gtk.Window? parent) throws Error
+        {
             if (undo_stack.size == 0)
                 return;
             var entry = undo_stack[undo_stack.size - 1];
+            yield require_identity(entry.destination, entry.destination_identity);
             if (entry.kind == OperationKind.MOVE || entry.kind == OperationKind.RENAME || entry.kind == OperationKind.TRASH)
             {
                 yield ensure_parent(entry.source);
@@ -648,16 +715,35 @@ namespace MajorisFiles {
                     return;
                 yield entry.destination.trash_async(Priority.DEFAULT, null);
             }
-            undo_stack.remove_at(undo_stack.size - 1);
+            entry.source_identity = yield file_identity(entry.source);
+            undo_stack.remove(entry);
             redo_stack.add(entry);
             persist_history();
             changed();
         }
         public async void redo() throws Error
         {
+            if(history_busy)
+                throw new IOError.BUSY("An undo or redo is already running");
+            history_busy = true;
+            var application = GLib.Application.get_default();
+            if(application != null)
+                application.hold();
+            try {
+                yield redo_entry();
+            }
+            finally {
+                history_busy = false;
+                if(application != null)
+                    application.release();
+            }
+        }
+        async void redo_entry() throws Error
+        {
             if (redo_stack.size == 0)
                 return;
             var entry = redo_stack[redo_stack.size - 1];
+            yield require_identity(entry.source, entry.source_identity);
             if (entry.kind == OperationKind.MOVE || entry.kind == OperationKind.RENAME)
             {
                 yield entry.source.move_async(entry.destination, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
@@ -672,7 +758,7 @@ namespace MajorisFiles {
                 var destination = yield find_trashed(entry.source, previous, new Cancellable());
                 if(destination == null)
                 {
-                    redo_stack.remove_at(redo_stack.size - 1);
+                    redo_stack.remove(entry);
                     persist_history();
                     throw new FileError.UNSUPPORTED("The restored file was trashed, but its new Trash entry could not be identified");
                 }
@@ -685,7 +771,8 @@ namespace MajorisFiles {
                 var job = new Job("Redo Copy");
                 yield transfer(entry.source, entry.destination, false, job);
             }
-            redo_stack.remove_at(redo_stack.size - 1);
+            entry.destination_identity = yield file_identity(entry.destination);
+            redo_stack.remove(entry);
             undo_stack.add(entry);
             persist_history();
             changed();

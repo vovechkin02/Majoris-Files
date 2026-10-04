@@ -14,7 +14,9 @@ namespace MajorisFiles {
             this.operations = operations;
             this.metadata = metadata;
             action("compress", () => compress.begin());
+            action("compress-encrypted", () => compress.begin(true));
             action("extract", () => extract.begin());
+            action("extract-encrypted", () => extract.begin(true));
             action("share-folder", () => { var items = current.selected();
                                            if (items.size == 1 && items[0].directory)
                                                new SharingDialog(window, items[0].file);
@@ -54,7 +56,7 @@ namespace MajorisFiles {
             action.activate.connect(() => callback());
             window.add_action(action);
         }
-        async void compress()
+        async void compress(bool encrypted = false)
         {
             var items = current.selected();
             if (items.size == 0)
@@ -74,12 +76,24 @@ namespace MajorisFiles {
                 Dialogs.error(window, "Choose a supported archive extension");
                 return;
             }
+            string? password = null;
+            if(encrypted)
+            {
+                if(format != "zip")
+                {
+                    Dialogs.error(window, "Encrypted creation currently requires a .zip filename");
+                    return;
+                }
+                password = yield Dialogs.password(window, "Create AES-256 ZIP", true, "File contents are encrypted. ZIP entry names remain visible.");
+                if(password == null)
+                    return;
+            }
             var files = new Gee.ArrayList<File>();
             foreach (var item in items)
                 files.add(item.file);
             var job = operations.start("Compress");
             try {
-                yield ArchiveService.compress(files, current.location.get_child(name), format, job);
+                yield ArchiveService.compress(files, current.location.get_child(name), format, job, password);
                 operations.finish(job);
             }
             catch (Error e) {
@@ -87,7 +101,7 @@ namespace MajorisFiles {
                 Dialogs.error(window, e.message);
             }
         }
-        async void extract()
+        async void extract(bool encrypted = false)
         {
             var items = current.selected();
             if(items.size != 1 || items[0].directory)
@@ -100,9 +114,16 @@ namespace MajorisFiles {
                 Dialogs.error(window, "Invalid folder name");
                 return;
             }
+            string? password = null;
+            if(encrypted)
+            {
+                password = yield Dialogs.password(window, "Extract Encrypted Archive");
+                if(password == null)
+                    return;
+            }
             var job = operations.start("Extract");
             try {
-                yield ArchiveService.extract(items[0].file, current.location.get_child(name), job);
+                yield ArchiveService.extract(items[0].file, current.location.get_child(name), job, password);
                 operations.finish(job);
             }
             catch(Error e) {

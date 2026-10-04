@@ -15,14 +15,20 @@ folder merging, conflict details and rename, persistent undo/redo and identifiab
 Trash undo, interrupted-job records, recursive counts and multi-item properties,
 permissions with owner/group IDs and recursive file/folder modes, ACL editing
 through platform utilities, batch rename with preflight,
-archives, streaming split/join/checksum manifests, filesystem-limit splitting,
+archives with AES-256 ZIP creation and password-based extraction, streaming
+split/join/checksum manifests, filesystem-limit splitting,
 graphical usershares with Polkit service, and FileManager1 integration.
 Home has configurable favorites/recent/download/recommendation sections with
 local usage only. Crash recovery restores window/tab locations, selected tabs
-and views. Tab context operations and detached-tab routing are implemented.
+and views. It also restores search filters/scopes, selected files and scroll
+positions in Grid/List/Gallery; deeper Column-view state still needs acceptance.
+Tab context operations and detached-tab routing are implemented.
 Native file drag/drop supports folder targets and spring navigation; folder rows
 support middle-click tabs. Local text/JSON/XML content search is bounded to 4 MiB;
-Search Home scans recursively. Quick Actions have a typed provider registry and
+Search Home scans recursively. Search Everywhere scans Home and mounted roots,
+deduplicates overlapping roots, reports unreadable folders and closes cancelled
+enumerators. Saved searches preserve their scope and accept earlier formats.
+Quick Actions have a typed provider registry and
 opt-in executable user scripts with confirmation and local-path arguments.
 Raw numbered parts can be joined after an explicit no-manifest warning.
 Background completion/error notifications have a preference. Executable file
@@ -34,7 +40,24 @@ The split dialog offers decimal presets, custom binary units, part count,
 filesystem-compatible sizing, destination selection and output estimates. The
 service checks all output conflicts, free space, size limits and part-count limits
 before opening the source stream.
-Validation currently includes 35 core/filesystem/UI/portal cases plus a separate
+Per-folder view controls offer compact/standard/large icons, selection checkboxes,
+folders-first/mixed sorting, additional sort fields, and 14 metadata columns with
+visibility, order and width controls. Location entry suggests recent paths and
+matching folders, with bounded cancellable enumeration and credential-free history.
+Unavailable locations have a Retry banner in both file browsing and the chooser.
+PDF, image, font and archive previews use a bubblewrap helper with no network or
+home-directory access, read-only input, process time/memory limits and cancellation.
+Image previews support fit/zoom, EXIF orientation and preview rotation. Font samples
+include family/style, alphabet, digits and a sentence. Image/PDF thumbnail providers
+use the helper and the freedesktop cache. At most four helper processes run at once.
+Undo/redo stores file identities, refuses replacement files and serializes history
+actions; legacy history without identities cannot safely be reversed.
+Permissions offer asynchronous platform account/group lookup and numeric fallback;
+properties show SELinux context where available.
+Disk-image quick actions delegate read-only loop creation, partition/filesystem
+mounting and unmount/detach to UDisks. Inventory selection is tested; actual mounts,
+Polkit cancellation and busy-device handling require a disposable Majoris VM.
+Validation currently includes 38 core/filesystem/UI/portal cases plus a separate
 actual-executable crash-recovery suite. This does not substitute for the platform
 acceptance work below.
 
@@ -53,27 +76,28 @@ D-Bus Close, concurrent cancellation and unauthorized backend/Close rejection.
 
 Outstanding #79 release criteria: full parent-window verification on both display
 servers, complete remote/FUSE and
-cloud-provider materialization handling, rich error recovery for detached devices,
+cloud-provider materialization handling, complete recovery for detached devices,
 accessibility audit, and actual Flatpak/document-portal end-to-end verification.
 SaveFiles is not implemented or advertised (backend interface version 1).
 
 Other outstanding specification areas include:
 
-* Session scroll/selection/search restoration and broad tab transfer acceptance.
-* Configurable columns/grouping, density, checkboxes, bookmark drop/reordering,
-  cross-filesystem drop-action policy and location autocomplete.
-* Full nested conflict policies, journal operation grouping/identities, remote
+* Complete Column-view session restoration and broad tab transfer acceptance.
+* Grouping, extension-provided columns, grid metadata captions, bookmark
+  drop/reordering and cross-filesystem drop-action policy.
+* Full nested conflict policies, journal operation grouping, remote
   Trash reconciliation, pause/resume/retry and durable job restart.
-* Indexed/full-text document search and Search Everywhere across mounted roots.
-* Animated image/font/full Markdown/office previews, media metadata and
-  controls audit, parser sandboxing, remote thumbnail policies and non-image
-  thumbnail providers.
-* Friendly owner/group account pickers, ACL integration acceptance, SELinux
-  metadata, custom-icon backend acceptance and association UI refinement.
-* Encrypted and multi-volume archives and arbitrary filesystem capability detection.
+* Indexed/full-text document search and indexed relevance ranking.
+* Animated images, full Markdown/office previews, media metadata and controls
+  audit, remaining media/cache parser isolation, remote thumbnail policies and
+  thumbnail providers beyond image/PDF.
+* ACL integration acceptance, custom-icon backend acceptance and association UI
+  refinement.
+* Encrypted 7z creation, multi-volume archive creation and arbitrary filesystem
+  capability detection. ZIP encryption protects contents; entry names remain visible.
 * Samba policy separation, hidden shares, owned firewall rules, shared-folder
   inventory/status/emblems, and a full authorization/integration test fixture.
-* Cloud-provider and Nearby Share integrations; disk images;
+* Cloud-provider and Nearby Share integrations; disk-image system acceptance;
   wallpaper/image rotation; sharing portals; full preference and shortcut UI.
 * Translation coverage, a11y/keyboard audit, adaptive narrow-window layout,
   packaging review and performance benchmarks.

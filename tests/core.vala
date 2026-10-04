@@ -182,10 +182,20 @@ int main(string[] args)
             query.tag = "finance";
             query.favorites_only = true;
             query.owner = "alice";
+            query.scope = "everywhere";
             assert(query.matches(item, metadata));
             var restored = SearchQuery.deserialize(query.serialize());
             assert(restored.matches(item, metadata));
             assert(restored.serialize() == query.serialize());
+            assert(restored.scope == "everywhere");
+            var legacy = "majoris-search-v1:" + new Variant("(ssttssttbs)", "report", "", (uint64)0, uint64.MAX, "Any", "modified", (uint64)0, uint64.MAX, false, "").print(true);
+            assert(SearchQuery.deserialize(legacy).scope == "recursive");
+            var multiline = new SearchQuery();
+            multiline.tag = "Line\nTwo";
+            multiline.owner = "Someone\nElse";
+            multiline.content = "Text\nText";
+            var multiline_saved = SearchQuery.deserialize(multiline.serialize());
+            assert(multiline_saved.tag == multiline.tag && multiline_saved.owner == multiline.owner && multiline_saved.content == multiline.content);
             restored.kind = "Folder";
             assert(!restored.matches(item, metadata));
             restored.kind = "PDF";
@@ -233,6 +243,14 @@ int main(string[] args)
         }
         catch(Error e) { error("%s", e.message);
         }
+    });
+    Test.add_func("/accounts/platform-directory-parser", () => {
+        var users = AccountDirectory.parse("alice:x:1000:1000:Alice Example,Office:/home/alice:/bin/sh\ninvalid:x:no:1000::/:/bin/false\nalice:x:2000:2000:Duplicate:/tmp:/bin/false\nroot:x:0:0:Root:/root:/bin/sh\n", true);
+        assert(users.size == 2);
+        assert(users[0].id == 1000 && users[0].name == "alice" && users[0].label.contains("Alice Example"));
+        assert(users[1].id == 0);
+        var groups = AccountDirectory.parse("staff:x:1000:alice\nbad:x:-1:\nnone:x:4294967295:\n", false);
+        assert(groups.size == 1 && groups[0].id == 1000 && groups[0].name == "staff");
     });
     return Test.run();
 }

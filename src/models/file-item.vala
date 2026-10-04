@@ -38,6 +38,6 @@ namespace MajorisFiles {
         {
             Object(file: file, info: info);
         }
-        public const string ATTRIBUTES = "standard::*,time::*,access::*,unix::*,owner::*,id::*,trash::*,thumbnail::*";
+        public const string ATTRIBUTES = "standard::*,time::*,access::*,unix::*,owner::*,id::*,trash::*,thumbnail::*,selinux::context";
     }
 }

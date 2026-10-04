@@ -7,6 +7,7 @@ namespace MajorisFiles {
         public string saved_query()
         {
             search_query.text = search_entry.text;
+            search_query.scope = everywhere ? "everywhere" : recursive ? "recursive" : "folder";
             return search_query.serialize();
         }
         public Gtk.MultiSelection selection;
@@ -35,6 +36,7 @@ namespace MajorisFiles {
         public signal void activated(FileItem item);
         public signal void selection_changed();
         public signal void location_changed(File location);
+        public signal void session_changed();
         public signal void error(string message);
         Gtk.CustomFilter filter;
         Gtk.CustomSorter sorter;
@@ -44,6 +46,7 @@ namespace MajorisFiles {
         HomeView home;
         Gtk.ListBox sidebar = new Gtk.ListBox();
         Gtk.Label status = new Gtk.Label("");
+        Adw.Banner location_error = new Adw.Banner("");
         Gtk.Box columns = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 1);
         Gtk.MultiSelection? column_selection;
         File? column_folder;
@@ -65,13 +68,30 @@ namespace MajorisFiles {
         bool chooser_mode;
         public signal void open_in_tab(File file);
         bool recursive;
+        bool everywhere;
         bool search_results;
         Gtk.ToggleButton recursive_button;
         bool ascending = true;
         string sort_key = "Name";
+        bool folders_first = true;
+        int icon_size = 64;
+        bool selection_checkboxes;
+        bool loading_display;
+        public signal void display_changed();
+        Gtk.ColumnView details;
+        Gee.HashMap<string, Gtk.ColumnViewColumn> detail_columns = new Gee.HashMap<string, Gtk.ColumnViewColumn>();
+        string[] column_titles = {
+            "Name", "Size", "Type", "Modified", "Created", "Accessed", "Owner", "Group", "Permissions", "MIME Type", "Location", "Tags", "Favorite", "Trash Date"
+        };
         File? initial_selection;
         Gee.ArrayList<File> remembered_selection = new Gee.ArrayList<File>();
         uint navigation_generation;
+        uint scroll_restore;
+        LocationSuggestions location_suggestions;
+        Gtk.Popover completion_popup = new Gtk.Popover();
+        Gtk.ListBox completion_list = new Gtk.ListBox();
+        Cancellable completion_token = new Cancellable();
+        uint completion_delay;
         ThumbnailService thumbnails = new ThumbnailService();
         Gee.HashMap<Gtk.ListItem, Cancellable> thumbnail_jobs = new Gee.HashMap<Gtk.ListItem, Cancellable>();
         uint sidebar_generation;
@@ -81,6 +101,7 @@ namespace MajorisFiles {
             this.metadata = metadata;
             this.places = places;
             this.chooser_mode = chooser_mode;
+            location_suggestions = new LocationSuggestions(metadata);
             home = new HomeView(metadata);
             views.add_named(home, "Home");
             home.activated.connect((item) => activate_item.begin(item));
@@ -91,23 +112,7 @@ namespace MajorisFiles {
             filter = new Gtk.CustomFilter((obj) => { var item = (FileItem)obj;
                                                      return (show_hidden || !item.info.get_is_hidden() || (initial_selection != null && initial_selection.equal(item.file))) && (!folders_only || item.navigable || item.info.get_is_symlink()) && (chooser_filter == null || chooser_filter.matches(item)) && (search_results || search_query.matches(item, metadata));
                 });
-            sorter = new Gtk.CustomSorter((a, b) => { var x = (FileItem)a;
-                                                      var y = (FileItem)b;
-                                                      if (x.directory != y.directory)
-                                                          return x.directory ? -1 : 1;
-                                                      int result;
-                                                      if (sort_key == "Size")
-                                                          result = x.bytes < y.bytes ? -1 : x.bytes == y.bytes ? 0 : 1;
-                                                      else if (sort_key == "Modified")
-                                                      {
-                                                          uint64 ax = x.info.get_attribute_uint64("time::modified"), by = y.info.get_attribute_uint64("time::modified");
-                                                          result = ax < by ? -1 : ax == by ? 0 : 1;
-                                                      }
-                                                      else if (sort_key == "Type")
-                                                          result = strcmp(x.mime, y.mime);
-                                                      else result = Paths.natural_compare(x.name, y.name);
-                                                      return ascending ? result : -result;
-                });
+            sorter = new Gtk.CustomSorter((a, b) => compare_items((FileItem)a, (FileItem)b));
             filtered = new Gtk.FilterListModel(directory.items, filter);
             sorted = new Gtk.SortListModel(filtered, sorter);
             sorted.items_changed.connect(() => update_status());
@@ -132,7 +137,48 @@ namespace MajorisFiles {
             path.hexpand = true;
             path.placeholder_text = "Location or URI";
             path.tooltip_text = "Location (Ctrl+L)";
-            path.activate.connect(() => navigate(Paths.parse(path.text)));
+            path.activate.connect(() => { completion_popup.popdown();
+                                          navigate(Paths.parse(path.text));
+                });
+            completion_popup.set_parent(path);
+            completion_popup.autohide = false;
+            completion_popup.has_arrow = false;
+            completion_list.selection_mode = Gtk.SelectionMode.NONE;
+            var suggestions_scroll = new Gtk.ScrolledWindow();
+            suggestions_scroll.max_content_height = 280;
+            suggestions_scroll.propagate_natural_height = true;
+            suggestions_scroll.min_content_width = 380;
+            suggestions_scroll.child = completion_list;
+            completion_popup.child = suggestions_scroll;
+            var completion_keys = new Gtk.EventControllerKey();
+            completion_keys.key_pressed.connect((key) => {
+                if(key == Gdk.Key.Down && completion_popup.visible)
+                {
+                    var row = completion_list.get_row_at_index(0);
+                    if(row != null && row.child != null)
+                    {
+                        row.child.grab_focus();
+                        return true;
+                    }
+                }
+                if(key == Gdk.Key.Escape)
+                    completion_popup.popdown();
+                return false;
+            });
+            path.add_controller(completion_keys);
+            path.changed.connect(() => {
+                completion_token.cancel();
+                if(completion_delay != 0)
+                    Source.remove(completion_delay);
+                completion_delay = 0;
+                if(location_bar.visible_child_name != "entry")
+                    return;
+                completion_delay = Timeout.add(150, () => {
+                    completion_delay = 0;
+                    update_completion.begin();
+                    return Source.REMOVE;
+                });
+            });
             location_bar.hexpand = true;
             location_bar.add_named(path, "entry");
             var crumbs_scroll = new Gtk.ScrolledWindow();
@@ -153,7 +199,11 @@ namespace MajorisFiles {
             modes.notify["selected"].connect(() => set_view(new string[] {"Grid", "List", "Columns", "Gallery"}
                 [modes.selected]));
             toolbar.append(modes);
+            toolbar.append(button("preferences-system-symbolic", "View Settings", () => show_view_settings()));
             append(toolbar);
+            location_error.button_label = "Retry";
+            location_error.button_clicked.connect(() => navigate(directory.location, false));
+            append(location_error);
             if(!metadata.available)
             {
                 var banner = new Adw.Banner("Favorites, tags, and preferences are unavailable: " + metadata.storage_error);
@@ -181,6 +231,17 @@ namespace MajorisFiles {
                 search_query = query;
                 search_entry.text = query.text;
                 searches.visible = true;
+                recursive_button.active = true;
+                run_search();
+            }));
+            searches.append(button("network-workgroup-symbolic", "Search Everywhere (Home and mounted locations)", () => {
+                search_query.text = search_entry.text;
+                var query = search_query;
+                navigate(File.new_for_path(Environment.get_home_dir()));
+                search_query = query;
+                search_entry.text = query.text;
+                searches.visible = true;
+                everywhere = true;
                 recursive_button.active = true;
                 run_search();
             }));
@@ -239,11 +300,21 @@ namespace MajorisFiles {
             name_column.expand = true;
             name_column.resizable = true;
             list.append_column(name_column);
-            list.append_column(new Gtk.ColumnViewColumn("Size", text_factory((item) => item.directory ? "—" : Paths.size(item.bytes))));
-            list.append_column(new Gtk.ColumnViewColumn("Type", text_factory((item) => ContentType.get_description(item.mime))));
-            list.append_column(new Gtk.ColumnViewColumn("Modified", text_factory((item) => { var date = item.info.get_modification_date_time();
-                                                                                             return date == null ? "" : date.format("%x %X");
-                })));
+            details = list;
+            detail_columns["Name"] = name_column;
+            name_column.notify["fixed-width"].connect(save_display);
+            foreach(var title in column_titles)
+            {
+                if(title == "Name")
+                    continue;
+                string column_title = title;
+                var column = new Gtk.ColumnViewColumn(title, text_factory((item) => column_text(item, column_title)));
+                column.resizable = true;
+                column.visible = title == "Size" || title == "Type" || title == "Modified";
+                list.append_column(column);
+                detail_columns[title] = column;
+                column.notify["fixed-width"].connect(save_display);
+            }
             list.activate.connect(activate_position);
             views.add_named(scrolled(list), "List");
             views.add_named(scrolled(columns), "Columns");
@@ -256,10 +327,18 @@ namespace MajorisFiles {
             strip_scroll.height_request = 160;
             gallery.append(strip_scroll);
             views.add_named(gallery, "Gallery");
+            foreach(var view in new string[] {"Grid", "List", "Columns"})
+            {
+                var scroll = (Gtk.ScrolledWindow)views.get_child_by_name(view);
+                scroll.vadjustment.value_changed.connect(() => session_changed());
+                scroll.hadjustment.value_changed.connect(() => session_changed());
+            }
+            strip_scroll.vadjustment.value_changed.connect(() => session_changed());
             status.halign = Gtk.Align.START;
             status.margin_start = 12;
             append(status);
             selection.selection_changed.connect(() => { selection_changed();
+                                                        session_changed();
                                                         update_status();
                                                         var chosen = selected();
                                                         if (chosen.size > 0)
@@ -270,18 +349,26 @@ namespace MajorisFiles {
                                                                 gallery_preview.show_item.begin(chosen[0]);
                                                         }
                 });
-            directory.resetting.connect((target) => { remembered_selection.clear();
+            directory.resetting.connect((target) => { location_error.revealed = false;
+                                                      remembered_selection.clear();
                                                       if(target.equal(location))
                                                           foreach(var item in selected())
                                                               remembered_selection.add(item.file);
                 });
-            directory.failed.connect((message) => error(message));
+            directory.failed.connect((message) => {
+                location_error.title = "Cannot load " + directory.location.get_parse_name() + ": " + message;
+                location_error.revealed = true;
+            });
             directory.loaded.connect(() => { update_status();
                                              restore_selection();
                                              if (view_mode == "Columns")
                                                  build_columns();
                 });
             search.found.connect((item) => directory.items.append(item));
+            search.progress.connect((folders, skipped) => {
+                if(search_results)
+                    status.label = "%u results · %u folders scanned · %u unavailable".printf(sorted.get_n_items(), folders, skipped);
+            });
             var keys = new Gtk.EventControllerKey();
             keys.key_pressed.connect((key, code, mods) => {
                 if(key == Gdk.Key.Escape && location_bar.visible_child_name == "entry")
@@ -469,6 +556,33 @@ namespace MajorisFiles {
             location_bar.visible_child_name = "entry";
             path.grab_focus();
             path.select_region(0, -1);
+            update_completion.begin();
+        }
+        async void update_completion()
+        {
+            completion_token.cancel();
+            completion_token = new Cancellable();
+            var token = completion_token;
+            try {
+                var suggestions = yield location_suggestions.suggest(path.text, location, token);
+                if(token.is_cancelled() || location_bar.visible_child_name != "entry" || !get_mapped())
+                    return;
+                while(completion_list.get_first_child() != null)
+                    completion_list.remove(completion_list.get_first_child());
+                foreach(var file in suggestions)
+                {
+                    var row = new Gtk.Button.with_label(file.get_parse_name());
+                    row.add_css_class("flat");
+                    row.clicked.connect(() => { completion_popup.popdown();
+                                                navigate(file);
+                        });
+                    completion_list.append(row);
+                }
+                if(suggestions.size > 0)
+                    completion_popup.popup();
+                else completion_popup.popdown();
+            }
+            catch(Error ignored) {}
         }
         void build_breadcrumbs(File file)
         {
@@ -503,11 +617,270 @@ namespace MajorisFiles {
             }
             location_bar.visible_child_name = "breadcrumbs";
         }
+        Gtk.ScrolledWindow? current_scroll()
+        {
+            var child = views.get_child_by_name(view_mode);
+            if(child is Gtk.ScrolledWindow)
+                return (Gtk.ScrolledWindow)child;
+            if(view_mode == "Gallery" && child != null)
+                return child.get_last_child() as Gtk.ScrolledWindow;
+            return null;
+        }
+        public string session_state()
+        {
+            var chosen = new VariantBuilder(new VariantType("as"));
+            foreach(var item in selected())
+                chosen.add("s", item.file.get_uri());
+            var scroll = current_scroll();
+            return new Variant("(sbb@asdd)", saved_query(), recursive, everywhere, chosen.end(), scroll == null ? 0.0 : scroll.hadjustment.value, scroll == null ? 0.0 : scroll.vadjustment.value).print(true);
+        }
+        public void restore_session_state(string saved) throws Error
+        {
+            var value = Variant.parse(new VariantType("(sbbasdd)"), saved);
+            var query = SearchQuery.deserialize(value.get_child_value(0).get_string());
+            var chosen = value.get_child_value(3);
+            double horizontal = value.get_child_value(4).get_double(), vertical = value.get_child_value(5).get_double();
+            if(chosen.n_children() > 10000 || !horizontal.is_finite() || !vertical.is_finite() || horizontal < 0 || vertical < 0)
+                throw new FileError.INVALID("Invalid browsing state");
+            remembered_selection.clear();
+            for(size_t i = 0; i < chosen.n_children(); i++)
+            {
+                string uri = chosen.get_child_value(i).get_string();
+                if(Uri.parse_scheme(uri) != null)
+                    remembered_selection.add(File.new_for_uri(uri));
+            }
+            search_query = query;
+            recursive = value.get_child_value(1).get_boolean();
+            everywhere = value.get_child_value(2).get_boolean();
+            search_entry.text = query.text;
+            searches.visible = query.active;
+            recursive_button.active = recursive;
+            if(query.active)
+                run_search();
+            else refilter();
+            restore_selection();
+            if(scroll_restore != 0)
+                remove_tick_callback(scroll_restore);
+            uint frames = 0;
+            scroll_restore = add_tick_callback(() => {
+                if(directory.loading)
+                    return Source.CONTINUE;
+                var scroll = current_scroll();
+                if(scroll != null)
+                {
+                    scroll.hadjustment.value = horizontal;
+                    scroll.vadjustment.value = vertical;
+                }
+                if(++frames < 8)
+                    return Source.CONTINUE;
+                scroll_restore = 0;
+                session_changed();
+                return Source.REMOVE;
+            });
+        }
+        string column_text(FileItem item, string key)
+        {
+            if(key == "Name")
+                return item.name;
+            if(key == "Size")
+                return item.directory ? "—" : Paths.size(item.bytes);
+            if(key == "Type")
+                return ContentType.get_description(item.mime);
+            if(key == "MIME Type")
+                return item.mime;
+            if(key == "Location")
+                return item.file.get_parent() == null ? item.file.get_parse_name() : item.file.get_parent().get_parse_name();
+            if(key == "Tags")
+                return metadata.tags(item.file);
+            if(key == "Favorite")
+                return metadata.favorite(item.file) ? "★" : "";
+            if(key == "Owner" || key == "Group")
+                return item.info.get_attribute_string(key == "Owner" ? "owner::user" : "owner::group") ?? "—";
+            if(key == "Permissions")
+                return item.info.has_attribute("unix::mode") ? "%04o".printf(item.info.get_attribute_uint32("unix::mode") & 07777) : "—";
+            if(key == "Trash Date")
+                return item.info.get_attribute_string("trash::deletion-date") ?? "—";
+            var attribute = key == "Created" ? "time::created" : key == "Accessed" ? "time::access" : "time::modified";
+            if(!item.info.has_attribute(attribute))
+                return "—";
+            return new DateTime.from_unix_local((int64)item.info.get_attribute_uint64(attribute)).format("%x %X");
+        }
+        int compare_items(FileItem x, FileItem y)
+        {
+            if(folders_first && x.directory != y.directory)
+                return x.directory ? -1 : 1;
+            int result;
+            if(sort_key == "Size")
+                result = x.bytes < y.bytes ? -1 : x.bytes == y.bytes ? 0 : 1;
+            else if(sort_key == "Modified" || sort_key == "Created" || sort_key == "Accessed")
+            {
+                var attribute = sort_key == "Created" ? "time::created" : sort_key == "Accessed" ? "time::access" : "time::modified";
+                uint64 first = x.info.get_attribute_uint64(attribute), second = y.info.get_attribute_uint64(attribute);
+                result = first < second ? -1 : first == second ? 0 : 1;
+            }
+            else result = Paths.natural_compare(column_text(x, sort_key), column_text(y, sort_key));
+            if(result == 0)
+                result = Paths.natural_compare(x.name, y.name);
+            return ascending ? result : -result;
+        }
+        void save_display()
+        {
+            if(details == null || loading_display)
+                return;
+            var columns_state = new VariantBuilder(new VariantType("a(sbi)"));
+            for(uint i = 0; i < details.columns.get_n_items(); i++)
+            {
+                var column = (Gtk.ColumnViewColumn)details.columns.get_item(i);
+                columns_state.add("(sbi)", column.title, column.visible, column.fixed_width);
+            }
+            metadata.set_state("display:" + directory.location.get_uri(), new Variant("(sbbib@a(sbi))", sort_key, ascending, folders_first, icon_size, selection_checkboxes, columns_state.end()).print(true));
+        }
+        void load_display(File location)
+        {
+            loading_display = true;
+            sort_key = "Name";
+            ascending = true;
+            folders_first = true;
+            icon_size = 64;
+            selection_checkboxes = false;
+            foreach(var title in column_titles)
+            {
+                var column = detail_columns[title];
+                if(column == null)
+                    continue;
+                column.visible = title == "Name" || title == "Size" || title == "Type" || title == "Modified";
+                column.fixed_width = -1;
+            }
+            var saved = metadata.state("display:" + location.get_uri());
+            if(saved != "")
+            {
+                try {
+                    var value = Variant.parse(new VariantType("(sbbiba(sbi))"), saved);
+                    var key = value.get_child_value(0).get_string();
+                    if(key in column_titles)
+                        sort_key = key;
+                    ascending = value.get_child_value(1).get_boolean();
+                    folders_first = value.get_child_value(2).get_boolean();
+                    icon_size = value.get_child_value(3).get_int32().clamp(32, 128);
+                    selection_checkboxes = value.get_child_value(4).get_boolean();
+                    var columns_state = value.get_child_value(5);
+                    var seen = new Gee.HashSet<string>();
+                    for(size_t i = 0; i < columns_state.n_children(); i++)
+                    {
+                        var entry = columns_state.get_child_value(i);
+                        var title = entry.get_child_value(0).get_string();
+                        if(!detail_columns.has_key(title) || !seen.add(title))
+                            continue;
+                        var column = detail_columns[title];
+                        column.visible = title == "Name" || entry.get_child_value(1).get_boolean();
+                        column.fixed_width = entry.get_child_value(2).get_int32().clamp(-1, 2000);
+                        details.remove_column(column);
+                        details.insert_column((uint)seen.size - 1, column);
+                    }
+                }
+                catch(Error e) {   /* Invalid preferences fall back to the defaults. */
+                }
+            }
+            sorter.changed(Gtk.SorterChange.DIFFERENT);
+            display_changed();
+            loading_display = false;
+        }
+        public void show_view_settings()
+        {
+            var dialog = new Adw.PreferencesDialog();
+            dialog.title = "View Settings";
+            var page = new Adw.PreferencesPage();
+            dialog.add(page);
+            var group = new Adw.PreferencesGroup();
+            group.title = "This Folder";
+            page.add(group);
+            var size = new Adw.ComboRow();
+            size.title = "Icon Density";
+            size.model = new Gtk.StringList({"Compact", "Standard", "Large"});
+            size.selected = icon_size < 64 ? 0 : icon_size > 64 ? 2 : 1;
+            group.add(size);
+            size.notify["selected"].connect(() => { icon_size = size.selected == 0 ? 32 : size.selected == 1 ? 64 : 128;
+                                                    display_changed();
+                                                    save_display();
+                });
+            var checkboxes = new Adw.SwitchRow();
+            checkboxes.title = "Selection Checkboxes";
+            checkboxes.active = selection_checkboxes;
+            group.add(checkboxes);
+            checkboxes.notify["active"].connect(() => { selection_checkboxes = checkboxes.active;
+                                                        display_changed();
+                                                        save_display();
+                });
+            var folders = new Adw.SwitchRow();
+            folders.title = "Folders First";
+            folders.active = folders_first;
+            group.add(folders);
+            folders.notify["active"].connect(() => { folders_first = folders.active;
+                                                     sorter.changed(Gtk.SorterChange.DIFFERENT);
+                                                     save_display();
+                });
+            var sort = new Adw.ComboRow();
+            sort.title = "Sort By";
+            sort.model = new Gtk.StringList(column_titles);
+            for(uint i = 0; i < column_titles.length; i++)
+                if(column_titles[i] == sort_key)
+                    sort.selected = i;
+            group.add(sort);
+            sort.notify["selected"].connect(() => set_sort(column_titles[sort.selected], ascending));
+            var direction = new Adw.SwitchRow();
+            direction.title = "Descending Order";
+            direction.active = !ascending;
+            group.add(direction);
+            direction.notify["active"].connect(() => set_sort(sort_key, !direction.active));
+            var columns_group = new Adw.PreferencesGroup();
+            columns_group.title = "List Columns";
+            page.add(columns_group);
+            for(uint i = 0; i < details.columns.get_n_items(); i++)
+            {
+                var column = (Gtk.ColumnViewColumn)details.columns.get_item(i);
+                var row = new Adw.ActionRow();
+                row.title = column.title;
+                var toggle = new Gtk.Switch();
+                toggle.valign = Gtk.Align.CENTER;
+                toggle.active = column.visible;
+                toggle.sensitive = column.title != "Name";
+                row.add_suffix(toggle);
+                toggle.notify["active"].connect(() => { column.visible = toggle.active;
+                                                        save_display();
+                    });
+                var width = new Gtk.SpinButton.with_range(40, 1200, 10);
+                width.valign = Gtk.Align.CENTER;
+                width.value = column.fixed_width > 0 ? column.fixed_width : 160;
+                width.tooltip_text = "Column Width (pixels)";
+                row.add_suffix(width);
+                width.value_changed.connect(() => { column.fixed_width = width.get_value_as_int();
+                                                    save_display();
+                    });
+                var up = new Gtk.Button.from_icon_name("go-up-symbolic");
+                up.valign = Gtk.Align.CENTER;
+                up.tooltip_text = "Move Column Left";
+                row.add_suffix(up);
+                up.clicked.connect(() => {
+                    for(uint j = 1; j < details.columns.get_n_items(); j++)
+                        if(details.columns.get_item(j) == column)
+                        {
+                            details.remove_column(column);
+                            details.insert_column(j - 1, column);
+                            save_display();
+                            break;
+                        }
+                });
+                columns_group.add(row);
+            }
+            dialog.present(this);
+        }
         public void set_sort(string key, bool ascending)
         {
             sort_key = key;
             this.ascending = ascending;
             sorter.changed(Gtk.SorterChange.DIFFERENT);
+            save_display();
+            session_changed();
         }
         public void set_view(string mode, bool remember = true)
         {
@@ -520,6 +893,7 @@ namespace MajorisFiles {
             if(remember)
                 metadata.set_state("view:" + location.get_uri(), mode);
             modes.selected = mode == "Grid" ? 0 : mode == "List" ? 1 : mode == "Columns" ? 2 : 3;
+            session_changed();
             if (mode == "Columns" && directory.location.get_uri() != "majoris:///home")
                 build_columns();
         }
@@ -543,14 +917,29 @@ namespace MajorisFiles {
         }
         public void navigate(File file, bool record = true)
         {
+            completion_token.cancel();
+            completion_popup.popdown();
+            if(completion_delay != 0)
+            {
+                Source.remove(completion_delay);
+                completion_delay = 0;
+            }
+            location_suggestions.remember(file);
+            if(scroll_restore != 0)
+            {
+                remove_tick_callback(scroll_restore);
+                scroll_restore = 0;
+            }
             column_folder = null;
             column_selection = null;
             navigation_generation++;
             search_results = false;
+            everywhere = false;
             search.cancellable.cancel();
             search_query = new SearchQuery();
             search_entry.text = "";
             path.text = file.get_parse_name();
+            load_display(file);
             if (record)
                 history.visit(file);
             initial_selection = null;
@@ -592,7 +981,9 @@ namespace MajorisFiles {
                             return;
                         }
                         search_entry.text = search_query.text;
-                        recursive_button.active = true;
+                        everywhere = search_query.scope == "everywhere";
+                        recursive = search_query.scope != "folder";
+                        recursive_button.active = recursive;
                         run_search();
                         return;
                     }
@@ -608,6 +999,7 @@ namespace MajorisFiles {
             else directory.open.begin(file, get_root() as Gtk.Window);
             update_status();
             location_changed(file);
+            session_changed();
         }
         async void load_virtual(Gee.List<File> files, uint epoch)
         {
@@ -716,22 +1108,27 @@ namespace MajorisFiles {
             foreach(var item in chosen)
                 if(!item.directory)
                     bytes += item.bytes;
-            status.label = "%u items · %d selected".printf(sorted.get_n_items(), chosen.size) + (chosen.size > 0 ? " · " + Paths.size(bytes) : "");
+            status.label = "%u items · %d selected".printf(sorted.get_n_items(), chosen.size) + (chosen.size > 0 ? " · " + Paths.size(bytes) : "") + (search_results ? " · %u folders scanned · %u unavailable".printf(search.scanned, search.unreadable) : "");
         }
         void run_search()
         {
             search.cancellable.cancel();
             search_query.text = search_entry.text;
-            if ((recursive || search_query.content != "") && search_query.active)
+            search_query.scope = everywhere ? "everywhere" : recursive ? "recursive" : "folder";
+            if ((recursive || everywhere || search_query.content != "") && search_query.active)
             {
                 search_results = true;
                 directory.cancel();
                 directory.items.remove_all();
-                search.search.begin(location, search_query, metadata, recursive, (obj, res) => { try { search.search.end(res);
-                                                                                                 }
-                                                                                                 catch (Error e) { if (!(e is IOError.CANCELLED))
-                                                                                                                       error(e.message);
-                                                                                                 }
+                var roots = everywhere ? places.search_roots() : new Gee.ArrayList<File>();
+                if(!everywhere)
+                    roots.add(location);
+                search.search_roots.begin(roots, search_query, metadata, recursive || everywhere, (obj, res) => { try { search.search_roots.end(res);
+                                                                                                                        restore_selection();
+                                                                                                                  }
+                                                                                                                  catch (Error e) { if (!(e is IOError.CANCELLED))
+                                                                                                                                        error(e.message);
+                                                                                                                  }
                     });
             }
             else if (search_results)
@@ -740,6 +1137,7 @@ namespace MajorisFiles {
                 directory.open.begin(location, get_root() as Gtk.Window);
             }
             refilter();
+            session_changed();
         }
         void build_columns()
         {
@@ -755,7 +1153,7 @@ namespace MajorisFiles {
         void append_column(File folder, ListModel items)
         {
             var selected = new Gtk.MultiSelection(items);
-            var list = new Gtk.ListView(selected, factory(false));
+            var list = new Gtk.ListView(selected, factory(false, selected));
             list.enable_rubberband = true;
             list.width_request = 220;
             var scroll = scrolled(list);
@@ -765,6 +1163,7 @@ namespace MajorisFiles {
                 column_selection = selected;
                 column_folder = folder;
                 selection_changed();
+                session_changed();
                 update_status();
                 var chosen = this.selected();
                 if(chosen.size != 1)
@@ -799,15 +1198,32 @@ namespace MajorisFiles {
         Gtk.SignalListItemFactory text_factory(owned ItemText text)
         {
             var factory = new Gtk.SignalListItemFactory();
-            factory.setup.connect((obj) => ((Gtk.ListItem)obj).child = new Gtk.Label(""));
+            var handlers = new Gee.HashMap<Gtk.ListItem, ulong?>();
+            factory.setup.connect((obj) => {
+                var li = (Gtk.ListItem)obj;
+                li.child = new Gtk.Label("");
+                handlers[li] = metadata.changed.connect(() => {
+                    if(li.item != null)
+                        ((Gtk.Label)li.child).label = text((FileItem)li.item);
+                });
+            });
             factory.bind.connect((obj) => { var li = (Gtk.ListItem)obj;
                                             ((Gtk.Label)li.child).label = text((FileItem)li.item);
                 });
+            factory.teardown.connect((obj) => {
+                var li = (Gtk.ListItem)obj;
+                if(handlers.has_key(li))
+                {
+                    metadata.disconnect(handlers[li]);
+                    handlers.unset(li);
+                }
+            });
             return factory;
         }
-        Gtk.SignalListItemFactory factory(bool grid)
+        Gtk.SignalListItemFactory factory(bool grid, Gtk.MultiSelection? row_selection = null)
         {
             var f = new Gtk.SignalListItemFactory();
+            var display_handlers = new Gee.HashMap<Gtk.ListItem, ulong?>();
             f.setup.connect((obj) => { var li = (Gtk.ListItem)obj;
                                        var box = new Gtk.Box(grid ? Gtk.Orientation.VERTICAL : Gtk.Orientation.HORIZONTAL, 8);
                                        box.margin_start = 8;
@@ -827,6 +1243,27 @@ namespace MajorisFiles {
                                        }
                                        else label.halign = Gtk.Align.START;
                                        box.append(label);
+                                       var checkbox = new Gtk.CheckButton();
+                                       checkbox.tooltip_text = "Select Item";
+                                       box.append(checkbox);
+                                       checkbox.toggled.connect(() => {
+                    if(li.item == null || checkbox.active == li.selected)
+                        return;
+                    var model = row_selection ?? selection;
+                    if(checkbox.active)
+                        model.select_item(li.position, false);
+                    else model.unselect_item(li.position);
+                });
+                                       li.notify["selected"].connect(() => checkbox.active = li.selected);
+                                       display_handlers[li] = display_changed.connect(() => {
+                    icon.pixel_size = grid ? icon_size : (icon_size > 64 ? 32 : 24);
+                    int spacing = icon_size < 64 ? 4 : 8;
+                    box.margin_top = spacing;
+                    box.margin_bottom = spacing;
+                    checkbox.visible = selection_checkboxes;
+                });
+                                       icon.pixel_size = grid ? icon_size : (icon_size > 64 ? 32 : 24);
+                                       checkbox.visible = selection_checkboxes;
                                        li.child = box;
                                        var middle = new Gtk.GestureClick();
                                        middle.button = 2;
@@ -868,6 +1305,7 @@ namespace MajorisFiles {
                                       var image = (Gtk.Image)box.get_first_child();
                                       image.set_from_gicon(item.info.get_icon());
                                       ((Gtk.Label)image.get_next_sibling()).label = item.name;
+                                      ((Gtk.CheckButton)box.get_last_child()).active = li.selected;
                                       box.tooltip_text = item.file.get_parse_name();
                                       var token = new Cancellable();
                                       thumbnail_jobs[li] = token;
@@ -884,10 +1322,30 @@ namespace MajorisFiles {
                                             token.cancel();
                                         thumbnail_jobs.unset(li);
                 });
+            f.teardown.connect((obj) => {
+                var li = (Gtk.ListItem)obj;
+                if(display_handlers.has_key(li))
+                {
+                    disconnect(display_handlers[li]);
+                    display_handlers.unset(li);
+                }
+            });
             return f;
         }
         public void cancel()
         {
+            completion_token.cancel();
+            completion_popup.popdown();
+            if(completion_delay != 0)
+            {
+                Source.remove(completion_delay);
+                completion_delay = 0;
+            }
+            if(scroll_restore != 0)
+            {
+                remove_tick_callback(scroll_restore);
+                scroll_restore = 0;
+            }
             navigation_generation++;
             foreach(var model in column_models)
                 model.cancel();
@@ -899,6 +1357,13 @@ namespace MajorisFiles {
             preview.cancel();
             home.cancel();
             gallery_preview.cancel();
+        }
+        protected override void dispose()
+        {
+            cancel();
+            if(completion_popup.get_parent() != null)
+                completion_popup.unparent();
+            base.dispose();
         }
         delegate File? DropFolder();
         async void recover_metadata(Adw.Banner banner)

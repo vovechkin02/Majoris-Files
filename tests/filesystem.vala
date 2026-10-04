@@ -46,6 +46,49 @@ async void content_case() throws Error
     found = 0;
     yield search.search(root, query, null, false);
     assert(found == 0);
+    var search_roots = new Gee.ArrayList<File>();
+    search_roots.add(root);
+    search_roots.add(root.get_child("folder"));
+    search_roots.add(root);
+    search_roots.add(root.get_child("missing"));
+    yield search.search_roots(search_roots, query);
+    assert(found == 1);
+    assert(search.unreadable == 1 && search.scanned == 3);
+    bool cancelled = false;
+    ulong cancellation = search.found.connect(() => search.cancellable.cancel());
+    try {
+        yield search.search_roots(search_roots, query);
+    }
+    catch(IOError.CANCELLED e) {
+        cancelled = true;
+    }
+    search.disconnect(cancellation);
+    assert(cancelled);
+    found = 0;
+    yield search.search(root, query);
+    assert(found == 1 && search.unreadable == 0);
+    var suggestion_metadata = new MetadataStore(Path.build_filename(temp, "suggestions.db"));
+    var completion = new LocationSuggestions(suggestion_metadata);
+    completion.remember(root.get_child("folder"));
+    completion.remember(root.get_child("folder"));
+    completion.remember(File.new_for_uri("sftp://alice:secret@example.test/private"));
+    assert(completion.history().size == 1);
+    var suggestions = yield completion.suggest("fol", root, new Cancellable());
+    assert(suggestions.size == 1 && suggestions[0].equal(root.get_child("folder")));
+    suggestions = yield completion.suggest(root.get_path() + "/", root, new Cancellable());
+    assert(suggestions.size >= 1);
+    foreach(var suggestion in suggestions)
+        assert(suggestion.get_basename() != "other.txt");
+    var cancelled_suggestions = new Cancellable();
+    cancelled_suggestions.cancel();
+    bool suggestion_cancelled = false;
+    try {
+        yield completion.suggest("fol", root, cancelled_suggestions);
+    }
+    catch(IOError.CANCELLED e) {
+        suggestion_cancelled = true;
+    }
+    assert(suggestion_cancelled);
     var roots = new Gee.ArrayList<File>();
     roots.add(root.get_child("folder"));
     var counts = new FileCounts();
@@ -110,6 +153,21 @@ async void archive_case() throws Error
         assert(result == "hello archive");
     }
     var malicious = root.get_child("malicious.tar");
+    var encrypted = root.get_child("encrypted.zip");
+    yield ArchiveService.compress(files, encrypted, "zip", job, "fixture-password");
+    bool wrong_password = false;
+    try {
+        yield ArchiveService.extract(encrypted, root.get_child("wrong-password"), job, "incorrect");
+    }
+    catch(Error e) {
+        wrong_password = true;
+    }
+    assert(wrong_password && !root.get_child("wrong-password").query_exists());
+    var decrypted = root.get_child("decrypted");
+    yield ArchiveService.extract(encrypted, decrypted, job, "fixture-password");
+    string decrypted_text;
+    FileUtils.get_contents(decrypted.get_child("hello.txt").get_path(), out decrypted_text);
+    assert(decrypted_text == "hello archive");
     var writer = new Archive.Write();
     writer.set_format_pax_restricted();
     writer.open_filename(malicious.get_path());
@@ -223,6 +281,25 @@ async void operation_case() throws Error
     assert(!root.get_child("folder").query_exists());
     yield manager.redo();
     assert(root.get_child("folder").query_exists());
+    var protected_folder = root.get_child("folder");
+    var saved_folder = root.get_child("saved-folder");
+    yield protected_folder.move_async(saved_folder, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
+    yield protected_folder.make_directory_async(Priority.DEFAULT, null);
+    manager = new OperationManager(new MetadataStore(Path.build_filename(temp, "metadata.db")));
+    bool replacement_rejected = false;
+    try {
+        yield manager.undo();
+    }
+    catch(MajorisFiles.FileError.CONFLICT e) {
+        replacement_rejected = true;
+    }
+    assert(replacement_rejected && protected_folder.query_exists() && saved_folder.query_exists());
+    yield protected_folder.delete_async(Priority.DEFAULT, null);
+    yield saved_folder.move_async(protected_folder, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
+    yield manager.undo();
+    assert(!protected_folder.query_exists());
+    yield manager.redo();
+    assert(protected_folder.query_exists());
     FileUtils.set_contents(Path.build_filename(temp, "original.txt"), "content");
     var original = root.get_child("original.txt");
     yield manager.rename(original, "renamed.txt");

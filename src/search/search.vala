@@ -12,6 +12,7 @@ namespace MajorisFiles {
         public bool favorites_only;
         public string owner = "";
         public string content = "";
+        public string scope = "folder";
         public bool active {
             get {
                 return text != "" || content != "" || mime != "" || kind != "Any" || minimum != 0 || maximum != uint64.MAX || after != 0 || before != uint64.MAX || tag != "" || favorites_only || owner != "";
@@ -69,17 +70,19 @@ namespace MajorisFiles {
         }
         public string serialize()
         {
-            return "majoris-search-v1:" + new Variant("(ssttssttbs)", text, mime, minimum, maximum, kind, date_field, after, before, favorites_only, tag + "\n" + owner + "\n" + content).print(true);
+            return "majoris-search-v3:" + new Variant("(ssttssttbssss)", text, mime, minimum, maximum, kind, date_field, after, before, favorites_only, tag, owner, content, scope).print(true);
         }
         public static SearchQuery deserialize(string saved) throws Error
         {
             var result = new SearchQuery();
-            if(!saved.has_prefix("majoris-search-v1:"))
+            bool version_two = saved.has_prefix("majoris-search-v2:");
+            bool version_three = saved.has_prefix("majoris-search-v3:");
+            if(!version_three && !version_two && !saved.has_prefix("majoris-search-v1:"))
             {
                 result.text = saved;
                 return result;
             }
-            var value = Variant.parse(new VariantType("(ssttssttbs)"), saved.substring(18));
+            var value = Variant.parse(new VariantType(version_three ? "(ssttssttbssss)" : version_two ? "(ssttssttbss)" : "(ssttssttbs)"), saved.substring(18));
             result.text = value.get_child_value(0).get_string();
             result.mime = value.get_child_value(1).get_string();
             result.minimum = value.get_child_value(2).get_uint64();
@@ -90,9 +93,12 @@ namespace MajorisFiles {
             result.before = value.get_child_value(7).get_uint64();
             result.favorites_only = value.get_child_value(8).get_boolean();
             var extra = value.get_child_value(9).get_string().split("\n", 3);
-            result.tag = extra[0];
-            result.owner = extra.length > 1 ? extra[1] : "";
-            result.content = extra.length > 2 ? extra[2] : "";
+            result.tag = version_three ? value.get_child_value(9).get_string() : extra[0];
+            result.owner = version_three ? value.get_child_value(10).get_string() : extra.length > 1 ? extra[1] : "";
+            result.content = version_three ? value.get_child_value(11).get_string() : extra.length > 2 ? extra[2] : "";
+            result.scope = version_three ? value.get_child_value(12).get_string() : version_two ? value.get_child_value(10).get_string() : "recursive";
+            if(!(result.scope in new string[] {"folder", "recursive", "everywhere"}))
+                throw new FileError.INVALID("Invalid saved search scope");
             if(result.minimum > result.maximum || result.after > result.before || !(result.date_field in new string[] {"modified", "created", "access"}))
                 throw new FileError.INVALID("Invalid saved search range");
             return result;
@@ -101,41 +107,84 @@ namespace MajorisFiles {
     public class SearchController : Object {
         public Cancellable cancellable = new Cancellable();
         public signal void found(FileItem item);
+        public uint unreadable {
+            get;
+            private set;
+        }
+        public uint scanned {
+            get;
+            private set;
+        }
+        public signal void progress(uint folders, uint skipped);
         public async void search(File root, SearchQuery query, MetadataStore? metadata = null, bool recursive = true) throws Error
+        {
+            var roots = new Gee.ArrayList<File>();
+            roots.add(root);
+            yield search_roots(roots, query, metadata, recursive);
+        }
+        public async void search_roots(Gee.List<File> roots, SearchQuery query, MetadataStore? metadata = null, bool recursive = true) throws Error
         {
             cancellable.cancel();
             cancellable = new Cancellable();
             var token = cancellable;
+            // The caller can edit its query while this asynchronous scan is running.
+            var criteria = SearchQuery.deserialize(query.serialize());
+            unreadable = 0;
+            scanned = 0;
             var queue = new Gee.ArrayQueue<File>();
-            queue.offer(root);
-            while (!queue.is_empty && !token.is_cancelled())
+            var visited = new Gee.HashSet<string>();
+            var emitted = new Gee.HashSet<string>();
+            foreach(var root in roots)
+                if(visited.add(root.get_uri()))
+                    queue.offer(root);
+            while (!queue.is_empty)
             {
+                token.set_error_if_cancelled();
                 var folder = queue.poll();
-                FileEnumerator enumerator;
+                FileEnumerator? enumerator = null;
                 try {
                     enumerator = yield folder.enumerate_children_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.LOW, token);
-                }
-                catch (IOError.CANCELLED e) {
-                    throw e;
-                }
-                catch (Error e) {
-                    continue;
-                }
-                while (true)
-                {
-                    var batch = yield enumerator.next_files_async(128, Priority.LOW, token);
-                    if (batch == null)
-                        break;
-                    foreach (var info in batch)
+                    while (true)
                     {
-                        var item = new FileItem(folder.get_child(info.get_name()), info);
-                        if (query.matches(item, metadata) && (query.content == "" || (yield content_matches(item, query.content, token))))
-                            found(item);
-                        if (recursive && item.directory && !info.get_is_symlink() && !info.get_is_hidden())
-                            queue.offer(item.file);
+                        var batch = yield enumerator.next_files_async(128, Priority.LOW, token);
+                        if (batch == null)
+                            break;
+                        foreach (var info in batch)
+                        {
+                            token.set_error_if_cancelled();
+                            var item = new FileItem(folder.get_child(info.get_name()), info);
+                            if (criteria.matches(item, metadata) && (criteria.content == "" || (yield content_matches(item, criteria.content, token))) && emitted.add(item.file.get_uri()))
+                                found(item);
+                            if (recursive && item.directory && !info.get_is_symlink() && !info.get_is_hidden() && visited.add(item.file.get_uri()))
+                                queue.offer(item.file);
+                        }
                     }
                 }
-                yield enumerator.close_async(Priority.LOW, null);
+                catch (Error e) {
+                    if(enumerator != null)
+                    {
+                        try {
+                            yield enumerator.close_async(Priority.LOW, null);
+                        }
+                        catch(Error ignored) {}
+                        enumerator = null;
+                    }
+                    if(e is IOError.CANCELLED || token.is_cancelled())
+                        throw new IOError.CANCELLED("Search cancelled");
+                    unreadable++;
+                }
+                if(enumerator != null)
+                {
+                    try {
+                        yield enumerator.close_async(Priority.LOW, null);
+                    }
+                    catch(Error e) {
+                        unreadable++;
+                    }
+                }
+                token.set_error_if_cancelled();
+                scanned++;
+                progress(scanned, unreadable);
             }
         }
         static async bool content_matches(FileItem item, string needle, Cancellable token) throws Error

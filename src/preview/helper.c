@@ -1,0 +1,99 @@
+#include <gio/gio.h>
+#include <poppler.h>
+#include <cairo.h>
+#include <pango/pangocairo.h>
+#include <pango/pangofc-fontmap.h>
+#include <fontconfig/fontconfig.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <sys/resource.h>
+#include <sys/prctl.h>
+#include <stdio.h>
+#include <math.h>
+#include "../archive/native.h"
+
+static cairo_status_t write_png(void *closure, const unsigned char *data, unsigned int length) {
+    (void)closure;
+    return fwrite(data, 1, length, stdout) == length ? CAIRO_STATUS_SUCCESS : CAIRO_STATUS_WRITE_ERROR;
+}
+static gboolean number(const char *text, double minimum, double maximum, double *value) {
+    char *end = NULL;
+    *value = g_ascii_strtod(text, &end);
+    return end && end != text && *end == 0 && isfinite(*value) && *value >= minimum && *value <= maximum;
+}
+int main(int argc, char **argv) {
+    struct rlimit memory = {768 * 1024 * 1024, 768 * 1024 * 1024}, cpu = {10, 10}, files = {64, 64}, core = {0, 0};
+    if(setrlimit(RLIMIT_AS, &memory) || setrlimit(RLIMIT_CPU, &cpu) || setrlimit(RLIMIT_NOFILE, &files) || setrlimit(RLIMIT_CORE, &core)) return 2;
+    if(prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) != 0 || argc < 3) return 2;
+    GError *error = NULL;
+    if(g_str_equal(argv[1], "archive")) {
+        GCancellable *token = g_cancellable_new();
+        char *text = majoris_archive_list(argv[2], token, &error);
+        g_object_unref(token);
+        if(!text) goto fail;
+        fputs(text, stdout); g_free(text); return 0;
+    }
+    if(g_str_equal(argv[1], "pdf-info") || g_str_equal(argv[1], "pdf-page") || g_str_equal(argv[1], "pdf-thumbnail")) {
+        char *uri = g_filename_to_uri(argv[2], NULL, &error);
+        if(!uri) goto fail;
+        PopplerDocument *document = poppler_document_new_from_file(uri, NULL, &error);
+        g_free(uri);
+        if(!document) goto fail;
+        int count = poppler_document_get_n_pages(document);
+        if(count < 1 || count > 100000) { g_object_unref(document); return 2; }
+        if(g_str_equal(argv[1], "pdf-info")) { printf("%d", count); g_object_unref(document); return 0; }
+        double index = 0, zoom = 1;
+        gboolean thumbnail = g_str_equal(argv[1], "pdf-thumbnail");
+        if(!thumbnail && (argc != 5 || !number(argv[3], 0, count - 1, &index) || floor(index) != index || !number(argv[4], 0.25, 3, &zoom))) { g_object_unref(document); return 2; }
+        PopplerPage *page = poppler_document_get_page(document, (int)index);
+        double width, height; poppler_page_get_size(page, &width, &height);
+        if(!isfinite(width) || !isfinite(height) || width <= 0 || height <= 0) { g_object_unref(page); g_object_unref(document); return 2; }
+        double scale = fmin(zoom, (thumbnail ? 128 : 4096) / fmax(width, height));
+        cairo_surface_t *image = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, MAX(1, (int)(width * scale)), MAX(1, (int)(height * scale)));
+        cairo_t *cr = cairo_create(image); cairo_set_source_rgb(cr, 1, 1, 1); cairo_paint(cr); cairo_scale(cr, scale, scale); poppler_page_render(page, cr);
+        cairo_status_t status = cairo_surface_write_to_png_stream(image, write_png, NULL);
+        cairo_destroy(cr); cairo_surface_destroy(image); g_object_unref(page); g_object_unref(document);
+        return status == CAIRO_STATUS_SUCCESS ? 0 : 2;
+    }
+    if(g_str_equal(argv[1], "image") || g_str_equal(argv[1], "image-thumbnail")) {
+        double angle = 0;
+        gboolean thumbnail = g_str_equal(argv[1], "image-thumbnail");
+        if(!thumbnail && (argc != 4 || !number(argv[3], 0, 270, &angle) || floor(angle) != angle || ((int)angle % 90) != 0)) return 2;
+        int original_width = 0, original_height = 0;
+        if(!gdk_pixbuf_get_file_info(argv[2], &original_width, &original_height) || original_width < 1 || original_height < 1) return 2;
+        double image_scale = fmin(1, (thumbnail ? 128.0 : 1800.0) / MAX(original_width, original_height));
+        GdkPixbuf *decoded = gdk_pixbuf_new_from_file_at_scale(argv[2], MAX(1, (int)(original_width * image_scale)), MAX(1, (int)(original_height * image_scale)), TRUE, &error);
+        if(!decoded) goto fail;
+        GdkPixbuf *oriented = gdk_pixbuf_apply_embedded_orientation(decoded); g_object_unref(decoded);
+        GdkPixbufRotation rotation = angle == 90 ? GDK_PIXBUF_ROTATE_CLOCKWISE : angle == 180 ? GDK_PIXBUF_ROTATE_UPSIDEDOWN : angle == 270 ? GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE : GDK_PIXBUF_ROTATE_NONE;
+        GdkPixbuf *image = gdk_pixbuf_rotate_simple(oriented, rotation); g_object_unref(oriented);
+        char *buffer = NULL; gsize size = 0;
+        gboolean saved = gdk_pixbuf_save_to_buffer(image, &buffer, &size, "png", &error, NULL); g_object_unref(image);
+        if(!saved) goto fail;
+        gboolean written = fwrite(buffer, 1, size, stdout) == size; g_free(buffer); return written ? 0 : 2;
+    }
+    if(g_str_equal(argv[1], "font")) {
+        FcConfig *config = FcInitLoadConfigAndFonts();
+        if(!config || !FcConfigAppFontAddFile(config, (const FcChar8 *)argv[2])) { if(config) FcConfigDestroy(config); return 2; }
+        FcFontSet *fonts = FcConfigGetFonts(config, FcSetApplication);
+        if(!fonts || fonts->nfont < 1) { FcConfigDestroy(config); return 2; }
+        FcChar8 *family = NULL, *style = NULL;
+        FcPatternGetString(fonts->fonts[0], FC_FAMILY, 0, &family); FcPatternGetString(fonts->fonts[0], FC_STYLE, 0, &style);
+        if(!family) { FcConfigDestroy(config); return 2; }
+        PangoFontMap *map = pango_cairo_font_map_new(); pango_fc_font_map_set_config(PANGO_FC_FONT_MAP(map), config);
+        PangoContext *context = pango_font_map_create_context(map); PangoLayout *layout = pango_layout_new(context);
+        PangoFontDescription *description = pango_fc_font_description_from_pattern(fonts->fonts[0], TRUE);
+        pango_font_description_set_absolute_size(description, 30 * PANGO_SCALE);
+        pango_layout_set_font_description(layout, description); pango_layout_set_width(layout, 1120 * PANGO_SCALE); pango_layout_set_wrap(layout, PANGO_WRAP_WORD_CHAR);
+        char *sample = g_strdup_printf("%s — %s\n\nABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789 !?@#$%%&()\n\nThe quick brown fox jumps over the lazy dog.", family, style ? (const char *)style : "Regular");
+        pango_layout_set_text(layout, sample, -1);
+        cairo_surface_t *image = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1200, 480); cairo_t *cr = cairo_create(image);
+        cairo_set_source_rgb(cr, 1, 1, 1); cairo_paint(cr); cairo_set_source_rgb(cr, .1, .1, .1); cairo_move_to(cr, 40, 30); pango_cairo_show_layout(cr, layout);
+        cairo_status_t status = cairo_surface_write_to_png_stream(image, write_png, NULL);
+        cairo_destroy(cr); cairo_surface_destroy(image); g_free(sample); pango_font_description_free(description); g_object_unref(layout); g_object_unref(context); g_object_unref(map); FcConfigDestroy(config);
+        return status == CAIRO_STATUS_SUCCESS ? 0 : 2;
+    }
+    return 2;
+fail:
+    if(error) { fputs(error->message, stderr); g_error_free(error); }
+    return 1;
+}

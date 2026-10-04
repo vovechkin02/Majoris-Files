@@ -19,7 +19,9 @@ inode and birth-time identities where the filesystem exposes them. Existing hard
 links retain their distinct paths and remote identity reconciliation remains work.
 
 Search predicates are shared by current-folder filtering and recursive GIO
-enumeration. Saved searches retain typed filter values and accept legacy plain
+enumeration. Everywhere shares a visited-folder/result set across Home and mounted
+roots, and inaccessible folders are counted. Saved searches retain scope and typed
+filter values and accept legacy plain
 filename queries. Native clipboard publication provides GdkFileList, URI lists
 and GNOME copy/cut data; paste reads the current desktop clipboard asynchronously.
 
@@ -27,7 +29,10 @@ and GNOME copy/cut data; paste reads the current desktop clipboard asynchronousl
 rename, move, folder creation and non-replacing copies. Replacement retains the
 previous destination at a temporary sibling until transfer succeeds. Copy undo
 requires confirmation and moves copied content to Trash, since it may have been
-edited since the copy. History is private SQLite state. Trash undo records only
+edited since the copy. History is private SQLite state; backend file identifiers,
+device/inode and creation timestamps are checked before reversal. Unverifiable
+legacy entries are retained but cannot be reversed. History actions are serialized.
+Trash undo records only
 an unambiguous newly created backend entry. Merged moves journal new child
 transfers and recreate missing source parents on undo. Recursive deletion does
 not follow symbolic links. Interrupted jobs are reported, never silently restarted.

@@ -39,6 +39,22 @@ namespace MajorisFiles {
             catch (Error e) {}
             reload();
         }
+        public Gee.ArrayList<File> search_roots()
+        {
+            var roots = new Gee.ArrayList<File>();
+            roots.add(File.new_for_path(Environment.get_home_dir()));
+            foreach(var mount in volumes.get_mounts())
+            {
+                var root = mount.get_root();
+                bool covered = false;
+                foreach(var existing in roots)
+                    if(root.equal(existing) || root.has_prefix(existing))
+                        covered = true;
+                if(!covered)
+                    roots.add(root);
+            }
+            return roots;
+        }
         public void reload()
         {
             entries.clear();

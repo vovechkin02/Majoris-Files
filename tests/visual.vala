@@ -11,6 +11,7 @@ int main(string[] args)
         DirUtils.create(Path.build_filename(root, "Documents"), 0700);
         DirUtils.create(Path.build_filename(root, "Pictures"), 0700);
         Gtk.init();
+        Environment.set_prgname("majoris-files-visual-check");
         Environment.set_application_name("Majoris Files Visual Check");
         Adw.init();
         var app = new Adw.Application("com.majoris.files.visualtest", ApplicationFlags.NON_UNIQUE);
@@ -51,6 +52,20 @@ int main(string[] args)
                                      return Source.CONTINUE;
                                  }
                                  if(stage == 3)
+                                 {
+                                     window.current.navigate(File.new_for_path(root));
+                                     window.current.set_view("List");
+                                     window.current.show_view_settings();
+                                     Timeout.add(500, () => {
+                    screenshot(window, "view-settings.png");
+                    if(window.visible_dialog != null)
+                        window.visible_dialog.close();
+                    return Source.REMOVE;
+                });
+                                     stage++;
+                                     return Source.CONTINUE;
+                                 }
+                                 if(stage == 4)
                                  {
                                      try {
                                          var options = new ChooserOptions(false, new VariantBuilder(VariantType.VARDICT).end());
