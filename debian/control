@@ -1,0 +1,15 @@
+Source: majoris-files
+Section: utils
+Priority: optional
+Maintainer: Majoris Developers <developers@majoris.local>
+Build-Depends: debhelper-compat (= 13), meson, ninja-build, valac, pkg-config, libgtk-4-dev (>= 4.12), libadwaita-1-dev (>= 1.5), libgee-0.8-dev, libsqlite3-dev, libjson-glib-dev, libpoppler-glib-dev, libarchive-dev, libpolkit-gobject-1-dev, libx11-dev, xvfb, dbus
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+
+Package: majoris-files
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, gvfs, gvfs-backends, gvfs-fuse, samba, smbclient, cifs-utils, xdg-desktop-portal, polkitd, udisks2, avahi-daemon
+Recommends: gstreamer1.0-plugins-good, gstreamer1.0-plugins-bad, gstreamer1.0-libav, gnome-keyring, xdg-terminal-exec
+Description: Majoris file manager and system chooser
+ Files provides shared local and remote browsing, file operations, previews,
+ and a FileChooser portal backend for the Majoris desktop.

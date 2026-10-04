@@ -1,0 +1,4 @@
+[portal]
+DBusName=org.freedesktop.impl.portal.desktop.majoris
+Interfaces=org.freedesktop.impl.portal.FileChooser;
+UseIn=Majoris;

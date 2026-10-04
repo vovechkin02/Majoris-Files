@@ -1,0 +1,5 @@
+[D-BUS Service]
+Name=com.majoris.Files.Sharing
+Exec=@libexecdir@/majoris-files-sharing-service
+User=root
+SystemdService=majoris-files-sharing.service

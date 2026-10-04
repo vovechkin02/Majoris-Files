@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Files
+Comment=Browse and manage files
+Exec=majoris-files %U
+Icon=com.majoris.files
+Type=Application
+Terminal=false
+Categories=System;FileTools;FileManager;
+MimeType=inode/directory;
+StartupNotify=true

@@ -1,0 +1,81 @@
+#include "native.h"
+#include <archive.h>
+#include <archive_entry.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+static gboolean failure(struct archive *a, GError **error) {
+    g_set_error(error, G_IO_ERROR, G_IO_ERROR_FAILED, "%s", archive_error_string(a) ?: "Archive operation failed");
+    return FALSE;
+}
+static gboolean safe_name(const char *name) {
+    if (!name || !*name || strlen(name) > 4096 || g_path_is_absolute(name) || strchr(name,'\\')) return FALSE;
+    char **parts = g_strsplit(name,"/",-1); gboolean safe = TRUE;
+    for (int i=0;parts[i];i++) if (!strcmp(parts[i],"..")) safe = FALSE;
+    g_strfreev(parts); return safe;
+}
+gboolean majoris_archive_extract(const char *source, const char *destination, GCancellable *cancel, GError **error) {
+    struct archive *reader = archive_read_new(), *writer = archive_write_disk_new(); gboolean ok = FALSE;
+    archive_read_support_filter_all(reader); archive_read_support_format_all(reader);
+    archive_write_disk_set_options(writer, ARCHIVE_EXTRACT_SECURE_SYMLINKS | ARCHIVE_EXTRACT_SECURE_NODOTDOT | ARCHIVE_EXTRACT_NO_OVERWRITE | ARCHIVE_EXTRACT_SAFE_WRITES);
+    if (archive_read_open_filename(reader,source,1024*1024) != ARCHIVE_OK) { failure(reader,error); goto out; }
+    struct archive_entry *entry; int result; guint count=0; guint64 bytes=0;
+    while ((result=archive_read_next_header(reader,&entry)) != ARCHIVE_EOF) {
+        if (g_cancellable_set_error_if_cancelled(cancel,error)) goto out;
+        if (result < ARCHIVE_OK) { failure(reader,error); goto out; }
+        const char *name=archive_entry_pathname(entry); mode_t type=archive_entry_filetype(entry);
+        if (!safe_name(name) || archive_entry_symlink(entry) || archive_entry_hardlink(entry) || (type!=AE_IFREG && type!=AE_IFDIR) || ++count>100000) {
+            g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_INVALID_DATA,"Archive contains an unsafe path, link, special file, or too many entries"); goto out;
+        }
+        char *path=g_build_filename(destination,name,NULL); archive_entry_set_pathname(entry,path); g_free(path);
+        archive_entry_set_perm(entry,type==AE_IFDIR ? 0700 : 0600);
+        if (archive_write_header(writer,entry) < ARCHIVE_OK) { failure(writer,error); goto out; }
+        const void *buffer; size_t length; la_int64_t offset;
+        while ((result=archive_read_data_block(reader,&buffer,&length,&offset)) == ARCHIVE_OK) {
+            if (g_cancellable_set_error_if_cancelled(cancel,error)) goto out;
+            bytes+=length;
+            if (bytes>(((guint64)1)<<40)) { g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_NO_SPACE,"Archive exceeds the 1 TiB extraction safety limit"); goto out; }
+            if (archive_write_data_block(writer,buffer,length,offset) < ARCHIVE_OK) { failure(writer,error); goto out; }
+        }
+        if (result != ARCHIVE_EOF) { failure(reader,error); goto out; }
+        if (archive_write_finish_entry(writer)<ARCHIVE_OK) { failure(writer,error); goto out; }
+    }
+    ok=TRUE;
+out:
+    archive_read_free(reader); archive_write_free(writer); return ok;
+}
+static gboolean add_path(struct archive *writer,const char *source,const char *name,GCancellable *cancel,GError **error) {
+    if (g_cancellable_set_error_if_cancelled(cancel,error)) return FALSE;
+    struct stat st;
+    if (lstat(source,&st)) { g_set_error(error,G_IO_ERROR,g_io_error_from_errno(errno),"Cannot read %s: %s",source,g_strerror(errno)); return FALSE; }
+    if (!S_ISREG(st.st_mode) && !S_ISDIR(st.st_mode)) { g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_NOT_SUPPORTED,"Archive creation only supports regular files and directories"); return FALSE; }
+    struct archive_entry *entry=archive_entry_new(); archive_entry_set_pathname(entry,name); archive_entry_set_filetype(entry,S_ISDIR(st.st_mode)?AE_IFDIR:AE_IFREG); archive_entry_set_perm(entry,st.st_mode & 0777); archive_entry_set_size(entry,S_ISREG(st.st_mode)?st.st_size:0); archive_entry_set_mtime(entry,st.st_mtime,0);
+    int result=archive_write_header(writer,entry); archive_entry_free(entry); if (result<ARCHIVE_OK) return failure(writer,error);
+    if (S_ISREG(st.st_mode)) {
+        int fd=open(source,O_RDONLY|O_NOFOLLOW); if (fd<0) { g_set_error(error,G_IO_ERROR,g_io_error_from_errno(errno),"Cannot open source: %s",g_strerror(errno)); return FALSE; }
+        guint8 *buffer=g_malloc(1024*1024); ssize_t count; gboolean ok=TRUE;
+        while ((count=read(fd,buffer,1024*1024))>0) { if (g_cancellable_set_error_if_cancelled(cancel,error)) { ok=FALSE; break; } if (archive_write_data(writer,buffer,count)!=count) { failure(writer,error); ok=FALSE; break; } }
+        if (count<0 && ok) { g_set_error(error,G_IO_ERROR,g_io_error_from_errno(errno),"Cannot read source: %s",g_strerror(errno)); ok=FALSE; }
+        g_free(buffer); close(fd); if (!ok) return FALSE;
+    } else {
+        GDir *dir=g_dir_open(source,0,error); if (!dir) return FALSE; const char *child;
+        while ((child=g_dir_read_name(dir))) { char *path=g_build_filename(source,child,NULL); char *relative=g_build_filename(name,child,NULL); gboolean ok=add_path(writer,path,relative,cancel,error); g_free(path); g_free(relative); if (!ok) { g_dir_close(dir); return FALSE; } }
+        g_dir_close(dir);
+    }
+    return archive_write_finish_entry(writer)>=ARCHIVE_OK || failure(writer,error);
+}
+gboolean majoris_archive_create(const char *destination,const char *format,char **sources,GCancellable *cancel,GError **error) {
+    int fd=open(destination,O_WRONLY|O_CREAT|O_EXCL,0600);
+    if (fd<0) { g_set_error(error,G_IO_ERROR,g_io_error_from_errno(errno),"Cannot create archive: %s",g_strerror(errno)); return FALSE; }
+    struct archive *writer=archive_write_new(); gboolean ok=FALSE; int result;
+    if (!strcmp(format,"zip")) result=archive_write_set_format_zip(writer);
+    else if (!strcmp(format,"7z")) result=archive_write_set_format_7zip(writer);
+    else { result=archive_write_set_format_pax_restricted(writer); if (!strcmp(format,"tar.gz")) archive_write_add_filter_gzip(writer); else if (!strcmp(format,"tar.bz2")) archive_write_add_filter_bzip2(writer); else if (!strcmp(format,"tar.xz")) archive_write_add_filter_xz(writer); else if (!strcmp(format,"tar.zst")) archive_write_add_filter_zstd(writer); }
+    if (result<ARCHIVE_OK || archive_write_open_fd(writer,fd)<ARCHIVE_OK) { failure(writer,error); goto out; }
+    for (int i=0;sources[i];i++) { char *name=g_path_get_basename(sources[i]); gboolean added=add_path(writer,sources[i],name,cancel,error); g_free(name); if (!added) goto out; }
+    ok=archive_write_close(writer)>=ARCHIVE_OK; if (!ok) failure(writer,error);
+out:
+    archive_write_free(writer); close(fd); if (!ok) unlink(destination); return ok;
+}

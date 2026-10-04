@@ -1,0 +1,74 @@
+# Architecture
+
+Files is a Vala application using GTK4, libadwaita, GIO and Meson. The executable
+is `majoris-files`, the application ID is `com.majoris.files`, and UI and service
+classes live in the `MajorisFiles` namespace.
+
+`DirectoryModel` incrementally enumerates batches of 128 entries, owns its
+cancellable and GFileMonitor, and coalesces monitor events. Each `Browser` owns
+its history, filters, selection, search and preview lifecycle. Files tabs and
+`ChooserWindow` use this same browser. `Places` shares GTK bookmark storage and
+uses GVolumeMonitor for attached devices; network navigation uses GVfs and
+GtkMountOperation instead of handling credentials itself.
+
+`MetadataStore` uses parameterized SQLite queries for favorites, multiple tags,
+saved searches and state. Browsing continues if metadata storage cannot open.
+Managed rename/move updates URI records. External rename identity reconciliation
+is not implemented yet.
+
+Search predicates are shared by current-folder filtering and recursive GIO
+enumeration. Saved searches retain typed filter values and accept legacy plain
+filename queries. Native clipboard publication provides GdkFileList, URI lists
+and GNOME copy/cut data; paste reads the current desktop clipboard asynchronously.
+
+`OperationManager` maintains concurrent cancellable jobs and a journal for
+rename, move, folder creation and non-replacing copies. Replacement retains the
+previous destination at a temporary sibling until transfer succeeds. Copy undo
+requires confirmation and moves copied content to Trash, since it may have been
+edited since the copy. Recursive deletion does not follow symbolic links.
+
+`SplitService` streams 1 MiB buffers, hashes while splitting, validates manifest
+types, names, order, sizes and hashes, and joins to a temporary sibling before
+publishing without overwrite. Missing parts and insufficient space are rejected
+before output creation. Oversized regular files on known constrained
+filesystems can be split after confirmation; the source is retained.
+
+Image/text/media/PDF preview providers share one cancellable presentation layer.
+Text reads at most 256 KiB; images and PDFs have explicit size limits. Media
+uses GtkMediaFile and the installed GTK GStreamer backend, with autoplay off.
+PDF loading/rendering and libarchive work run on worker threads. Complex parsers
+are currently in-process; a parser sandbox is still required for release.
+Local image thumbnails use the Freedesktop cache naming and URI/mtime metadata.
+
+Archive extraction uses libarchive, rejects traversal, symlinks, hard links and
+special files, and extracts into a newly created directory. Cancellation/failure
+removes that directory. Archive creation excludes symlinks and special files,
+uses exclusive creation, and removes failed output.
+
+The chooser portal runs in a separate process. It exports
+`org.freedesktop.impl.portal.FileChooser`, not the public portal interface.
+Only the current owner of `org.freedesktop.portal.Desktop` can invoke it. Each
+request has a separate chooser, options, cancellation and response state.
+Request Close is restricted to its invoking owner; owner disappearance cancels
+the chooser. X11 and Wayland parent identifiers are imported through a small
+native bridge. Results contain normalized `file://` URIs; GVfs locations without
+a local FUSE representation cannot be returned. xdg-desktop-portal performs
+document registration and permission mediation; Files never grants sandbox
+permissions directly.
+
+Sharing uses unprivileged Samba usershares. A narrow Polkit-protected system
+service can start the fixed `smbd.service` unit and provision only the calling
+non-root account's SMB credentials through stdin. It accepts neither arbitrary
+commands nor arbitrary account names. Separate read/write/delete ACL policy and
+owned firewall integration remain release work.
+
+## Reference review
+
+The supplied Nautilus tree was inspected for directory enumeration, asynchronous
+operations, symlink semantics, undo ownership, bookmark storage, search batching,
+thumbnail caching, chooser modes, portal request lifecycle and D-Bus interfaces.
+Relevant sources included `nautilus-file-operations.c`, `nautilus-file-chooser.c`,
+`nautilus-portal.c`, `nautilus-portal-request.c`, `nautilus-bookmark-list.c`,
+`nautilus-search-engine-simple.c`, `nautilus-thumbnails.c`, and the portal XML.
+The implementation is independently written; reference sources are not bundled
+or installed with Files.

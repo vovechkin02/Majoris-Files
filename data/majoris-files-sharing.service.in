@@ -1,0 +1,13 @@
+[Unit]
+Description=Majoris Files Sharing Service
+[Service]
+Type=dbus
+BusName=com.majoris.Files.Sharing
+ExecStart=@libexecdir@/majoris-files-sharing-service
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/samba /etc/samba
+[Install]
+WantedBy=multi-user.target
