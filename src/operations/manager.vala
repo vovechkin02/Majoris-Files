@@ -25,6 +25,19 @@ namespace MajorisFiles {
             get;
             set;
         }
+        public bool cancelled {
+            get;
+            set;
+        }
+        public bool can_retry {
+            get;
+            set;
+        }
+        internal OperationKind retry_kind;
+        internal bool replace_all;
+        internal bool skip_all;
+        internal File? retry_target;
+        internal Gee.ArrayList<File> remaining = new Gee.ArrayList<File>();
         public Cancellable cancellable = new Cancellable();
         public weak Gtk.Window? parent;
         public Job(string title)
@@ -175,7 +188,10 @@ namespace MajorisFiles {
         public void finish(Job job, Error? error = null)
         {
             job.done = true;
-            job.progress = 1;
+            if(error == null)
+                job.progress = 1;
+            job.cancelled = error is IOError.CANCELLED;
+            job.can_retry = error != null && job.remaining.size > 0;
             if (error != null && !(error is IOError.CANCELLED))
                 job.error = error.message;
             var app = GLib.Application.get_default();
@@ -195,13 +211,20 @@ namespace MajorisFiles {
         {
             var job = start(kind.to_string());
             job.parent = parent;
+            job.retry_kind = kind;
+            job.retry_target = target;
+            int completed = 0;
             try {
                 int index = 0;
                 var previous_trash = kind == OperationKind.TRASH ? yield trash_snapshot(job.cancellable) : null;
-                bool replace_all = false;
-                bool skip_all = false;
+
+
                 foreach (var source in files)
                 {
+                    job.remaining.clear();
+                    if(kind == OperationKind.COPY || kind == OperationKind.MOVE || kind == OperationKind.LINK)
+                        for(int i = completed; i < files.size; i++)
+                            job.remaining.add(files[i]);
                     job.cancellable.set_error_if_cancelled();
                     job.current = source.get_parse_name();
                     persist_jobs();
@@ -236,8 +259,8 @@ namespace MajorisFiles {
                         bool merge = false;
                         if (exists)
                         {
-                            string decision = replace_all ? "replace" : (skip_all ? "skip" : "cancel");
-                            if (!replace_all && !skip_all && parent != null)
+                            string decision = job.replace_all ? "replace" : (job.skip_all ? "skip" : "cancel");
+                            if (!job.replace_all && !job.skip_all && parent != null)
                             {
                                 var source_info = yield source.query_info_async("standard::type,standard::size,time::modified", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
                                 var destination_info = yield destination.query_info_async("standard::type,standard::size,time::modified", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
@@ -260,11 +283,14 @@ namespace MajorisFiles {
                             if (decision == "cancel")
                                 throw new IOError.CANCELLED("Cancelled");
                             if (decision == "skip-all")
-                                skip_all = true;
+                                job.skip_all = true;
                             if (decision == "skip" || decision == "skip-all")
+                            {
+                                completed++;
                                 continue;
+                            }
                             if (decision == "replace-all")
-                                replace_all = true;
+                                job.replace_all = true;
                             if(decision == "merge")
                                 merge = true;
                             else if(decision == "rename")
@@ -335,6 +361,7 @@ namespace MajorisFiles {
                                     throw new FileError.INTEGRITY("Previous item preserved at " + backup.get_parse_name());
                                 }
                             }
+                            completed++;
                             continue;
                         }
                         if (backup != null)
@@ -368,13 +395,30 @@ namespace MajorisFiles {
                         yield remove_tree(source, job.cancellable);
                     }
                     index++;
+                    completed++;
                     job.progress = (double) index / files.size;
                 }
+                job.remaining.clear();
                 finish(job);
             }
             catch (Error e) {
                 finish(job, e);
             }
+        }
+        public async void retry(Job job, Gtk.Window? parent = null)
+        {
+            if(!job.done || !job.can_retry)
+                return;
+            bool registered = false;
+            for(uint i = 0; i < jobs.get_n_items(); i++)
+                if(jobs.get_item(i) == job)
+                    registered = true;
+            if(!registered)
+                return;
+            job.can_retry = false;
+            var pending = new Gee.ArrayList<File>();
+            pending.add_all(job.remaining);
+            yield run(job.retry_kind, pending, job.retry_target, parent);
         }
         async bool transfer(File source, File destination, bool move, Job job) throws Error
         {
@@ -461,23 +505,49 @@ namespace MajorisFiles {
                         File? backup = null;
                         if(existing != null)
                         {
-                            if(job.parent == null)
+                            if(job.parent == null && !job.replace_all && !job.skip_all)
                                 throw new FileError.INVALID("A merged child conflicts with an existing item");
-                            var dialog = new Adw.AlertDialog("An item already exists", target.get_parse_name() + "\nDestination: " + Paths.size(existing.get_size()));
+                            var incoming = yield child.query_info_async("standard::size,time::modified", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
+                            var source_date = incoming.get_modification_date_time();
+                            var target_date = existing.get_modification_date_time();
+                            var detail = target.get_parse_name() + "\nSource: " + Paths.size(incoming.get_size()) + " · " + (source_date == null ? "Unknown date" : source_date.format("%c")) + "\nDestination: " + Paths.size(existing.get_size()) + " · " + (target_date == null ? "Unknown date" : target_date.format("%c"));
+                            var dialog = new Adw.AlertDialog("An item already exists", detail);
                             dialog.add_response("cancel", "Cancel");
                             dialog.add_response("skip", "Skip");
+                            dialog.add_response("skip-all", "Skip All");
                             dialog.add_response("both", "Keep Both");
+                            dialog.add_response("rename", "Rename");
                             dialog.add_response("replace", "Replace");
+                            dialog.add_response("replace-all", "Replace All");
                             dialog.close_response = "cancel";
-                            var decision = yield dialog.choose(job.parent, job.cancellable);
+                            var decision = job.replace_all ? "replace" : job.skip_all ? "skip" : yield dialog.choose(job.parent, job.cancellable);
                             if(decision == "cancel")
                                 throw new IOError.CANCELLED("Cancelled");
-                            if(decision == "skip")
+                            if(decision == "skip-all")
+                                job.skip_all = true;
+                            if(decision == "replace-all")
+                                job.replace_all = true;
+                            if(decision == "skip" || decision == "skip-all")
                             {
                                 complete = false;
                                 continue;
                             }
-                            if(decision == "both")
+                            if(decision == "rename")
+                            {
+                                var name = yield Dialogs.prompt(job.parent, "Destination Name", info.get_name());
+                                if(name == null)
+                                    throw new IOError.CANCELLED("Cancelled");
+                                if(!Paths.valid_name(name))
+                                    throw new FileError.INVALID("Invalid destination name");
+                                target = destination.get_child(name);
+                                try {
+                                    yield target.query_info_async("standard::type", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
+                                    throw new FileError.CONFLICT("An item with that name already exists");
+                                }
+                                catch(IOError.NOT_FOUND e) {}
+                                existing = null;
+                            }
+                            else if(decision == "both")
                             {
                                 uint suffix = 1;
                                 while(true)

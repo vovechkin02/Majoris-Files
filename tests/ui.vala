@@ -42,6 +42,9 @@ int main(string[] args)
     Test.add_func("/ui/initial-location-recovery", () => initial_recovery());
     Test.add_func("/ui/overwrite-confirmation", () => overwrite_test());
     Test.add_func("/ui/merge-move-and-persistent-undo", () => merge_test());
+    Test.add_func("/ui/merge-skip-all", () => merge_test("skip-all"));
+    Test.add_func("/ui/merge-replace-all", () => merge_test("replace-all"));
+    Test.add_func("/ui/merge-rename", () => merge_test("rename"));
     Test.add_func("/ui/column-selection", () => columns_test());
     Test.add_func("/ui/session-detail-recovery", () => session_details_test());
     Test.add_func("/ui/disk-image-inventory", () => disk_image_inventory_test());
@@ -168,16 +171,16 @@ void overwrite_test()
         error("%s", e.message);
     }
 }
-void merge_test()
+void merge_test(string decision = "both")
 {
     var loop = new MainLoop();
     bool passed = false;
-    merge_case.begin((obj, res) => { try { merge_case.end(res);
-                                           passed = true;
-                                     }
-                                     catch(Error e) { error("%s", e.message);
-                                     }
-                                     loop.quit();
+    merge_case.begin(decision, (obj, res) => { try { merge_case.end(res);
+                                                     passed = true;
+                                               }
+                                               catch(Error e) { error("%s", e.message);
+                                               }
+                                               loop.quit();
         });
     uint watchdog = Timeout.add_seconds(15, () => { error("Folder merge timed out");
         });
@@ -300,6 +303,7 @@ void columns_test()
         parent.present();
         var loop = new MainLoop();
         bool drilled = false;
+        bool restoring = false;
         bool passed = false;
         browser.navigate(File.new_for_path(temp));
         browser.set_view("Columns");
@@ -322,9 +326,25 @@ void columns_test()
                 var model = (Gtk.MultiSelection)lists[1].model;
                 if(model.get_n_items() == 0)
                     return Source.CONTINUE;
-                model.select_item(0, true);
+                if(!restoring)
+                    model.select_item(0, true);
+                else if(browser.selected().size != 1)
+                    return Source.CONTINUE;
                 assert(browser.selected().size == 1 && browser.selected()[0].name == "child.txt");
                 assert(browser.location.equal(File.new_for_path(Path.build_filename(temp, "folder"))));
+                if(!restoring)
+                {
+                    string saved = browser.session_state();
+                    assert(saved.has_prefix("columns-v1:"));
+                    restoring = true;
+                    browser.set_view("Grid");
+                    browser.set_view("Columns");
+                    try { browser.restore_session_state(saved);
+                    }
+                    catch(Error e) { error("%s", e.message);
+                    }
+                    return Source.CONTINUE;
+                }
                 passed = true;
                 loop.quit();
                 return Source.REMOVE;
@@ -343,7 +363,7 @@ void columns_test()
         error("%s", e.message);
     }
 }
-async void merge_case() throws Error
+async void merge_case(string decision) throws Error
 {
     var temp = DirUtils.make_tmp("majoris-merge-XXXXXX");
     var root = File.new_for_path(temp);
@@ -352,6 +372,11 @@ async void merge_case() throws Error
     FileUtils.set_contents(Path.build_filename(temp, "source", "folder", "new.txt"), "new");
     FileUtils.set_contents(Path.build_filename(temp, "source", "folder", "existing.txt"), "incoming");
     FileUtils.set_contents(Path.build_filename(temp, "destination", "folder", "existing.txt"), "preserved");
+    if(decision == "skip-all" || decision == "replace-all")
+    {
+        FileUtils.set_contents(Path.build_filename(temp, "source", "folder", "second.txt"), "second incoming");
+        FileUtils.set_contents(Path.build_filename(temp, "destination", "folder", "second.txt"), "second preserved");
+    }
     var metadata = new MetadataStore(Path.build_filename(temp, "metadata.db"));
     var manager = new OperationManager(metadata);
     var parent = new Adw.Window();
@@ -365,7 +390,14 @@ async void merge_case() throws Error
         if(dialog != null && dialog != previous)
         {
             previous = dialog;
-            dialog.response(prompts++ == 0 ? "merge" : "both");
+            if(prompts++ == 0)
+                dialog.response("merge");
+            else if(dialog.heading == "Destination Name")
+            {
+                ((Gtk.Entry)dialog.extra_child).text = "renamed.txt";
+                dialog.response("apply");
+            }
+            else dialog.response(decision);
         }
         return Source.CONTINUE;
     });
@@ -374,14 +406,26 @@ async void merge_case() throws Error
     yield manager.run(OperationKind.MOVE, files, root.get_child("destination"), parent);
     Source.remove(poll);
     parent.destroy();
-    assert(prompts == 2);
+    assert(prompts == (decision == "rename" ? 3 : 2));
     var job = (Job)manager.jobs.get_item(0);
     assert(job.error == "");
+    if(decision == "skip-all" || decision == "replace-all")
+    {
+        string first, second;
+        FileUtils.get_contents(Path.build_filename(temp, "destination", "folder", "existing.txt"), out first);
+        FileUtils.get_contents(Path.build_filename(temp, "destination", "folder", "second.txt"), out second);
+        bool skipped = decision == "skip-all";
+        assert(first == (skipped ? "preserved" : "incoming"));
+        assert(second == (skipped ? "second preserved" : "second incoming"));
+        assert(root.get_child("source/folder").query_exists() == skipped);
+        yield OperationManager.remove_tree(root, new Cancellable());
+        return;
+    }
     assert(!root.get_child("source/folder").query_exists());
     string content;
     FileUtils.get_contents(Path.build_filename(temp, "destination", "folder", "existing.txt"), out content);
     assert(content == "preserved");
-    assert(root.get_child("destination/folder/existing.txt (1)").query_exists());
+    assert(root.get_child(decision == "rename" ? "destination/folder/renamed.txt" : "destination/folder/existing.txt (1)").query_exists());
     manager = new OperationManager(new MetadataStore(Path.build_filename(temp, "metadata.db")));
     yield manager.undo();
     yield manager.undo();
@@ -532,6 +576,18 @@ void session_details_test()
                 catch(MajorisFiles.FileError.INVALID e) { duplicate_rejected = true;
                 }
                 assert(duplicate_rejected);
+                metadata.set_tags(root.get_child("file-000.txt"), "alpha");
+                metadata.set_tags(root.get_child("file-119.txt"), "beta");
+                browser.set_group("Tags");
+                assert(metadata.state("group:" + root.get_uri()) == "Tags");
+                assert(((FileItem)browser.active_selection.get_item(0)).name == "file-000.txt");
+                assert(((FileItem)browser.active_selection.get_item(1)).name == "file-119.txt");
+                var sections = browser.active_selection as Gtk.SectionModel;
+                uint start, end;
+                sections.get_section(0, out start, out end);
+                assert(start == 0 && end == 1);
+                browser.set_group("None");
+                assert(((FileItem)browser.active_selection.get_item(0)).name == "file-119.txt");
                 browser.cancel();
                 window.destroy();
                 loop.quit();

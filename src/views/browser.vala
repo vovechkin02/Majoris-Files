@@ -41,6 +41,14 @@ namespace MajorisFiles {
         public signal void error(string message);
         Gtk.CustomFilter filter;
         Gtk.CustomSorter sorter;
+        Gtk.CustomSorter group_sorter;
+        string group_key = "None";
+        uint group_refresh;
+        Variant? column_restore;
+        bool applying_column_restore;
+        string[] group_modes = {
+            "None", "Type", "Modified Date", "Size", "Tags"
+        };
         Gtk.FilterListModel filtered;
         Gtk.SortListModel sorted;
         Gtk.Stack views = new Gtk.Stack();
@@ -109,7 +117,14 @@ namespace MajorisFiles {
             this.metadata = metadata;
             this.places = places;
             this.chooser_mode = chooser_mode;
-            metadata.changed.connect(() => display_changed());
+            metadata.changed.connect(() => {
+                display_changed();
+                if(group_key == "Tags" && group_refresh == 0)
+                    group_refresh = Idle.add(() => { group_refresh = 0;
+                                                     group_sorter.changed(Gtk.SorterChange.DIFFERENT);
+                                                     return Source.REMOVE;
+                        });
+            });
             location_suggestions = new LocationSuggestions(metadata);
             home = new HomeView(metadata);
             views.add_named(home, "Home");
@@ -124,6 +139,7 @@ namespace MajorisFiles {
             sorter = new Gtk.CustomSorter((a, b) => compare_items((FileItem)a, (FileItem)b));
             filtered = new Gtk.FilterListModel(directory.items, filter);
             sorted = new Gtk.SortListModel(filtered, sorter);
+            group_sorter = new Gtk.CustomSorter((a, b) => FileGroups.compare((FileItem)a, (FileItem)b, group_key, metadata));
             sorted.items_changed.connect(() => update_status());
             selection = new Gtk.MultiSelection(sorted);
             var toolbar = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
@@ -303,6 +319,7 @@ namespace MajorisFiles {
             grid.activate.connect(activate_position);
             views.add_named(scrolled(grid), "Grid");
             var list = new Gtk.ColumnView(selection);
+            list.header_factory = group_headers();
             list.show_column_separators = true;
             list.enable_rubberband = true;
             var name_column = new Gtk.ColumnViewColumn("Name", factory(false));
@@ -331,6 +348,7 @@ namespace MajorisFiles {
             gallery_preview.vexpand = true;
             gallery.append(gallery_preview);
             var strip = new Gtk.ListView(selection, factory(false));
+            strip.header_factory = group_headers();
             strip.activate.connect(activate_position);
             var strip_scroll = scrolled(strip);
             strip_scroll.height_request = 160;
@@ -641,16 +659,61 @@ namespace MajorisFiles {
             foreach(var item in selected())
                 chosen.add("s", item.file.get_uri());
             var scroll = current_scroll();
-            return new Variant("(sbb@asdd)", saved_query(), recursive, everywhere, chosen.end(), scroll == null ? 0.0 : scroll.hadjustment.value, scroll == null ? 0.0 : scroll.vadjustment.value).print(true);
+            string base_state = new Variant("(sbb@asdd)", saved_query(), recursive, everywhere, chosen.end(), scroll == null ? 0.0 : scroll.hadjustment.value, scroll == null ? 0.0 : scroll.vadjustment.value).print(true);
+            if(view_mode != "Columns")
+                return base_state;
+            var chain = new VariantBuilder(new VariantType("a(sasdd)"));
+            for(var widget = columns.get_first_child(); widget != null; widget = widget.get_next_sibling())
+            {
+                var model = column_selections[widget];
+                var selected_uris = new VariantBuilder(new VariantType("as"));
+                for(uint i = 0; i < model.get_n_items(); i++)
+                    if(model.is_selected(i))
+                        selected_uris.add("s", ((FileItem)model.get_item(i)).file.get_uri());
+                var folder = loaded_columns.has_key(widget) ? loaded_columns[widget].location : directory.location;
+                var column_scroll = (Gtk.ScrolledWindow)widget;
+                chain.add("(s@asdd)", folder.get_uri(), selected_uris.end(), column_scroll.hadjustment.value, column_scroll.vadjustment.value);
+            }
+            return "columns-v1:" + new Variant("(s@a(sasdd))", base_state, chain.end()).print(true);
         }
         public void restore_session_state(string saved) throws Error
         {
-            var value = Variant.parse(new VariantType("(sbbasdd)"), saved);
+            if(saved.length > 4 * 1024 * 1024)
+                throw new FileError.INVALID("Browsing state is too large");
+            string base_state = saved;
+            Variant? pending_restore = null;
+            column_restore = null;
+            if(saved.has_prefix("columns-v1:"))
+            {
+                var wrapper = Variant.parse(new VariantType("(sa(sasdd))"), saved.substring(11));
+                var chain = wrapper.get_child_value(1);
+                if(chain.n_children() > 32)
+                    throw new FileError.INVALID("Too many restored columns");
+                File? previous = null;
+                for(size_t i = 0; i < chain.n_children(); i++)
+                {
+                    var entry = chain.get_child_value(i);
+                    string uri = entry.get_child_value(0).get_string();
+                    double x = entry.get_child_value(2).get_double(), y = entry.get_child_value(3).get_double();
+                    if(Uri.parse_scheme(uri) == null || !x.is_finite() || !y.is_finite() || x < 0 || y < 0 || entry.get_child_value(1).n_children() > 10000)
+                        throw new FileError.INVALID("Invalid restored column");
+                    var folder = File.new_for_uri(uri);
+                    if(i == 0 && !folder.equal(directory.location))
+                        throw new FileError.INVALID("Column root differs from session location");
+                    if(previous != null && (folder.get_parent() == null || !folder.get_parent().equal(previous)))
+                        throw new FileError.INVALID("Invalid column ancestry");
+                    previous = folder;
+                }
+                pending_restore = chain;
+                base_state = wrapper.get_child_value(0).get_string();
+            }
+            var value = Variant.parse(new VariantType("(sbbasdd)"), base_state);
             var query = SearchQuery.deserialize(value.get_child_value(0).get_string());
             var chosen = value.get_child_value(3);
             double horizontal = value.get_child_value(4).get_double(), vertical = value.get_child_value(5).get_double();
             if(chosen.n_children() > 10000 || !horizontal.is_finite() || !vertical.is_finite() || horizontal < 0 || vertical < 0)
                 throw new FileError.INVALID("Invalid browsing state");
+            column_restore = pending_restore;
             remembered_selection.clear();
             for(size_t i = 0; i < chosen.n_children(); i++)
             {
@@ -668,6 +731,8 @@ namespace MajorisFiles {
                 run_search();
             else refilter();
             restore_selection();
+            if(view_mode == "Columns" && !directory.loading)
+                build_columns();
             if(scroll_restore != 0)
                 remove_tick_callback(scroll_restore);
             uint frames = 0;
@@ -748,6 +813,7 @@ namespace MajorisFiles {
             }
             metadata.set_state("display:" + directory.location.get_uri(), new Variant("(sbbib@a(sbi))", sort_key, ascending, folders_first, icon_size, selection_checkboxes, columns_state.end()).print(true));
             metadata.set_state("caption:" + directory.location.get_uri(), caption_key);
+            metadata.set_state("group:" + directory.location.get_uri(), group_key);
         }
         void load_display(File location)
         {
@@ -757,6 +823,11 @@ namespace MajorisFiles {
             folders_first = true;
             icon_size = 64;
             selection_checkboxes = false;
+            group_key = metadata.state("group:" + location.get_uri(), "None");
+            if(!(group_key in group_modes))
+                group_key = "None";
+            sorted.section_sorter = group_key == "None" ? null : group_sorter;
+            group_sorter.changed(Gtk.SorterChange.DIFFERENT);
             caption_key = metadata.state("caption:" + location.get_uri(), "None");
             if(caption_key != "None" && !(caption_key in column_titles))
                 caption_key = "None";
@@ -816,6 +887,14 @@ namespace MajorisFiles {
             size.model = new Gtk.StringList({"Compact", "Standard", "Large"});
             size.selected = icon_size < 64 ? 0 : icon_size > 64 ? 2 : 1;
             group.add(size);
+            var grouping = new Adw.ComboRow();
+            grouping.title = "Group By";
+            grouping.model = new Gtk.StringList(group_modes);
+            for(uint i = 0; i < group_modes.length; i++)
+                if(group_modes[i] == group_key)
+                    grouping.selected = i;
+            group.add(grouping);
+            grouping.notify["selected"].connect(() => set_group(group_modes[grouping.selected]));
             var caption = new Adw.ComboRow();
             caption.title = "Grid Metadata Caption";
             string[] captions = {
@@ -916,6 +995,36 @@ namespace MajorisFiles {
             save_display();
             session_changed();
         }
+        public void set_group(string mode)
+        {
+            if(!(mode in group_modes))
+                return;
+            group_key = mode;
+            sorted.section_sorter = mode == "None" ? null : group_sorter;
+            group_sorter.changed(Gtk.SorterChange.DIFFERENT);
+            save_display();
+            session_changed();
+        }
+        Gtk.SignalListItemFactory group_headers()
+        {
+            var headers = new Gtk.SignalListItemFactory();
+            headers.setup.connect((obj) => {
+                var label = new Gtk.Label("");
+                label.halign = Gtk.Align.START;
+                label.margin_start = 12;
+                label.margin_top = 12;
+                label.margin_bottom = 6;
+                label.add_css_class("heading");
+                ((Gtk.ListHeader)obj).child = label;
+            });
+            headers.bind.connect((obj) => {
+                var header = (Gtk.ListHeader)obj;
+                var label = (Gtk.Label)header.child;
+                label.label = FileGroups.label((FileItem)header.item, group_key, metadata);
+                label.visible = group_key != "None";
+            });
+            return headers;
+        }
         public void register_column(ColumnProvider provider) throws Error
         {
             string title = provider.title;
@@ -993,6 +1102,7 @@ namespace MajorisFiles {
         }
         public void navigate(File file, bool record = true)
         {
+            column_restore = null;
             completion_token.cancel();
             completion_popup.popdown();
             if(completion_delay != 0)
@@ -1224,7 +1334,40 @@ namespace MajorisFiles {
             column_selection = null;
             while (columns.get_first_child() != null)
                 remove_column(columns.get_first_child());
-            append_column(directory.location, sorted);
+            var root = append_column(directory.location, sorted);
+            if(!directory.loading)
+                restore_column(root, directory.location);
+        }
+        void restore_column(Gtk.Widget widget, File folder)
+        {
+            if(column_restore == null)
+                return;
+            for(size_t i = 0; i < column_restore.n_children(); i++)
+            {
+                var entry = column_restore.get_child_value(i);
+                if(entry.get_child_value(0).get_string() != folder.get_uri())
+                    continue;
+                var chosen = entry.get_child_value(1);
+                var wanted = new Gee.HashSet<string>();
+                for(size_t j = 0; j < chosen.n_children(); j++)
+                    wanted.add(chosen.get_child_value(j).get_string());
+                var model = column_selections[widget];
+                applying_column_restore = true;
+                model.unselect_all();
+                for(uint j = 0; j < model.get_n_items(); j++)
+                    if(wanted.contains(((FileItem)model.get_item(j)).file.get_uri()))
+                        model.select_item(j, false);
+                applying_column_restore = false;
+                var scroll = (Gtk.ScrolledWindow)widget;
+                double x = entry.get_child_value(2).get_double(), y = entry.get_child_value(3).get_double();
+                uint frames = 0;
+                widget.add_tick_callback(() => {
+                    scroll.hadjustment.value = x;
+                    scroll.vadjustment.value = y;
+                    return ++frames < 8 ? Source.CONTINUE : Source.REMOVE;
+                });
+                return;
+            }
         }
         void remove_column(Gtk.Widget widget)
         {
@@ -1261,6 +1404,8 @@ namespace MajorisFiles {
             column_handlers[scroll] = selected.selection_changed.connect(() => {
                 if(view_mode != "Columns" || scroll.get_parent() != columns)
                     return;
+                if(!applying_column_restore)
+                    column_restore = null;
                 column_generations[scroll] = column_generations[scroll] + 1;
                 if(pending_columns.has_key(scroll))
                 {
@@ -1307,6 +1452,7 @@ namespace MajorisFiles {
             pending_columns.unset(anchor);
             var child = append_column(folder, model.items);
             loaded_columns[child] = model;
+            restore_column(child, folder);
         }
         delegate string ItemText(FileItem item);
         Gtk.SignalListItemFactory text_factory(owned ItemText text)
@@ -1460,6 +1606,11 @@ namespace MajorisFiles {
         }
         public void cancel()
         {
+            if(group_refresh != 0)
+            {
+                Source.remove(group_refresh);
+                group_refresh = 0;
+            }
             while(columns.get_first_child() != null)
                 remove_column(columns.get_first_child());
             completion_token.cancel();

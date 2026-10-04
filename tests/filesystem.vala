@@ -325,6 +325,25 @@ async void operation_case() throws Error
     yield manager.run(OperationKind.LINK, files, links);
     var conflict_job = (Job)manager.jobs.get_item(manager.jobs.get_n_items() - 1);
     assert(conflict_job.error != "" && original.query_exists() && created_link.query_exists());
+    var retry_target = root.get_child("retry-target");
+    yield retry_target.make_directory_async(Priority.DEFAULT, null);
+    var pending = new Gee.ArrayList<File>();
+    pending.add(original);
+    var missing = root.get_child("missing.txt");
+    pending.add(missing);
+    yield manager.run(OperationKind.COPY, pending, retry_target);
+    var failed = (Job)manager.jobs.get_item(manager.jobs.get_n_items() - 1);
+    assert(failed.error != "" && failed.can_retry && failed.progress < 1);
+    assert(retry_target.get_child("original.txt").query_exists());
+    FileUtils.set_contents(missing.get_path(), "recovered");
+    yield manager.retry(failed);
+    var retried = (Job)manager.jobs.get_item(manager.jobs.get_n_items() - 1);
+    assert(retried.done && retried.error == "" && !failed.can_retry);
+    assert(retry_target.get_child("missing.txt").query_exists());
+    // Completed jobs cannot be replayed by a second click.
+    uint job_count = manager.jobs.get_n_items();
+    yield manager.retry(failed);
+    assert(manager.jobs.get_n_items() == job_count);
     // A destructive recursive operation must delete the link rather than its target.
     var outside = root.get_child("outside");
     yield outside.make_directory_async(Priority.DEFAULT, null);

@@ -29,6 +29,7 @@ int main(string[] args)
                                  {
                                      screenshot(window, "files-window.png");
                                      window.current.set_view("List");
+                                     window.current.set_group("Type");
                                      stage++;
                                      return Source.CONTINUE;
                                  }

@@ -141,7 +141,7 @@ namespace MajorisFiles {
                 for(int i = 0; i < window.tabs.n_pages; i++)
                 {
                     var browser = (Browser)window.tabs.get_nth_page(i).child;
-                    tabs.add("(ss)", browser.view_mode == "Columns" ? browser.location.get_uri() : browser.directory.location.get_uri(), browser.view_mode);
+                    tabs.add("(ss)", browser.directory.location.get_uri(), browser.view_mode);
                     states.add("s", browser.session_state());
                 }
                 windows.add_value(new Variant("(@a(ss)u)", tabs.end(), (uint)window.tabs.get_page_position(window.tabs.selected_page)));

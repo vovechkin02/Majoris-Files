@@ -21,7 +21,9 @@ graphical usershares with Polkit service, and FileManager1 integration.
 Home has configurable favorites/recent/download/recommendation sections with
 local usage only. Crash recovery restores window/tab locations, selected tabs
 and views. It also restores search filters/scopes, selected files and scroll
-positions in Grid/List/Gallery; deeper Column-view state still needs acceptance.
+positions in Grid/List/Gallery. Column sessions now store the root and column chain,
+per-column selections and scroll positions; local selection recovery is tested.
+Remote/disconnected column chains still need platform acceptance.
 Tab context operations and detached-tab routing are implemented.
 Native file drag/drop supports folder targets and spring navigation; folder rows
 support middle-click tabs. Bookmark drags reorder entries and preserve labels using
@@ -49,6 +51,9 @@ folders-first/mixed sorting, additional sort fields, and 14 metadata columns wit
 visibility, order and width controls. Grid metadata captions are configurable per
 folder. Extension column providers supply display text and comparison for sorting.
 Column browsing cancels stale loads and disconnects removed branch selections.
+Per-folder grouping supports type, modified-date ranges, size ranges and tag sets.
+List/Gallery show section headings; Grid preserves grouped ordering. Tag groups
+refresh when metadata changes, and sorting remains available within groups.
 Location entry suggests recent paths and
 matching folders, with bounded cancellable enumeration and credential-free history.
 Unavailable locations have a Retry banner in both file browsing and the chooser.
@@ -62,6 +67,12 @@ include family/style, alphabet, digits and a sentence. Image/PDF thumbnail provi
 use the helper and the freedesktop cache. At most four helper processes run at once.
 Undo/redo stores file identities, refuses replacement files and serializes history
 actions; legacy history without identities cannot safely be reversed.
+Failed/cancelled copy, move and link jobs can retry remaining top-level items in the
+current session. Completed items are not replayed; retries retain ordinary conflict
+checks. Failed jobs preserve progress and cancellation is shown explicitly.
+Nested merge conflicts offer Rename, Keep Both, Replace, Skip, Replace All and
+Skip All with both sizes and timestamps. All-item policies apply through the job's
+nested conflicts; replacement backups are restored if transfer fails.
 Permissions offer asynchronous platform account/group lookup and numeric fallback;
 properties show SELinux context where available.
 Multi-selection properties list types, shared location, common tags and permissions,
@@ -70,7 +81,7 @@ selection. Bulk favorite controls reflect whether all selected items are favorit
 Disk-image quick actions delegate read-only loop creation, partition/filesystem
 mounting and unmount/detach to UDisks. Inventory selection is tested; actual mounts,
 Polkit cancellation and busy-device handling require a disposable Majoris VM.
-Validation currently includes 39 core/filesystem/UI/portal cases plus a separate
+Validation currently includes 42 core/filesystem/UI/portal cases plus a separate
 actual-executable crash-recovery suite. This does not substitute for the platform
 acceptance work below.
 
@@ -95,10 +106,11 @@ SaveFiles is not implemented or advertised (backend interface version 1).
 
 Other outstanding specification areas include:
 
-* Complete Column-view session restoration and broad tab transfer acceptance.
-* Grouping and broad external drag negotiation/tab-hover acceptance.
-* Full nested conflict policies, journal operation grouping, remote
-  Trash reconciliation, pause/resume/retry and durable job restart.
+* Remote/disconnected Column-view recovery and broad tab transfer acceptance.
+* Broad external drag negotiation/tab-hover acceptance and Grid section headings.
+* Conflict thumbnails, journal operation grouping, remote
+  Trash reconciliation and durable job restart. Current GIO transfers do not offer
+  a safe pause/resume facility; pause controls are intentionally unavailable.
 * Indexed/full-text document search and indexed relevance ranking.
 * Animated images, office previews, media metadata and controls
   audit, remaining media/cache parser isolation, remote thumbnail policies and

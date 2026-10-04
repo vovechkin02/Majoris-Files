@@ -53,12 +53,19 @@ namespace MajorisFiles {
                                                         var bar = new Gtk.ProgressBar();
                                                         var cancel = new Gtk.Button.with_label("Cancel");
                                                         cancel.clicked.connect(() => job.cancellable.cancel());
+                                                        var retry = new Gtk.Button.with_label("Retry Remaining Items");
+                                                        retry.visible = job.can_retry;
+                                                        retry.clicked.connect(() => operations.retry.begin(job, this));
                                                         box.append(label);
                                                         box.append(bar);
                                                         box.append(cancel);
+                                                        box.append(retry);
                                                         job.notify.connect(() => { label.label = job.error != "" ? job.error : job.current;
+                                                                                   if(job.cancelled)
+                                                                                       label.label = "Cancelled · " + job.current;
                                                                                    bar.fraction = job.progress;
                                                                                    cancel.sensitive = !job.done;
+                                                                                   retry.visible = job.can_retry;
                                                             });
                                                         return box;
                 });
