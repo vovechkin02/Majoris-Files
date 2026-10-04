@@ -129,7 +129,9 @@ int main(string[] args)
             var explicit_options = new ChooserOptions(false, supplied.end());
             reopened.apply(explicit_options);
             assert(explicit_options.initial.equal(File.new_for_path(Environment.get_home_dir())));
-        } catch(Error e) { error("%s", e.message); }
+        }
+        catch(Error e) { error("%s", e.message);
+        }
     });
     Test.add_func("/clipboard/file-formats", () => {
         try {
@@ -139,40 +141,98 @@ int main(string[] args)
             var uris = FileClipboard.parse("# comment\r\nfile:///tmp/one\r\nsmb://server/share/two\r\n", false);
             assert(!uris.cut && uris.files.size == 2);
             bool rejected = false;
-            try { FileClipboard.parse("delete\nfile:///tmp/one", true); }
-            catch(Error e) { rejected = true; }
+            try { FileClipboard.parse("delete\nfile:///tmp/one", true);
+            }
+            catch(Error e) { rejected = true;
+            }
             assert(rejected);
             rejected = false;
-            try { FileClipboard.parse("/tmp/unqualified", false); }
-            catch(Error e) { rejected = true; }
+            try { FileClipboard.parse("/tmp/unqualified", false);
+            }
+            catch(Error e) { rejected = true;
+            }
             assert(rejected);
-        } catch(Error e) { error("%s", e.message); }
+        }
+        catch(Error e) { error("%s", e.message);
+        }
     });
     Test.add_func("/search/predicates-and-persistence", () => {
         try {
             var temp = DirUtils.make_tmp("majoris-search-XXXXXX");
             var metadata = new MetadataStore(Path.build_filename(temp, "meta.db"));
             var file = File.new_for_path("/tmp/Report.pdf");
-            var info = new FileInfo(); info.set_name("Report.pdf"); info.set_display_name("Report.pdf");
-            info.set_file_type(FileType.REGULAR); info.set_size(4096); info.set_content_type("application/pdf");
-            info.set_attribute_uint64("time::modified", 1000); info.set_attribute_string("owner::user", "alice");
+            var info = new FileInfo();
+            info.set_name("Report.pdf");
+            info.set_display_name("Report.pdf");
+            info.set_file_type(FileType.REGULAR);
+            info.set_size(4096);
+            info.set_content_type("application/pdf");
+            info.set_attribute_uint64("time::modified", 1000);
+            info.set_attribute_string("owner::user", "alice");
             var item = new FileItem(file, info);
-            metadata.set_tags(file, "Work, Finance"); metadata.set_favorite(file, true);
-            var query = new SearchQuery(); query.text = "REPORT"; query.kind = "PDF"; query.minimum = 1024; query.maximum = 8192;
-            query.after = 500; query.before = 1500; query.tag = "finance"; query.favorites_only = true; query.owner = "alice";
+            metadata.set_tags(file, "Work, Finance");
+            metadata.set_favorite(file, true);
+            var query = new SearchQuery();
+            query.text = "REPORT";
+            query.kind = "PDF";
+            query.minimum = 1024;
+            query.maximum = 8192;
+            query.after = 500;
+            query.before = 1500;
+            query.tag = "finance";
+            query.favorites_only = true;
+            query.owner = "alice";
             assert(query.matches(item, metadata));
             var restored = SearchQuery.deserialize(query.serialize());
             assert(restored.matches(item, metadata));
             assert(restored.serialize() == query.serialize());
-            restored.kind = "Folder"; assert(!restored.matches(item, metadata)); restored.kind = "PDF";
-            restored.date_field = "created"; assert(!restored.matches(item, metadata)); restored.date_field = "modified";
-            restored.tag = "Financial"; assert(!restored.matches(item, metadata)); restored.tag = "finance";
-            restored.minimum = 8192; assert(!restored.matches(item, metadata));
+            restored.kind = "Folder";
+            assert(!restored.matches(item, metadata));
+            restored.kind = "PDF";
+            restored.date_field = "created";
+            assert(!restored.matches(item, metadata));
+            restored.date_field = "modified";
+            restored.tag = "Financial";
+            assert(!restored.matches(item, metadata));
+            restored.tag = "finance";
+            restored.minimum = 8192;
+            assert(!restored.matches(item, metadata));
             assert(SearchQuery.deserialize("legacy filename").text == "legacy filename");
             bool rejected = false;
-            try { SearchQuery.deserialize("majoris-search-v1:invalid"); } catch(Error e) { rejected = true; }
+            try { SearchQuery.deserialize("majoris-search-v1:invalid");
+            }
+            catch(Error e) { rejected = true;
+            }
             assert(rejected);
-        } catch(Error e) { error("%s", e.message); }
+        }
+        catch(Error e) { error("%s", e.message);
+        }
+    });
+    Test.add_func("/metadata/tags-and-recovery", () => {
+        try {
+            var temp = DirUtils.make_tmp("majoris-meta-recovery-XXXXXX");
+            var path = Path.build_filename(temp, "metadata.db");
+            FileUtils.set_contents(path, "invalid database");
+            var store = new MetadataStore(path);
+            assert(!store.available);
+            var backup = store.recover();
+            assert(store.available);
+            string preserved;
+            FileUtils.get_contents(backup, out preserved);
+            assert(preserved == "invalid database");
+            var file = File.new_for_path("/tmp/tagged");
+            store.set_tags(file, "Work,Finance");
+            store.define_tag("Work", "#ff0000", 2);
+            store.define_tag("Finance", "#00ff00", 1);
+            assert(store.all_tags()[0] == "Finance");
+            store.rename_tag("Work", "Projects");
+            assert(store.tags(file) == "Projects,Finance");
+            assert(store.tag_color("Projects") == "#ff0000");
+            store.delete_tag("Finance");
+            assert(store.tags(file) == "Projects");
+        }
+        catch(Error e) { error("%s", e.message);
+        }
     });
     return Test.run();
 }

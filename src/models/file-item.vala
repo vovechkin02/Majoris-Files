@@ -19,7 +19,11 @@ namespace MajorisFiles {
             }
         }
         public bool resolved_directory;
-        public bool navigable { get { return directory || info.get_file_type()==FileType.SHORTCUT || info.get_file_type()==FileType.MOUNTABLE; } }
+        public bool navigable {
+            get {
+                return directory || info.get_file_type() == FileType.SHORTCUT || info.get_file_type() == FileType.MOUNTABLE;
+            }
+        }
         public uint64 bytes {
             get {
                 return info.get_size();

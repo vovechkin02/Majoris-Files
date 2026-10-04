@@ -42,6 +42,7 @@ namespace MajorisFiles {
         public void reload()
         {
             entries.clear();
+            entries.add(new Place("Home Overview", File.new_for_uri("majoris:///home")));
             entries.add(new Place("Home", File.new_for_path(Environment.get_home_dir())));
             entries.add(new Place("Recent", File.new_for_uri("recent:///")));
             entries.add(new Place("Favorites", File.new_for_uri("majoris:///favorites")));

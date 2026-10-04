@@ -10,7 +10,8 @@ namespace MajorisFiles {
                 throw new FileError.INVALID("Invalid filter");
             serialized = value;
             name = value.get_child_value(0).get_string();
-            if(name.length>4096) throw new FileError.INVALID("Filter name is too long");
+            if(name.length > 4096)
+                throw new FileError.INVALID("Filter name is too long");
             var rules = value.get_child_value(1);
             if (rules.n_children() > 256)
                 throw new FileError.INVALID("Too many filter rules");
@@ -19,7 +20,8 @@ namespace MajorisFiles {
                 var rule = rules.get_child_value(i);
                 uint kind = rule.get_child_value(0).get_uint32();
                 var text = rule.get_child_value(1).get_string();
-                if(text.length>4096) throw new FileError.INVALID("Filter rule is too long");
+                if(text.length > 4096)
+                    throw new FileError.INVALID("Filter rule is too long");
                 if (kind == 0)
                     patterns.add(text);
                 else if (kind == 1)
@@ -113,7 +115,26 @@ namespace MajorisFiles {
             choices = typed(options, "choices", "a(ssa(ss)s)");
             if (choices != null && choices.n_children() > 64)
                 throw new FileError.INVALID("Too many choices");
-            if(choices!=null) { var ids=new Gee.HashSet<string>(); for(size_t i=0;i<choices.n_children();i++) { var choice=choices.get_child_value(i); string id=choice.get_child_value(0).get_string(); var values=choice.get_child_value(2); if(id.length==0 || id.length>256 || !ids.add(id) || choice.get_child_value(1).get_string().length>4096 || values.n_children()>256) throw new FileError.INVALID("Invalid caller choice"); var value_ids=new Gee.HashSet<string>(); for(size_t j=0;j<values.n_children();j++) { var pair=values.get_child_value(j); string choice_value=pair.get_child_value(0).get_string(); if(choice_value.length==0 || choice_value.length>256 || !value_ids.add(choice_value) || pair.get_child_value(1).get_string().length>4096) throw new FileError.INVALID("Invalid choice value"); } } }
+            if(choices != null)
+            {
+                var ids = new Gee.HashSet<string>();
+                for(size_t i = 0; i < choices.n_children(); i++)
+                {
+                    var choice = choices.get_child_value(i);
+                    string id = choice.get_child_value(0).get_string();
+                    var values = choice.get_child_value(2);
+                    if(id.length == 0 || id.length > 256 || !ids.add(id) || choice.get_child_value(1).get_string().length > 4096 || values.n_children() > 256)
+                        throw new FileError.INVALID("Invalid caller choice");
+                    var value_ids = new Gee.HashSet<string>();
+                    for(size_t j = 0; j < values.n_children(); j++)
+                    {
+                        var pair = values.get_child_value(j);
+                        string choice_value = pair.get_child_value(0).get_string();
+                        if(choice_value.length == 0 || choice_value.length > 256 || !value_ids.add(choice_value) || pair.get_child_value(1).get_string().length > 4096)
+                            throw new FileError.INVALID("Invalid choice value");
+                    }
+                }
+            }
         }
         public static Variant? typed(Variant options, string key, string signature) throws Error
         {

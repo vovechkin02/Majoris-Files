@@ -59,13 +59,22 @@ namespace MajorisFiles {
                     var batch = yield enumerator.next_files_async(128, Priority.DEFAULT, token);
                     if (epoch != generation || batch == null)
                         break;
-                    foreach (var info in batch) {
+                    foreach (var info in batch)
+                    {
                         var item = new FileItem(folder.get_child(info.get_name()), info);
-                        if(info.get_is_symlink()) {
-                            try { var target = yield item.file.query_info_async("standard::type",FileQueryInfoFlags.NONE,Priority.DEFAULT,token); item.resolved_directory=target.get_file_type()==FileType.DIRECTORY; }
-                            catch(IOError.CANCELLED e) { throw e; } catch(Error e) {}
+                        if(info.get_is_symlink())
+                        {
+                            try {
+                                var target = yield item.file.query_info_async("standard::type", FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+                                item.resolved_directory = target.get_file_type() == FileType.DIRECTORY;
+                            }
+                            catch(IOError.CANCELLED e) {
+                                throw e;
+                            }
+                            catch(Error e) {}
                         }
-                        if(epoch!=generation || token.is_cancelled()) break;
+                        if(epoch != generation || token.is_cancelled())
+                            break;
                         items.append(item);
                     }
                 }

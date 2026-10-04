@@ -9,7 +9,7 @@ Rules-Requires-Root: no
 Package: majoris-files
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, gvfs, gvfs-backends, gvfs-fuse, samba, smbclient, cifs-utils, xdg-desktop-portal, polkitd, udisks2, avahi-daemon
-Recommends: gstreamer1.0-plugins-good, gstreamer1.0-plugins-bad, gstreamer1.0-libav, gnome-keyring, xdg-terminal-exec
+Recommends: gstreamer1.0-plugins-good, gstreamer1.0-plugins-bad, gstreamer1.0-libav, gnome-keyring, xdg-terminal-exec, acl
 Description: Majoris file manager and system chooser
  Files provides shared local and remote browsing, file operations, previews,
  and a FileChooser portal backend for the Majoris desktop.

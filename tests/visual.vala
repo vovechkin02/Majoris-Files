@@ -3,6 +3,7 @@ int main(string[] args)
 {
     try {
         var root = DirUtils.make_tmp("majoris-visual-XXXXXX");
+        Environment.set_variable("HOME", root, true);
         Environment.set_variable("XDG_DATA_HOME", root, true);
         Environment.set_variable("XDG_CACHE_HOME", root, true);
         Environment.set_variable("XDG_CONFIG_HOME", root, true);
@@ -10,10 +11,13 @@ int main(string[] args)
         DirUtils.create(Path.build_filename(root, "Documents"), 0700);
         DirUtils.create(Path.build_filename(root, "Pictures"), 0700);
         Gtk.init();
+        Environment.set_application_name("Majoris Files Visual Check");
         Adw.init();
         var app = new Adw.Application("com.majoris.files.visualtest", ApplicationFlags.NON_UNIQUE);
         app.register(null);
         var metadata = new MetadataStore(Path.build_filename(root, "metadata.db"));
+        metadata.set_favorite(File.new_for_path(Path.build_filename(root, "notes.txt")), true);
+        Gtk.RecentManager.get_default().add_item(File.new_for_path(Path.build_filename(root, "notes.txt")).get_uri());
         var places = new Places(metadata);
         var operations = new OperationManager(metadata);
         var window = new FilesWindow(app, metadata, places, operations, File.new_for_path(root));
@@ -30,16 +34,38 @@ int main(string[] args)
                                  if(stage == 1)
                                  {
                                      screenshot(window, "files-list.png");
-                                     var options = new ChooserOptions(false, new VariantBuilder(VariantType.VARDICT).end());
-                                     options.initial = File.new_for_path(root);
-                                     var chooser = new ChooserWindow(options, metadata, places);
-                                     chooser.present();
-                                     Timeout.add(500, () => { screenshot(chooser, "file-chooser.png");
-                                                              chooser.cancel_request();
-                                                              window.destroy();
-                                                              loop.quit();
+                                     window.current.navigate(File.new_for_uri("majoris:///home"));
+                                     stage++;
+                                     return Source.CONTINUE;
+                                 }
+                                 if(stage == 2)
+                                 {
+                                     screenshot(window, "files-home.png");
+                                     var filters = new SearchFilters(new SearchQuery());
+                                     filters.present(window);
+                                     Timeout.add(500, () => { screenshot(window, "search-filters.png");
+                                                              filters.close();
                                                               return Source.REMOVE;
                                          });
+                                     stage++;
+                                     return Source.CONTINUE;
+                                 }
+                                 if(stage == 3)
+                                 {
+                                     try {
+                                         var options = new ChooserOptions(false, new VariantBuilder(VariantType.VARDICT).end());
+                                         options.initial = File.new_for_path(root);
+                                         var chooser = new ChooserWindow(options, metadata, places);
+                                         chooser.present();
+                                         Timeout.add(500, () => { screenshot(chooser, "file-chooser.png");
+                                                                  chooser.cancel_request();
+                                                                  window.destroy();
+                                                                  loop.quit();
+                                                                  return Source.REMOVE;
+                                             });
+                                     }
+                                     catch(Error e) { error("%s", e.message);
+                                     }
                                      return Source.REMOVE;
                                  }
                                  return Source.REMOVE;

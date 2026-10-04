@@ -15,7 +15,8 @@ namespace MajorisFiles {
         {
             Object(title: options.save ? "Save As" : (options.directory ? "Select Folder" : "Open"), default_width: 960, default_height: 660, modal: options.modal);
             this.options = options;
-            state = new ChooserState(metadata,application_id); state.apply(options);
+            state = new ChooserState(metadata, application_id);
+            state.apply(options);
             browser = new Browser(metadata, places, true);
             default_width = state.dimension("width", 960, 560, 2400);
             default_height = state.dimension("height", 660, 400, 1600);
@@ -89,7 +90,7 @@ namespace MajorisFiles {
                                                       if (!options.multiple && chosen.size > 1)
                                                           browser.selection.select_item(browser.selection.get_selection().get_minimum(), true);
                 });
-            browser.preview.visible = state.get("preview","false")=="true";
+            browser.preview.visible = state.get("preview", "false") == "true";
             initialize.begin();
             close_request.connect(() => { finish(1, new VariantBuilder(VariantType.VARDICT).end());
                                           return true;
@@ -117,22 +118,38 @@ namespace MajorisFiles {
                 });
             ((Gtk.Widget)this).add_controller(keys);
         }
-        async void initialize() {
-            accept.sensitive=false;
-            File? candidate=options.initial;
-            while(candidate!=null && !finished) {
-                try { var info=yield candidate.query_info_async("standard::type",FileQueryInfoFlags.NONE,Priority.DEFAULT,token); if(info.get_file_type()==FileType.DIRECTORY) break; }
-                catch(IOError.NOT_MOUNTED e) { break; }
-                catch(IOError.CANCELLED e) { return; }
+        async void initialize()
+        {
+            accept.sensitive = false;
+            File? candidate = options.initial;
+            while(candidate != null && !finished)
+            {
+                try {
+                    var info = yield candidate.query_info_async("standard::type", FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+                    if(info.get_file_type() == FileType.DIRECTORY)
+                        break;
+                }
+                catch(IOError.NOT_MOUNTED e) {
+                    break;
+                }
+                catch(IOError.CANCELLED e) {
+                    return;
+                }
                 catch(IOError.NOT_FOUND e) {}
-                catch(Error e) { if(!finished) Dialogs.error(this,e.message); break; }
-                candidate=candidate.get_parent();
+                catch(Error e) {
+                    if(!finished)
+                        Dialogs.error(this, e.message);
+                    break;
+                }
+                candidate = candidate.get_parent();
             }
-            if(finished) return;
+            if(finished)
+                return;
             browser.navigate(candidate ?? File.new_for_path(Environment.get_home_dir()));
-            browser.set_view(state.get("view","Grid"),false);
-            if(options.current_file!=null) browser.select_file(options.current_file);
-            accept.sensitive=true;
+            browser.set_view(state.get("view", "Grid"), false);
+            if(options.current_file != null)
+                browser.select_file(options.current_file);
+            accept.sensitive = true;
         }
         public void cancel_request()
         {
@@ -143,13 +160,16 @@ namespace MajorisFiles {
             if (finished)
                 return;
             finished = true;
-            state.set("view",browser.view_mode); state.set("preview",browser.preview.visible ? "true" : "false");
+            state.set("view", browser.view_mode);
+            state.set("preview", browser.preview.visible ? "true" : "false");
             state.set("sidebar-width", browser.sidebar_width.to_string());
-            if(get_width() > 0 && get_height() > 0) {
+            if(get_width() > 0 && get_height() > 0)
+            {
                 state.set("width", get_width().to_string());
                 state.set("height", get_height().to_string());
             }
-            if(response==0 && !browser.location.has_uri_scheme("majoris") && !browser.location.has_uri_scheme("recent")) state.set(options.save ? "save-location" : "open-location",browser.location.get_uri());
+            if(response == 0 && !browser.location.has_uri_scheme("majoris") && !browser.location.has_uri_scheme("recent"))
+                state.set(options.save ? "save-location" : "open-location", browser.location.get_uri());
             token.cancel();
             browser.cancel();
             completed(response, results);
@@ -210,10 +230,11 @@ namespace MajorisFiles {
                         files.add(browser.location);
                     foreach (var item in chosen)
                     {
-                        var info=yield item.file.query_info_async("standard::type,access::can-read",FileQueryInfoFlags.NONE,Priority.DEFAULT,token);
-                        if ((info.get_file_type()==FileType.DIRECTORY) != options.directory)
+                        var info = yield item.file.query_info_async("standard::type,access::can-read", FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+                        if ((info.get_file_type() == FileType.DIRECTORY) != options.directory)
                             throw new FileError.INVALID(options.directory ? "Select a folder" : "Select a file");
-                        if(info.has_attribute("access::can-read") && !info.get_attribute_boolean("access::can-read")) throw new FileError.INVALID("The selected item is not readable");
+                        if(info.has_attribute("access::can-read") && !info.get_attribute_boolean("access::can-read"))
+                            throw new FileError.INVALID("The selected item is not readable");
                         if (filter != null && !filter.matches(item))
                             throw new FileError.INVALID("The selection does not match the file type");
                         files.add(item.file);

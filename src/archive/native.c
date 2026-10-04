@@ -16,6 +16,26 @@ static gboolean safe_name(const char *name) {
     for (int i=0;parts[i];i++) if (!strcmp(parts[i],"..")) safe = FALSE;
     g_strfreev(parts); return safe;
 }
+char *majoris_archive_list(const char *source, GCancellable *cancel, GError **error) {
+    struct archive *reader = archive_read_new();
+    GString *text = g_string_new(NULL);
+    archive_read_support_filter_all(reader); archive_read_support_format_all(reader);
+    if(archive_read_open_filename(reader, source, 65536) != ARCHIVE_OK) { failure(reader, error); goto fail; }
+    struct archive_entry *entry; int result; guint count = 0;
+    while((result = archive_read_next_header(reader, &entry)) != ARCHIVE_EOF) {
+        if(g_cancellable_set_error_if_cancelled(cancel, error)) goto fail;
+        if(result < ARCHIVE_OK) { failure(reader, error); goto fail; }
+        const char *name = archive_entry_pathname(entry);
+        char *valid = g_utf8_make_valid(name ? name : "Unnamed entry", -1);
+        g_string_append_printf(text, "%s%s · %" G_GINT64_FORMAT " bytes\n", valid, archive_entry_filetype(entry) == AE_IFDIR ? "/" : "", (gint64)archive_entry_size(entry));
+        g_free(valid);
+        if(++count >= 2000 || text->len > 1024 * 1024) { g_string_append(text, "\n[Entry preview limit reached]\n"); break; }
+        if(archive_read_data_skip(reader) < ARCHIVE_OK) { failure(reader, error); goto fail; }
+    }
+    archive_read_free(reader); return g_string_free(text, FALSE);
+fail:
+    archive_read_free(reader); g_string_free(text, TRUE); return NULL;
+}
 gboolean majoris_archive_extract(const char *source, const char *destination, GCancellable *cancel, GError **error) {
     struct archive *reader = archive_read_new(), *writer = archive_write_disk_new(); gboolean ok = FALSE;
     archive_read_support_filter_all(reader); archive_read_support_format_all(reader);

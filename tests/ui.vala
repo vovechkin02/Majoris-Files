@@ -41,6 +41,50 @@ int main(string[] args)
     Test.add_func("/ui/select-symlink-folder", () => chooser_flow(false, false, true, true));
     Test.add_func("/ui/initial-location-recovery", () => initial_recovery());
     Test.add_func("/ui/overwrite-confirmation", () => overwrite_test());
+    Test.add_func("/ui/merge-move-and-persistent-undo", () => merge_test());
+    Test.add_func("/ui/column-selection", () => columns_test());
+    Test.add_func("/ui/transferred-tab-routing", () => {
+        try {
+            var temp = DirUtils.make_tmp("majoris-tabs-XXXXXX");
+            var metadata = new MetadataStore(Path.build_filename(temp, "meta.db"));
+            var places = new Places();
+            var operations = new OperationManager(metadata);
+            var app = new Adw.Application("com.majoris.files.tabs.test", ApplicationFlags.NON_UNIQUE);
+            app.register(null);
+            var first = new FilesWindow(app, metadata, places, operations, File.new_for_path(temp));
+            first.new_tab(File.new_for_path(temp));
+            var second = new FilesWindow(app, metadata, places, operations, null, true);
+            var page = first.tabs.selected_page;
+            first.tabs.transfer_page(page, second.tabs, 0);
+            var browser = (Browser)page.child;
+            browser.open_in_tab(File.new_for_path(temp));
+            assert(first.tabs.n_pages == 1 && second.tabs.n_pages == 2);
+            for(int i = 0; i < first.tabs.n_pages; i++)
+                ((Browser)first.tabs.get_nth_page(i).child).cancel();
+            for(int i = 0; i < second.tabs.n_pages; i++)
+                ((Browser)second.tabs.get_nth_page(i).child).cancel();
+            first.destroy();
+            second.destroy();
+        }
+        catch(Error e) { error("%s", e.message);
+        }
+    });
+    Test.add_func("/ui/script-policy-and-previews", () => {
+        var loop = new MainLoop();
+        bool passed = false;
+        preview_case.begin((obj, res) => { try { preview_case.end(res);
+                                                 passed = true;
+                                           }
+                                           catch(Error e) { error("%s", e.message);
+                                           }
+                                           loop.quit();
+            });
+        uint watchdog = Timeout.add_seconds(10, () => { error("Preview/provider test timed out");
+            });
+        loop.run();
+        Source.remove(watchdog);
+        assert(passed);
+    });
     Test.add_func("/ui/sharing-policy", () => { assert(SharePolicy.valid_name("Projects"));
                                                 assert(!SharePolicy.valid_name("../etc"));
                                                 assert(!SharePolicy.valid_name("a;id"));
@@ -55,7 +99,8 @@ int main(string[] args)
         var clipboard = Gdk.Display.get_default().get_clipboard();
         var files = new Gee.ArrayList<File>();
         files.add(File.new_for_path("/tmp/example space.txt"));
-        foreach(bool cut in new bool[] {false, true}) {
+        foreach(bool cut in new bool[] {false, true})
+        {
             FileClipboard.publish(clipboard, files, cut);
             assert(clipboard.get_formats().contain_gtype(typeof(Gdk.FileList)));
             assert(clipboard.get_formats().contain_mime_type("text/uri-list"));
@@ -65,10 +110,13 @@ int main(string[] args)
                     var content = FileClipboard.read.end(res);
                     assert(content.cut == cut);
                     assert(content.files.size == 1 && content.files[0].equal(files[0]));
-                } catch(Error e) { error("%s", e.message); }
+                }
+                catch(Error e) { error("%s", e.message);
+                }
                 loop.quit();
             });
-            uint watchdog = Timeout.add_seconds(10, () => { error("Clipboard read timed out"); });
+            uint watchdog = Timeout.add_seconds(10, () => { error("Clipboard read timed out");
+                });
             loop.run();
             Source.remove(watchdog);
         }
@@ -116,6 +164,175 @@ void overwrite_test()
     catch(Error e) {
         error("%s", e.message);
     }
+}
+void merge_test()
+{
+    var loop = new MainLoop();
+    bool passed = false;
+    merge_case.begin((obj, res) => { try { merge_case.end(res);
+                                           passed = true;
+                                     }
+                                     catch(Error e) { error("%s", e.message);
+                                     }
+                                     loop.quit();
+        });
+    uint watchdog = Timeout.add_seconds(15, () => { error("Folder merge timed out");
+        });
+    loop.run();
+    Source.remove(watchdog);
+    assert(passed);
+}
+void collect_lists(Gtk.Widget widget, Gee.ArrayList<Gtk.ListView> lists)
+{
+    if(widget is Gtk.ListView && widget.get_mapped())
+        lists.add((Gtk.ListView)widget);
+    for(var child = widget.get_first_child(); child != null; child = child.get_next_sibling())
+        collect_lists(child, lists);
+}
+async void preview_case() throws Error
+{
+    var temp = DirUtils.make_tmp("majoris-preview-XXXXXX");
+    var root = File.new_for_path(temp);
+    FileUtils.set_contents(Path.build_filename(temp, "notes.md"), "# Title\n- Entry\n<script>never executed</script>\n```\ncode\n```");
+    var file = root.get_child("notes.md");
+    var info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
+    var item = new FileItem(file, info);
+    var markdown = new MarkdownPreview();
+    assert(markdown.supports(item));
+    var widget = yield markdown.render(item, new Cancellable());
+    assert(widget is Gtk.ScrolledWindow);
+    var view = (Gtk.TextView)((Gtk.ScrolledWindow)widget).get_child();
+    assert(view.buffer.text.contains("Title") && view.buffer.text.contains("never executed"));
+    var files = new Gee.ArrayList<File>();
+    files.add(file);
+    yield ArchiveService.compress(files, root.get_child("test.zip"), "zip", new Job("test"));
+    var archive = root.get_child("test.zip");
+    var archive_info = yield archive.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
+    var archive_item = new FileItem(archive, archive_info);
+    var provider = new ArchivePreview();
+    assert(provider.supports(archive_item));
+    widget = yield provider.render(archive_item, new Cancellable());
+    view = (Gtk.TextView)((Gtk.ScrolledWindow)widget).get_child();
+    assert(view.buffer.text.contains("notes.md"));
+    var selected = new Gee.ArrayList<FileItem>();
+    selected.add(item);
+    var metadata = new MetadataStore(Path.build_filename(temp, "meta.db"));
+    var scripts = new ScriptActions(metadata);
+    assert(scripts.actions(selected).size == 0);
+    bool denied = false;
+    try {
+        yield scripts.execute("../escape", selected, new Adw.Window());
+    }
+    catch(Error e) {
+        denied = true;
+    }
+    assert(denied);
+    yield OperationManager.remove_tree(root, new Cancellable());
+}
+void columns_test()
+{
+    try {
+        var temp = DirUtils.make_tmp("majoris-columns-XXXXXX");
+        DirUtils.create(Path.build_filename(temp, "folder"), 0700);
+        FileUtils.set_contents(Path.build_filename(temp, "folder", "child.txt"), "child");
+        var metadata = new MetadataStore(Path.build_filename(temp, "meta.db"));
+        var browser = new Browser(metadata, new Places());
+        var parent = new Adw.Window();
+        parent.default_width = 900;
+        parent.default_height = 600;
+        parent.content = browser;
+        parent.present();
+        var loop = new MainLoop();
+        bool drilled = false;
+        bool passed = false;
+        browser.navigate(File.new_for_path(temp));
+        browser.set_view("Columns");
+        uint poll = Timeout.add(20, () => {
+            var lists = new Gee.ArrayList<Gtk.ListView>();
+            collect_lists(browser, lists);
+            if(!drilled && lists.size == 1 && !browser.directory.loading)
+            {
+                var model = (Gtk.MultiSelection)lists[0].model;
+                for(uint i = 0; i < model.get_n_items(); i++)
+                    if(((FileItem)model.get_item(i)).name == "folder")
+                    {
+                        model.select_item(i, true);
+                        drilled = true;
+                        break;
+                    }
+            }
+            else if(drilled && lists.size == 2)
+            {
+                var model = (Gtk.MultiSelection)lists[1].model;
+                if(model.get_n_items() == 0)
+                    return Source.CONTINUE;
+                model.select_item(0, true);
+                assert(browser.selected().size == 1 && browser.selected()[0].name == "child.txt");
+                assert(browser.location.equal(File.new_for_path(Path.build_filename(temp, "folder"))));
+                passed = true;
+                loop.quit();
+                return Source.REMOVE;
+            }
+            return Source.CONTINUE;
+        });
+        uint watchdog = Timeout.add_seconds(10, () => { error("Column selection timed out");
+            });
+        loop.run();
+        Source.remove(watchdog);
+        assert(passed);
+        browser.cancel();
+        parent.destroy();
+    }
+    catch(Error e) {
+        error("%s", e.message);
+    }
+}
+async void merge_case() throws Error
+{
+    var temp = DirUtils.make_tmp("majoris-merge-XXXXXX");
+    var root = File.new_for_path(temp);
+    DirUtils.create_with_parents(Path.build_filename(temp, "source", "folder"), 0700);
+    DirUtils.create_with_parents(Path.build_filename(temp, "destination", "folder"), 0700);
+    FileUtils.set_contents(Path.build_filename(temp, "source", "folder", "new.txt"), "new");
+    FileUtils.set_contents(Path.build_filename(temp, "source", "folder", "existing.txt"), "incoming");
+    FileUtils.set_contents(Path.build_filename(temp, "destination", "folder", "existing.txt"), "preserved");
+    var metadata = new MetadataStore(Path.build_filename(temp, "metadata.db"));
+    var manager = new OperationManager(metadata);
+    var parent = new Adw.Window();
+    parent.default_width = 800;
+    parent.default_height = 600;
+    parent.present();
+    Adw.AlertDialog? previous = null;
+    uint prompts = 0;
+    uint poll = Timeout.add(10, () => {
+        var dialog = parent.visible_dialog as Adw.AlertDialog;
+        if(dialog != null && dialog != previous)
+        {
+            previous = dialog;
+            dialog.response(prompts++ == 0 ? "merge" : "both");
+        }
+        return Source.CONTINUE;
+    });
+    var files = new Gee.ArrayList<File>();
+    files.add(root.get_child("source/folder"));
+    yield manager.run(OperationKind.MOVE, files, root.get_child("destination"), parent);
+    Source.remove(poll);
+    parent.destroy();
+    assert(prompts == 2);
+    var job = (Job)manager.jobs.get_item(0);
+    assert(job.error == "");
+    assert(!root.get_child("source/folder").query_exists());
+    string content;
+    FileUtils.get_contents(Path.build_filename(temp, "destination", "folder", "existing.txt"), out content);
+    assert(content == "preserved");
+    assert(root.get_child("destination/folder/existing.txt (1)").query_exists());
+    manager = new OperationManager(new MetadataStore(Path.build_filename(temp, "metadata.db")));
+    yield manager.undo();
+    yield manager.undo();
+    assert(root.get_child("source/folder/new.txt").query_exists());
+    assert(root.get_child("source/folder/existing.txt").query_exists());
+    assert(root.get_child("destination/folder/existing.txt").query_exists());
+    yield OperationManager.remove_tree(root, new Cancellable());
 }
 void chooser_flow(bool save, bool multiple, bool directory, bool symlink = false)
 {
@@ -184,9 +401,13 @@ void initial_recovery()
             window.cancel_request();
             loop.quit();
         });
-        uint watchdog = Timeout.add_seconds(10, () => { error("Initial location recovery timed out"); });
+        uint watchdog = Timeout.add_seconds(10, () => { error("Initial location recovery timed out");
+            });
         loop.run();
         Source.remove(watchdog);
         assert(recovered);
-    } catch(Error e) { error("%s", e.message); }
+    }
+    catch(Error e) {
+        error("%s", e.message);
+    }
 }

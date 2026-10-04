@@ -69,9 +69,11 @@ namespace MajorisFiles {
             Object(orientation: Gtk.Orientation.VERTICAL, spacing: 8);
             width_request = 280;
             providers.add(new ImagePreview());
+            providers.add(new MarkdownPreview());
             providers.add(new TextPreview());
             providers.add(new MediaPreview());
             providers.add(new PdfPreview());
+            providers.add(new ArchivePreview());
         }
         public void cancel()
         {

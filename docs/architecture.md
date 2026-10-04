@@ -13,8 +13,10 @@ GtkMountOperation instead of handling credentials itself.
 
 `MetadataStore` uses parameterized SQLite queries for favorites, multiple tags,
 saved searches and state. Browsing continues if metadata storage cannot open.
-Managed rename/move updates URI records. External rename identity reconciliation
-is not implemented yet.
+Recovery preserves the original database and sidecars before creating a new one.
+Managed rename/move updates URI records; local enumeration reconciles device,
+inode and birth-time identities where the filesystem exposes them. Existing hard
+links retain their distinct paths and remote identity reconciliation remains work.
 
 Search predicates are shared by current-folder filtering and recursive GIO
 enumeration. Saved searches retain typed filter values and accept legacy plain
@@ -25,7 +27,10 @@ and GNOME copy/cut data; paste reads the current desktop clipboard asynchronousl
 rename, move, folder creation and non-replacing copies. Replacement retains the
 previous destination at a temporary sibling until transfer succeeds. Copy undo
 requires confirmation and moves copied content to Trash, since it may have been
-edited since the copy. Recursive deletion does not follow symbolic links.
+edited since the copy. History is private SQLite state. Trash undo records only
+an unambiguous newly created backend entry. Merged moves journal new child
+transfers and recreate missing source parents on undo. Recursive deletion does
+not follow symbolic links. Interrupted jobs are reported, never silently restarted.
 
 `SplitService` streams 1 MiB buffers, hashes while splitting, validates manifest
 types, names, order, sizes and hashes, and joins to a temporary sibling before

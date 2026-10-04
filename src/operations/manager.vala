@@ -52,11 +52,72 @@ namespace MajorisFiles {
         public OperationManager(MetadataStore metadata)
         {
             this.metadata = metadata;
+            restore_history("undo", undo_stack);
+            restore_history("redo", redo_stack);
+            var interrupted = metadata.state("operations-active");
+            if(interrupted != "")
+            {
+                var job = new Job("Interrupted operations");
+                job.current = interrupted;
+                job.error = "Files stopped before these operations finished. Check the source and destination before retrying.";
+                job.done = true;
+                jobs.append(job);
+                metadata.set_state("operations-active", "");
+            }
+        }
+        void restore_history(string key, Gee.ArrayList<JournalEntry> stack)
+        {
+            var saved = metadata.state("operations-" + key);
+            if(saved == "")
+                return;
+            try {
+                var entries = Variant.parse(new VariantType("a(uss)"), saved);
+                if(entries.n_children() > 100)
+                    return;
+                for(size_t i = 0; i < entries.n_children(); i++)
+                {
+                    var entry = entries.get_child_value(i);
+                    uint kind = entry.get_child_value(0).get_uint32();
+                    string source = entry.get_child_value(1).get_string(), destination = entry.get_child_value(2).get_string();
+                    if(kind > OperationKind.RENAME || kind == OperationKind.DELETE || Uri.parse_scheme(source) == null || Uri.parse_scheme(destination) == null)
+                        continue;
+                    stack.add(new JournalEntry((OperationKind)kind, File.new_for_uri(source), File.new_for_uri(destination)));
+                }
+            }
+            catch(Error e) {
+                warning("Cannot restore operation history: %s", e.message);
+            }
+        }
+        void persist_history()
+        {
+            save_stack("undo", undo_stack);
+            save_stack("redo", redo_stack);
+        }
+        void save_stack(string key, Gee.ArrayList<JournalEntry> stack)
+        {
+            while(stack.size > 100)
+                stack.remove_at(0);
+            var builder = new VariantBuilder(new VariantType("a(uss)"));
+            foreach(var entry in stack)
+                builder.add("(uss)", (uint)entry.kind, entry.source.get_uri(), entry.destination.get_uri());
+            metadata.set_state("operations-" + key, builder.end().print(true));
+        }
+        void persist_jobs()
+        {
+            var text = new StringBuilder();
+            for(uint i = 0; i < jobs.get_n_items(); i++)
+            {
+                var job = (Job)jobs.get_item(i);
+                if(!job.done)
+                    text.append(job.title + ": " + job.current + "\n");
+            }
+            metadata.set_state("operations-active", text.str);
         }
         public Job start(string title)
         {
             var job = new Job(title);
             jobs.append(job);
+            persist_jobs();
             var app = GLib.Application.get_default();
             if (app != null)
                 app.hold();
@@ -69,9 +130,17 @@ namespace MajorisFiles {
             if (error != null && !(error is IOError.CANCELLED))
                 job.error = error.message;
             var app = GLib.Application.get_default();
+            if(app != null && !(error is IOError.CANCELLED) && metadata.state("notifications", "true") == "true" && (job.parent == null || !job.parent.is_active))
+            {
+                var notification = new Notification(job.error == "" ? "File operation completed" : "File operation failed");
+                notification.set_body(job.error == "" ? job.title : job.error);
+                app.send_notification("operation-" + Uuid.string_random(), notification);
+            }
             if (app != null)
                 app.release();
             changed();
+            persist_history();
+            persist_jobs();
         }
         public async void run(OperationKind kind, Gee.List<File> files, File? target = null, Gtk.Window? parent = null)
         {
@@ -79,15 +148,23 @@ namespace MajorisFiles {
             job.parent = parent;
             try {
                 int index = 0;
+                var previous_trash = kind == OperationKind.TRASH ? yield trash_snapshot(job.cancellable) : null;
                 bool replace_all = false;
                 bool skip_all = false;
                 foreach (var source in files)
                 {
                     job.cancellable.set_error_if_cancelled();
                     job.current = source.get_parse_name();
-                string destination_name=source.get_basename();
-                if(kind==OperationKind.MOVE && source.has_uri_scheme("trash")) { var trash_info=yield source.query_info_async("trash::orig-path",FileQueryInfoFlags.NONE,Priority.DEFAULT,job.cancellable); var original_path=trash_info.get_attribute_byte_string("trash::orig-path"); if(original_path!=null) destination_name=Path.get_basename(original_path); }
-                File? destination = target == null ? null : target.get_child(destination_name);
+                    persist_jobs();
+                    string destination_name = source.get_basename();
+                    if(kind == OperationKind.MOVE && source.has_uri_scheme("trash"))
+                    {
+                        var trash_info = yield source.query_info_async("trash::orig-path", FileQueryInfoFlags.NONE, Priority.DEFAULT, job.cancellable);
+                        var original_path = trash_info.get_attribute_byte_string("trash::orig-path");
+                        if(original_path != null)
+                            destination_name = Path.get_basename(original_path);
+                    }
+                    File? destination = target == null ? null : target.get_child(destination_name);
                     if (destination != null && (kind == OperationKind.COPY || kind == OperationKind.MOVE))
                     {
                         if (source.equal(destination) || destination.has_prefix(source))
@@ -99,16 +176,25 @@ namespace MajorisFiles {
                         }
                         catch (IOError.NOT_FOUND e) {}
                         File? backup = null;
+                        bool merge = false;
                         if (exists)
                         {
                             string decision = replace_all ? "replace" : (skip_all ? "skip" : "cancel");
                             if (!replace_all && !skip_all && parent != null)
                             {
-                                var alert = new Adw.AlertDialog("An item already exists", source.get_basename() + " already exists in the destination.");
+                                var source_info = yield source.query_info_async("standard::type,standard::size,time::modified", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
+                                var destination_info = yield destination.query_info_async("standard::type,standard::size,time::modified", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
+                                var source_date = source_info.get_modification_date_time();
+                                var destination_date = destination_info.get_modification_date_time();
+                                var detail = "%s\nSource: %s · %s\nDestination: %s · %s".printf(destination_name, Paths.size(source_info.get_size()), source_date == null ? "Unknown date" : source_date.format("%c"), Paths.size(destination_info.get_size()), destination_date == null ? "Unknown date" : destination_date.format("%c"));
+                                var alert = new Adw.AlertDialog("An item already exists", detail);
                                 alert.add_response("cancel", "Cancel");
                                 alert.add_response("skip", "Skip");
                                 alert.add_response("skip-all", "Skip All");
                                 alert.add_response("both", "Keep Both");
+                                alert.add_response("rename", "Rename");
+                                if(source_info.get_file_type() == FileType.DIRECTORY && destination_info.get_file_type() == FileType.DIRECTORY)
+                                    alert.add_response("merge", "Merge Folders");
                                 alert.add_response("replace", "Replace");
                                 alert.add_response("replace-all", "Replace All");
                                 alert.close_response = "cancel";
@@ -122,11 +208,28 @@ namespace MajorisFiles {
                                 continue;
                             if (decision == "replace-all")
                                 replace_all = true;
-                            if (decision == "both")
+                            if(decision == "merge")
+                                merge = true;
+                            else if(decision == "rename")
+                            {
+                                var name = yield Dialogs.prompt(parent, "Destination Name", destination_name);
+                                if(name == null)
+                                    throw new IOError.CANCELLED("Cancelled");
+                                if(!Paths.valid_name(name))
+                                    throw new FileError.INVALID("Invalid destination name");
+                                destination = target.get_child(name);
+                                try {
+                                    yield destination.query_info_async("standard::type", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
+                                    throw new FileError.INVALID("An item with that name already exists");
+                                }
+                                catch(IOError.NOT_FOUND e) {}
+                                exists = false;
+                            }
+                            else if (decision == "both")
                             {
                                 uint suffix = 1;
                                 do {
-                                    destination = target.get_child("%s (%u)".printf(source.get_basename(), suffix++));
+                                    destination = target.get_child("%s (%u)".printf(destination_name, suffix++));
                                     exists = false;
                                     try {
                                         yield destination.query_info_async("standard::type", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
@@ -142,7 +245,7 @@ namespace MajorisFiles {
                         }
                         bool complete;
                         try {
-                            complete = yield transfer(source, destination, kind == OperationKind.MOVE, job);
+                            complete = merge ? yield merge_folders(source, destination, kind == OperationKind.MOVE, job) : yield transfer(source, destination, kind == OperationKind.MOVE, job);
                         }
                         catch (Error e) {
                             if (backup != null)
@@ -163,7 +266,18 @@ namespace MajorisFiles {
                         if (!complete)
                         {
                             if(backup != null)
-                                yield backup.move_async(destination, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null, null);
+                            {
+                                try {
+                                    yield remove_tree(destination, new Cancellable());
+                                }
+                                catch(IOError.NOT_FOUND ignored) {}
+                                try {
+                                    yield backup.move_async(destination, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null, null);
+                                }
+                                catch(Error e) {
+                                    throw new FileError.INTEGRITY("Previous item preserved at " + backup.get_parse_name());
+                                }
+                            }
                             continue;
                         }
                         if (backup != null)
@@ -174,12 +288,23 @@ namespace MajorisFiles {
                             undo_stack.add(new JournalEntry(kind, source, destination));
                             redo_stack.clear();
                         }
-                        if (kind == OperationKind.MOVE)
+                        if (kind == OperationKind.MOVE && !merge)
                             metadata.relocate(source, destination);
                     }
                     else if (kind == OperationKind.TRASH)
                     {
                         yield source.trash_async(Priority.DEFAULT, job.cancellable);
+                        if(previous_trash != null)
+                        {
+                            var trashed = yield find_trashed(source, previous_trash, job.cancellable);
+                            if(trashed != null)
+                            {
+                                previous_trash.add(trashed.get_uri());
+                                undo_stack.add(new JournalEntry(OperationKind.TRASH, source, trashed));
+                                redo_stack.clear();
+                                persist_history();
+                            }
+                        }
                     }
                     else if (kind == OperationKind.DELETE)
                     {
@@ -251,6 +376,213 @@ namespace MajorisFiles {
                 yield remove_tree(source, job.cancellable);
             return true;
         }
+        async bool merge_folders(File source, File destination, bool move, Job job) throws Error
+        {
+            var enumerator = yield source.enumerate_children_async("standard::name,standard::type", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
+            bool complete = true;
+            try {
+                while(true)
+                {
+                    var batch = yield enumerator.next_files_async(64, Priority.DEFAULT, job.cancellable);
+                    if(batch == null)
+                        break;
+                    foreach(var info in batch)
+                    {
+                        var child = source.get_child(info.get_name());
+                        var target = destination.get_child(info.get_name());
+                        FileInfo? existing = null;
+                        try {
+                            existing = yield target.query_info_async("standard::type,standard::size,time::modified", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
+                        }
+                        catch(IOError.NOT_FOUND e) {}
+                        if(existing != null && info.get_file_type() == FileType.DIRECTORY && existing.get_file_type() == FileType.DIRECTORY)
+                        {
+                            if(!(yield merge_folders(child, target, move, job)))
+                                complete = false;
+                            continue;
+                        }
+                        File? backup = null;
+                        if(existing != null)
+                        {
+                            if(job.parent == null)
+                                throw new FileError.INVALID("A merged child conflicts with an existing item");
+                            var dialog = new Adw.AlertDialog("An item already exists", target.get_parse_name() + "\nDestination: " + Paths.size(existing.get_size()));
+                            dialog.add_response("cancel", "Cancel");
+                            dialog.add_response("skip", "Skip");
+                            dialog.add_response("both", "Keep Both");
+                            dialog.add_response("replace", "Replace");
+                            dialog.close_response = "cancel";
+                            var decision = yield dialog.choose(job.parent, job.cancellable);
+                            if(decision == "cancel")
+                                throw new IOError.CANCELLED("Cancelled");
+                            if(decision == "skip")
+                            {
+                                complete = false;
+                                continue;
+                            }
+                            if(decision == "both")
+                            {
+                                uint suffix = 1;
+                                while(true)
+                                {
+                                    target = destination.get_child("%s (%u)".printf(info.get_name(), suffix++));
+                                    try {
+                                        yield target.query_info_async("standard::type", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
+                                    }
+                                    catch(IOError.NOT_FOUND e) {
+                                        break;
+                                    }
+                                }
+                                existing = null;
+                            }
+                            else {
+                                backup = destination.get_child(".majoris-backup-" + Uuid.string_random());
+                                yield target.move_async(backup, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable, null);
+                            }
+                        }
+                        try {
+                            if(!(yield transfer(child, target, move, job)))
+                            {
+                                complete = false;
+                                if(backup != null)
+                                {
+                                    try {
+                                        yield remove_tree(target, new Cancellable());
+                                    }
+                                    catch(IOError.NOT_FOUND ignored) {}
+                                    try {
+                                        yield backup.move_async(target, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null, null);
+                                    }
+                                    catch(Error e) {
+                                        throw new FileError.INTEGRITY("Previous item preserved at " + backup.get_parse_name());
+                                    }
+                                }
+                                continue;
+                            }
+                        }
+                        catch(Error e) {
+                            if(backup != null)
+                            {
+                                try {
+                                    yield remove_tree(target, new Cancellable());
+                                }
+                                catch(Error ignored) {}
+                                try {
+                                    yield backup.move_async(target, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null, null);
+                                }
+                                catch(Error recovery) {
+                                    throw new FileError.INTEGRITY("Previous item preserved at " + backup.get_parse_name());
+                                }
+                            }
+                            throw e;
+                        }
+                        if(backup != null)
+                            yield remove_tree(backup, job.cancellable);
+                        if(existing == null)
+                        {
+                            undo_stack.add(new JournalEntry(move ? OperationKind.MOVE : OperationKind.COPY, child, target));
+                            redo_stack.clear();
+                            persist_history();
+                        }
+                        if(move)
+                            metadata.relocate(child, target);
+                    }
+                }
+            }
+            catch(Error e) {
+                try {
+                    yield enumerator.close_async(Priority.DEFAULT, null);
+                }
+                catch(Error ignored) {}
+                throw e;
+            }
+            yield enumerator.close_async(Priority.DEFAULT, null);
+            if(move && complete)
+                yield source.delete_async(Priority.DEFAULT, job.cancellable);
+            return complete;
+        }
+        static async void ensure_parent(File file) throws Error
+        {
+            var parent = file.get_parent();
+            if(parent == null)
+                return;
+            try {
+                yield parent.query_info_async("standard::type", FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
+            }
+            catch(IOError.NOT_FOUND e) {
+                yield ensure_parent(parent);
+                yield parent.make_directory_async(Priority.DEFAULT, null);
+            }
+        }
+        static async Gee.HashSet<string>? trash_snapshot(Cancellable token) throws Error {
+            var result = new Gee.HashSet<string>();
+            var trash = File.new_for_uri("trash:///");
+            try {
+                var en = yield trash.enumerate_children_async("standard::name", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token);
+                try {
+                    while(true)
+                    {
+                        var batch = yield en.next_files_async(128, Priority.DEFAULT, token);
+                        if(batch == null)
+                            break;
+                        foreach(var info in batch)
+                            result.add(trash.get_child(info.get_name()).get_uri());
+                    }
+                }
+                catch(Error e) {
+                    try {
+                        yield en.close_async(Priority.DEFAULT, null);
+                    }
+                    catch(Error ignored) {}
+                    throw e;
+                }
+                yield en.close_async(Priority.DEFAULT, null);
+                return result;
+            }
+            catch(IOError.CANCELLED e) {
+                throw e;
+            }
+            catch(Error e) {
+                return null;
+            }
+        }
+        static async File? find_trashed(File original, Gee.HashSet<string> previous, Cancellable token) throws Error
+        {
+            if(!original.is_native())
+                return null;
+            var trash = File.new_for_uri("trash:///");
+            File? match = null;
+            var en = yield trash.enumerate_children_async("standard::name,trash::orig-path", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token);
+            bool ambiguous = false;
+            try {
+                while(true)
+                {
+                    var batch = yield en.next_files_async(128, Priority.DEFAULT, token);
+                    if(batch == null)
+                        break;
+                    foreach(var info in batch)
+                    {
+                        var candidate = trash.get_child(info.get_name());
+                        var path = info.get_attribute_byte_string("trash::orig-path");
+                        if(!previous.contains(candidate.get_uri()) && path != null && File.new_for_path(path).equal(original))
+                        {
+                            if(match != null)
+                                ambiguous = true;
+                            else match = candidate;
+                        }
+                    }
+                }
+            }
+            catch(Error e) {
+                try {
+                    yield en.close_async(Priority.DEFAULT, null);
+                }
+                catch(Error ignored) {}
+                throw e;
+            }
+            yield en.close_async(Priority.DEFAULT, null);
+            return ambiguous ? null : match;
+        }
         public static async void remove_tree(File file, Cancellable token) throws Error
         {
             var info = yield file.query_info_async("standard::type,standard::is-symlink", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token);
@@ -277,6 +609,7 @@ namespace MajorisFiles {
             metadata.relocate(file, result);
             undo_stack.add(new JournalEntry(OperationKind.RENAME, file, result));
             redo_stack.clear();
+            persist_history();
             changed();
         }
         public async void new_folder(File parent, string name) throws Error
@@ -287,6 +620,7 @@ namespace MajorisFiles {
             yield file.make_directory_async(Priority.DEFAULT, null);
             undo_stack.add(new JournalEntry(OperationKind.CREATE_FOLDER, parent, file));
             redo_stack.clear();
+            persist_history();
             changed();
         }
         public async void undo(Gtk.Window? parent = null) throws Error
@@ -294,8 +628,9 @@ namespace MajorisFiles {
             if (undo_stack.size == 0)
                 return;
             var entry = undo_stack[undo_stack.size - 1];
-            if (entry.kind == OperationKind.MOVE || entry.kind == OperationKind.RENAME)
+            if (entry.kind == OperationKind.MOVE || entry.kind == OperationKind.RENAME || entry.kind == OperationKind.TRASH)
             {
+                yield ensure_parent(entry.source);
                 yield entry.destination.move_async(entry.source, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
                 metadata.relocate(entry.destination, entry.source);
             }
@@ -315,6 +650,7 @@ namespace MajorisFiles {
             }
             undo_stack.remove_at(undo_stack.size - 1);
             redo_stack.add(entry);
+            persist_history();
             changed();
         }
         public async void redo() throws Error
@@ -327,6 +663,21 @@ namespace MajorisFiles {
                 yield entry.source.move_async(entry.destination, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
                 metadata.relocate(entry.source, entry.destination);
             }
+            else if(entry.kind == OperationKind.TRASH)
+            {
+                var previous = yield trash_snapshot(new Cancellable());
+                if(previous == null)
+                    throw new FileError.UNSUPPORTED("The Trash backend is unavailable");
+                yield entry.source.trash_async(Priority.DEFAULT, null);
+                var destination = yield find_trashed(entry.source, previous, new Cancellable());
+                if(destination == null)
+                {
+                    redo_stack.remove_at(redo_stack.size - 1);
+                    persist_history();
+                    throw new FileError.UNSUPPORTED("The restored file was trashed, but its new Trash entry could not be identified");
+                }
+                entry.destination = destination;
+            }
             else if (entry.kind == OperationKind.CREATE_FOLDER)
                 yield entry.destination.make_directory_async(Priority.DEFAULT, null);
             else if (entry.kind == OperationKind.COPY)
@@ -336,6 +687,7 @@ namespace MajorisFiles {
             }
             redo_stack.remove_at(redo_stack.size - 1);
             undo_stack.add(entry);
+            persist_history();
             changed();
         }
     }

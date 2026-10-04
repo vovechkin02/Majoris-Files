@@ -43,6 +43,50 @@ namespace MajorisFiles {
                 size += item.bytes;
             group.add(row("Items", items.size.to_string()));
             group.add(row("Size", Paths.size(size) + " (" + size.to_string() + " bytes)"));
+            var counts_row = row("Contents", "Calculating…");
+            group.add(counts_row);
+            var allocated_row = row("Size on Disk", "Calculating…");
+            group.add(allocated_row);
+            var counts = new FileCounts();
+            var token = new Cancellable();
+            var roots = new Gee.ArrayList<File>();
+            foreach(var item in items)
+                roots.add(item.file);
+            counts.updated.connect(() => {
+                counts_row.subtitle = "%" + uint64.FORMAT + " files, %" + uint64.FORMAT + " folders";
+                counts_row.subtitle = counts_row.subtitle.printf(counts.files, counts.folders) + (counts.unreadable > 0 ? " · Some items are unreadable" : "");
+                allocated_row.subtitle = Paths.size(counts.allocated);
+            });
+            counts.scan.begin(roots, token, (obj, res) => { try { counts.scan.end(res);
+                                                            }
+                                                            catch(Error e) {}
+                });
+            dialog.closed.connect(() => token.cancel());
+            if(items.size > 1)
+            {
+                var types = new Gee.HashSet<string>();
+                foreach(var item in items)
+                    types.add(item.mime);
+                group.add(row("Types", types.size == 1 ? items[0].mime : "Multiple types"));
+                var common = items[0].file.get_parent();
+                foreach(var item in items)
+                    if(common != null && (item.file.get_parent() == null || !common.equal(item.file.get_parent())))
+                        common = null;
+                group.add(row("Location", common == null ? "Multiple locations" : common.get_parse_name()));
+                var favorites = new Adw.SwitchRow();
+                favorites.title = "Favorite All Selected Items";
+                group.add(favorites);
+                favorites.notify["active"].connect(() => { foreach(var item in items)
+                                                               metadata.set_favorite(item.file, favorites.active);
+                    });
+                var tags = new Adw.EntryRow();
+                tags.title = "Replace Tags on All Selected Items";
+                tags.show_apply_button = true;
+                tags.apply.connect(() => { foreach(var item in items)
+                                               metadata.set_tags(item.file, tags.text);
+                    });
+                group.add(tags);
+            }
             if (items.size == 1)
             {
                 var item = items[0];
@@ -54,6 +98,16 @@ namespace MajorisFiles {
                     group.add(row("Modified", date.format("%c")));
                 if (item.info.has_attribute("unix::mode"))
                     group.add(row("Permissions", "%04o".printf(item.info.get_attribute_uint32("unix::mode") & 07777)));
+                if(item.info.has_attribute("owner::user"))
+                    group.add(row("Owner", item.info.get_attribute_string("owner::user")));
+                if(item.info.has_attribute("owner::group"))
+                    group.add(row("Group", item.info.get_attribute_string("owner::group")));
+                var created = item.info.get_creation_date_time();
+                if(created != null)
+                    group.add(row("Created", created.format("%c")));
+                var accessed = item.info.get_access_date_time();
+                if(accessed != null)
+                    group.add(row("Accessed", accessed.format("%c")));
                 if (item.info.get_is_symlink())
                     group.add(row("Link target", item.info.get_symlink_target() ?? "Unavailable"));
                 var favorite = new Adw.SwitchRow();

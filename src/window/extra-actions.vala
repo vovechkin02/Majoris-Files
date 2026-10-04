@@ -23,19 +23,28 @@ namespace MajorisFiles {
             action("empty-trash", () => empty_trash.begin());
             action("terminal", () => terminal.begin());
             action("open-with", () => open_with.begin());
+            action("associations", () => { var items = current.selected();
+                                           if(items.size == 1)
+                                               new AssociationsDialog(window, items[0]);
+                });
+            action("custom-icon", () => custom_icon.begin(false));
+            action("reset-icon", () => custom_icon.begin(true));
             action("link", () => link.begin());
             action("batch-rename", () => batch_rename.begin());
             action("templates", () => templates.begin());
-            action("select-none", () => current.selection.unselect_all());
-            action("invert-selection", () => { for (uint i = 0; i < current.selection.get_n_items(); i++)
+            action("select-none", () => current.active_selection.unselect_all());
+            action("invert-selection", () => { for (uint i = 0; i < current.active_selection.get_n_items(); i++)
                                                {
-                                                   if (current.selection.is_selected(i))
-                                                       current.selection.unselect_item(i);
-                                                   else current.selection.select_item(i, false);
+                                                   if (current.active_selection.is_selected(i))
+                                                       current.active_selection.unselect_item(i);
+                                                   else current.active_selection.select_item(i, false);
                                                }
                 });
             action("select-pattern", () => select_pattern.begin());
-            action("permissions", () => permissions.begin());
+            action("permissions", () => { var items = current.selected();
+                                          if(items.size > 0)
+                                              new PermissionsDialog(window, items);
+                });
             action("smb-password", () => smb_password.begin());
             action("connect-server", () => connect_server.begin());
         }
@@ -200,6 +209,41 @@ namespace MajorisFiles {
                 Dialogs.error(window, e.message);
             }
         }
+        async void custom_icon(bool reset)
+        {
+            var items = current.selected();
+            if(items.size == 0)
+                return;
+            try {
+                string uri = "";
+                if(!reset)
+                {
+                    var dialog = new Gtk.FileDialog();
+                    dialog.title = "Choose Custom Icon";
+                    var filter = new Gtk.FileFilter();
+                    filter.name = "Images";
+                    filter.add_mime_type("image/*");
+                    var filters = new GLib.ListStore(typeof(Gtk.FileFilter));
+                    filters.append(filter);
+                    dialog.filters = filters;
+                    var icon = yield dialog.open(window, null);
+                    if(!icon.is_native())
+                        throw new FileError.UNSUPPORTED("Custom icons must be local images");
+                    uri = icon.get_uri();
+                }
+                foreach(var item in items)
+                {
+                    var info = new FileInfo();
+                    info.set_attribute_string("metadata::custom-icon", uri);
+                    yield item.file.set_attributes_async(info, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null, null);
+                }
+                current.navigate(current.location, false);
+            }
+            catch(Error e) {
+                if(!(e is Gtk.DialogError.DISMISSED) && !(e is IOError.CANCELLED))
+                    Dialogs.error(window, e.message);
+            }
+        }
         async void batch_rename()
         {
             var items = current.selected();
@@ -309,38 +353,10 @@ namespace MajorisFiles {
             var pattern = yield Dialogs.prompt(window, "Select by Filename Pattern", "*");
             if(pattern == null)
                 return;
-            current.selection.unselect_all();
-            for(uint i = 0; i < current.selection.get_n_items(); i++)
-                if(PatternSpec.match_simple(pattern, ((FileItem)current.selection.get_item(i)).name))
-                    current.selection.select_item(i, false);
-        }
-        async void permissions()
-        {
-            var items = current.selected();
-            if(items.size == 0)
-                return;
-            var value = yield Dialogs.prompt(window, "POSIX Permissions (octal, for example 0644)", "0644");
-            if(value == null)
-                return;
-            uint64 mode;
-            if(!uint64.try_parse(value, out mode, null, 8) || mode > 0777)
-            {
-                Dialogs.error(window, "Use permission bits between 0000 and 0777");
-                return;
-            }
-            try {
-                foreach(var item in items)
-                {
-                    if(!item.file.is_native() || !item.info.has_attribute("unix::mode"))
-                        throw new FileError.UNSUPPORTED("This location does not support POSIX permissions");
-                    var info = new FileInfo();
-                    info.set_attribute_uint32("unix::mode", (uint)mode);
-                    yield item.file.set_attributes_async(info, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null, null);
-                }
-            }
-            catch(Error e) {
-                Dialogs.error(window, e.message);
-            }
+            current.active_selection.unselect_all();
+            for(uint i = 0; i < current.active_selection.get_n_items(); i++)
+                if(PatternSpec.match_simple(pattern, ((FileItem)current.active_selection.get_item(i)).name))
+                    current.active_selection.select_item(i, false);
         }
         async void smb_password()
         {

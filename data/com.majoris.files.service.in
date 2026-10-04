@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=com.majoris.files
+Exec=@bindir@/majoris-files --gapplication-service

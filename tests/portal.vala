@@ -45,7 +45,9 @@ void test_success_and_authorization()
                 var uris = result.get_child_value(1).lookup_value("uris", new VariantType("as"));
                 assert(uris.n_children() == 1 && uris.get_child_value(0).get_string() == file.get_uri());
                 finished++;
-            } catch(Error e) { error("%s", e.message); }
+            }
+            catch(Error e) { error("%s", e.message);
+            }
         });
         string close_handle = "/org/freedesktop/portal/desktop/request/test/close";
         connection.call.begin(connection.unique_name, "/org/freedesktop/portal/desktop", "org.freedesktop.impl.portal.FileChooser", "OpenFile", new Variant("(osss@a{sv})", close_handle, "test.app", "", "Close", new VariantBuilder(VariantType.VARDICT).end()), new VariantType("(ua{sv})"), DBusCallFlags.NONE, 10000, null, (obj, res) => {
@@ -53,51 +55,80 @@ void test_success_and_authorization()
                 var result = connection.call.end(res);
                 assert(result.get_child_value(0).get_uint32() == 1);
                 finished++;
-            } catch(Error e) { error("%s", e.message); }
+            }
+            catch(Error e) { error("%s", e.message);
+            }
         });
         stranger.call.begin(connection.unique_name, "/org/freedesktop/portal/desktop", "org.freedesktop.impl.portal.FileChooser", "OpenFile", new Variant("(osss@a{sv})", "/org/freedesktop/portal/desktop/request/test/stranger", "test.app", "", "Forbidden", new VariantBuilder(VariantType.VARDICT).end()), null, DBusCallFlags.NONE, 10000, null, (obj, res) => {
-            try { stranger.call.end(res); assert_not_reached(); }
-            catch(Error e) { assert(DBusError.get_remote_error(e) == "org.freedesktop.DBus.Error.AccessDenied"); rejected = true; }
+            try { stranger.call.end(res);
+                  assert_not_reached();
+            }
+            catch(Error e) { assert(DBusError.get_remote_error(e) == "org.freedesktop.DBus.Error.AccessDenied");
+                             rejected = true;
+            }
         });
         bool acted = false;
         Timeout.add(20, () => {
-            if(finished == 2 && rejected && close_returned && close_denied) { loop.quit(); return Source.REMOVE; }
-            if(!acted && app.get_windows().length() == 2) {
+            if(finished == 2 && rejected && close_returned && close_denied)
+            {
+                loop.quit();
+                return Source.REMOVE;
+            }
+            if(!acted && app.get_windows().length() == 2)
+            {
                 ChooserWindow? success = null;
-                foreach(var candidate in app.get_windows()) {
+                foreach(var candidate in app.get_windows())
+                {
                     var window = (ChooserWindow)candidate;
-                    if(window.title == "Select") success = window;
+                    if(window.title == "Select")
+                        success = window;
                 }
-                if(success == null || success.browser.directory.loading || !success.browser.location.equal(File.new_for_path(temp))) return Source.CONTINUE;
+                if(success == null || success.browser.directory.loading || !success.browser.location.equal(File.new_for_path(temp)))
+                    return Source.CONTINUE;
                 bool found = false;
-                for(uint i = 0; i < success.browser.selection.get_n_items(); i++) {
+                for(uint i = 0; i < success.browser.selection.get_n_items(); i++)
+                {
                     var item = (FileItem)success.browser.selection.get_item(i);
-                    if(item.file.equal(file)) { success.browser.selection.select_item(i, true); found = true; }
+                    if(item.file.equal(file))
+                    {
+                        success.browser.selection.select_item(i, true);
+                        found = true;
+                    }
                 }
-                if(!found) return Source.CONTINUE;
+                if(!found)
+                    return Source.CONTINUE;
                 acted = true;
                 success.accept_selection.begin();
                 stranger.call.begin(connection.unique_name, close_handle, "org.freedesktop.impl.portal.Request", "Close", null, null, DBusCallFlags.NONE, 10000, null, (obj, res) => {
-                    try { stranger.call.end(res); assert_not_reached(); }
+                    try { stranger.call.end(res);
+                          assert_not_reached();
+                    }
                     catch(Error e) {
                         assert(DBusError.get_remote_error(e) == "org.freedesktop.DBus.Error.AccessDenied");
                         close_denied = true;
                         connection.call.begin(connection.unique_name, close_handle, "org.freedesktop.impl.portal.Request", "Close", null, null, DBusCallFlags.NONE, 10000, null, (o, r) => {
-                            try { connection.call.end(r); close_returned = true; }
-                            catch(Error close_error) { error("%s", close_error.message); }
+                            try { connection.call.end(r);
+                                  close_returned = true;
+                            }
+                            catch(Error close_error) { error("%s", close_error.message);
+                            }
                         });
                     }
                 });
             }
             return Source.CONTINUE;
         });
-        uint watchdog = Timeout.add_seconds(15, () => { error("Portal success/authorization timed out"); });
+        uint watchdog = Timeout.add_seconds(15, () => { error("Portal success/authorization timed out");
+            });
         loop.run();
         Source.remove(watchdog);
         assert(app.get_windows().length() == 0);
         connection.unregister_object(registration);
         stranger.close_sync();
-    } catch(Error e) { error("%s", e.message); }
+    }
+    catch(Error e) {
+        error("%s", e.message);
+    }
 }
 void test_portal()
 {

@@ -21,6 +21,8 @@ Polkit agent, xdg-desktop-portal, the document portal, the GTK GStreamer media
 backend, suitable GStreamer codecs and image codecs. Poppler and libarchive are
 linked system libraries. Install `xdg-terminal-exec` and register the Majoris
 terminal as the configured terminal provider. Runtime UI does not install packages.
+Install the `acl` utilities for advanced POSIX ACL editing. Normal permission
+changes use GIO, run as the desktop user, and report authorization failures.
 
 ## File chooser
 

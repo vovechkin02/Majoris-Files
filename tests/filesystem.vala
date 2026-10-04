@@ -6,17 +6,133 @@ int main(string[] args)
     Test.add_func("/filesystem/missing-parts", () => run_async.begin(true));
     // Async tests run within their own bounded main loop.
     Test.add_func("/filesystem/operations", () => operations_test());
-    Test.add_func("/filesystem/archive-roundtrip",()=>archive_test());
+    Test.add_func("/filesystem/archive-roundtrip", () => archive_test());
+    Test.add_func("/filesystem/content-counts-and-identity", () => {
+        var loop = new MainLoop();
+        bool passed = false;
+        content_case.begin((obj, res) => { try { content_case.end(res);
+                                                 passed = true;
+                                           }
+                                           catch(Error e) { error("%s", e.message);
+                                           }
+                                           loop.quit();
+            });
+        uint watchdog = Timeout.add_seconds(10, () => { error("Content/count test timed out");
+            });
+        loop.run();
+        Source.remove(watchdog);
+        assert(passed);
+    });
     return Test.run();
 }
-void archive_test() {
-    var loop=new MainLoop(); bool passed=false; archive_case.begin((obj,res)=>{ try { archive_case.end(res); passed=true; } catch(Error e) { error("%s",e.message); } loop.quit(); }); uint timeout=Timeout.add_seconds(15,()=>{ error("Archive test timed out"); }); loop.run(); Source.remove(timeout); assert(passed);
+async void content_case() throws Error
+{
+    var temp = DirUtils.make_tmp("majoris-content-XXXXXX");
+    var root = File.new_for_path(temp);
+    yield root.get_child("folder").make_directory_async(Priority.DEFAULT, null);
+    FileUtils.set_contents(Path.build_filename(temp, "folder", "report.txt"), "A Unicode café report");
+    FileUtils.set_contents(Path.build_filename(temp, "folder", "other.txt"), "unrelated");
+    yield root.get_child("linked").make_symbolic_link_async(root.get_child("folder").get_path(), Priority.DEFAULT, null);
+    var query = new SearchQuery();
+    query.content = "CAFÉ";
+    assert(SearchQuery.deserialize(query.serialize()).content == "CAFÉ");
+    var search = new SearchController();
+    uint found = 0;
+    search.found.connect((item) => { assert(item.name == "report.txt");
+                                     found++;
+        });
+    yield search.search(root, query);
+    assert(found == 1);
+    found = 0;
+    yield search.search(root, query, null, false);
+    assert(found == 0);
+    var roots = new Gee.ArrayList<File>();
+    roots.add(root.get_child("folder"));
+    var counts = new FileCounts();
+    yield counts.scan(roots, new Cancellable());
+    assert(counts.files == 2 && counts.folders == 1 && counts.unreadable == 0);
+    var file = root.get_child("folder/report.txt");
+    var permission_roots = new Gee.ArrayList<File>();
+    permission_roots.add(root);
+    yield PermissionService.apply(permission_roots, 0600, 0700, true, null, null, new Cancellable());
+    var permission_info = yield file.query_info_async("unix::mode", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null);
+    assert((permission_info.get_attribute_uint32("unix::mode") & 0777) == 0600);
+    var folder_info = yield root.get_child("folder").query_info_async("unix::mode", FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
+    assert((folder_info.get_attribute_uint32("unix::mode") & 0777) == 0700);
+    var metadata = new MetadataStore(Path.build_filename(temp, "meta.db"));
+    var info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
+    metadata.reconcile(new FileItem(file, info));
+    metadata.set_favorite(file, true);
+    metadata.set_tags(file, "Work");
+    var renamed = yield file.set_display_name_async("renamed.txt", Priority.DEFAULT, null);
+    var renamed_info = yield renamed.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
+    metadata.reconcile(new FileItem(renamed, renamed_info));
+    if(info.has_attribute("time::created") && info.get_attribute_uint64("time::created") != 0)
+    {
+        assert(metadata.favorite(renamed));
+        assert(metadata.tags(renamed) == "Work");
+    }
+    yield OperationManager.remove_tree(root, new Cancellable());
 }
-async void archive_case() throws Error {
-    var temp=DirUtils.make_tmp("majoris-archive-XXXXXX"); var root=File.new_for_path(temp); FileUtils.set_contents(Path.build_filename(temp,"hello.txt"),"hello archive"); var files=new Gee.ArrayList<File>(); files.add(root.get_child("hello.txt")); var job=new Job("archive test");
-    foreach(var format in new string[]{"zip","7z","tar","tar.gz","tar.xz"}) { var archive=root.get_child("test."+format); yield ArchiveService.compress(files,archive,format,job); var target=root.get_child("extracted-"+format); yield ArchiveService.extract(archive,target,job); string result; FileUtils.get_contents(target.get_child("hello.txt").get_path(),out result); assert(result=="hello archive"); }
-    var malicious=root.get_child("malicious.tar"); var writer=new Archive.Write(); writer.set_format_pax_restricted(); writer.open_filename(malicious.get_path()); var entry=new Archive.Entry(); entry.set_pathname("../escaped.txt"); entry.set_filetype(Archive.FileType.IFREG); entry.set_size(4); entry.set_perm(0600); writer.write_header(entry); writer.write_data("oops".data); writer.close();
-    bool rejected=false; var target=root.get_child("unsafe"); try { yield ArchiveService.extract(malicious,target,job); } catch(Error e) { rejected=true; } assert(rejected); assert(!root.get_child("escaped.txt").query_exists()); assert(!target.query_exists()); yield OperationManager.remove_tree(root,new Cancellable());
+void archive_test()
+{
+    var loop = new MainLoop();
+    bool passed = false;
+    archive_case.begin((obj, res) => { try { archive_case.end(res);
+                                             passed = true;
+                                       }
+                                       catch(Error e) { error("%s", e.message);
+                                       }
+                                       loop.quit();
+        });
+    uint timeout = Timeout.add_seconds(15, () => { error("Archive test timed out");
+        });
+    loop.run();
+    Source.remove(timeout);
+    assert(passed);
+}
+async void archive_case() throws Error
+{
+    var temp = DirUtils.make_tmp("majoris-archive-XXXXXX");
+    var root = File.new_for_path(temp);
+    FileUtils.set_contents(Path.build_filename(temp, "hello.txt"), "hello archive");
+    var files = new Gee.ArrayList<File>();
+    files.add(root.get_child("hello.txt"));
+    var job = new Job("archive test");
+    foreach(var format in new string[] {"zip", "7z", "tar", "tar.gz", "tar.xz"})
+    {
+        var archive = root.get_child("test." + format);
+        yield ArchiveService.compress(files, archive, format, job);
+        var target = root.get_child("extracted-" + format);
+        yield ArchiveService.extract(archive, target, job);
+        string result;
+        FileUtils.get_contents(target.get_child("hello.txt").get_path(), out result);
+        assert(result == "hello archive");
+    }
+    var malicious = root.get_child("malicious.tar");
+    var writer = new Archive.Write();
+    writer.set_format_pax_restricted();
+    writer.open_filename(malicious.get_path());
+    var entry = new Archive.Entry();
+    entry.set_pathname("../escaped.txt");
+    entry.set_filetype(Archive.FileType.IFREG);
+    entry.set_size(4);
+    entry.set_perm(0600);
+    writer.write_header(entry);
+    writer.write_data("oops".data);
+    writer.close();
+    bool rejected = false;
+    var target = root.get_child("unsafe");
+    try {
+        yield ArchiveService.extract(malicious, target, job);
+    }
+    catch(Error e) {
+        rejected = true;
+    }
+    assert(rejected);
+    assert(!root.get_child("escaped.txt").query_exists());
+    assert(!target.query_exists());
+    yield OperationManager.remove_tree(root, new Cancellable());
 }
 async void run_async(bool missing)
 {
@@ -69,6 +185,11 @@ async void split_case(bool missing) throws Error
         FileUtils.get_contents(output.get_child("original.bin").get_path(), out result);
         assert(result == original);
         assert((yield SplitService.checksum(source, ChecksumType.SHA256, job.cancellable)) == (yield SplitService.checksum(output.get_child("original.bin"), ChecksumType.SHA256, job.cancellable)));
+        var raw = root.get_child("raw-output");
+        yield raw.make_directory_async(Priority.DEFAULT, null);
+        yield SplitService.join_raw(parts.get_child("original.bin.part002"), raw, job);
+        FileUtils.get_contents(raw.get_child("original.bin").get_path(), out result);
+        assert(result == original);
     }
     yield OperationManager.remove_tree(root, new Cancellable());
 }
@@ -106,6 +227,7 @@ async void operation_case() throws Error
     var original = root.get_child("original.txt");
     yield manager.rename(original, "renamed.txt");
     assert(root.get_child("renamed.txt").query_exists());
+    manager = new OperationManager(new MetadataStore(Path.build_filename(temp, "metadata.db")));
     yield manager.undo();
     assert(original.query_exists());
     var files = new Gee.ArrayList<File>();
