@@ -1,6 +1,6 @@
 namespace MajorisFiles {
     public enum OperationKind {
-        COPY, MOVE, TRASH, DELETE, CREATE_FOLDER, RENAME
+        COPY, MOVE, TRASH, DELETE, CREATE_FOLDER, RENAME, LINK
     }
     public class Job : Object {
         public string title {
@@ -83,7 +83,7 @@ namespace MajorisFiles {
                     var entry = entries.get_child_value(i);
                     uint kind = entry.get_child_value(0).get_uint32();
                     string source = entry.get_child_value(1).get_string(), destination = entry.get_child_value(2).get_string();
-                    if(kind > OperationKind.RENAME || kind == OperationKind.DELETE || Uri.parse_scheme(source) == null || Uri.parse_scheme(destination) == null)
+                    if(kind > OperationKind.LINK || kind == OperationKind.DELETE || Uri.parse_scheme(source) == null || Uri.parse_scheme(destination) == null)
                         continue;
                     var restored = new JournalEntry((OperationKind)kind, File.new_for_uri(source), File.new_for_uri(destination));
                     if(version_two)
@@ -214,7 +214,15 @@ namespace MajorisFiles {
                             destination_name = Path.get_basename(original_path);
                     }
                     File? destination = target == null ? null : target.get_child(destination_name);
-                    if (destination != null && (kind == OperationKind.COPY || kind == OperationKind.MOVE))
+                    if(kind == OperationKind.LINK)
+                    {
+                        if(destination == null || !source.is_native() || !destination.is_native())
+                            throw new FileError.UNSUPPORTED("Symbolic links require local source and destination paths");
+                        // Exclusive creation leaves any existing item untouched.
+                        yield destination.make_symbolic_link_async(source.get_path(), Priority.DEFAULT, job.cancellable);
+                        yield record(kind, source, destination);
+                    }
+                    else if (destination != null && (kind == OperationKind.COPY || kind == OperationKind.MOVE))
                     {
                         if (source.equal(destination) || destination.has_prefix(source))
                             throw new FileError.INVALID("The destination is inside the source or is the source itself");
@@ -701,7 +709,7 @@ namespace MajorisFiles {
                 yield entry.destination.move_async(entry.source, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
                 metadata.relocate(entry.destination, entry.source);
             }
-            else if (entry.kind == OperationKind.CREATE_FOLDER)
+            else if (entry.kind == OperationKind.CREATE_FOLDER || entry.kind == OperationKind.LINK)
                 yield entry.destination.delete_async(Priority.DEFAULT, null);
             else if (entry.kind == OperationKind.COPY)
             {
@@ -766,6 +774,8 @@ namespace MajorisFiles {
             }
             else if (entry.kind == OperationKind.CREATE_FOLDER)
                 yield entry.destination.make_directory_async(Priority.DEFAULT, null);
+            else if(entry.kind == OperationKind.LINK)
+                yield entry.destination.make_symbolic_link_async(entry.source.get_path(), Priority.DEFAULT, null);
             else if (entry.kind == OperationKind.COPY)
             {
                 var job = new Job("Redo Copy");

@@ -109,10 +109,15 @@ namespace MajorisFiles {
         public async void add_bookmark(File file) throws Error
         {
             string content = "";
+            string? etag = null;
             try {
-                FileUtils.get_contents(bookmarks.get_path(), out content);
+                uint8[] bytes;
+                yield bookmarks.load_contents_async(null, out bytes, out etag);
+                content = (string)bytes;
             }
-            catch (Error e) {}
+            catch (IOError.NOT_FOUND e) {
+                content = "";
+            }
             foreach (var line in content.split("\n"))
                 if (line.split(" ", 2)[0] == file.get_uri())
                     return;
@@ -120,7 +125,7 @@ namespace MajorisFiles {
             if(content != "" && !content.has_suffix("\n"))
                 content += "\n";
             uint8[] bytes = (content + file.get_uri() + "\n").data;
-            yield bookmarks.replace_contents_async(bytes, null, false, FileCreateFlags.PRIVATE, null, null);
+            yield bookmarks.replace_contents_async(bytes, etag, false, FileCreateFlags.PRIVATE, null, null);
             reload();
         }
         public async void edit_bookmark(File file, string? label, bool remove = false, int move = 0) throws Error
@@ -155,6 +160,41 @@ namespace MajorisFiles {
                     throw new FileError.INVALID("Invalid bookmark label");
                 lines[index] = file.get_uri() + " " + label.strip();
             }
+            var output = new StringBuilder();
+            foreach(var line in lines)
+                output.append(line + "\n");
+            yield bookmarks.replace_contents_async(output.str.data, etag, false, FileCreateFlags.PRIVATE, null, null);
+            reload();
+        }
+        public async void reorder_bookmark(File source, File target, bool after) throws Error
+        {
+            if(source.equal(target))
+                return;
+            uint8[] content;
+            string? etag;
+            yield bookmarks.load_contents_async(null, out content, out etag);
+            var lines = new Gee.ArrayList<string>();
+            string? moved = null;
+            foreach(var line in ((string)content).split("\n"))
+            {
+                if(line.strip() == "")
+                    continue;
+                if(line.split(" ", 2)[0] == source.get_uri())
+                    moved = line;
+                else lines.add(line);
+            }
+            if(moved == null)
+                throw new FileError.INVALID("The dragged bookmark no longer exists");
+            int position = -1;
+            for(int i = 0; i < lines.size; i++)
+                if(lines[i].split(" ", 2)[0] == target.get_uri())
+                {
+                    position = i;
+                    break;
+                }
+            if(position < 0)
+                throw new FileError.INVALID("The destination bookmark no longer exists");
+            lines.insert(position + (after ? 1 : 0), moved);
             var output = new StringBuilder();
             foreach(var line in lines)
                 output.append(line + "\n");

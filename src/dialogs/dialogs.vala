@@ -1,4 +1,5 @@
 namespace MajorisFiles {
+    public delegate void PropertiesPermissions();
     public class Dialogs : Object {
         public static void error(Gtk.Widget parent, string message)
         {
@@ -64,8 +65,10 @@ namespace MajorisFiles {
                 message = "Enter a non-empty password up to 4096 bytes. Confirmation must match.";
             }
         }
-        public static void show_properties(Gtk.Window parent, Gee.List<FileItem> items, MetadataStore metadata)
+        public static void show_properties(Gtk.Window parent, Gee.List<FileItem> items, MetadataStore metadata, owned PropertiesPermissions? permissions = null)
         {
+            if(items.size == 0)
+                return;
             var dialog = new Adw.PreferencesDialog();
             dialog.title = "Properties";
             var page = new Adw.PreferencesPage();
@@ -76,7 +79,8 @@ namespace MajorisFiles {
             foreach (var item in items)
                 size += item.bytes;
             group.add(row("Items", items.size.to_string()));
-            group.add(row("Size", Paths.size(size) + " (" + size.to_string() + " bytes)"));
+            var size_row = row("Size", Paths.size(size) + " (" + size.to_string() + " bytes)");
+            group.add(size_row);
             var counts_row = row("Contents", "Calculating…");
             group.add(counts_row);
             var allocated_row = row("Size on Disk", "Calculating…");
@@ -90,6 +94,7 @@ namespace MajorisFiles {
                 counts_row.subtitle = "%" + uint64.FORMAT + " files, %" + uint64.FORMAT + " folders";
                 counts_row.subtitle = counts_row.subtitle.printf(counts.files, counts.folders) + (counts.unreadable > 0 ? " · Some items are unreadable" : "");
                 allocated_row.subtitle = Paths.size(counts.allocated);
+                size_row.subtitle = Paths.size(counts.bytes) + " (" + counts.bytes.to_string() + " bytes)" + (counts.unreadable > 0 ? " · Partial total" : "");
             });
             counts.scan.begin(roots, token, (obj, res) => { try { counts.scan.end(res);
                                                             }
@@ -101,14 +106,47 @@ namespace MajorisFiles {
                 var types = new Gee.HashSet<string>();
                 foreach(var item in items)
                     types.add(item.mime);
-                group.add(row("Types", types.size == 1 ? items[0].mime : "Multiple types"));
+                var type_names = new Gee.ArrayList<string>();
+                type_names.add_all(types);
+                type_names.sort((a, b) => strcmp(a, b));
+                group.add(row("Types", string.joinv(", ", type_names.to_array())));
                 var common = items[0].file.get_parent();
                 foreach(var item in items)
                     if(common != null && (item.file.get_parent() == null || !common.equal(item.file.get_parent())))
                         common = null;
                 group.add(row("Location", common == null ? "Multiple locations" : common.get_parse_name()));
+                string? common_mode = null;
+                bool mixed_mode = false;
+                foreach(var item in items)
+                {
+                    string mode = item.info.has_attribute("unix::mode") ? "%04o".printf(item.info.get_attribute_uint32("unix::mode") & 07777) : "Unavailable";
+                    if(common_mode == null)
+                        common_mode = mode;
+                    else if(common_mode != mode)
+                        mixed_mode = true;
+                }
+                group.add(row("Permissions", mixed_mode ? "Multiple permissions" : common_mode ?? "Unavailable"));
+                var common_tags = new Gee.ArrayList<string>();
+                foreach(var tag in metadata.tags(items[0].file).split(","))
+                    if(tag.strip() != "")
+                        common_tags.add(tag.strip());
+                foreach(var item in items)
+                {
+                    var present = new Gee.HashSet<string>();
+                    foreach(var tag in metadata.tags(item.file).split(","))
+                        present.add(tag.strip());
+                    for(int i = common_tags.size - 1; i >= 0; i--)
+                        if(!present.contains(common_tags[i]))
+                            common_tags.remove_at(i);
+                }
+                group.add(row("Common Tags", common_tags.size == 0 ? "None" : string.joinv(", ", common_tags.to_array())));
                 var favorites = new Adw.SwitchRow();
                 favorites.title = "Favorite All Selected Items";
+                bool all_favorites = true;
+                foreach(var item in items)
+                    if(!metadata.favorite(item.file))
+                        all_favorites = false;
+                favorites.active = all_favorites;
                 group.add(favorites);
                 favorites.notify["active"].connect(() => { foreach(var item in items)
                                                                metadata.set_favorite(item.file, favorites.active);
@@ -120,6 +158,14 @@ namespace MajorisFiles {
                                                metadata.set_tags(item.file, tags.text);
                     });
                 group.add(tags);
+            }
+            if(permissions != null)
+            {
+                var edit = new Gtk.Button.with_label("Edit Permissions…");
+                edit.clicked.connect(() => { dialog.close();
+                                             permissions();
+                    });
+                group.add(edit);
             }
             if (items.size == 1)
             {

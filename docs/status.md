@@ -24,7 +24,11 @@ and views. It also restores search filters/scopes, selected files and scroll
 positions in Grid/List/Gallery; deeper Column-view state still needs acceptance.
 Tab context operations and detached-tab routing are implemented.
 Native file drag/drop supports folder targets and spring navigation; folder rows
-support middle-click tabs. Local text/JSON/XML content search is bounded to 4 MiB;
+support middle-click tabs. Bookmark drags reorder entries and preserve labels using
+optimistic concurrency checks. File drops move within a verified local filesystem,
+copy across filesystems or when identity cannot be verified, and honor Ctrl copy,
+Shift move and Ctrl+Shift local symbolic links. Links use cancellable operations and
+identity-checked persistent undo/redo. Local text/JSON/XML content search is bounded to 4 MiB;
 Search Home scans recursively. Search Everywhere scans Home and mounted roots,
 deduplicates overlapping roots, reports unreadable folders and closes cancelled
 enumerators. Saved searches preserve their scope and accept earlier formats.
@@ -60,10 +64,13 @@ Undo/redo stores file identities, refuses replacement files and serializes histo
 actions; legacy history without identities cannot safely be reversed.
 Permissions offer asynchronous platform account/group lookup and numeric fallback;
 properties show SELinux context where available.
+Multi-selection properties list types, shared location, common tags and permissions,
+update recursive byte totals, and open the permissions editor for the captured
+selection. Bulk favorite controls reflect whether all selected items are favorites.
 Disk-image quick actions delegate read-only loop creation, partition/filesystem
 mounting and unmount/detach to UDisks. Inventory selection is tested; actual mounts,
 Polkit cancellation and busy-device handling require a disposable Majoris VM.
-Validation currently includes 38 core/filesystem/UI/portal cases plus a separate
+Validation currently includes 39 core/filesystem/UI/portal cases plus a separate
 actual-executable crash-recovery suite. This does not substitute for the platform
 acceptance work below.
 
@@ -89,8 +96,7 @@ SaveFiles is not implemented or advertised (backend interface version 1).
 Other outstanding specification areas include:
 
 * Complete Column-view session restoration and broad tab transfer acceptance.
-* Grouping, bookmark
-  drop/reordering and cross-filesystem drop-action policy.
+* Grouping and broad external drag negotiation/tab-hover acceptance.
 * Full nested conflict policies, journal operation grouping, remote
   Trash reconciliation, pause/resume/retry and durable job restart.
 * Indexed/full-text document search and indexed relevance ranking.

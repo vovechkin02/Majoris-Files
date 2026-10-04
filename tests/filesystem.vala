@@ -311,6 +311,20 @@ async void operation_case() throws Error
     files.add(original);
     yield manager.run(OperationKind.COPY, files, root.get_child("folder"));
     assert(root.get_child("folder/original.txt").query_exists());
+    var links = root.get_child("links");
+    yield links.make_directory_async(Priority.DEFAULT, null);
+    yield manager.run(OperationKind.LINK, files, links);
+    var created_link = links.get_child("original.txt");
+    var link_info = yield created_link.query_info_async("standard::is-symlink,standard::symlink-target", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null);
+    assert(link_info.get_is_symlink() && link_info.get_symlink_target() == original.get_path());
+    manager = new OperationManager(new MetadataStore(Path.build_filename(temp, "metadata.db")));
+    yield manager.undo();
+    assert(!created_link.query_exists() && original.query_exists());
+    yield manager.redo();
+    assert(created_link.query_exists());
+    yield manager.run(OperationKind.LINK, files, links);
+    var conflict_job = (Job)manager.jobs.get_item(manager.jobs.get_n_items() - 1);
+    assert(conflict_job.error != "" && original.query_exists() && created_link.query_exists());
     // A destructive recursive operation must delete the link rather than its target.
     var outside = root.get_child("outside");
     yield outside.make_directory_async(Priority.DEFAULT, null);

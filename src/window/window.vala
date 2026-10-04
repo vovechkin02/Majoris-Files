@@ -193,7 +193,8 @@ namespace MajorisFiles {
                 }));
             action("properties", () => { var chosen = current.selected();
                                          if (chosen.size > 0)
-                                             Dialogs.show_properties(this, chosen, metadata);
+                                             Dialogs.show_properties(this, chosen, metadata, () => { new PermissionsDialog(this, chosen);
+                                                 });
                 });
             action("favorite", () => { foreach (var item in current.selected())
                                            metadata.set_favorite(item.file, !metadata.favorite(item.file));
@@ -259,6 +260,11 @@ namespace MajorisFiles {
                                                                           if(root != null)
                                                                               root.operations.run.begin(move ? OperationKind.MOVE : OperationKind.COPY, files, target, root);
                 });
+            browser.link_requested.connect((files, target) => {
+                var root = browser.get_root() as FilesWindow;
+                if(root != null)
+                    root.operations.run.begin(OperationKind.LINK, files, target, root);
+            });
             browser.activated.connect((item) => {
                 var root = browser.get_root() as FilesWindow;
                 if(root == null)

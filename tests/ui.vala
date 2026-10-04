@@ -45,6 +45,7 @@ int main(string[] args)
     Test.add_func("/ui/column-selection", () => columns_test());
     Test.add_func("/ui/session-detail-recovery", () => session_details_test());
     Test.add_func("/ui/disk-image-inventory", () => disk_image_inventory_test());
+    Test.add_func("/ui/bookmark-reorder-and-drop-policy", () => bookmark_drop_test());
     Test.add_func("/ui/transferred-tab-routing", () => {
         try {
             var temp = DirUtils.make_tmp("majoris-tabs-XXXXXX");
@@ -599,5 +600,60 @@ class FixtureColumn : Object, ColumnProvider {
     public int compare(FileItem first, FileItem second, MetadataStore metadata)
     {
         return first.bytes < second.bytes ? -1 : first.bytes == second.bytes ? 0 : 1;
+    }
+}
+
+void bookmark_drop_test()
+{
+    var loop = new MainLoop();
+    bookmark_drop_flow.begin((obj, res) => { bookmark_drop_flow.end(res);
+                                             loop.quit();
+        });
+    loop.run();
+}
+async void bookmark_drop_flow()
+{
+    try {
+        var root = DirUtils.make_tmp("majoris-drop-XXXXXX");
+        var a = File.new_for_path(root).get_child("a");
+        var b = File.new_for_path(root).get_child("b");
+        var c = File.new_for_path(root).get_child("c");
+        a.make_directory();
+        b.make_directory();
+        c.make_directory();
+        var places = new Places();
+        yield places.add_bookmark(a);
+        yield places.add_bookmark(b);
+        yield places.add_bookmark(c);
+        yield places.edit_bookmark(a, "A label with spaces");
+        yield places.reorder_bookmark(c, a, false);
+        yield places.reorder_bookmark(a, b, true);
+        var ordered = new Gee.ArrayList<Place>();
+        foreach(var place in places.entries)
+            if(place.bookmark)
+                ordered.add(place);
+        assert(ordered.size == 3);
+        assert(ordered[0].file.equal(c) && ordered[1].file.equal(b) && ordered[2].file.equal(a));
+        assert(ordered[2].label == "A label with spaces");
+        bool rejected = false;
+        try {
+            yield places.reorder_bookmark(a, File.new_for_path(root).get_child("missing"), false);
+        }
+        catch(MajorisFiles.FileError.INVALID e) {
+            rejected = true;
+        }
+        assert(rejected);
+        var sources = new Gee.ArrayList<File>();
+        sources.add(a);
+        sources.add(b);
+        assert(yield DropPolicy.same_filesystem(sources, c));
+        sources.add(File.new_for_uri("sftp://example.invalid/file"));
+        assert(!(yield DropPolicy.same_filesystem(sources, c)));
+        yield places.edit_bookmark(a, null, true);
+        yield places.edit_bookmark(b, null, true);
+        yield places.edit_bookmark(c, null, true);
+    }
+    catch(Error e) {
+        error("%s", e.message);
     }
 }

@@ -17,6 +17,7 @@ namespace MajorisFiles {
             }
         }
         public signal void transfer_requested(Gee.ArrayList<File> files, File target, bool move);
+        public signal void link_requested(Gee.ArrayList<File> files, File target);
         public File location {
             owned get {
                 if(directory.location.get_uri() == "majoris:///home")
@@ -961,7 +962,34 @@ namespace MajorisFiles {
                 sidebar.append(label);
                 if(!chooser_mode)
                     add_drop(label, () => place.file);
+                if(place.bookmark)
+                    add_bookmark_drag(label, place);
             }
+        }
+        void add_bookmark_drag(Gtk.Widget widget, Place place)
+        {
+            var drag = new Gtk.DragSource();
+            drag.actions = Gdk.DragAction.MOVE;
+            drag.prepare.connect(() => {
+                var value = Value(typeof(Place));
+                value.set_object(place);
+                return new Gdk.ContentProvider.for_value(value);
+            });
+            widget.add_controller(drag);
+            var drop = new Gtk.DropTarget(typeof(Place), Gdk.DragAction.MOVE);
+            drop.drop.connect((value, x, y) => {
+                var source = value.get_object() as Place;
+                if(source == null || !source.bookmark)
+                    return false;
+                places.reorder_bookmark.begin(source.file, place.file, y >= widget.get_height() / 2.0, (obj, res) => {
+                    try { places.reorder_bookmark.end(res);
+                    }
+                    catch(Error e) { error(e.message);
+                    }
+                });
+                return true;
+            });
+            widget.add_controller(drop);
         }
         public void navigate(File file, bool record = true)
         {
@@ -1377,7 +1405,7 @@ namespace MajorisFiles {
                                        if(!chooser_mode)
                                        {
                                            var drag = new Gtk.DragSource();
-                                           drag.actions = Gdk.DragAction.COPY | Gdk.DragAction.MOVE;
+                                           drag.actions = Gdk.DragAction.COPY | Gdk.DragAction.MOVE | Gdk.DragAction.LINK;
                                            drag.prepare.connect(() => {
                         var item = li.item as FileItem;
                         if(item == null)
@@ -1481,7 +1509,7 @@ namespace MajorisFiles {
         }
         void add_drop(Gtk.Widget widget, owned DropFolder folder)
         {
-            var drop = new Gtk.DropTarget(typeof(Gdk.FileList), Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
+            var drop = new Gtk.DropTarget(typeof(Gdk.FileList), Gdk.DragAction.COPY | Gdk.DragAction.MOVE | Gdk.DragAction.LINK);
             uint spring = 0;
             drop.enter.connect(() => {
                 var target = folder();
@@ -1520,12 +1548,39 @@ namespace MajorisFiles {
                         return false;
                     files.add(file);
                 }
-                var drag = drop.current_drop == null ? null : drop.current_drop.get_drag();
-                bool move = drag != null && drag.get_selected_action() == Gdk.DragAction.MOVE;
-                transfer_requested(files, target, move);
+                var modifiers = drop.get_current_event_state();
+                bool copy_override = (modifiers & Gdk.ModifierType.CONTROL_MASK) != 0;
+                bool move_override = (modifiers & Gdk.ModifierType.SHIFT_MASK) != 0;
+                var offered = drop.current_drop == null ? Gdk.DragAction.COPY : drop.current_drop.get_actions();
+                if(copy_override && move_override)
+                {
+                    if((offered & Gdk.DragAction.LINK) == 0)
+                        return false;
+                    if(!target.is_native())
+                        return false;
+                    foreach(var file in files)
+                        if(!file.is_native())
+                            return false;
+                    link_requested(files, target);
+                }
+                else if(copy_override || move_override)
+                {
+                    if((offered & (move_override ? Gdk.DragAction.MOVE : Gdk.DragAction.COPY)) == 0)
+                        return false;
+                    transfer_requested(files, target, move_override);
+                }
+                else default_drop.begin(files, target, offered);
                 return files.size > 0;
             });
             widget.add_controller(drop);
+        }
+        async void default_drop(Gee.ArrayList<File> files, File target, Gdk.DragAction offered)
+        {
+            bool move = (offered & Gdk.DragAction.MOVE) != 0 && (yield DropPolicy.same_filesystem(files, target));
+            if(!move && (offered & Gdk.DragAction.COPY) == 0)
+                return;
+            if(get_root() != null)
+                transfer_requested(files, target, move);
         }
     }
 }

@@ -67,6 +67,21 @@ int main(string[] args)
                                  }
                                  if(stage == 4)
                                  {
+                                     var items = new Gee.ArrayList<FileItem>();
+                                     for(uint i = 0; i < window.current.active_selection.get_n_items(); i++)
+                                         items.add((FileItem)window.current.active_selection.get_item(i));
+                                     Dialogs.show_properties(window, items, metadata);
+                                     Timeout.add(500, () => {
+                    screenshot(window, "multi-properties.png");
+                    if(window.visible_dialog != null)
+                        window.visible_dialog.close();
+                    return Source.REMOVE;
+                });
+                                     stage++;
+                                     return Source.CONTINUE;
+                                 }
+                                 if(stage == 5)
+                                 {
                                      try {
                                          var options = new ChooserOptions(false, new VariantBuilder(VariantType.VARDICT).end());
                                          options.initial = File.new_for_path(root);
