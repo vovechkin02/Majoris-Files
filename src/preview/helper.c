@@ -9,6 +9,8 @@
 #include <sys/prctl.h>
 #include <stdio.h>
 #include <math.h>
+#include <cmark.h>
+#include <json-glib/json-glib.h>
 #include "../archive/native.h"
 
 static cairo_status_t write_png(void *closure, const unsigned char *data, unsigned int length) {
@@ -20,11 +22,57 @@ static gboolean number(const char *text, double minimum, double maximum, double 
     *value = g_ascii_strtod(text, &end);
     return end && end != text && *end == 0 && isfinite(*value) && *value >= minimum && *value <= maximum;
 }
+typedef struct { JsonBuilder *builder; gsize bytes; guint segments; gboolean valid; } MarkdownOutput;
+static void markdown_text(MarkdownOutput *out, const char *text, guint style) {
+    if(!text || !out->valid) return;
+    char *valid = g_utf8_make_valid(text, -1);
+    out->bytes += strlen(valid);
+    if(out->bytes > 2 * 1024 * 1024 || ++out->segments > 20000) { out->valid = FALSE; g_free(valid); return; }
+    json_builder_begin_object(out->builder);
+    json_builder_set_member_name(out->builder, "text"); json_builder_add_string_value(out->builder, valid);
+    json_builder_set_member_name(out->builder, "style"); json_builder_add_int_value(out->builder, style);
+    json_builder_end_object(out->builder); g_free(valid);
+}
+static void markdown_node(MarkdownOutput *out, cmark_node *node, guint style, guint depth) {
+    if(depth > 256 || !out->valid) { out->valid = FALSE; return; }
+    cmark_node_type type = cmark_node_get_type(node);
+    if(type == CMARK_NODE_TEXT || type == CMARK_NODE_HTML_INLINE || type == CMARK_NODE_HTML_BLOCK) { markdown_text(out, cmark_node_get_literal(node), style); return; }
+    if(type == CMARK_NODE_CODE || type == CMARK_NODE_CODE_BLOCK) { markdown_text(out, cmark_node_get_literal(node), style | 4); if(type == CMARK_NODE_CODE_BLOCK) markdown_text(out, "\n\n", 0); return; }
+    if(type == CMARK_NODE_SOFTBREAK || type == CMARK_NODE_LINEBREAK) { markdown_text(out, type == CMARK_NODE_SOFTBREAK ? " " : "\n", style); return; }
+    if(type == CMARK_NODE_THEMATIC_BREAK) { markdown_text(out, "────────────\n\n", 0); return; }
+    if(type == CMARK_NODE_STRONG) style |= 1;
+    if(type == CMARK_NODE_EMPH) style |= 2;
+    if(type == CMARK_NODE_HEADING) style |= 9;
+    if(type == CMARK_NODE_BLOCK_QUOTE) { style |= 16; markdown_text(out, "│ ", style); }
+    if(type == CMARK_NODE_LINK || type == CMARK_NODE_IMAGE) style |= 32;
+    if(type == CMARK_NODE_IMAGE) markdown_text(out, "[Image: ", style);
+    int number = type == CMARK_NODE_LIST ? cmark_node_get_list_start(node) : 0;
+    for(cmark_node *child = cmark_node_first_child(node); child; child = cmark_node_next(child)) {
+        if(type == CMARK_NODE_LIST) {
+            if(cmark_node_get_list_type(node) == CMARK_ORDERED_LIST) { char *prefix = g_strdup_printf("%d. ", number++); markdown_text(out, prefix, 0); g_free(prefix); }
+            else markdown_text(out, "• ", 0);
+        }
+        markdown_node(out, child, style, depth + 1);
+    }
+    if(type == CMARK_NODE_LINK || type == CMARK_NODE_IMAGE) { markdown_text(out, " (", style); markdown_text(out, cmark_node_get_url(node), style); markdown_text(out, type == CMARK_NODE_IMAGE ? ")]" : ")", style); }
+    if(type == CMARK_NODE_PARAGRAPH || type == CMARK_NODE_HEADING || type == CMARK_NODE_BLOCK_QUOTE) markdown_text(out, "\n\n", 0);
+}
 int main(int argc, char **argv) {
     struct rlimit memory = {768 * 1024 * 1024, 768 * 1024 * 1024}, cpu = {10, 10}, files = {64, 64}, core = {0, 0};
     if(setrlimit(RLIMIT_AS, &memory) || setrlimit(RLIMIT_CPU, &cpu) || setrlimit(RLIMIT_NOFILE, &files) || setrlimit(RLIMIT_CORE, &core)) return 2;
     if(prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) != 0 || argc < 3) return 2;
     GError *error = NULL;
+    if(g_str_equal(argv[1], "markdown")) {
+        FILE *input = fopen(argv[2], "rb"); if(!input) return 2;
+        char *contents = g_malloc(256 * 1024); size_t length = fread(contents, 1, 256 * 1024, input);
+        gboolean read_ok = !ferror(input); fclose(input); if(!read_ok) { g_free(contents); return 2; }
+        cmark_node *document = cmark_parse_document(contents, length, CMARK_OPT_VALIDATE_UTF8); g_free(contents); if(!document) return 2;
+        MarkdownOutput output = {json_builder_new(), 0, 0, TRUE}; json_builder_begin_array(output.builder);
+        markdown_node(&output, document, 0, 0); json_builder_end_array(output.builder); cmark_node_free(document);
+        if(!output.valid) { g_object_unref(output.builder); return 2; }
+        JsonGenerator *generator = json_generator_new(); JsonNode *root = json_builder_get_root(output.builder); json_generator_set_root(generator, root);
+        char *text = json_generator_to_data(generator, NULL); fputs(text, stdout); g_free(text); json_node_free(root); g_object_unref(generator); g_object_unref(output.builder); return 0;
+    }
     if(g_str_equal(argv[1], "archive")) {
         GCancellable *token = g_cancellable_new();
         char *text = majoris_archive_list(argv[2], token, &error);

@@ -26,16 +26,46 @@ namespace MajorisFiles {
     public class MarkdownPreview : Object, PreviewProvider {
         public bool supports(FileItem item)
         {
-            return item.mime == "text/markdown" || item.name.has_suffix(".md");
+            return item.mime == "text/markdown" || item.name.down().has_suffix(".md");
         }
         public async Gtk.Widget render(FileItem item, Cancellable token) throws Error
         {
-            var stream = yield item.file.read_async(Priority.LOW, token);
-            uint8[] bytes = new uint8[256 * 1024 + 1];
-            size_t count;
-            yield stream.read_all_async(bytes[0 : bytes.length - 1], Priority.LOW, token, out count);
-            yield stream.close_async(Priority.LOW, null);
-            bytes[count] = 0;
+            var source = yield new TextPreview().render(item, token);
+            Gtk.TextView? rendered = null;
+            string failure = "";
+            try {
+                var bytes = yield PreviewSandbox.run(item, "markdown", {}, token);
+                rendered = render_document(bytes);
+                if(item.bytes > 256 * 1024)
+                {
+                    Gtk.TextIter end;
+                    rendered.buffer.get_end_iter(out end);
+                    rendered.buffer.insert(ref end, "\n[Preview limited to 256 KiB]", -1);
+                }
+            }
+            catch(IOError.CANCELLED e) {
+                throw e;
+            }
+            catch(Error e) {
+                failure = e.message;
+            }
+            return new MarkdownView(source, rendered, failure);
+        }
+        static Gtk.TextView render_document(Bytes bytes) throws Error
+        {
+            if(bytes.get_size() > 4 * 1024 * 1024)
+                throw new FileError.INVALID("Markdown preview exceeds its output limit");
+            var parser = new Json.Parser();
+            var data = new ByteArray();
+            data.append(bytes.get_data());
+            data.append({0});
+            parser.load_from_data((string)data.data, (ssize_t)bytes.get_size());
+            var root = parser.get_root();
+            if(root == null || root.get_node_type() != Json.NodeType.ARRAY)
+                throw new FileError.INVALID("Invalid Markdown output");
+            var segments = root.get_array();
+            if(segments.get_length() > 20000)
+                throw new FileError.INVALID("Too many Markdown segments");
             var view = new Gtk.TextView();
             view.editable = false;
             view.wrap_mode = Gtk.WrapMode.WORD_CHAR;
@@ -43,48 +73,73 @@ namespace MajorisFiles {
             view.right_margin = 12;
             view.top_margin = 12;
             var buffer = view.buffer;
-            var heading = buffer.create_tag("heading", "weight", Pango.Weight.BOLD, "scale", 1.4);
-            var code = buffer.create_tag("code", "family", "monospace", "background", "#eeeeee");
-            bool fenced = false;
-            foreach(var line in ((string)bytes).make_valid().split("\n"))
+            Gtk.TextTag[] tags = {
+                buffer.create_tag("strong", "weight", Pango.Weight.BOLD),
+                buffer.create_tag("emphasis", "style", Pango.Style.ITALIC),
+                buffer.create_tag("code", "family", "monospace"),
+                buffer.create_tag("heading", "scale", 1.4),
+                buffer.create_tag("quote", "style", Pango.Style.ITALIC),
+                buffer.create_tag("link", "underline", Pango.Underline.SINGLE)
+            };
+            uint total = 0;
+            for(uint i = 0; i < segments.get_length(); i++)
             {
-                if(line.has_prefix("```"))
-                {
-                    fenced = !fenced;
-                    continue;
-                }
-                var text = line;
-                bool is_heading = !fenced && line.has_prefix("#");
-                if(is_heading)
-                {
-                    int prefix = 0;
-                    while(prefix < line.length && line[prefix] == '#')
-                        prefix++;
-                    text = line.substring(prefix).strip();
-                }
-                if(!fenced && (text.has_prefix("- ") || text.has_prefix("* ")))
-                    text = "• " + text.substring(2);
-                Gtk.TextIter end;
+                var node = segments.get_element(i);
+                if(node.get_node_type() != Json.NodeType.OBJECT)
+                    throw new FileError.INVALID("Invalid Markdown segment");
+                var segment = node.get_object();
+                if(!segment.has_member("text") || !segment.has_member("style"))
+                    throw new FileError.INVALID("Incomplete Markdown segment");
+                var text_node = segment.get_member("text"), style_node = segment.get_member("style");
+                if(text_node.get_value_type() != typeof(string) || style_node.get_value_type() != typeof(int64))
+                    throw new FileError.INVALID("Invalid Markdown segment types");
+                string text = text_node.get_string();
+                int64 style = style_node.get_int();
+                total += text.length;
+                if(style < 0 || style > 63 || total > 2 * 1024 * 1024)
+                    throw new FileError.INVALID("Invalid Markdown style or text budget");
+                Gtk.TextIter begin, end;
                 buffer.get_end_iter(out end);
-                int start = end.get_offset();
-                buffer.insert(ref end, text + "\n", -1);
-                Gtk.TextIter begin;
-                buffer.get_iter_at_offset(out begin, start);
-                buffer.get_end_iter(out end);
-                if(fenced)
-                    buffer.apply_tag(code, begin, end);
-                else if(is_heading)
-                    buffer.apply_tag(heading, begin, end);
+                int offset = end.get_offset();
+                buffer.insert(ref end, text, -1);
+                buffer.get_iter_at_offset(out begin, offset);
+                for(int bit = 0; bit < tags.length; bit++)
+                    if((style & ((int64)1 << bit)) != 0)
+                        buffer.apply_tag(tags[bit], begin, end);
             }
-            if(item.bytes > count)
+            return view;
+        }
+    }
+    public class MarkdownView : Gtk.Box {
+        public Gtk.Widget source {
+            get;
+            private set;
+        }
+        public Gtk.TextView? rendered {
+            get;
+            private set;
+        }
+        public MarkdownView(Gtk.Widget source, Gtk.TextView? rendered, string failure)
+        {
+            Object(orientation: Gtk.Orientation.VERTICAL, spacing: 6);
+            this.source = source;
+            this.rendered = rendered;
+            var views = new Gtk.Stack();
+            views.vexpand = true;
+            views.add_titled(source, "source", "Source");
+            if(rendered != null)
+                views.add_titled(Browser.scrolled(rendered), "rendered", "Rendered");
+            var switcher = new Gtk.StackSwitcher();
+            switcher.stack = views;
+            append(switcher);
+            append(views);
+            views.visible_child_name = rendered != null ? "rendered" : "source";
+            if(failure != "")
             {
-                Gtk.TextIter end;
-                buffer.get_end_iter(out end);
-                buffer.insert(ref end, "\n[Preview limited to 256 KiB]", -1);
+                var message = new Gtk.Label("Rendered preview unavailable\n" + failure);
+                message.wrap = true;
+                append(message);
             }
-            var scroll = new Gtk.ScrolledWindow();
-            scroll.set_child(view);
-            return scroll;
         }
     }
 }

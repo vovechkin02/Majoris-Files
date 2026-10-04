@@ -51,6 +51,11 @@ namespace MajorisFiles {
         Gtk.MultiSelection? column_selection;
         File? column_folder;
         Gee.ArrayList<DirectoryModel> column_models = new Gee.ArrayList<DirectoryModel>();
+        Gee.HashMap<Gtk.Widget, Gtk.MultiSelection> column_selections = new Gee.HashMap<Gtk.Widget, Gtk.MultiSelection>();
+        Gee.HashMap<Gtk.Widget, ulong?> column_handlers = new Gee.HashMap<Gtk.Widget, ulong?>();
+        Gee.HashMap<Gtk.Widget, uint> column_generations = new Gee.HashMap<Gtk.Widget, uint>();
+        Gee.HashMap<Gtk.Widget, DirectoryModel> pending_columns = new Gee.HashMap<Gtk.Widget, DirectoryModel>();
+        Gee.HashMap<Gtk.Widget, DirectoryModel> loaded_columns = new Gee.HashMap<Gtk.Widget, DirectoryModel>();
         PreviewPane gallery_preview = new PreviewPane();
         Gtk.Stack location_bar = new Gtk.Stack();
         Gtk.Box breadcrumbs = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
@@ -76,6 +81,8 @@ namespace MajorisFiles {
         bool folders_first = true;
         int icon_size = 64;
         bool selection_checkboxes;
+        string caption_key = "None";
+        Gee.HashMap<string, ColumnProvider> column_providers = new Gee.HashMap<string, ColumnProvider>();
         bool loading_display;
         public signal void display_changed();
         Gtk.ColumnView details;
@@ -101,6 +108,7 @@ namespace MajorisFiles {
             this.metadata = metadata;
             this.places = places;
             this.chooser_mode = chooser_mode;
+            metadata.changed.connect(() => display_changed());
             location_suggestions = new LocationSuggestions(metadata);
             home = new HomeView(metadata);
             views.add_named(home, "Home");
@@ -680,6 +688,8 @@ namespace MajorisFiles {
         }
         string column_text(FileItem item, string key)
         {
+            if(column_providers.has_key(key))
+                return column_providers[key].text(item, metadata);
             if(key == "Name")
                 return item.name;
             if(key == "Size")
@@ -710,7 +720,9 @@ namespace MajorisFiles {
             if(folders_first && x.directory != y.directory)
                 return x.directory ? -1 : 1;
             int result;
-            if(sort_key == "Size")
+            if(column_providers.has_key(sort_key))
+                result = column_providers[sort_key].compare(x, y, metadata);
+            else if(sort_key == "Size")
                 result = x.bytes < y.bytes ? -1 : x.bytes == y.bytes ? 0 : 1;
             else if(sort_key == "Modified" || sort_key == "Created" || sort_key == "Accessed")
             {
@@ -734,6 +746,7 @@ namespace MajorisFiles {
                 columns_state.add("(sbi)", column.title, column.visible, column.fixed_width);
             }
             metadata.set_state("display:" + directory.location.get_uri(), new Variant("(sbbib@a(sbi))", sort_key, ascending, folders_first, icon_size, selection_checkboxes, columns_state.end()).print(true));
+            metadata.set_state("caption:" + directory.location.get_uri(), caption_key);
         }
         void load_display(File location)
         {
@@ -743,6 +756,9 @@ namespace MajorisFiles {
             folders_first = true;
             icon_size = 64;
             selection_checkboxes = false;
+            caption_key = metadata.state("caption:" + location.get_uri(), "None");
+            if(caption_key != "None" && !(caption_key in column_titles))
+                caption_key = "None";
             foreach(var title in column_titles)
             {
                 var column = detail_columns[title];
@@ -799,6 +815,23 @@ namespace MajorisFiles {
             size.model = new Gtk.StringList({"Compact", "Standard", "Large"});
             size.selected = icon_size < 64 ? 0 : icon_size > 64 ? 2 : 1;
             group.add(size);
+            var caption = new Adw.ComboRow();
+            caption.title = "Grid Metadata Caption";
+            string[] captions = {
+                "None"
+            };
+            foreach(var key in column_titles)
+                if(key != "Name")
+                    captions += key;
+            caption.model = new Gtk.StringList(captions);
+            for(uint i = 0; i < captions.length; i++)
+                if(captions[i] == caption_key)
+                    caption.selected = i;
+            group.add(caption);
+            caption.notify["selected"].connect(() => { caption_key = captions[caption.selected];
+                                                       display_changed();
+                                                       save_display();
+                });
             size.notify["selected"].connect(() => { icon_size = size.selected == 0 ? 32 : size.selected == 1 ? 64 : 128;
                                                     display_changed();
                                                     save_display();
@@ -881,6 +914,21 @@ namespace MajorisFiles {
             sorter.changed(Gtk.SorterChange.DIFFERENT);
             save_display();
             session_changed();
+        }
+        public void register_column(ColumnProvider provider) throws Error
+        {
+            string title = provider.title;
+            if(title == "" || title == "None" || title != title.strip() || title.contains("\n") || title.contains("\r") || title.length > 80 || !title.validate() || detail_columns.has_key(title))
+                throw new FileError.INVALID("Column titles must be non-empty, single-line and unique");
+            column_providers[title] = provider;
+            column_titles += title;
+            var column = new Gtk.ColumnViewColumn(title, text_factory((item) => provider.text(item, metadata)));
+            column.resizable = true;
+            column.visible = false;
+            details.append_column(column);
+            detail_columns[title] = column;
+            column.notify["fixed-width"].connect(save_display);
+            load_display(directory.location);
         }
         public void set_view(string mode, bool remember = true)
         {
@@ -1147,30 +1195,62 @@ namespace MajorisFiles {
             column_folder = null;
             column_selection = null;
             while (columns.get_first_child() != null)
-                columns.remove(columns.get_first_child());
+                remove_column(columns.get_first_child());
             append_column(directory.location, sorted);
         }
-        void append_column(File folder, ListModel items)
+        void remove_column(Gtk.Widget widget)
         {
-            var selected = new Gtk.MultiSelection(items);
+            if(column_handlers.has_key(widget))
+                column_selections[widget].disconnect(column_handlers[widget]);
+            column_handlers.unset(widget);
+            column_selections.unset(widget);
+            column_generations.unset(widget);
+            if(pending_columns.has_key(widget))
+            {
+                pending_columns[widget].cancel();
+                column_models.remove(pending_columns[widget]);
+                pending_columns.unset(widget);
+            }
+            if(loaded_columns.has_key(widget))
+            {
+                loaded_columns[widget].cancel();
+                column_models.remove(loaded_columns[widget]);
+                loaded_columns.unset(widget);
+            }
+            columns.remove(widget);
+        }
+        Gtk.Widget append_column(File folder, ListModel items)
+        {
+            var selected = items == sorted ? selection : new Gtk.MultiSelection(items);
             var list = new Gtk.ListView(selected, factory(false, selected));
             list.enable_rubberband = true;
             list.width_request = 220;
             var scroll = scrolled(list);
             scroll.hexpand = false;
             columns.append(scroll);
-            selected.selection_changed.connect(() => {
+            column_selections[scroll] = selected;
+            column_generations[scroll] = 0;
+            column_handlers[scroll] = selected.selection_changed.connect(() => {
+                if(view_mode != "Columns" || scroll.get_parent() != columns)
+                    return;
+                column_generations[scroll] = column_generations[scroll] + 1;
+                if(pending_columns.has_key(scroll))
+                {
+                    pending_columns[scroll].cancel();
+                    column_models.remove(pending_columns[scroll]);
+                    pending_columns.unset(scroll);
+                }
                 column_selection = selected;
                 column_folder = folder;
                 selection_changed();
                 session_changed();
                 update_status();
                 var chosen = this.selected();
+                while (scroll.get_next_sibling() != null)
+                    remove_column(scroll.get_next_sibling());
                 if(chosen.size != 1)
                     return;
                 var item = chosen[0];
-                while (scroll.get_next_sibling() != null)
-                    columns.remove(scroll.get_next_sibling());
                 if (item.directory)
                     load_column.begin(item.file, scroll);
                 else { preview.visible = true;
@@ -1181,18 +1261,24 @@ namespace MajorisFiles {
                                                   if (item != null)
                                                       activate_item.begin(item);
                 });
+            return scroll;
         }
         async void load_column(File folder, Gtk.Widget anchor)
         {
             var model = new DirectoryModel();
+            uint generation = column_generations[anchor];
+            pending_columns[anchor] = model;
+            column_models.add(model);
             yield model.open(folder, get_root() as Gtk.Window);
-            if (anchor.get_parent() != columns)
+            if (anchor.get_parent() != columns || !column_generations.has_key(anchor) || generation != column_generations[anchor] || !pending_columns.has_key(anchor) || pending_columns[anchor] != model)
             {
                 model.cancel();
+                column_models.remove(model);
                 return;
             }
-            append_column(folder, model.items);
-            column_models.add(model);
+            pending_columns.unset(anchor);
+            var child = append_column(folder, model.items);
+            loaded_columns[child] = model;
         }
         delegate string ItemText(FileItem item);
         Gtk.SignalListItemFactory text_factory(owned ItemText text)
@@ -1243,6 +1329,13 @@ namespace MajorisFiles {
                                        }
                                        else label.halign = Gtk.Align.START;
                                        box.append(label);
+                                       var caption = new Gtk.Label("");
+                                       caption.add_css_class("dim-label");
+                                       caption.ellipsize = Pango.EllipsizeMode.END;
+                                       caption.max_width_chars = 18;
+                                       caption.visible = grid && caption_key != "None";
+                                       if(grid)
+                                           box.append(caption);
                                        var checkbox = new Gtk.CheckButton();
                                        checkbox.tooltip_text = "Select Item";
                                        box.append(checkbox);
@@ -1261,6 +1354,9 @@ namespace MajorisFiles {
                     box.margin_top = spacing;
                     box.margin_bottom = spacing;
                     checkbox.visible = selection_checkboxes;
+                    caption.visible = grid && caption_key != "None";
+                    if(grid && li.item != null)
+                        caption.label = column_text((FileItem)li.item, caption_key);
                 });
                                        icon.pixel_size = grid ? icon_size : (icon_size > 64 ? 32 : 24);
                                        checkbox.visible = selection_checkboxes;
@@ -1305,6 +1401,8 @@ namespace MajorisFiles {
                                       var image = (Gtk.Image)box.get_first_child();
                                       image.set_from_gicon(item.info.get_icon());
                                       ((Gtk.Label)image.get_next_sibling()).label = item.name;
+                                      if(grid)
+                                          ((Gtk.Label)image.get_next_sibling().get_next_sibling()).label = caption_key == "None" ? "" : column_text(item, caption_key);
                                       ((Gtk.CheckButton)box.get_last_child()).active = li.selected;
                                       box.tooltip_text = item.file.get_parse_name();
                                       var token = new Cancellable();
@@ -1334,6 +1432,8 @@ namespace MajorisFiles {
         }
         public void cancel()
         {
+            while(columns.get_first_child() != null)
+                remove_column(columns.get_first_child());
             completion_token.cancel();
             completion_popup.popdown();
             if(completion_delay != 0)

@@ -9,7 +9,7 @@ List views, Column selection/action integration and Gallery views, incremental m
 shared places/bookmarks/devices, GVfs navigation, cancellable recursive filename
 search with type/MIME/size/date/tag/favorite/owner filters, saved filter persistence,
 named/color/ordered tags, local birth-time identity reconciliation, metadata recovery,
-native file clipboard interoperability, image/text/PDF/media and basic Markdown/archive preview,
+native file clipboard interoperability, image/text/PDF/media and CommonMark/archive preview,
 local image thumbnail caching, asynchronous copy/move/rename/trash/delete, basic
 folder merging, conflict details and rename, persistent undo/redo and identifiable
 Trash undo, interrupted-job records, recursive counts and multi-item properties,
@@ -42,12 +42,18 @@ service checks all output conflicts, free space, size limits and part-count limi
 before opening the source stream.
 Per-folder view controls offer compact/standard/large icons, selection checkboxes,
 folders-first/mixed sorting, additional sort fields, and 14 metadata columns with
-visibility, order and width controls. Location entry suggests recent paths and
+visibility, order and width controls. Grid metadata captions are configurable per
+folder. Extension column providers supply display text and comparison for sorting.
+Column browsing cancels stale loads and disconnects removed branch selections.
+Location entry suggests recent paths and
 matching folders, with bounded cancellable enumeration and credential-free history.
 Unavailable locations have a Retry banner in both file browsing and the chooser.
-PDF, image, font and archive previews use a bubblewrap helper with no network or
+PDF, image, font, CommonMark and archive previews use a bubblewrap helper with no network or
 home-directory access, read-only input, process time/memory limits and cancellation.
-Image previews support fit/zoom, EXIF orientation and preview rotation. Font samples
+Image previews support fit/zoom, EXIF orientation and preview rotation.
+Markdown offers Source/Rendered views with styled headings, emphasis, strong text,
+code, lists, quotes and link labels. Embedded HTML/JavaScript and image URLs remain
+inert text; the renderer performs no downloads or code execution. Font samples
 include family/style, alphabet, digits and a sentence. Image/PDF thumbnail providers
 use the helper and the freedesktop cache. At most four helper processes run at once.
 Undo/redo stores file identities, refuses replacement files and serializes history
@@ -83,12 +89,12 @@ SaveFiles is not implemented or advertised (backend interface version 1).
 Other outstanding specification areas include:
 
 * Complete Column-view session restoration and broad tab transfer acceptance.
-* Grouping, extension-provided columns, grid metadata captions, bookmark
+* Grouping, bookmark
   drop/reordering and cross-filesystem drop-action policy.
 * Full nested conflict policies, journal operation grouping, remote
   Trash reconciliation, pause/resume/retry and durable job restart.
 * Indexed/full-text document search and indexed relevance ranking.
-* Animated images, full Markdown/office previews, media metadata and controls
+* Animated images, office previews, media metadata and controls
   audit, remaining media/cache parser isolation, remote thumbnail policies and
   thumbnail providers beyond image/PDF.
 * ACL integration acceptance, custom-icon backend acceptance and association UI

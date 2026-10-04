@@ -195,16 +195,25 @@ async void preview_case() throws Error
 {
     var temp = DirUtils.make_tmp("majoris-preview-XXXXXX");
     var root = File.new_for_path(temp);
-    FileUtils.set_contents(Path.build_filename(temp, "notes.md"), "# Title\n- Entry\n<script>never executed</script>\n```\ncode\n```");
+    FileUtils.set_contents(Path.build_filename(temp, "notes.md"), "# Title\n- Entry\n\n**Bold** and *Italic* [link](https://example.test)\n![External image](https://example.test/image.png)\n\n<script>never executed</script>\n```\ncode\n```");
     var file = root.get_child("notes.md");
     var info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
     var item = new FileItem(file, info);
     var markdown = new MarkdownPreview();
     assert(markdown.supports(item));
     var widget = yield markdown.render(item, new Cancellable());
-    assert(widget is Gtk.ScrolledWindow);
-    var view = (Gtk.TextView)((Gtk.ScrolledWindow)widget).get_child();
+    assert(widget is MarkdownView);
+    var markdown_view = (MarkdownView)widget;
+    assert(markdown_view.rendered != null);
+    var view = markdown_view.rendered;
     assert(view.buffer.text.contains("Title") && view.buffer.text.contains("never executed"));
+    assert(view.buffer.text.contains("External image") && view.buffer.text.contains("https://example.test/image.png"));
+    Gtk.TextIter text_start, match_start, match_end;
+    view.buffer.get_start_iter(out text_start);
+    assert(text_start.forward_search("Bold", Gtk.TextSearchFlags.TEXT_ONLY, out match_start, out match_end, null));
+    assert(match_start.has_tag(view.buffer.get_tag_table().lookup("strong")));
+    var source_view = (Gtk.TextView)((Gtk.ScrolledWindow)markdown_view.source).get_child();
+    assert(source_view.buffer.text.contains("**Bold**"));
     var files = new Gee.ArrayList<File>();
     files.add(file);
     yield ArchiveService.compress(files, root.get_child("test.zip"), "zip", new Job("test"));
@@ -513,6 +522,15 @@ void session_details_test()
                     }
                 }
                 assert(owner_found);
+                browser.register_column(new FixtureColumn());
+                browser.set_sort("Byte Count", false);
+                assert(((FileItem)browser.active_selection.get_item(0)).name == "file-119.txt");
+                bool duplicate_rejected = false;
+                try { browser.register_column(new FixtureColumn());
+                }
+                catch(MajorisFiles.FileError.INVALID e) { duplicate_rejected = true;
+                }
+                assert(duplicate_rejected);
                 browser.cancel();
                 window.destroy();
                 loop.quit();
@@ -566,4 +584,20 @@ void disk_image_inventory_test()
     assert(provider.actions(selection).size == 2);
     selection.add(selection[0]);
     assert(provider.actions(selection).size == 0);
+}
+
+class FixtureColumn : Object, ColumnProvider {
+    public string title {
+        owned get {
+            return "Byte Count";
+        }
+    }
+    public string text(FileItem item, MetadataStore metadata)
+    {
+        return item.bytes.to_string();
+    }
+    public int compare(FileItem first, FileItem second, MetadataStore metadata)
+    {
+        return first.bytes < second.bytes ? -1 : first.bytes == second.bytes ? 0 : 1;
+    }
 }

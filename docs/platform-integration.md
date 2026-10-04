@@ -6,7 +6,7 @@ Build on Debian with a current GTK4/libadwaita toolchain:
 apt install build-essential meson ninja-build valac libgtk-4-dev \
   libadwaita-1-dev libgee-0.8-dev libsqlite3-dev libjson-glib-dev \
   libpoppler-glib-dev libarchive-dev libpolkit-gobject-1-dev libx11-dev \
-  libfontconfig-dev libpango1.0-dev bubblewrap fonts-dejavu-core
+  libfontconfig-dev libpango1.0-dev libcmark-dev bubblewrap fonts-dejavu-core
 meson setup build --prefix=/usr
 meson compile -C build
 meson test -C build --print-errorlogs

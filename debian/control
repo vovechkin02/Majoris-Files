@@ -2,7 +2,7 @@ Source: majoris-files
 Section: utils
 Priority: optional
 Maintainer: Majoris Developers <developers@majoris.local>
-Build-Depends: debhelper-compat (= 13), meson, ninja-build, valac, pkg-config, libgtk-4-dev (>= 4.12), libadwaita-1-dev (>= 1.5), libgee-0.8-dev, libsqlite3-dev, libjson-glib-dev, libpoppler-glib-dev, libarchive-dev, libpolkit-gobject-1-dev, libx11-dev, libfontconfig-dev, libpango1.0-dev, bubblewrap, fonts-dejavu-core, xvfb, dbus
+Build-Depends: debhelper-compat (= 13), meson, ninja-build, valac, pkg-config, libgtk-4-dev (>= 4.12), libadwaita-1-dev (>= 1.5), libgee-0.8-dev, libsqlite3-dev, libjson-glib-dev, libpoppler-glib-dev, libarchive-dev, libpolkit-gobject-1-dev, libx11-dev, libfontconfig-dev, libpango1.0-dev, libcmark-dev, bubblewrap, fonts-dejavu-core, xvfb, dbus
 Standards-Version: 4.7.0
 Rules-Requires-Root: no
 

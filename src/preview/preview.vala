@@ -13,7 +13,16 @@ namespace MajorisFiles {
             var input = yield item.file.read_async(Priority.LOW, token);
             uint8[] bytes = new uint8[256 * 1024 + 1];
             size_t count;
-            yield input.read_all_async(bytes[0 : bytes.length - 1], Priority.LOW, token, out count);
+            try {
+                yield input.read_all_async(bytes[0 : bytes.length - 1], Priority.LOW, token, out count);
+            }
+            catch(Error e) {
+                try {
+                    yield input.close_async(Priority.LOW, null);
+                }
+                catch(Error ignored) {}
+                throw e;
+            }
             yield input.close_async(Priority.LOW, null);
             bytes[count] = 0;
             string text = ((string)bytes).make_valid();
