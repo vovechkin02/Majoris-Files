@@ -50,6 +50,11 @@ namespace MajorisFiles {
         }
     }
     public class MediaPreview : Object, PreviewProvider {
+        MetadataStore? metadata;
+        public MediaPreview(MetadataStore? metadata = null)
+        {
+            this.metadata = metadata;
+        }
         public bool supports(FileItem item)
         {
             return item.mime.has_prefix("audio/") || item.mime.has_prefix("video/");
@@ -60,7 +65,7 @@ namespace MajorisFiles {
             var media = Gtk.MediaFile.for_file(item.file);
             media.set_volume(0.5);
             var video = new Gtk.Video.for_media_stream(media);
-            video.autoplay = false;
+            video.autoplay = metadata != null && metadata.state("autoplay-media", "false") == "true";
             return video;
         }
     }
@@ -68,17 +73,18 @@ namespace MajorisFiles {
         Cancellable token = new Cancellable();
         Gee.ArrayList<PreviewProvider> providers = new Gee.ArrayList<PreviewProvider>();
         uint generation;
-        public PreviewPane()
+        public PreviewPane(MetadataStore? metadata = null)
         {
             Object(orientation: Gtk.Orientation.VERTICAL, spacing: 8);
             width_request = 280;
             providers.add(new ImagePreview());
             providers.add(new MarkdownPreview());
             providers.add(new TextPreview());
-            providers.add(new MediaPreview());
+            providers.add(new MediaPreview(metadata));
             providers.add(new PdfPreview());
             providers.add(new ArchivePreview());
             providers.add(new FontPreview());
+            providers.add(new OfficePreview());
         }
         public void cancel()
         {

@@ -48,6 +48,8 @@ int main(string[] args)
     Test.add_func("/ui/column-selection", () => columns_test());
     Test.add_func("/ui/session-detail-recovery", () => session_details_test());
     Test.add_func("/ui/disk-image-inventory", () => disk_image_inventory_test());
+    Test.add_func("/ui/nearby-confirm", () => nearby_test(true));
+    Test.add_func("/ui/nearby-cancel", () => nearby_test(false));
     Test.add_func("/ui/bookmark-reorder-and-drop-policy", () => bookmark_drop_test());
     Test.add_func("/ui/transferred-tab-routing", () => {
         try {
@@ -245,6 +247,29 @@ async void preview_case() throws Error
     assert(texture.get_width() == 200 && texture.get_height() == 200);
     var thumbnail = yield new ThumbnailService().texture(pdf_item, new Cancellable());
     assert(thumbnail != null && thumbnail.get_width() <= 128 && thumbnail.get_height() <= 128);
+    var cached_thumbnail = yield new ThumbnailService().texture(pdf_item, new Cancellable());
+    assert(cached_thumbnail != null && cached_thumbnail.get_width() == thumbnail.get_width());
+    string cache_name = Checksum.compute_for_string(ChecksumType.MD5, pdf_item.file.get_uri()) + ".png";
+    FileUtils.set_contents(Path.build_filename(Environment.get_user_cache_dir(), "thumbnails", "normal", cache_name), "corrupted thumbnail");
+    cached_thumbnail = yield new ThumbnailService().texture(pdf_item, new Cancellable());
+    assert(cached_thumbnail != null);
+    var thumbnail_settings = new MetadataStore(root.get_child("thumbnail-settings.db").get_path());
+    thumbnail_settings.set_state("thumbnail-policy", "Never");
+    assert((yield new ThumbnailService(thumbnail_settings).texture(pdf_item, new Cancellable())) == null);
+    yield root.get_child("word").make_directory_async(Priority.DEFAULT, null);
+    FileUtils.set_contents(root.get_child("word/document.xml").get_path(), "<w:document xmlns:w='urn:fixture'><w:p><w:r><w:t>Office café &amp; text</w:t></w:r></w:p></w:document>");
+    var office_sources = new Gee.ArrayList<File>();
+    office_sources.add(root.get_child("word"));
+    var office_file = root.get_child("sample.docx");
+    yield ArchiveService.compress(office_sources, office_file, "zip", new Job("Office fixture"));
+    var office_info = yield office_file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
+    office_info.set_content_type("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    var office_item = new FileItem(office_file, office_info);
+    var office_provider = new OfficePreview();
+    assert(office_provider.supports(office_item));
+    var office_widget = (Gtk.Box)(yield office_provider.render(office_item, new Cancellable()));
+    var office_text = (Gtk.TextView)((Gtk.ScrolledWindow)office_widget.get_last_child()).child;
+    assert(office_text.buffer.text.contains("Office café & text"));
     var image_file = root.get_child("sample.png");
     var image_surface = new Cairo.ImageSurface(Cairo.Format.ARGB32, 200, 100);
     image_surface.write_to_png(image_file.get_path());
@@ -262,6 +287,8 @@ async void preview_case() throws Error
         image_bytes = yield PreviewSandbox.run(font_item, "font", {}, new Cancellable());
         texture = Gdk.Texture.from_bytes(image_bytes);
         assert(texture.get_width() == 1200 && texture.get_height() == 480);
+        var font_thumbnail = yield new ThumbnailService().texture(font_item, new Cancellable());
+        assert(font_thumbnail != null && font_thumbnail.get_width() <= 128);
     }
     var preview_cancel = new Cancellable();
     preview_cancel.cancel();
@@ -712,4 +739,71 @@ async void bookmark_drop_flow()
     catch(Error e) {
         error("%s", e.message);
     }
+}
+
+class FixtureNearby : Object, NearbyShareProvider {
+    public bool sent;
+    public string provider_id {
+        owned get {
+            return "fixture";
+        }
+    }
+    public bool supports(Gee.List<FileItem> selection)
+    {
+        return selection.size == 1;
+    }
+    public async Gee.List<NearbyPeer> discover(Cancellable token) throws Error
+    {
+        token.set_error_if_cancelled();
+        var peers = new Gee.ArrayList<NearbyPeer>();
+        peers.add(new NearbyPeer("test-device", "Test Device"));
+        return peers;
+    }
+    public async void send(string peer_id, Gee.List<File> files, Cancellable token) throws Error
+    {
+        token.set_error_if_cancelled();
+        assert(peer_id == "test-device" && files.size == 1);
+        sent = true;
+    }
+}
+void nearby_test(bool confirm)
+{
+    var loop = new MainLoop();
+    nearby_flow.begin(confirm, (obj, res) => { try { nearby_flow.end(res);
+                                               }
+                                               catch(Error e) { error("%s", e.message);
+                                               }
+                                               loop.quit();
+        });
+    uint watchdog = Timeout.add_seconds(10, () => { error("Nearby provider flow timed out");
+        });
+    loop.run();
+    Source.remove(watchdog);
+}
+async void nearby_flow(bool confirm) throws Error
+{
+    var root = File.new_for_path(DirUtils.make_tmp("majoris-nearby-XXXXXX"));
+    var file = root.get_child("attachment.txt");
+    FileUtils.set_contents(file.get_path(), "test attachment");
+    var info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
+    var items = new Gee.ArrayList<FileItem>();
+    items.add(new FileItem(file, info));
+    var provider = new FixtureNearby();
+    var actions = new NearbyActions(provider);
+    assert(actions.actions(items).size == 1);
+    assert(new DesktopActions().actions(items).size == 1);
+    var parent = new Adw.Window();
+    parent.set_default_size(700, 500);
+    parent.present();
+    uint poll = Timeout.add(10, () => {
+        var dialog = parent.visible_dialog as Adw.AlertDialog;
+        if(dialog != null)
+            dialog.response(confirm ? "send" : "cancel");
+        return Source.CONTINUE;
+    });
+    yield actions.execute("send", items, parent);
+    Source.remove(poll);
+    parent.destroy();
+    assert(provider.sent == confirm);
+    yield OperationManager.remove_tree(root, new Cancellable());
 }

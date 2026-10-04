@@ -65,10 +65,31 @@ code, lists, quotes and link labels. Embedded HTML/JavaScript and image URLs rem
 inert text; the renderer performs no downloads or code execution. Font samples
 include family/style, alphabet, digits and a sentence. Image/PDF thumbnail providers
 use the helper and the freedesktop cache. At most four helper processes run at once.
+Untrusted cached thumbnails are validated and decoded in the sandbox; only
+sanitized output is decoded in the UI. Font thumbnails are supported. Thumbnail
+preferences offer Local/All/Never; remote downloads have byte and time limits,
+at most two concurrent downloads, private temporary files and cleanup on cancellation.
+Office/OpenDocument ZIP formats have sandboxed bounded text previews; formatting,
+images, spreadsheet formula evaluation and legacy binary Office formats are omitted.
+Preferences now cover activation mode, folder/view/density defaults, extension
+display and rename warnings, selection checkboxes, hidden files, delete confirmation,
+per-folder memory, recursive search, previews, thumbnails, media auto-play and Home.
+The keyboard-shortcuts dialog is available from the menu and Ctrl+?.
+Desktop actions use the Wallpaper and Email portals; wallpaper has desktop preview
+and email opens a composer with attachments. Nearby Share has a typed provider
+interface and a tested device-selection/confirmation workflow; transport belongs
+to an installed provider and no custom wireless protocol is implemented.
+libcloudproviders accounts supply sidebar roots, icons, sync/error status and
+provider-owned account actions, with live account/provider updates.
 Undo/redo stores file identities, refuses replacement files and serializes history
 actions; legacy history without identities cannot safely be reversed.
+New multi-file jobs share a persistent journal group. Undo/redo preflight every
+group identity before reversal. History is capped at 100 entries; whole groups are
+discarded at that limit rather than advertising a partial operation as undoable.
 Failed/cancelled copy, move and link jobs can retry remaining top-level items in the
-current session. Completed items are not replayed; retries retain ordinary conflict
+current session. Verified source/destination retry plans are persisted and restored
+for explicit retry after restart. Restored retries refuse replaced sources or target
+folders, and never auto-resume. Completed items are not replayed; retries retain ordinary conflict
 checks. Failed jobs preserve progress and cancellation is shown explicitly.
 Nested merge conflicts offer Rename, Keep Both, Replace, Skip, Replace All and
 Skip All with both sizes and timestamps. All-item policies apply through the job's
@@ -81,7 +102,7 @@ selection. Bulk favorite controls reflect whether all selected items are favorit
 Disk-image quick actions delegate read-only loop creation, partition/filesystem
 mounting and unmount/detach to UDisks. Inventory selection is tested; actual mounts,
 Polkit cancellation and busy-device handling require a disposable Majoris VM.
-Validation currently includes 42 core/filesystem/UI/portal cases plus a separate
+Validation currently includes 45 core/filesystem/UI/portal cases plus a separate
 actual-executable crash-recovery suite. This does not substitute for the platform
 acceptance work below.
 
@@ -104,26 +125,36 @@ cloud-provider materialization handling, complete recovery for detached devices,
 accessibility audit, and actual Flatpak/document-portal end-to-end verification.
 SaveFiles is not implemented or advertised (backend interface version 1).
 
+
+Narrow browsing now hides the locations sidebar, preview pane and secondary toolbar
+controls below 650 pixels, with a locations toggle and view selection in View
+Settings. Narrow preview requests open the existing preview dialog. The browser
+sets an explicit minimum size for Adwaita breakpoint allocation. Headless visual
+acceptance covers a 500-pixel window; overlay sidebar behavior, very small windows,
+remote locations and a full keyboard/accessibility audit remain pending.
 Other outstanding specification areas include:
 
 * Remote/disconnected Column-view recovery and broad tab transfer acceptance.
 * Broad external drag negotiation/tab-hover acceptance and Grid section headings.
-* Conflict thumbnails, journal operation grouping, remote
-  Trash reconciliation and durable job restart. Current GIO transfers do not offer
+* Conflict thumbnails, remote
+  Trash reconciliation, durable replacement-backup transaction recovery, and
+  interrupted-job acceptance for archives/permissions/other operations. Current GIO transfers do not offer
   a safe pause/resume facility; pause controls are intentionally unavailable.
 * Indexed/full-text document search and indexed relevance ranking.
-* Animated images, office previews, media metadata and controls
-  audit, remaining media/cache parser isolation, remote thumbnail policies and
-  thumbnail providers beyond image/PDF.
+* Animated images, formatted/legacy Office previews, media metadata and controls
+  audit, remaining media parser isolation, remote thumbnail platform acceptance and
+  thumbnail providers beyond image/PDF/font.
 * ACL integration acceptance, custom-icon backend acceptance and association UI
   refinement.
 * Encrypted 7z creation, multi-volume archive creation and arbitrary filesystem
   capability detection. ZIP encryption protects contents; entry names remain visible.
 * Samba policy separation, hidden shares, owned firewall rules, shared-folder
   inventory/status/emblems, and a full authorization/integration test fixture.
-* Cloud-provider and Nearby Share integrations; disk-image system acceptance;
-  wallpaper/image rotation; sharing portals; full preference and shortcut UI.
-* Translation coverage, a11y/keyboard audit, adaptive narrow-window layout,
+* Cloud quota/per-item availability/materialization extensions and real-provider
+  acceptance; Nearby Share transport-provider/system acceptance; disk-image system
+  acceptance; wallpaper/email portal acceptance and file image rotation; indexing
+  and network preference UI.
+* Translation coverage, a11y/keyboard audit, narrow-window sidebar overlay and broad adaptive acceptance,
   packaging review and performance benchmarks.
 
 Do not use the current tree as the default file manager/portal on a production

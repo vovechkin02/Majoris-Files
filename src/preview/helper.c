@@ -12,6 +12,62 @@
 #include <cmark.h>
 #include <json-glib/json-glib.h>
 #include "../archive/native.h"
+#include <archive.h>
+#include <archive_entry.h>
+
+typedef struct { GString *text; guint depth; } OfficeText;
+static void office_start(GMarkupParseContext *context, const gchar *name, const gchar **keys, const gchar **values, gpointer data, GError **error) {
+    (void)context; (void)name; (void)keys; (void)values;
+    OfficeText *out = data;
+    if(++out->depth > 128) g_set_error_literal(error, G_MARKUP_ERROR, G_MARKUP_ERROR_INVALID_CONTENT, "Office XML nesting limit");
+}
+static void office_end(GMarkupParseContext *context, const gchar *name, gpointer data, GError **error) {
+    (void)context; (void)error; OfficeText *out = data; out->depth--;
+    if(out->text->len < 512 * 1024 && (g_str_has_suffix(name, ":p") || g_str_has_suffix(name, ":tr") || g_str_equal(name, "row"))) g_string_append_c(out->text, '\n');
+    else if(out->text->len < 512 * 1024 && (g_str_has_suffix(name, ":tc") || g_str_equal(name, "c") || g_str_equal(name, "si"))) g_string_append_c(out->text, '\t');
+}
+static void office_text(GMarkupParseContext *context, const gchar *text, gsize length, gpointer data, GError **error) {
+    (void)context; (void)error; OfficeText *out = data;
+    if(out->text->len < 512 * 1024) g_string_append_len(out->text, text, MIN(length, 512 * 1024 - out->text->len));
+}
+static void office_passthrough(GMarkupParseContext *context, const gchar *text, gsize length, gpointer data, GError **error) {
+    (void)context; (void)length; (void)data;
+    if(g_str_has_prefix(text, "<!DOCTYPE") || g_str_has_prefix(text, "<!ENTITY")) g_set_error_literal(error, G_MARKUP_ERROR, G_MARKUP_ERROR_INVALID_CONTENT, "Document declarations are not supported");
+}
+static gboolean office_preview(const char *path) {
+    struct archive *archive = archive_read_new(); archive_read_support_format_zip(archive);
+    if(archive_read_open_filename(archive, path, 65536) != ARCHIVE_OK) { archive_read_free(archive); return FALSE; }
+    struct archive_entry *entry; guint entries = 0, documents = 0; gsize total = 0;
+    OfficeText out = {g_string_new(NULL), 0}; gboolean ok = TRUE;
+    const GMarkupParser parser = {office_start, office_end, office_text, office_passthrough, NULL};
+    int status;
+    while((status = archive_read_next_header(archive, &entry)) == ARCHIVE_OK) {
+        if(++entries > 4096) { ok = FALSE; break; }
+        const char *name = archive_entry_pathname(entry);
+        gboolean selected = name && (g_str_equal(name, "content.xml") || g_str_equal(name, "word/document.xml") || g_str_equal(name, "xl/sharedStrings.xml") || (g_str_has_prefix(name, "xl/worksheets/sheet") && g_str_has_suffix(name, ".xml")) || (g_str_has_prefix(name, "ppt/slides/slide") && g_str_has_suffix(name, ".xml")));
+        if(!selected) { archive_read_data_skip(archive); continue; }
+        if(archive_entry_filetype(entry) != AE_IFREG || archive_entry_size(entry) > 4 * 1024 * 1024) { ok = FALSE; break; }
+        GString *xml = g_string_new(NULL); char buffer[16384]; la_ssize_t count;
+        while((count = archive_read_data(archive, buffer, sizeof(buffer))) > 0) {
+            total += count;
+            if(xml->len + count > 4 * 1024 * 1024 || total > 16 * 1024 * 1024) { ok = FALSE; break; }
+            g_string_append_len(xml, buffer, count);
+        }
+        if(count < 0) ok = FALSE;
+        if(ok) {
+            out.depth = 0; GMarkupParseContext *context = g_markup_parse_context_new(&parser, 0, &out, NULL);
+            ok = g_markup_parse_context_parse(context, xml->str, xml->len, NULL) && g_markup_parse_context_end_parse(context, NULL);
+            g_markup_parse_context_free(context); documents++; g_string_append_c(out.text, '\n');
+        }
+        g_string_free(xml, TRUE);
+        if(!ok || out.text->len >= 512 * 1024) break;
+    }
+    if(status != ARCHIVE_EOF && status != ARCHIVE_OK) ok = FALSE;
+    archive_read_free(archive);
+    if(ok && documents > 0) { char *valid = g_utf8_make_valid(out.text->str, out.text->len); fputs(valid, stdout); g_free(valid); if(out.text->len >= 512 * 1024) fputs("\n[Text preview truncated]\n", stdout); }
+    else ok = FALSE;
+    g_string_free(out.text, TRUE); return ok;
+}
 
 static cairo_status_t write_png(void *closure, const unsigned char *data, unsigned int length) {
     (void)closure;
@@ -62,6 +118,20 @@ int main(int argc, char **argv) {
     if(setrlimit(RLIMIT_AS, &memory) || setrlimit(RLIMIT_CPU, &cpu) || setrlimit(RLIMIT_NOFILE, &files) || setrlimit(RLIMIT_CORE, &core)) return 2;
     if(prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) != 0 || argc < 3) return 2;
     GError *error = NULL;
+    if(g_str_equal(argv[1], "office")) return office_preview(argv[2]) ? 0 : 2;
+    if(g_str_equal(argv[1], "thumbnail-cache")) {
+        if(argc != 5) return 2;
+        int width, height;
+        if(!gdk_pixbuf_get_file_info(argv[2], &width, &height) || width < 1 || height < 1 || width > 128 || height > 128) return 2;
+        GdkPixbuf *image = gdk_pixbuf_new_from_file(argv[2], &error);
+        if(!image) goto fail;
+        gboolean valid = g_strcmp0(gdk_pixbuf_get_option(image, "tEXt::Thumb::URI"), argv[3]) == 0 && g_strcmp0(gdk_pixbuf_get_option(image, "tEXt::Thumb::MTime"), argv[4]) == 0;
+        char *buffer = NULL; gsize size = 0;
+        gboolean saved = valid && gdk_pixbuf_save_to_buffer(image, &buffer, &size, "png", &error, NULL);
+        g_object_unref(image);
+        if(!saved) goto fail;
+        gboolean written = fwrite(buffer, 1, size, stdout) == size; g_free(buffer); return written ? 0 : 2;
+    }
     if(g_str_equal(argv[1], "markdown")) {
         FILE *input = fopen(argv[2], "rb"); if(!input) return 2;
         char *contents = g_malloc(256 * 1024); size_t length = fread(contents, 1, 256 * 1024, input);

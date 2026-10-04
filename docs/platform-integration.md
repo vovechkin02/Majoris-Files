@@ -6,7 +6,7 @@ Build on Debian with a current GTK4/libadwaita toolchain:
 apt install build-essential meson ninja-build valac libgtk-4-dev \
   libadwaita-1-dev libgee-0.8-dev libsqlite3-dev libjson-glib-dev \
   libpoppler-glib-dev libarchive-dev libpolkit-gobject-1-dev libx11-dev \
-  libfontconfig-dev libpango1.0-dev libcmark-dev bubblewrap fonts-dejavu-core
+  libfontconfig-dev libpango1.0-dev libcmark-dev libportal-gtk4-dev libcloudproviders-dev bubblewrap fonts-dejavu-core
 meson setup build --prefix=/usr
 meson compile -C build
 meson test -C build --print-errorlogs
@@ -101,6 +101,14 @@ The service must be tested with the actual Majoris firewall and Samba packages
 before default installation. WS-Discovery remains an ISO component.
 
 ## Hardware and sandbox acceptance
+
+Desktop wallpaper and email actions use libportal with GTK parent-window export.
+Wallpaper requests ask the desktop to show its preview before applying the image;
+email requests open a composer with attachments and do not send mail themselves.
+See the [libportal wallpaper API](https://libportal.org/method.Portal.set_wallpaper.html).
+Cloud sidebar discovery uses libcloudproviders account roots, status, menus and
+action groups. Provider-specific quota and per-item materialization APIs remain
+separate acceptance work.
 
 Validate USB arrival/removal and eject, SMB discovery/authentication/read/write,
 SFTP/WebDAV mounts, Flatpak document access to only selected files, portal parent

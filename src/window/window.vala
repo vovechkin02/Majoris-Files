@@ -28,11 +28,13 @@ namespace MajorisFiles {
                 });
             providers.register_provider(new ScriptActions(metadata));
             providers.register_provider(new DiskImageActions());
+            providers.register_provider(new DesktopActions());
             var provider_action = new SimpleAction("provider-action", VariantType.STRING);
             provider_action.activate.connect((target) => {
                 providers.execute.begin(target.get_string(), current.selected(), this, (obj, res) => { try { providers.execute.end(res);
                                                                                                        }
-                                                                                                       catch(Error e) { Dialogs.error(this, e.message);
+                                                                                                       catch(Error e) { if(!(e is IOError.CANCELLED) && !(e is Gtk.DialogError.DISMISSED))
+                                                                                                                            Dialogs.error(this, e.message);
                                                                                                        }
                     });
             });
@@ -49,13 +51,20 @@ namespace MajorisFiles {
             jobs.selection_mode = Gtk.SelectionMode.NONE;
             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
                                                         var box = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
-                                                        var label = new Gtk.Label(job.title);
+                                                        var label = new Gtk.Label(job.error != "" ? job.error : job.current == "" ? job.title : job.current);
                                                         var bar = new Gtk.ProgressBar();
+                                                        bar.fraction = job.progress;
                                                         var cancel = new Gtk.Button.with_label("Cancel");
+                                                        cancel.sensitive = !job.done;
                                                         cancel.clicked.connect(() => job.cancellable.cancel());
                                                         var retry = new Gtk.Button.with_label("Retry Remaining Items");
                                                         retry.visible = job.can_retry;
-                                                        retry.clicked.connect(() => operations.retry.begin(job, this));
+                                                        retry.clicked.connect(() => operations.retry.begin(job, this, (obj, res) => {
+                    try { operations.retry.end(res);
+                    }
+                    catch(Error e) { Dialogs.error(this, e.message);
+                    }
+                }));
                                                         box.append(label);
                                                         box.append(bar);
                                                         box.append(cancel);
@@ -66,6 +75,7 @@ namespace MajorisFiles {
                                                                                    bar.fraction = job.progress;
                                                                                    cancel.sensitive = !job.done;
                                                                                    retry.visible = job.can_retry;
+                                                                                   retry.sensitive = !job.retrying;
                                                             });
                                                         return box;
                 });
@@ -73,7 +83,7 @@ namespace MajorisFiles {
             progress.popover = popover;
             header.pack_end(progress);
             var menu = new Menu();
-            foreach (var entry in new string[] {"New Window|app.new-window", "New Tab|win.new-tab", "Reopen Closed Tab|win.reopen", "Duplicate Tab|win.duplicate-tab", "New Folder|win.new-folder", "New Empty File|win.new-file", "Show Hidden Files|win.hidden", "Preview Pane|win.preview", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified", "Descending Order|win.descending", "Bookmarks: Add Current Folder|win.bookmark", "Save Search|win.save-search", "Preferences|win.preferences"})
+            foreach (var entry in new string[] {"New Window|app.new-window", "New Tab|win.new-tab", "Reopen Closed Tab|win.reopen", "Duplicate Tab|win.duplicate-tab", "New Folder|win.new-folder", "New Empty File|win.new-file", "Show Hidden Files|win.hidden", "Preview Pane|win.preview", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified", "Descending Order|win.descending", "Bookmarks: Add Current Folder|win.bookmark", "Save Search|win.save-search", "Preferences|win.preferences", "Keyboard Shortcuts|win.shortcuts"})
             {
                 var parts = entry.split("|", 2);
                 menu.append(parts[0], parts[1]);
@@ -175,7 +185,12 @@ namespace MajorisFiles {
             action("hidden", () => { current.show_hidden = !current.show_hidden;
                                      current.refilter();
                 });
-            action("preview", () => { current.preview.visible = !current.preview.visible;
+            action("preview", () => { if(current.narrow)
+                                      {
+                                          quick_preview();
+                                          return;
+                                      }
+                                      current.preview.visible = !current.preview.visible;
                                       var chosen = current.selected();
                                       if (chosen.size > 0 && current.preview.visible)
                                           current.preview.show_item.begin(chosen[0]);
@@ -225,6 +240,8 @@ namespace MajorisFiles {
                 });
             action("join", () => join.begin());
             action("preferences", () => preferences());
+            action("shortcuts", () => new ShortcutsDialog().present(this));
+            app.set_accels_for_action("win.shortcuts", {"<Control>question"});
             action("manage-tags", () => new TagsDialog(metadata).present(this));
             string[] names = {
                 "new-tab", "close-tab", "reopen", "hidden", "new-folder", "rename", "trash", "delete", "copy", "cut", "paste", "undo", "redo", "properties", "quick-preview"
@@ -388,6 +405,13 @@ namespace MajorisFiles {
             if (name == null)
                 return;
             try {
+                string old_name = chosen[0].name;
+                int old_dot = old_name.last_index_of("."), new_dot = name.last_index_of(".");
+                string old_extension = old_dot > 0 ? old_name.substring(old_dot) : "";
+                string new_extension = new_dot > 0 ? name.substring(new_dot) : "";
+                if(!chosen[0].directory && old_extension != new_extension && metadata.state("extension-warning", "true") == "true")
+                    if(!(yield Dialogs.confirm(this, "Change File Extension?", "Changing the extension can change which application opens this file.", "Rename")))
+                        return;
                 yield operations.rename(chosen[0].file, name);
             }
             catch (Error e) {
@@ -397,7 +421,7 @@ namespace MajorisFiles {
         async void permanent_delete()
         {
             var files = selected_files();
-            if (files.size > 0 && (yield Dialogs.confirm(this, "Permanently delete selected items?", "This cannot be undone.", "Delete")))
+            if (files.size > 0 && (metadata.state("confirm-delete", "true") != "true" || (yield Dialogs.confirm(this, "Permanently delete selected items?", "This cannot be undone.", "Delete"))))
                 operations.run.begin(OperationKind.DELETE, files, null, this);
         }
         async void set_tags()
@@ -437,7 +461,7 @@ namespace MajorisFiles {
             window.transient_for = this;
             window.default_width = 720;
             window.default_height = 560;
-            var pane = new PreviewPane();
+            var pane = new PreviewPane(metadata);
             window.content = pane;
             pane.show_item.begin(initial);
             var keys = new Gtk.EventControllerKey();
@@ -519,53 +543,7 @@ namespace MajorisFiles {
         }
         void preferences()
         {
-            var window = new Adw.PreferencesDialog();
-            window.title = "Preferences";
-            var page = new Adw.PreferencesPage();
-            var group = new Adw.PreferencesGroup();
-            group.title = "Browsing";
-            var hidden = new Adw.SwitchRow();
-            hidden.title = "Show Hidden Files";
-            hidden.active = current.show_hidden;
-            hidden.notify["active"].connect(() => { current.show_hidden = hidden.active;
-                                                    current.refilter();
-                });
-            group.add(hidden);
-            var notifications = new Adw.SwitchRow();
-            notifications.title = "Notify About Background Operations";
-            notifications.active = metadata.state("notifications", "true") == "true";
-            notifications.notify["active"].connect(() => metadata.set_state("notifications", notifications.active ? "true" : "false"));
-            group.add(notifications);
-            var scripts = new Adw.SwitchRow();
-            scripts.title = "Enable User Scripts";
-            scripts.subtitle = Path.build_filename(Environment.get_user_data_dir(), "majoris-files", "scripts");
-            scripts.active = metadata.state("scripts-enabled", "false") == "true";
-            scripts.notify["active"].connect(() => metadata.set_state("scripts-enabled", scripts.active ? "true" : "false"));
-            group.add(scripts);
-            var restore = new Adw.SwitchRow();
-            restore.title = "Restore Tabs After an Unexpected Exit";
-            restore.active = metadata.state("restore-session", "true") == "true";
-            restore.notify["active"].connect(() => metadata.set_state("restore-session", restore.active ? "true" : "false"));
-            group.add(restore);
-            page.add(group);
-            window.add(page);
-            var tags_button = new Gtk.Button.with_label("Manage Tags");
-            tags_button.clicked.connect(() => new TagsDialog(metadata).present(this));
-            group.add(tags_button);
-            var home_group = new Adw.PreferencesGroup();
-            home_group.title = "Home Sections";
-            page.add(home_group);
-            foreach(var entry in new string[] {"favorites|Favorites", "recent|Recent", "downloads|Recent Downloads", "recommended|Recommended"})
-            {
-                var parts = entry.split("|");
-                string key = "home-" + parts[0];
-                var toggle = new Adw.SwitchRow();
-                toggle.title = parts[1];
-                toggle.active = metadata.state(key, "true") == "true";
-                toggle.notify["active"].connect(() => metadata.set_state(key, toggle.active ? "true" : "false"));
-                home_group.add(toggle);
-            }
-            window.present(this);
+            new PreferencesDialog(metadata).present(this);
         }
     }
 }

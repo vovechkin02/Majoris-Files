@@ -33,10 +33,18 @@ namespace MajorisFiles {
             get;
             set;
         }
+        public bool retrying {
+            get;
+            set;
+        }
         internal OperationKind retry_kind;
         internal bool replace_all;
         internal bool skip_all;
+        internal string journal_group = Uuid.string_random();
         internal File? retry_target;
+        internal string target_identity = "";
+        internal bool restored_plan;
+        internal Gee.HashMap<string, string> source_identities = new Gee.HashMap<string, string>();
         internal Gee.ArrayList<File> remaining = new Gee.ArrayList<File>();
         public Cancellable cancellable = new Cancellable();
         public weak Gtk.Window? parent;
@@ -51,6 +59,7 @@ namespace MajorisFiles {
         public File destination;
         public string source_identity = "";
         public string destination_identity = "";
+        public string group = Uuid.string_random();
         public JournalEntry(OperationKind kind, File source, File destination)
         {
             this.kind = kind;
@@ -64,14 +73,16 @@ namespace MajorisFiles {
         Gee.ArrayList<JournalEntry> redo_stack = new Gee.ArrayList<JournalEntry>();
         public MetadataStore metadata;
         bool history_busy;
+        Gee.HashSet<string> discarded_groups = new Gee.HashSet<string>();
         public signal void changed();
         public OperationManager(MetadataStore metadata)
         {
             this.metadata = metadata;
             restore_history("undo", undo_stack);
             restore_history("redo", redo_stack);
+            restore_jobs();
             var interrupted = metadata.state("operations-active");
-            if(interrupted != "")
+            if(interrupted != "" && jobs.get_n_items() == 0)
             {
                 var job = new Job("Interrupted operations");
                 job.current = interrupted;
@@ -81,14 +92,72 @@ namespace MajorisFiles {
                 metadata.set_state("operations-active", "");
             }
         }
+        void restore_jobs()
+        {
+            string saved = metadata.state("operations-plans");
+            if(saved == "" || saved.length > 4 * 1024 * 1024)
+                return;
+            try {
+                var plans = Variant.parse(new VariantType("aa{sv}"), saved);
+                if(plans.n_children() > 100)
+                    return;
+                for(size_t i = 0; i < plans.n_children(); i++)
+                {
+                    var plan = plans.get_child_value(i);
+                    var kind = plan.lookup_value("kind", VariantType.UINT32);
+                    var title = plan.lookup_value("title", VariantType.STRING);
+                    var target = plan.lookup_value("target", VariantType.STRING);
+                    var target_id = plan.lookup_value("target-id", VariantType.STRING);
+                    var group = plan.lookup_value("group", VariantType.STRING);
+                    var sources = plan.lookup_value("sources", new VariantType("a(ss)"));
+                    if(kind == null || title == null || target == null || target_id == null || group == null || sources == null || sources.n_children() == 0 || sources.n_children() > 10000)
+                        continue;
+                    uint value = kind.get_uint32();
+                    if(value != OperationKind.COPY && value != OperationKind.MOVE && value != OperationKind.LINK)
+                        continue;
+                    if(Uri.parse_scheme(target.get_string()) == null || target_id.get_string() == "")
+                        continue;
+                    var job = new Job(title.get_string());
+                    job.retry_kind = (OperationKind)value;
+                    job.retry_target = File.new_for_uri(target.get_string());
+                    job.target_identity = target_id.get_string();
+                    job.journal_group = group.get_string();
+                    bool valid = true;
+                    for(size_t j = 0; j < sources.n_children(); j++)
+                    {
+                        var source = sources.get_child_value(j);
+                        string uri = source.get_child_value(0).get_string(), identity = source.get_child_value(1).get_string();
+                        if(Uri.parse_scheme(uri) == null || identity == "")
+                        {
+                            valid = false;
+                            break;
+                        }
+                        job.remaining.add(File.new_for_uri(uri));
+                        job.source_identities[uri] = identity;
+                    }
+                    if(!valid)
+                        continue;
+                    job.done = true;
+                    job.can_retry = true;
+                    job.restored_plan = true;
+                    job.current = job.retry_target.get_parse_name();
+                    job.error = "Incomplete operation. Retry rechecks file identities and asks about destination conflicts. Check any preserved .majoris-backup files.";
+                    jobs.append(job);
+                }
+            }
+            catch(Error e) {
+                warning("Cannot restore operation plans: %s", e.message);
+            }
+        }
         void restore_history(string key, Gee.ArrayList<JournalEntry> stack)
         {
             var saved = metadata.state("operations-" + key);
             if(saved == "")
                 return;
             try {
-                bool version_two = saved.has_prefix("v2:");
-                var entries = Variant.parse(new VariantType(version_two ? "a(ussss)" : "a(uss)"), version_two ? saved.substring(3) : saved);
+                bool version_three = saved.has_prefix("v3:");
+                bool version_two = saved.has_prefix("v2:") || version_three;
+                var entries = Variant.parse(new VariantType(version_three ? "a(usssss)" : version_two ? "a(ussss)" : "a(uss)"), version_two ? saved.substring(3) : saved);
                 if(entries.n_children() > 100)
                     return;
                 for(size_t i = 0; i < entries.n_children(); i++)
@@ -103,6 +172,8 @@ namespace MajorisFiles {
                     {
                         restored.source_identity = entry.get_child_value(3).get_string();
                         restored.destination_identity = entry.get_child_value(4).get_string();
+                        if(version_three)
+                            restored.group = entry.get_child_value(5).get_string();
                     }
                     stack.add(restored);
                 }
@@ -119,11 +190,16 @@ namespace MajorisFiles {
         void save_stack(string key, Gee.ArrayList<JournalEntry> stack)
         {
             while(stack.size > 100)
-                stack.remove_at(0);
-            var builder = new VariantBuilder(new VariantType("a(ussss)"));
+            {
+                string oldest = stack[0].group;
+                discarded_groups.add(oldest);
+                while(stack.size > 0 && stack[0].group == oldest)
+                    stack.remove_at(0);
+            }
+            var builder = new VariantBuilder(new VariantType("a(usssss)"));
             foreach(var entry in stack)
-                builder.add("(ussss)", (uint)entry.kind, entry.source.get_uri(), entry.destination.get_uri(), entry.source_identity, entry.destination_identity);
-            metadata.set_state("operations-" + key, "v2:" + builder.end().print(true));
+                builder.add("(usssss)", (uint)entry.kind, entry.source.get_uri(), entry.destination.get_uri(), entry.source_identity, entry.destination_identity, entry.group);
+            metadata.set_state("operations-" + key, "v3:" + builder.end().print(true));
         }
         static async string file_identity(File file)
         {
@@ -149,13 +225,21 @@ namespace MajorisFiles {
                     Source.remove(timeout);
             }
         }
-        async void record(OperationKind kind, File source, File destination)
+        async void record(OperationKind kind, File source, File destination, string? group = null)
         {
             var entry = new JournalEntry(kind, source, destination);
             entry.source_identity = yield file_identity(source);
             entry.destination_identity = yield file_identity(destination);
-            undo_stack.add(entry);
+            if(group != null)
+                entry.group = group;
             redo_stack.clear();
+            if(discarded_groups.contains(entry.group))
+                return;
+            int position = undo_stack.size;
+            for(int i = 0; i < undo_stack.size; i++)
+                if(undo_stack[i].group == entry.group)
+                    position = i + 1;
+            undo_stack.insert(position, entry);
         }
         static async void require_identity(File file, string expected) throws Error
         {
@@ -167,13 +251,41 @@ namespace MajorisFiles {
         void persist_jobs()
         {
             var text = new StringBuilder();
+            var plans = new VariantBuilder(new VariantType("aa{sv}"));
             for(uint i = 0; i < jobs.get_n_items(); i++)
             {
                 var job = (Job)jobs.get_item(i);
                 if(!job.done)
                     text.append(job.title + ": " + job.current + "\n");
+                if((!job.done || job.can_retry) && job.retry_target != null && job.target_identity != "" && job.remaining.size > 0)
+                {
+                    var sources = new VariantBuilder(new VariantType("a(ss)"));
+                    bool valid = true;
+                    foreach(var source in job.remaining)
+                    {
+                        string identity = job.source_identities[source.get_uri()] ?? "";
+                        if(identity == "")
+                        {
+                            valid = false;
+                            break;
+                        }
+                        sources.add("(ss)", source.get_uri(), identity);
+                    }
+                    if(valid)
+                    {
+                        var plan = new VariantBuilder(VariantType.VARDICT);
+                        plan.add("{sv}", "kind", new Variant.uint32((uint)job.retry_kind));
+                        plan.add("{sv}", "title", new Variant.string(job.title));
+                        plan.add("{sv}", "target", new Variant.string(job.retry_target.get_uri()));
+                        plan.add("{sv}", "target-id", new Variant.string(job.target_identity));
+                        plan.add("{sv}", "group", new Variant.string(job.journal_group));
+                        plan.add("{sv}", "sources", sources.end());
+                        plans.add_value(plan.end());
+                    }
+                }
             }
             metadata.set_state("operations-active", text.str);
+            metadata.set_state("operations-plans", plans.end().print(true));
         }
         public Job start(string title)
         {
@@ -207,14 +319,32 @@ namespace MajorisFiles {
             persist_history();
             persist_jobs();
         }
-        public async void run(OperationKind kind, Gee.List<File> files, File? target = null, Gtk.Window? parent = null)
+        public async void run(OperationKind kind, Gee.List<File> files, File? target = null, Gtk.Window? parent = null, string? journal_group = null)
         {
             var job = start(kind.to_string());
             job.parent = parent;
+            if(history_busy)
+            {
+                finish(job, new IOError.BUSY("Wait for undo or redo to finish"));
+                return;
+            }
             job.retry_kind = kind;
+            if(journal_group != null)
+                job.journal_group = journal_group;
             job.retry_target = target;
             int completed = 0;
             try {
+                if(target != null && (kind == OperationKind.COPY || kind == OperationKind.MOVE || kind == OperationKind.LINK))
+                {
+                    job.target_identity = yield file_identity(target);
+                    foreach(var source in files)
+                    {
+                        job.cancellable.set_error_if_cancelled();
+                        job.source_identities[source.get_uri()] = yield file_identity(source);
+                    }
+                    job.remaining.add_all(files);
+                    persist_jobs();
+                }
                 int index = 0;
                 var previous_trash = kind == OperationKind.TRASH ? yield trash_snapshot(job.cancellable) : null;
 
@@ -243,7 +373,7 @@ namespace MajorisFiles {
                             throw new FileError.UNSUPPORTED("Symbolic links require local source and destination paths");
                         // Exclusive creation leaves any existing item untouched.
                         yield destination.make_symbolic_link_async(source.get_path(), Priority.DEFAULT, job.cancellable);
-                        yield record(kind, source, destination);
+                        yield record(kind, source, destination, job.journal_group);
                     }
                     else if (destination != null && (kind == OperationKind.COPY || kind == OperationKind.MOVE))
                     {
@@ -369,7 +499,7 @@ namespace MajorisFiles {
                         // Copies can be removed on undo only if they were not replacements.
                         if (!exists)
                         {
-                            yield record(kind, source, destination);
+                            yield record(kind, source, destination, job.journal_group);
                             redo_stack.clear();
                         }
                         if (kind == OperationKind.MOVE && !merge)
@@ -384,7 +514,7 @@ namespace MajorisFiles {
                             if(trashed != null)
                             {
                                 previous_trash.add(trashed.get_uri());
-                                yield record(OperationKind.TRASH, source, trashed);
+                                yield record(OperationKind.TRASH, source, trashed, job.journal_group);
                                 redo_stack.clear();
                                 persist_history();
                             }
@@ -405,9 +535,9 @@ namespace MajorisFiles {
                 finish(job, e);
             }
         }
-        public async void retry(Job job, Gtk.Window? parent = null)
+        public async void retry(Job job, Gtk.Window? parent = null) throws Error
         {
-            if(!job.done || !job.can_retry)
+            if(!job.done || !job.can_retry || job.retrying)
                 return;
             bool registered = false;
             for(uint i = 0; i < jobs.get_n_items(); i++)
@@ -415,10 +545,22 @@ namespace MajorisFiles {
                     registered = true;
             if(!registered)
                 return;
-            job.can_retry = false;
-            var pending = new Gee.ArrayList<File>();
-            pending.add_all(job.remaining);
-            yield run(job.retry_kind, pending, job.retry_target, parent);
+            job.retrying = true;
+            try {
+                var pending = new Gee.ArrayList<File>();
+                pending.add_all(job.remaining);
+                if(job.restored_plan)
+                {
+                    yield require_identity(job.retry_target, job.target_identity);
+                    foreach(var source in pending)
+                        yield require_identity(source, job.source_identities[source.get_uri()]);
+                }
+                job.can_retry = false;
+                yield run(job.retry_kind, pending, job.retry_target, parent, job.journal_group);
+            }
+            finally {
+                job.retrying = false;
+            }
         }
         async bool transfer(File source, File destination, bool move, Job job) throws Error
         {
@@ -607,7 +749,7 @@ namespace MajorisFiles {
                             yield remove_tree(backup, job.cancellable);
                         if(existing == null)
                         {
-                            yield record(move ? OperationKind.MOVE : OperationKind.COPY, child, target);
+                            yield record(move ? OperationKind.MOVE : OperationKind.COPY, child, target, job.journal_group);
                             redo_stack.clear();
                             persist_history();
                         }
@@ -730,6 +872,8 @@ namespace MajorisFiles {
         }
         public async void rename(File file, string name) throws Error
         {
+            if(history_busy)
+                throw new IOError.BUSY("Wait for undo or redo to finish");
             if (!Paths.valid_name(name))
                 throw new FileError.INVALID("Invalid filename");
             var result = yield file.set_display_name_async(name, Priority.DEFAULT, null);
@@ -741,6 +885,8 @@ namespace MajorisFiles {
         }
         public async void new_folder(File parent, string name) throws Error
         {
+            if(history_busy)
+                throw new IOError.BUSY("Wait for undo or redo to finish");
             if (!Paths.valid_name(name))
                 throw new FileError.INVALID("Invalid folder name");
             var file = parent.get_child(name);
@@ -752,14 +898,40 @@ namespace MajorisFiles {
         }
         public async void undo(Gtk.Window? parent = null) throws Error
         {
-            if(history_busy)
+            if(history_busy || running_jobs())
                 throw new IOError.BUSY("An undo or redo is already running");
             history_busy = true;
             var application = GLib.Application.get_default();
             if(application != null)
                 application.hold();
             try {
-                yield undo_entry(parent);
+                if(undo_stack.size == 0)
+                    return;
+                string group = undo_stack[undo_stack.size - 1].group;
+                bool copies = false;
+                var records = new Gee.ArrayList<JournalEntry>();
+                foreach(var entry in undo_stack)
+                    if(entry.group == group)
+                        records.add(entry);
+                foreach(var entry in records)
+                {
+                    yield require_identity(entry.destination, entry.destination_identity);
+                    if(entry.kind == OperationKind.COPY)
+                        copies = true;
+                }
+                if(copies)
+                {
+                    if(parent == null)
+                        throw new FileError.UNSUPPORTED("Copy undo requires confirmation");
+                    var alert = new Adw.AlertDialog("Undo Copy?", "Copied items in this operation will be moved to Trash, including changes made since copying.");
+                    alert.add_response("cancel", "Cancel");
+                    alert.add_response("undo", "Move Copies to Trash");
+                    alert.close_response = "cancel";
+                    if((yield alert.choose(parent, null)) != "undo")
+                        return;
+                }
+                while(undo_stack.size > 0 && undo_stack[undo_stack.size - 1].group == group)
+                    yield undo_entry();
             }
             finally {
                 history_busy = false;
@@ -767,7 +939,14 @@ namespace MajorisFiles {
                     application.release();
             }
         }
-        async void undo_entry(Gtk.Window? parent) throws Error
+        bool running_jobs()
+        {
+            for(uint i = 0; i < jobs.get_n_items(); i++)
+                if(!((Job)jobs.get_item(i)).done)
+                    return true;
+            return false;
+        }
+        async void undo_entry() throws Error
         {
             if (undo_stack.size == 0)
                 return;
@@ -783,14 +962,6 @@ namespace MajorisFiles {
                 yield entry.destination.delete_async(Priority.DEFAULT, null);
             else if (entry.kind == OperationKind.COPY)
             {
-                if(parent == null)
-                    throw new FileError.UNSUPPORTED("Copy undo requires confirmation");
-                var alert = new Adw.AlertDialog("Undo Copy?", "The copied item will be moved to Trash, including any changes made since copying.");
-                alert.add_response("cancel", "Cancel");
-                alert.add_response("undo", "Move Copy to Trash");
-                alert.close_response = "cancel";
-                if((yield alert.choose(parent, null)) != "undo")
-                    return;
                 yield entry.destination.trash_async(Priority.DEFAULT, null);
             }
             entry.source_identity = yield file_identity(entry.source);
@@ -801,14 +972,24 @@ namespace MajorisFiles {
         }
         public async void redo() throws Error
         {
-            if(history_busy)
+            if(history_busy || running_jobs())
                 throw new IOError.BUSY("An undo or redo is already running");
             history_busy = true;
             var application = GLib.Application.get_default();
             if(application != null)
                 application.hold();
             try {
-                yield redo_entry();
+                if(redo_stack.size == 0)
+                    return;
+                string group = redo_stack[redo_stack.size - 1].group;
+                var records = new Gee.ArrayList<JournalEntry>();
+                foreach(var entry in redo_stack)
+                    if(entry.group == group)
+                        records.add(entry);
+                foreach(var entry in records)
+                    yield require_identity(entry.source, entry.source_identity);
+                while(redo_stack.size > 0 && redo_stack[redo_stack.size - 1].group == group)
+                    yield redo_entry();
             }
             finally {
                 history_busy = false;

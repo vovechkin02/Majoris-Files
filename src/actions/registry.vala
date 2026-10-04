@@ -21,6 +21,10 @@ namespace MajorisFiles {
         {
             providers[provider.provider_id] = provider;
         }
+        public void register_nearby(NearbyShareProvider provider)
+        {
+            register_provider(new NearbyActions(provider));
+        }
         public Menu menu(Gee.List<FileItem> selected)
         {
             var menu = new Menu();

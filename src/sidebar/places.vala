@@ -5,6 +5,7 @@ namespace MajorisFiles {
         public Mount? mount;
         public Volume? volume;
         public bool bookmark;
+        public CloudProviders.Account? cloud;
         public Place(string label, File file, Mount? mount = null)
         {
             this.label = label;
@@ -19,9 +20,11 @@ namespace MajorisFiles {
         File bookmarks;
         FileMonitor? watcher;
         MetadataStore? metadata;
+        CloudAccounts cloud = new CloudAccounts();
         public Places(MetadataStore? metadata = null)
         {
             this.metadata = metadata;
+            cloud.changed.connect(reload);
             if(metadata != null)
                 metadata.changed.connect(reload);
             volumes = VolumeMonitor.get();
@@ -103,6 +106,7 @@ namespace MajorisFiles {
                     entries.add(place);
                 }
             entries.add(new Place("Network", File.new_for_uri("network:///")));
+            entries.add_all(cloud.entries);
             entries.add(new Place("Trash", File.new_for_uri("trash:///")));
             changed();
         }

@@ -6,6 +6,7 @@ int main(string[] args)
     Test.add_func("/filesystem/missing-parts", () => run_async.begin(true));
     // Async tests run within their own bounded main loop.
     Test.add_func("/filesystem/operations", () => operations_test());
+    Test.add_func("/filesystem/durable-retry", () => durable_retry_test());
     Test.add_func("/filesystem/archive-roundtrip", () => archive_test());
     Test.add_func("/filesystem/content-counts-and-identity", () => {
         var loop = new MainLoop();
@@ -344,6 +345,29 @@ async void operation_case() throws Error
     uint job_count = manager.jobs.get_n_items();
     yield manager.retry(failed);
     assert(manager.jobs.get_n_items() == job_count);
+    var grouped = root.get_child("grouped");
+    yield grouped.make_directory_async(Priority.DEFAULT, null);
+    var group_sources = new Gee.ArrayList<File>();
+    group_sources.add(original);
+    group_sources.add(missing);
+    yield manager.run(OperationKind.MOVE, group_sources, grouped);
+    manager = new OperationManager(new MetadataStore(Path.build_filename(temp, "metadata.db")));
+    yield manager.undo();
+    assert(original.query_exists() && missing.query_exists());
+    assert(!grouped.get_child("original.txt").query_exists() && !grouped.get_child("missing.txt").query_exists());
+    yield manager.redo();
+    assert(!original.query_exists() && !missing.query_exists());
+    assert(grouped.get_child("original.txt").query_exists() && grouped.get_child("missing.txt").query_exists());
+    yield grouped.get_child("original.txt").move_async(root.get_child("held-original.txt"), FileCopyFlags.NONE, Priority.DEFAULT, null, null);
+    FileUtils.set_contents(grouped.get_child("original.txt").get_path(), "replacement");
+    bool group_rejected = false;
+    try {
+        yield manager.undo();
+    }
+    catch(MajorisFiles.FileError.CONFLICT e) {
+        group_rejected = true;
+    }
+    assert(group_rejected && grouped.get_child("missing.txt").query_exists() && !missing.query_exists());
     // A destructive recursive operation must delete the link rather than its target.
     var outside = root.get_child("outside");
     yield outside.make_directory_async(Priority.DEFAULT, null);
@@ -352,5 +376,64 @@ async void operation_case() throws Error
     yield link.make_symbolic_link_async(outside.get_path(), Priority.DEFAULT, null);
     yield OperationManager.remove_tree(root.get_child("folder"), new Cancellable());
     assert(outside.get_child("keep.txt").query_exists());
+    yield OperationManager.remove_tree(root, new Cancellable());
+}
+
+void durable_retry_test()
+{
+    var loop = new MainLoop();
+    durable_retry_case.begin((obj, res) => { try { durable_retry_case.end(res);
+                                             }
+                                             catch(Error e) { error("%s", e.message);
+                                             }
+                                             loop.quit();
+        });
+    uint watchdog = Timeout.add_seconds(10, () => { error("Durable retry timed out");
+        });
+    loop.run();
+    Source.remove(watchdog);
+}
+async void durable_retry_case() throws Error
+{
+    var root = File.new_for_path(DirUtils.make_tmp("majoris-durable-XXXXXX"));
+    var destination = root.get_child("destination");
+    destination.make_directory();
+    var source = root.get_child("source.txt");
+    FileUtils.set_contents(source.get_path(), "durable contents");
+    var metadata = new MetadataStore(root.get_child("metadata.db").get_path());
+    var manager = new OperationManager(metadata);
+    manager.jobs.items_changed.connect((position, removed, added) => {
+        if(added > 0)
+        {
+            var job = (Job)manager.jobs.get_item(position);
+            job.notify["current"].connect(() => job.cancellable.cancel());
+        }
+    });
+    var files = new Gee.ArrayList<File>();
+    files.add(source);
+    yield manager.run(OperationKind.COPY, files, destination);
+    assert(((Job)manager.jobs.get_item(0)).cancelled);
+    var restarted = new OperationManager(new MetadataStore(root.get_child("metadata.db").get_path()));
+    assert(restarted.jobs.get_n_items() == 1);
+    var recovered = (Job)restarted.jobs.get_item(0);
+    assert(recovered.can_retry && recovered.done);
+    // A replacement source must block retry without creating an output.
+    var held = root.get_child("held.txt");
+    yield source.move_async(held, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
+    FileUtils.set_contents(source.get_path(), "replacement");
+    bool blocked = false;
+    try {
+        yield restarted.retry(recovered);
+    }
+    catch(MajorisFiles.FileError.CONFLICT e) {
+        blocked = true;
+    }
+    assert(blocked && !destination.get_child("source.txt").query_exists() && recovered.can_retry);
+    yield source.delete_async(Priority.DEFAULT, null);
+    yield held.move_async(source, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
+    yield restarted.retry(recovered);
+    assert(destination.get_child("source.txt").query_exists());
+    var completed = new OperationManager(new MetadataStore(root.get_child("metadata.db").get_path()));
+    assert(completed.jobs.get_n_items() == 0);
     yield OperationManager.remove_tree(root, new Cancellable());
 }

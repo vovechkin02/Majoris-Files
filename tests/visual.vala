@@ -83,6 +83,41 @@ int main(string[] args)
                                  }
                                  if(stage == 5)
                                  {
+                                     var preferences = new PreferencesDialog(metadata);
+                                     preferences.present(window);
+                                     Timeout.add(500, () => { screenshot(window, "preferences.png");
+                                                              preferences.close();
+                                                              return Source.REMOVE;
+                                         });
+                                     stage++;
+                                     return Source.CONTINUE;
+                                 }
+                                 if(stage == 6)
+                                 {
+                                     var shortcuts = new ShortcutsDialog();
+                                     shortcuts.present(window);
+                                     Timeout.add(500, () => { screenshot(window, "shortcuts.png");
+                                                              shortcuts.close();
+                                                              return Source.REMOVE;
+                                         });
+                                     stage++;
+                                     return Source.CONTINUE;
+                                 }
+                                 if(stage == 7)
+                                 {
+                                     window.set_default_size(500, 680);
+                                     stage++;
+                                     return Source.CONTINUE;
+                                 }
+                                 if(stage == 8)
+                                 {
+                                     assert(window.current.narrow);
+                                     screenshot(window, "files-narrow.png");
+                                     stage++;
+                                     return Source.CONTINUE;
+                                 }
+                                 if(stage == 9)
+                                 {
                                      try {
                                          var options = new ChooserOptions(false, new VariantBuilder(VariantType.VARDICT).end());
                                          options.initial = File.new_for_path(root);
