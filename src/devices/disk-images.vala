@@ -44,8 +44,8 @@ namespace MajorisFiles {
                 if(backing == null || backing.n_children() > 65536)
                     continue;
                 var bytes = new ByteArray();
-                for(size_t j = 0; j < backing.n_children(); j++)
-                    bytes.append({backing.get_child_value(j).get_byte()});
+                var storage = backing.get_data_as_bytes();
+                bytes.append(storage.get_data());
                 bytes.append({0});
                 string path = (string)bytes.data;
                 if(path != "" && Path.is_absolute(path) && File.new_for_path(path).equal(image))
@@ -117,8 +117,8 @@ namespace MajorisFiles {
                     {
                         var point = points.get_child_value(0);
                         var bytes = new ByteArray();
-                        for(size_t i = 0; i < point.n_children(); i++)
-                            bytes.append({point.get_child_value(i).get_byte()});
+                        var storage = point.get_data_as_bytes();
+                        bytes.append(storage.get_data());
                         bytes.append({0});
                         locations.add(File.new_for_path((string)bytes.data));
                         continue;

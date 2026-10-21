@@ -54,6 +54,8 @@ namespace MajorisFiles {
     }
     public class ChooserOptions : Object {
         public bool save;
+        public bool save_many;
+        public Gee.ArrayList<string> filenames = new Gee.ArrayList<string>();
         public bool multiple;
         public bool directory;
         public bool modal = true;
@@ -65,13 +67,30 @@ namespace MajorisFiles {
         public Gee.ArrayList<ChooserFilter> filters = new Gee.ArrayList<ChooserFilter>();
         public uint selected_filter;
         public Variant? choices;
-        public ChooserOptions(bool save, Variant options) throws Error
+        public ChooserOptions(bool save, Variant options, bool save_many = false) throws Error
         {
             this.save = save;
+            this.save_many = save_many;
             if (!options.is_of_type(VariantType.VARDICT))
                 throw new FileError.INVALID("Options must be a dictionary");
             multiple = boolean(options, "multiple", false) && !save;
             directory = boolean(options, "directory", false) && !save;
+            if (save_many)
+            {
+                if (!save)
+                    throw new FileError.INVALID("SaveFiles requires save mode");
+                directory = true;
+                var names = typed(options, "files", "aay");
+                if (names == null || names.n_children() == 0 || names.n_children() > 1024)
+                    throw new FileError.INVALID("SaveFiles requires between 1 and 1024 filenames");
+                for (size_t i = 0; i < names.n_children(); i++)
+                {
+                    string name = decode_bytes(names.get_child_value(i));
+                    if (!Paths.valid_name(name))
+                        throw new FileError.INVALID("Invalid destination filename");
+                    filenames.add(name);
+                }
+            }
             modal = boolean(options, "modal", true);
             current_name = text(options, "current_name", "");
             accept_label = text(options, "accept_label", "");
@@ -158,19 +177,65 @@ namespace MajorisFiles {
             var v = typed(options, key, "ay");
             if (v == null)
                 return null;
-            if (v.n_children() == 0 || v.n_children() > 65536 || v.get_child_value(v.n_children() - 1).get_byte() != 0)
+            string path = decode_bytes(v);
+            if (!Path.is_absolute(path))
+                throw new FileError.INVALID("Path must be absolute");
+            return path;
+        }
+        static string decode_bytes(Variant v) throws Error
+        {
+            var storage = v.get_data_as_bytes();
+            unowned uint8[] bytes = storage.get_data();
+            if (bytes.length == 0 || bytes.length > 65536 || bytes[bytes.length - 1] != 0)
                 throw new FileError.INVALID("Path must be NUL terminated");
             var result = new StringBuilder();
-            for (size_t i = 0; i + 1 < v.n_children(); i++)
+            for (int i = 0; i + 1 < bytes.length; i++)
             {
-                uint8 b = v.get_child_value(i).get_byte();
+                uint8 b = bytes[i];
                 if (b == 0)
                     throw new FileError.INVALID("Embedded NUL in path");
                 result.append_c((char)b);
             }
-            if (!Path.is_absolute(result.str))
-                throw new FileError.INVALID("Path must be absolute");
             return result.str;
+        }
+        // Preserve input order, including repeated names. Do not create anything:
+        // the requesting application writes after document-portal mediation.
+        public async Gee.ArrayList<File> destinations(File folder, Cancellable? token = null) throws Error
+        {
+            var info = yield folder.query_info_async("standard::type,access::can-write", FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+            if (info.get_file_type() != FileType.DIRECTORY ||
+                (info.has_attribute("access::can-write") && !info.get_attribute_boolean("access::can-write")))
+                throw new FileError.INVALID("Select a writable folder");
+            var result = new Gee.ArrayList<File>();
+            var reserved = new Gee.HashSet<string>();
+            foreach (var original in filenames)
+            {
+                string name = original;
+                int dot = original.last_index_of(".");
+                string stem = dot > 0 ? original.substring(0, dot) : original;
+                string suffix = dot > 0 ? original.substring(dot) : "";
+                for (uint attempt = 0; ; attempt++)
+                {
+                    if (token != null)
+                        token.set_error_if_cancelled();
+                    if (attempt > 10000)
+                        throw new FileError.CONFLICT("Unable to find a free destination name");
+                    if (attempt > 0)
+                        name = "%s (%u)%s".printf(stem, attempt, suffix);
+                    if (reserved.contains(name))
+                        continue;
+                    var target = folder.get_child(name);
+                    try {
+                        yield target.query_info_async("standard::type", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token);
+                    }
+                    catch (IOError.NOT_FOUND e) {
+                        reserved.add(name);
+                        result.add(target);
+                        break;
+                    }
+                }
+            }
+            return result;
         }
         public static Variant response(string[] uris, ChooserFilter? filter = null, Variant? choices = null) throws Error
         {

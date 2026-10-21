@@ -102,7 +102,7 @@ selection. Bulk favorite controls reflect whether all selected items are favorit
 Disk-image quick actions delegate read-only loop creation, partition/filesystem
 mounting and unmount/detach to UDisks. Inventory selection is tested; actual mounts,
 Polkit cancellation and busy-device handling require a disposable Majoris VM.
-Validation currently includes 45 core/filesystem/UI/portal cases plus a separate
+Validation currently includes 51 core/filesystem/UI/portal cases plus a separate
 actual-executable crash-recovery suite. This does not substitute for the platform
 acceptance work below.
 
@@ -123,14 +123,26 @@ Outstanding #79 release criteria: full parent-window verification on both displa
 servers, complete remote/FUSE and
 cloud-provider materialization handling, complete recovery for detached devices,
 accessibility audit, and actual Flatpak/document-portal end-to-end verification.
-SaveFiles is not implemented or advertised (backend interface version 1).
+SaveFiles is implemented through the existing isolated request lifecycle (backend
+interface version 1; the backend interface does not use the public portal's version
+numbers). It selects a destination folder, validates bounded NUL-terminated names,
+preserves caller order and generates unique names for existing and repeated outputs.
+It never creates the returned destinations. D-Bus roundtrip tests cover this flow.
+Non-FUSE remote Open selections offer an explicit, durable local import, limited
+to 64 MiB and 60 seconds. The UI explains that edits do not update the original.
+Remote Save and folder selection still require a usable GVfs/FUSE bridge; no
+temporary-file writeback is advertised. Removed mounts invalidate pending chooser
+acceptance, clear selections and navigate Home with an error message. Real removable
+device and remote document-portal acceptance remain pending.
 
 
-Narrow browsing now hides the locations sidebar, preview pane and secondary toolbar
-controls below 650 pixels, with a locations toggle and view selection in View
-Settings. Narrow preview requests open the existing preview dialog. The browser
+Narrow browsing now moves the locations sidebar into an Adwaita overlay below
+650 pixels, with the locations toggle opening that overlay. Navigation dismisses
+it. Wide windows retain the resizable paned sidebar. Secondary toolbar controls
+and the preview pane collapse; view selection remains in View Settings.
+Narrow preview requests open the existing preview dialog. The browser
 sets an explicit minimum size for Adwaita breakpoint allocation. Headless visual
-acceptance covers a 500-pixel window; overlay sidebar behavior, very small windows,
+acceptance covers a 500-pixel window; very small windows,
 remote locations and a full keyboard/accessibility audit remain pending.
 Other outstanding specification areas include:
 
@@ -149,13 +161,36 @@ Other outstanding specification areas include:
 * Encrypted 7z creation, multi-volume archive creation and arbitrary filesystem
   capability detection. ZIP encryption protects contents; entry names remain visible.
 * Samba policy separation, hidden shares, owned firewall rules, shared-folder
-  inventory/status/emblems, and a full authorization/integration test fixture.
+  live status/emblems, and a full authorization/integration test fixture.
 * Cloud quota/per-item availability/materialization extensions and real-provider
   acceptance; Nearby Share transport-provider/system acceptance; disk-image system
   acceptance; wallpaper/email portal acceptance and file image rotation; indexing
   and network preference UI.
-* Translation coverage, a11y/keyboard audit, narrow-window sidebar overlay and broad adaptive acceptance,
+* Translation coverage, a11y/keyboard audit and broad adaptive acceptance,
   packaging review and performance benchmarks.
 
 Do not use the current tree as the default file manager/portal on a production
 image until these gaps and system-level acceptance tests have been resolved.
+
+## Current implementation pass
+
+Sharing now queries `net usershare info --long` for current usershare state, exposes
+the same Sharing page in folder Properties and the standalone sharing dialog,
+offers a graphical multi-account picker and lists usershares in Shared Folders.
+The inventory provides Open, Edit, Copy Address and Stop Sharing. Unresolved ACL
+accounts remain visible and removable. Advanced/mixed ACLs disable editing rather
+than being silently widened. Share names are locked while editing an existing share.
+Filesystem permissions remain authoritative. These changes do not complete hidden
+shares, firewall policy, emblems, connected-client status or SMB enforcement acceptance.
+
+Checksums now expose SHA-256/SHA-512 calculation and verification against a pasted
+value or a bounded GNU-style checksum file. File records are matched by filename;
+missing and duplicate matches fail. Cancellation/error closes checksum streams.
+Raw splitting has an optional SHA-256 manifest setting, enabled by default.
+Audio previews use a dedicated presentation and GTK playback controls; stream
+metadata, artwork, decoder isolation and actual codec playback acceptance remain open.
+
+See [the release matrix](release-matrix.md) for changes, code paths, coverage and
+unresolved requirements. The original 102-section specification and the full
+expanded Section 79 text are not present in this checkout or the supplied task
+attachment; full comparison against those documents remains pending.

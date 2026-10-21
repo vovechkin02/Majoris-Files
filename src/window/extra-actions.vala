@@ -13,6 +13,7 @@ namespace MajorisFiles {
             this.window = window;
             this.operations = operations;
             this.metadata = metadata;
+            action("shared-folders", () => new SharedFoldersDialog(window));
             action("compress", () => compress.begin());
             action("compress-encrypted", () => compress.begin(true));
             action("extract", () => extract.begin());

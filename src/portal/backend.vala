@@ -31,13 +31,17 @@ namespace MajorisFiles {
         }
         public async void open_file(ObjectPath handle, string app_id, string parent_window, string title, HashTable<string, Variant> options, BusName sender, out uint response, out HashTable<string, Variant> results) throws DBusError, IOError
         {
-            yield choose(false, handle, app_id, parent_window, title, options, sender, out response, out results);
+            yield choose(false, handle, app_id, parent_window, title, options, sender, false, out response, out results);
         }
         public async void save_file(ObjectPath handle, string app_id, string parent_window, string title, HashTable<string, Variant> options, BusName sender, out uint response, out HashTable<string, Variant> results) throws DBusError, IOError
         {
-            yield choose(true, handle, app_id, parent_window, title, options, sender, out response, out results);
+            yield choose(true, handle, app_id, parent_window, title, options, sender, false, out response, out results);
         }
-        async void choose(bool save, ObjectPath handle, string app_id, string parent_window, string title, HashTable<string, Variant> options, BusName sender, out uint response, out HashTable<string, Variant> results) throws DBusError, IOError
+        public async void save_files(ObjectPath handle, string app_id, string parent_window, string title, HashTable<string, Variant> options, BusName sender, out uint response, out HashTable<string, Variant> results) throws DBusError, IOError
+        {
+            yield choose(true, handle, app_id, parent_window, title, options, sender, true, out response, out results);
+        }
+        async void choose(bool save, ObjectPath handle, string app_id, string parent_window, string title, HashTable<string, Variant> options, BusName sender, bool save_many, out uint response, out HashTable<string, Variant> results) throws DBusError, IOError
         {
             // Only xdg-desktop-portal may invoke this host-privileged browsing service.
             Variant owner;
@@ -55,7 +59,7 @@ namespace MajorisFiles {
             options.foreach((key, value) => builder.add("{sv}", key, value));
             ChooserOptions parsed;
             try {
-                parsed = new ChooserOptions(save, builder.end());
+                parsed = new ChooserOptions(save, builder.end(), save_many);
             }
             catch (Error e) {
                 throw new DBusError.INVALID_ARGS(e.message);

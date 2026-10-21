@@ -72,6 +72,7 @@ namespace MajorisFiles {
         Gtk.Box breadcrumbs = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
         Gtk.Box searches;
         Gtk.Paned sidebar_pane;
+        Adw.OverlaySplitView sidebar_overlay = new Adw.OverlaySplitView();
         Adw.BreakpointBin adaptive = new Adw.BreakpointBin();
         public bool narrow {
             get {
@@ -174,7 +175,9 @@ namespace MajorisFiles {
             toolbar.margin_end = 8;
             toolbar.margin_top = 6;
             toolbar.margin_bottom = 6;
-            toolbar.append(button("sidebar-show-symbolic", "Show or Hide Locations", () => { sidebar_pane.start_child.visible = !sidebar_pane.start_child.visible;
+            toolbar.append(button("sidebar-show-symbolic", "Show or Hide Locations", () => { if (narrow)
+                                                                                              sidebar_overlay.show_sidebar = !sidebar_overlay.show_sidebar;
+                                                                                          else sidebar_pane.start_child.visible = !sidebar_pane.start_child.visible;
                 }));
             toolbar.append(button("go-previous-symbolic", "Back", () => { var file = history.back();
                                                                           if (file != null)
@@ -342,12 +345,28 @@ namespace MajorisFiles {
             content.shrink_start_child = false;
             preview.visible = metadata.state("preview-pane-default", "false") == "true";
             body.end_child = content;
-            adaptive.child = body;
+            sidebar_overlay.content = body;
+            sidebar_overlay.min_sidebar_width = 180;
+            sidebar_overlay.max_sidebar_width = 300;
+            adaptive.child = sidebar_overlay;
             adaptive.vexpand = true;
             adaptive.width_request = 320;
             adaptive.height_request = 240;
             var breakpoint = new Adw.Breakpoint(Adw.BreakpointCondition.parse("max-width: 650px"));
-            breakpoint.add_setter(side_scroll, "visible", false);
+            breakpoint.apply.connect(() => {
+                body.start_child = null;
+                sidebar_overlay.sidebar = side_scroll;
+                side_scroll.visible = true;
+                sidebar_overlay.collapsed = true;
+                sidebar_overlay.show_sidebar = false;
+            });
+            breakpoint.unapply.connect(() => {
+                sidebar_overlay.show_sidebar = false;
+                sidebar_overlay.sidebar = null;
+                sidebar_overlay.collapsed = false;
+                body.start_child = side_scroll;
+                side_scroll.visible = true;
+            });
             breakpoint.add_setter(preview, "visible", false);
             breakpoint.add_setter(edit_location_button, "visible", false);
             breakpoint.add_setter(reload_button, "visible", false);
@@ -1182,8 +1201,8 @@ namespace MajorisFiles {
         }
         public void navigate(File file, bool record = true)
         {
-            if(narrow && sidebar_pane.start_child != null)
-                sidebar_pane.start_child.visible = false;
+            if(narrow)
+                sidebar_overlay.show_sidebar = false;
             column_restore = null;
             completion_token.cancel();
             completion_popup.popdown();

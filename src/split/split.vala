@@ -150,17 +150,54 @@ namespace MajorisFiles {
             var input = yield file.read_async(Priority.LOW, token);
             var hash = new Checksum(type);
             uint8[] buffer = new uint8[BUFFER];
-            while (true)
-            {
-                ssize_t count = yield input.read_async(buffer, Priority.LOW, token);
-                if (count == 0)
-                    break;
-                hash.update(buffer, count);
+            try {
+                while (true)
+                {
+                    ssize_t count = yield input.read_async(buffer, Priority.LOW, token);
+                    if (count == 0)
+                        break;
+                    hash.update(buffer, count);
+                }
+            }
+            catch (Error e) {
+                try { yield input.close_async(Priority.LOW, null); } catch (Error ignored) {}
+                throw e;
             }
             yield input.close_async(Priority.LOW, null);
             return hash.get_string().dup();
         }
-        public static async void split(File source, File destination, uint64 piece_size, Job job) throws Error
+        public static string expected_checksum(string text, string filename, ChecksumType type) throws Error
+        {
+            int digits = type == ChecksumType.SHA512 ? 128 : 64;
+            string? found = null;
+            foreach (var raw in text.split("\n"))
+            {
+                string line = raw.strip();
+                if (line == "" || line.has_prefix("#"))
+                    continue;
+                if (line.length < digits)
+                    throw new FileError.INVALID("Invalid checksum length");
+                string hash = line.substring(0, digits);
+                if (!Regex.match_simple("^[0-9a-fA-F]+$", hash))
+                    throw new FileError.INVALID("Invalid checksum value");
+                if (line.length > digits)
+                {
+                    if (line[digits] != ' ' && line[digits] != '\t')
+                        throw new FileError.INVALID("Invalid checksum file format");
+                    string name = line.substring(digits).strip();
+                    if (name.has_prefix("*")) name = name.substring(1);
+                    if (name != filename && name != "./" + filename)
+                        continue;
+                }
+                if (found != null)
+                    throw new FileError.INVALID("Multiple checksums match the selected file");
+                found = hash.down();
+            }
+            if (found == null)
+                throw new FileError.INVALID("No checksum matches the selected file");
+            return found;
+        }
+        public static async void split(File source, File destination, uint64 piece_size, Job job, bool manifest_enabled = true) throws Error
         {
             if (piece_size == 0)
                 throw new FileError.INVALID("Part size must be positive");
@@ -176,6 +213,7 @@ namespace MajorisFiles {
             if(fs.has_attribute("filesystem::free") && fs.get_attribute_uint64("filesystem::free") < (uint64)info.get_size())
                 throw new FileError.INVALID("Insufficient free space for all parts");
             var expected = new Gee.HashSet<string>();
+            // A stale manifest must not be left beside newly generated raw parts.
             expected.add(source.get_basename() + ".parts.json");
             for(uint i = 1; i <= pieces; i++)
                 expected.add(Paths.part_name(source.get_basename(), i));
@@ -257,14 +295,16 @@ namespace MajorisFiles {
                 builder.set_member_name("sha256");
                 builder.add_string_value(full.get_string());
                 builder.end_object();
-                var generator = new Json.Generator();
-                generator.set_root(builder.get_root());
-                var manifest = destination.get_child(source.get_basename() + ".parts.json");
-                var output = yield manifest.create_async(FileCreateFlags.PRIVATE, Priority.LOW, job.cancellable);
-                created.add(manifest);
-                size_t written;
-                yield output.write_all_async(generator.to_data(null).data, Priority.LOW, job.cancellable, out written);
-                yield output.close_async(Priority.LOW, null);
+                if (manifest_enabled) {
+                    var generator = new Json.Generator();
+                    generator.set_root(builder.get_root());
+                    var manifest = destination.get_child(source.get_basename() + ".parts.json");
+                    var output = yield manifest.create_async(FileCreateFlags.PRIVATE, Priority.LOW, job.cancellable);
+                    created.add(manifest);
+                    size_t written;
+                    yield output.write_all_async(generator.to_data(null).data, Priority.LOW, job.cancellable, out written);
+                    yield output.close_async(Priority.LOW, null);
+                }
             }
             catch (Error e) {
                 foreach (var file in created)

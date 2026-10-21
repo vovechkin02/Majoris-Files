@@ -64,6 +64,24 @@ namespace MajorisFiles {
             // GtkMediaFile delegates playback to GTK's installed GStreamer media backend.
             var media = Gtk.MediaFile.for_file(item.file);
             media.set_volume(0.5);
+            token.cancelled.connect(() => { media.pause(); media.clear(); });
+            if (item.mime.has_prefix("audio/"))
+            {
+                var audio = new Gtk.Box(Gtk.Orientation.VERTICAL, 12);
+                var icon = new Gtk.Image.from_icon_name("audio-x-generic-symbolic");
+                icon.pixel_size = 96;
+                icon.vexpand = true;
+                audio.append(icon);
+                var name = new Gtk.Label(item.name);
+                name.wrap = true;
+                name.selectable = true;
+                audio.append(name);
+                var controls = new Gtk.MediaControls(media);
+                audio.append(controls);
+                if (metadata != null && metadata.state("autoplay-media", "false") == "true")
+                    media.play();
+                return audio;
+            }
             var video = new Gtk.Video.for_media_stream(media);
             video.autoplay = metadata != null && metadata.state("autoplay-media", "false") == "true";
             return video;

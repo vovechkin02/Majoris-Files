@@ -24,7 +24,50 @@ int main(string[] args)
         Source.remove(watchdog);
         assert(passed);
     });
+    Test.add_func("/filesystem/chooser-destinations-and-import", () => {
+        var loop = new MainLoop();
+        chooser_files_case.begin((obj, res) => {
+            try { chooser_files_case.end(res); }
+            catch (Error e) { error("%s", e.message); }
+            loop.quit();
+        });
+        uint timeout = Timeout.add_seconds(10, () => { error("Chooser filesystem test timed out"); });
+        loop.run();
+        Source.remove(timeout);
+    });
     return Test.run();
+}
+async void chooser_files_case() throws Error
+{
+    var root = File.new_for_path(DirUtils.make_tmp("majoris-chooser-files-XXXXXX"));
+    var source = root.get_child("source.txt");
+    FileUtils.set_contents(source.get_path(), "test contents");
+    var imported = yield ChooserImport.download(source, new Cancellable(), root.get_child("imports"));
+    assert(imported.is_native() && !imported.equal(source));
+    assert((yield SplitService.checksum(source, ChecksumType.SHA512, new Cancellable())) ==
+           (yield SplitService.checksum(imported, ChecksumType.SHA512, new Cancellable())));
+    yield imported.delete_async(Priority.DEFAULT, null);
+    yield imported.get_parent().delete_async(Priority.DEFAULT, null);
+    var cancelled = new Cancellable();
+    cancelled.cancel();
+    bool rejected = false;
+    try { yield ChooserImport.download(source, cancelled, root.get_child("imports")); }
+    catch (IOError.CANCELLED e) { rejected = true; }
+    assert(rejected);
+    var options = new VariantBuilder(VariantType.VARDICT);
+    var names = new VariantBuilder(new VariantType("aay"));
+    names.add_value(new Variant.bytestring("source.txt"));
+    names.add_value(new Variant.bytestring("source.txt"));
+    options.add("{sv}", "files", names.end());
+    var parsed = new ChooserOptions(true, options.end(), true);
+    var outputs = yield parsed.destinations(root, new Cancellable());
+    assert(outputs.size == 2 && outputs[0].get_basename() == "source (1).txt" && outputs[1].get_basename() == "source (2).txt");
+    var metadata = new MetadataStore(root.get_child("state.db").get_path());
+    var job = new OperationManager(metadata).start("Split without manifest");
+    yield SplitService.split(source, root, 4, job, false);
+    assert(!root.get_child("source.txt.parts.json").query_exists());
+    assert(root.get_child("source.txt.part001").query_exists());
+    yield OperationManager.remove_tree(root, new Cancellable());
 }
 async void content_case() throws Error
 {

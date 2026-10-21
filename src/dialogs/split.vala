@@ -9,6 +9,7 @@ namespace MajorisFiles {
         Gtk.SpinButton amount = new Gtk.SpinButton.with_range(1, 1000000000, 1);
         Adw.ActionRow estimate = new Adw.ActionRow();
         Cancellable token = new Cancellable();
+        Adw.SwitchRow manifest = new Adw.SwitchRow();
         public SplitDialog(Gtk.Window owner_window, FileItem item, File destination, OperationManager operations)
         {
             this.owner_window = owner_window;
@@ -62,9 +63,13 @@ namespace MajorisFiles {
             estimate.title = "Estimated Output";
             group.add(estimate);
             var explanation = new Adw.ActionRow();
-            explanation.title = "Original kept · SHA-256 manifest included";
+            explanation.title = "Original kept";
             explanation.subtitle = "Parts are streamed to new files. Existing outputs are never overwritten. Up to 10,000 parts.";
             group.add(explanation);
+            manifest.title = "Include SHA-256 Manifest";
+            manifest.subtitle = "Recommended: verifies every part and the reconstructed file. Without it, missing final parts cannot be detected.";
+            manifest.active = true;
+            group.add(manifest);
             var start = new Gtk.Button.with_label("Split File");
             start.add_css_class("suggested-action");
             group.add(start);
@@ -144,7 +149,7 @@ namespace MajorisFiles {
                 job.parent = owner_window;
                 close();
                 try {
-                    yield SplitService.split(file, folder, size, job);
+                    yield SplitService.split(file, folder, size, job, manifest.active);
                     operations.finish(job);
                 }
                 catch(Error e) {

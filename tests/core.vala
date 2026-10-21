@@ -252,5 +252,39 @@ int main(string[] args)
         var groups = AccountDirectory.parse("staff:x:1000:alice\nbad:x:-1:\nnone:x:4294967295:\n", false);
         assert(groups.size == 1 && groups[0].id == 1000 && groups[0].name == "staff");
     });
+    Test.add_func("/chooser/save-files-validation", () => {
+        foreach (var name in new string[] {"../escape", "folder/file", ".", "..", ""})
+        {
+            var options = new VariantBuilder(VariantType.VARDICT);
+            var names = new VariantBuilder(new VariantType("aay"));
+            names.add_value(new Variant.bytestring(name));
+            options.add("{sv}", "files", names.end());
+            bool rejected = false;
+            try { new ChooserOptions(true, options.end(), true); }
+            catch (Error e) { rejected = true; }
+            assert(rejected);
+        }
+        bool rejected = false;
+        try { new ChooserOptions(true, new VariantBuilder(VariantType.VARDICT).end(), true); }
+        catch (Error e) { rejected = true; }
+        assert(rejected);
+    });
+    Test.add_func("/checksum/supplied-values", () => {
+        try {
+            string hash = string.nfill(64, 'a');
+            assert(SplitService.expected_checksum(hash.up(), "file.txt", ChecksumType.SHA256) == hash);
+            assert(SplitService.expected_checksum(hash + "  other.txt\n" + hash + " *file.txt\n", "file.txt", ChecksumType.SHA256) == hash);
+            bool rejected = false;
+            try { SplitService.expected_checksum(hash + "  other.txt", "file.txt", ChecksumType.SHA256); }
+            catch (Error e) { rejected = true; }
+            assert(rejected);
+            rejected = false;
+            try { SplitService.expected_checksum(hash + "\n" + hash, "file.txt", ChecksumType.SHA256); }
+            catch (Error e) { rejected = true; }
+            assert(rejected);
+            assert(SplitService.expected_checksum(string.nfill(128, 'b'), "file.txt", ChecksumType.SHA512).length == 128);
+        }
+        catch (Error e) { error("%s", e.message); }
+    });
     return Test.run();
 }

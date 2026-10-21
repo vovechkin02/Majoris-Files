@@ -83,6 +83,7 @@ namespace MajorisFiles {
             progress.popover = popover;
             header.pack_end(progress);
             var menu = new Menu();
+            menu.append("Shared Folders", "win.shared-folders");
             foreach (var entry in new string[] {"New Window|app.new-window", "New Tab|win.new-tab", "Reopen Closed Tab|win.reopen", "Duplicate Tab|win.duplicate-tab", "New Folder|win.new-folder", "New Empty File|win.new-file", "Show Hidden Files|win.hidden", "Preview Pane|win.preview", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified", "Descending Order|win.descending", "Bookmarks: Add Current Folder|win.bookmark", "Save Search|win.save-search", "Preferences|win.preferences", "Keyboard Shortcuts|win.shortcuts"})
             {
                 var parts = entry.split("|", 2);
@@ -216,7 +217,7 @@ namespace MajorisFiles {
             action("properties", () => { var chosen = current.selected();
                                          if (chosen.size > 0)
                                              Dialogs.show_properties(this, chosen, metadata, () => { new PermissionsDialog(this, chosen);
-                                                 });
+                                                 }, () => { return new SharingPage(this, chosen[0].file); });
                 });
             action("favorite", () => { foreach (var item in current.selected())
                                            metadata.set_favorite(item.file, !metadata.favorite(item.file));
@@ -309,7 +310,7 @@ namespace MajorisFiles {
                                                         root.new_tab(file);
                 });
             var context = new Menu();
-            foreach (var entry in new string[] {"Open Preview|win.quick-preview", "Cut|win.cut", "Copy|win.copy", "Paste|win.paste", "Rename|win.rename", "Favorite|win.favorite", "Tags|win.tags", "Calculate SHA-256|win.checksum", "Split File|win.split", "Join Split File|win.join", "Move to Trash|win.trash", "Properties|win.properties"})
+            foreach (var entry in new string[] {"Open Preview|win.quick-preview", "Cut|win.cut", "Copy|win.copy", "Paste|win.paste", "Rename|win.rename", "Favorite|win.favorite", "Tags|win.tags", "Checksums…|win.checksum", "Split File|win.split", "Join Split File|win.join", "Move to Trash|win.trash", "Properties|win.properties"})
             {
                 var parts = entry.split("|", 2);
                 context.append(parts[0], parts[1]);
@@ -491,17 +492,7 @@ namespace MajorisFiles {
             var items = current.selected();
             if (items.size != 1 || items[0].directory)
                 return;
-            var job = operations.start("SHA-256");
-            try {
-                var hash = yield SplitService.checksum(items[0].file, ChecksumType.SHA256, job.cancellable);
-                operations.finish(job);
-                var dialog = new Adw.AlertDialog("SHA-256", hash);
-                dialog.add_response("close", "Close");
-                dialog.present(this);
-            }
-            catch (Error e) {
-                operations.finish(job, e);
-            }
+            new ChecksumDialog(this, items[0].file, operations);
         }
         async void join()
         {

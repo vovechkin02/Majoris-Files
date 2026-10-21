@@ -34,7 +34,62 @@ int main(string[] args)
                                                catch (Error e) { error("%s", e.message);
                                                }
         });
+    Test.add_func("/sharing/inventory-parser", () => {
+        try {
+            var shares = ShareRecord.parse("[Projects]\npath=/home/alice/Projects\ncomment=Work\nusershare_acl=Everyone:R\nguest_ok=n\n\n[Team]\npath=/srv/team\nusershare_acl=alice:F,bob:F\nguest_ok=y\n");
+            assert(shares.size == 2);
+            assert(shares[0].name == "Projects" && !shares[0].writable && !shares[0].guest);
+            assert(shares[1].path == "/srv/team" && shares[1].writable && shares[1].guest);
+            assert(shares[1].address.has_suffix("/Team"));
+            assert(ShareRecord.parse("").size == 0);
+            bool rejected = false;
+            try { ShareRecord.parse("[Bad]\npath=relative\nusershare_acl=Everyone:F\nguest_ok=n\n"); }
+            catch (Error e) { rejected = true; }
+            assert(rejected);
+        }
+        catch (Error e) { error("%s", e.message); }
+    });
     Test.add_func("/ui/open-single", () => chooser_flow(false, false, false));
+    Test.add_func("/ui/adaptive-sidebar", () => {
+        try {
+            var root = DirUtils.make_tmp("majoris-adaptive-XXXXXX");
+            var metadata = new MetadataStore(Path.build_filename(root, "state.db"));
+            var options = new ChooserOptions(false, new VariantBuilder(VariantType.VARDICT).end());
+            options.initial = File.new_for_path(root);
+            var window = new ChooserWindow(options, metadata, new Places());
+            window.set_default_size(500, 660);
+            window.present();
+            var loop = new MainLoop();
+            int stage = 0;
+            uint poll = Timeout.add(50, () => {
+                if (stage == 0 && window.browser.narrow)
+                {
+                    var overlay = find_overlay(window.browser);
+                    assert(overlay != null && overlay.collapsed && overlay.sidebar != null);
+                    overlay.show_sidebar = true;
+                    assert(overlay.show_sidebar);
+                    window.browser.navigate(File.new_for_path(root));
+                    assert(!overlay.show_sidebar);
+                    window.set_default_size(960, 660);
+                    stage = 1;
+                }
+                else if (stage == 1 && !window.browser.narrow)
+                {
+                    var overlay = find_overlay(window.browser);
+                    assert(overlay != null && !overlay.collapsed && overlay.sidebar == null);
+                    window.cancel_request();
+                    loop.quit();
+                    return Source.REMOVE;
+                }
+                return Source.CONTINUE;
+            });
+            uint watchdog = Timeout.add_seconds(10, () => { error("Adaptive sidebar transition timed out"); });
+            loop.run();
+            Source.remove(watchdog);
+            assert(poll > 0 && stage == 1);
+        }
+        catch (Error e) { error("%s", e.message); }
+    });
     Test.add_func("/ui/open-multiple", () => chooser_flow(false, true, false));
     Test.add_func("/ui/select-folder", () => chooser_flow(false, false, true));
     Test.add_func("/ui/save-suggested", () => chooser_flow(true, false, false));
@@ -131,6 +186,18 @@ int main(string[] args)
         clipboard.set_content(null);
     });
     return Test.run();
+}
+Adw.OverlaySplitView? find_overlay(Gtk.Widget widget)
+{
+    if (widget is Adw.OverlaySplitView)
+        return (Adw.OverlaySplitView)widget;
+    for (var child = widget.get_first_child(); child != null; child = child.get_next_sibling())
+    {
+        var found = find_overlay(child);
+        if (found != null)
+            return found;
+    }
+    return null;
 }
 void overwrite_test()
 {

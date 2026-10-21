@@ -100,6 +100,18 @@ implemented, the ISO must provide its standard Samba LAN firewall policy.
 The service must be tested with the actual Majoris firewall and Samba packages
 before default installation. WS-Discovery remains an ISO component.
 
+The Shared Folders inventory queries Samba usershares using `net usershare info
+--long`; it does not claim to edit administrator-owned smb.conf shares. Account
+pickers use getent, and Samba authentication still requires provisioned SMB accounts.
+Editing advanced mixed ACLs is intentionally disabled to avoid widening access.
+
+Non-FUSE remote Open requests can explicitly import a regular file of at most
+64 MiB into Downloads/Files Imports. The copy is retained and is independent of
+the remote original. It is returned through the ordinary document portal, without
+directly changing sandbox permissions. Remote Save/folder selection requires
+GVfs/FUSE. SaveFiles returns ordered, conflict-renamed file destinations in the
+selected directory; clients still perform the writes after portal mediation.
+
 ## Hardware and sandbox acceptance
 
 Desktop wallpaper and email actions use libportal with GTK parent-window export.

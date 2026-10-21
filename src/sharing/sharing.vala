@@ -1,4 +1,41 @@
 namespace MajorisFiles {
+    public class ShareRecord : Object {
+        public string name;
+        public string path;
+        public string acl;
+        public bool guest;
+        public string address {
+            owned get { return "smb://" + Environment.get_host_name() + "/" + Uri.escape_string(name); }
+        }
+        public bool writable {
+            get { return acl.contains(":F"); }
+        }
+        public ShareRecord(string name, string path, string acl, bool guest)
+        {
+            this.name = name;
+            this.path = path;
+            this.acl = acl;
+            this.guest = guest;
+        }
+        public static Gee.ArrayList<ShareRecord> parse(string output) throws Error
+        {
+            var records = new Gee.ArrayList<ShareRecord>();
+            if (output.strip() == "")
+                return records;
+            var data = new KeyFile();
+            data.load_from_data(output, output.length, KeyFileFlags.NONE);
+            foreach (var group in data.get_groups())
+            {
+                string path = data.get_string(group, "path");
+                string acl = data.get_string(group, "usershare_acl");
+                string guest = data.get_string(group, "guest_ok");
+                if (!SharePolicy.valid_name(group) || !Path.is_absolute(path))
+                    throw new FileError.INVALID("Invalid Samba usershare inventory");
+                records.add(new ShareRecord(group, path, acl, guest == "y" || guest == "yes"));
+            }
+            return records;
+        }
+    }
     public class SharePolicy : Object {
         public static bool valid_name(string name)
         {
@@ -39,6 +76,10 @@ namespace MajorisFiles {
         public abstract async void provision_password(string password) throws DBusError, IOError;
     }
     public class SharingManager : Object {
+        public async Gee.ArrayList<ShareRecord> inventory(Cancellable? token = null) throws Error
+        {
+            return ShareRecord.parse(yield invoke({"net", "usershare", "info", "--long"}, token));
+        }
         public async string invoke(string[] arguments, Cancellable? token = null) throws Error
         {
             var process = new Subprocess.newv(arguments, SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDERR_PIPE);
@@ -65,6 +106,9 @@ namespace MajorisFiles {
             if (path == "/" || path.has_prefix("/etc") || path.has_prefix("/proc") || path.has_prefix("/sys") || path.has_prefix("/dev") || path.has_prefix("/boot") || path.has_prefix("/root"))
                 throw new FileError.INVALID("System folders cannot be shared");
             var args = SharePolicy.arguments(name, path, writable, guest, users);
+            foreach (var existing in (yield inventory()))
+                if (existing.name == name && !File.new_for_path(existing.path).equal(folder))
+                    throw new FileError.CONFLICT("That share name already belongs to another folder. Choose a different share name.");
             SharingProxy helper = yield Bus.get_proxy(BusType.SYSTEM, "com.majoris.Files.Sharing", "/com/majoris/Files/Sharing");
             yield helper.enable_services();
             yield invoke(args);
@@ -74,62 +118,6 @@ namespace MajorisFiles {
             if (!SharePolicy.valid_name(name))
                 throw new FileError.INVALID("Invalid share name");
             yield invoke({"net", "usershare", "delete", name});
-        }
-    }
-    public class SharingDialog : Adw.PreferencesDialog {
-        public SharingDialog(Gtk.Window parent, File folder)
-        {
-            title = "Network Sharing";
-            var page = new Adw.PreferencesPage();
-            var group = new Adw.PreferencesGroup();
-            group.title = folder.get_basename();
-            page.add(group);
-            add(page);
-            var name = new Adw.EntryRow();
-            name.title = "Share Name";
-            name.text = folder.get_basename();
-            group.add(name);
-            var users = new Adw.EntryRow();
-            users.title = "Specific Users (comma separated; empty for everyone)";
-            group.add(users);
-            var writable = new Adw.SwitchRow();
-            writable.title = "Allow Creating, Modifying, and Deleting Files";
-            group.add(writable);
-            var guest = new Adw.SwitchRow();
-            guest.title = "Allow Guest Access";
-            group.add(guest);
-            var address = new Adw.ActionRow();
-            address.title = "Network Address";
-            address.subtitle_selectable = true;
-            group.add(address);
-            var manager = new SharingManager();
-            var buttons = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8);
-            var enable = new Gtk.Button.with_label("Share Folder");
-            enable.add_css_class("suggested-action");
-            var stop = new Gtk.Button.with_label("Stop Sharing");
-            buttons.append(enable);
-            buttons.append(stop);
-            group.add(buttons);
-            enable.clicked.connect(() => { enable.sensitive = false;
-                                           string[] names = {};
-                                           foreach (var user in users.text.split(","))
-                                               if (user.strip() != "")
-                                                   names += user.strip();
-                                           manager.share.begin(folder, name.text, writable.active, guest.active, names, (obj, res) => { enable.sensitive = true;
-                                                                                                                                        try { manager.share.end(res);
-                                                                                                                                              address.subtitle = "smb://" + Environment.get_host_name() + "/" + Uri.escape_string(name.text);
-                                                                                                                                        }
-                                                                                                                                        catch (Error e) { Dialogs.error(parent, e.message);
-                                                                                                                                        }
-                                               });
-                });
-            stop.clicked.connect(() => manager.remove.begin(name.text, (obj, res) => { try { manager.remove.end(res);
-                                                                                             address.subtitle = "Sharing stopped";
-                                                                                       }
-                                                                                       catch (Error e) { Dialogs.error(parent, e.message);
-                                                                                       }
-                }));
-            present(parent);
         }
     }
 }

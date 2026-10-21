@@ -1,5 +1,6 @@
 namespace MajorisFiles {
     public delegate void PropertiesPermissions();
+    public delegate Adw.PreferencesPage PropertiesSharing();
     public class Dialogs : Object {
         public static void error(Gtk.Widget parent, string message)
         {
@@ -65,16 +66,20 @@ namespace MajorisFiles {
                 message = "Enter a non-empty password up to 4096 bytes. Confirmation must match.";
             }
         }
-        public static void show_properties(Gtk.Window parent, Gee.List<FileItem> items, MetadataStore metadata, owned PropertiesPermissions? permissions = null)
+        public static void show_properties(Gtk.Window parent, Gee.List<FileItem> items, MetadataStore metadata, owned PropertiesPermissions? permissions = null, owned PropertiesSharing? sharing = null)
         {
             if(items.size == 0)
                 return;
             var dialog = new Adw.PreferencesDialog();
             dialog.title = "Properties";
             var page = new Adw.PreferencesPage();
+            page.title = "General";
+            page.icon_name = "document-properties-symbolic";
             var group = new Adw.PreferencesGroup();
             page.add(group);
             dialog.add(page);
+            if (sharing != null && items.size == 1 && items[0].directory && items[0].file.is_native() && !items[0].info.get_is_symlink())
+                dialog.add(sharing());
             uint64 size = 0;
             foreach (var item in items)
                 size += item.bytes;

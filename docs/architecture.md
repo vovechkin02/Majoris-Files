@@ -62,7 +62,12 @@ request has a separate chooser, options, cancellation and response state.
 Request Close is restricted to its invoking owner; owner disappearance cancels
 the chooser. X11 and Wayland parent identifiers are imported through a small
 native bridge. Results contain normalized `file://` URIs; GVfs locations without
-a local FUSE representation cannot be returned. xdg-desktop-portal performs
+a local FUSE representation require an explicitly approved local import for Open.
+Imports are durable copies in Downloads/Files Imports, limited to 64 MiB/60 seconds;
+Save never substitutes an import for the intended remote destination. SaveFiles
+uses the same request lifecycle and validates/generates destination names without
+creating them. Mount removal invalidates outstanding acceptance work.
+xdg-desktop-portal performs
 document registration and permission mediation; Files never grants sandbox
 permissions directly.
 
@@ -71,6 +76,12 @@ service can start the fixed `smbd.service` unit and provision only the calling
 non-root account's SMB credentials through stdin. It accepts neither arbitrary
 commands nor arbitrary account names. Separate read/write/delete ACL policy and
 owned firewall integration remain release work.
+
+Sharing pages and the usershare inventory read the actual Samba usershare state.
+Account selection uses the shared asynchronous system account directory. Advanced
+ACLs are displayed as unavailable for editing rather than flattened. System-wide
+smb.conf shares remain administrator managed. Narrow browsing reparents the shared
+sidebar into AdwOverlaySplitView; wide browsing retains the resizable GtkPaned.
 
 ## Reference review
 

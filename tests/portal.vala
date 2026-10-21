@@ -16,7 +16,67 @@ int main(string[] args)
     Test.init(ref args);
     Test.add_func("/portal/roundtrip-and-isolation", () => test_portal());
     Test.add_func("/portal/success-close-and-authorization", () => test_success_and_authorization());
+    Test.add_func("/portal/save-files", () => test_save_files());
     return Test.run();
+}
+void test_save_files()
+{
+    try {
+        var temp = DirUtils.make_tmp("majoris-save-files-XXXXXX");
+        FileUtils.set_contents(Path.build_filename(temp, "report.txt"), "preserved");
+        var connection = Bus.get_sync(BusType.SESSION);
+        connection.call_sync("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "RequestName", new Variant("(su)", "org.freedesktop.portal.Desktop", 0u), null, DBusCallFlags.NONE, -1, null);
+        var app = new Adw.Application("com.majoris.files.test.savefiles", ApplicationFlags.NON_UNIQUE);
+        app.register(null);
+        var backend = new PortalBackend(connection, app);
+        uint registration = connection.register_object("/org/freedesktop/portal/desktop", backend);
+        var options = new VariantBuilder(VariantType.VARDICT);
+        options.add("{sv}", "current_folder", new Variant.bytestring(temp));
+        var names = new VariantBuilder(new VariantType("aay"));
+        foreach (var name in new string[] {"report.txt", "report.txt", "other.txt"})
+            names.add_value(new Variant.bytestring(name));
+        options.add("{sv}", "files", names.end());
+        var loop = new MainLoop();
+        bool done = false;
+        connection.call.begin(connection.unique_name, "/org/freedesktop/portal/desktop", "org.freedesktop.impl.portal.FileChooser", "SaveFiles", new Variant("(osss@a{sv})", "/org/freedesktop/portal/desktop/request/test/savefiles", "test.app", "", "Save Files", options.end()), new VariantType("(ua{sv})"), DBusCallFlags.NONE, 10000, null, (obj, res) => {
+            try {
+                var result = connection.call.end(res);
+                assert(result.get_child_value(0).get_uint32() == 0);
+                var uris = result.get_child_value(1).lookup_value("uris", new VariantType("as"));
+                assert(uris.n_children() == 3);
+                string[] expected = {"report (1).txt", "report (2).txt", "other.txt"};
+                for (size_t i = 0; i < 3; i++)
+                {
+                    var target = File.new_for_uri(uris.get_child_value(i).get_string());
+                    assert(target.get_basename() == expected[i]);
+                    assert(!target.query_exists());
+                }
+                string contents;
+                FileUtils.get_contents(Path.build_filename(temp, "report.txt"), out contents);
+                assert(contents == "preserved");
+                done = true;
+                loop.quit();
+            }
+            catch (Error e) { error("%s", e.message); }
+        });
+        uint poll = Timeout.add(20, () => {
+            if (app.get_windows().length() != 1)
+                return Source.CONTINUE;
+            var window = (ChooserWindow)app.get_windows().data;
+            if (window.browser.directory.loading || !window.browser.location.equal(File.new_for_path(temp)))
+                return Source.CONTINUE;
+            assert(window.options.save_many && window.options.directory);
+            window.accept_selection.begin();
+            return Source.REMOVE;
+        });
+        uint watchdog = Timeout.add_seconds(15, () => { error("SaveFiles timed out"); });
+        loop.run();
+        Source.remove(watchdog);
+        assert(done && poll > 0);
+        assert(app.get_windows().length() == 0);
+        connection.unregister_object(registration);
+    }
+    catch (Error e) { error("%s", e.message); }
 }
 void test_success_and_authorization()
 {

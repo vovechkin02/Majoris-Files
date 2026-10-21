@@ -8,6 +8,9 @@ namespace MajorisFiles {
         Gtk.DropDown? filters;
         bool finished;
         bool accepting;
+        uint location_generation;
+        VolumeMonitor volumes;
+        ulong mount_removed;
         Cancellable token = new Cancellable();
         Gee.HashMap<string, Gtk.Widget> choice_widgets = new Gee.HashMap<string, Gtk.Widget>();
         ChooserState state;
@@ -15,6 +18,23 @@ namespace MajorisFiles {
         {
             Object(title: options.save ? "Save As" : (options.directory ? "Select Folder" : "Open"), default_width: 960, default_height: 660, modal: options.modal);
             this.options = options;
+            volumes = VolumeMonitor.get();
+            mount_removed = volumes.mount_removed.connect((mount) => {
+                var root = mount.get_root();
+                bool affected = browser.location.equal(root) || browser.location.has_prefix(root);
+                foreach (var item in browser.selected())
+                    affected = affected || item.file.equal(root) || item.file.has_prefix(root);
+                if (!finished && affected)
+                {
+                    location_generation++;
+                    token.cancel();
+                    token = new Cancellable();
+                    browser.cancel();
+                    browser.selection.unselect_all();
+                    browser.navigate(File.new_for_path(Environment.get_home_dir()));
+                    Dialogs.error(this, "The device or network location was disconnected. Select the file again after reconnecting, or choose another location.");
+                }
+            });
             state = new ChooserState(metadata, application_id);
             state.apply(options);
             browser = new Browser(metadata, places, true);
@@ -38,7 +58,7 @@ namespace MajorisFiles {
             footer.margin_end = 12;
             footer.margin_top = 8;
             footer.margin_bottom = 12;
-            if (options.save)
+            if (options.save && !options.save_many)
             {
                 var label = new Gtk.Label("Name:");
                 label.mnemonic_widget = filename;
@@ -75,6 +95,14 @@ namespace MajorisFiles {
             accept.clicked.connect(() => accept_selection.begin());
             footer.append(accept);
             box.append(footer);
+            if (options.save_many)
+            {
+                var summary = new Gtk.Label("Choose a destination folder for %u files. Existing files are kept; conflicting names receive a number.".printf(options.filenames.size));
+                summary.wrap = true;
+                summary.margin_start = 12;
+                summary.margin_end = 12;
+                box.append(summary);
+            }
             add_choices(box);
             toolbar.content = box;
             content = toolbar;
@@ -160,6 +188,7 @@ namespace MajorisFiles {
             if (finished)
                 return;
             finished = true;
+            volumes.disconnect(mount_removed);
             state.set("view", browser.view_mode);
             state.set("preview", browser.preview.visible ? "true" : "false");
             state.set("sidebar-width", browser.sidebar_width.to_string());
@@ -195,11 +224,21 @@ namespace MajorisFiles {
             if (finished || accepting)
                 return;
             accepting = true;
+            uint generation = location_generation;
+            var selection_token = token;
             accept.sensitive = false;
             try {
                 var files = new Gee.ArrayList<File>();
                 var filter = options.filters.size > 0 ? options.filters[(int)options.selected_filter] : null;
-                if (options.save)
+                if (options.save_many)
+                {
+                    var chosen = browser.selected();
+                    if (chosen.size > 1)
+                        throw new FileError.INVALID("Select one destination folder");
+                    var folder = chosen.size == 1 ? chosen[0].file : browser.location;
+                    files = yield options.destinations(folder, token);
+                }
+                else if (options.save)
                 {
                     string name = filter == null ? filename.text : filter.filename(filename.text);
                     if (!Paths.valid_name(name))
@@ -248,11 +287,19 @@ namespace MajorisFiles {
                 foreach (var file in files)
                 {
                     var path = file.get_path();
+                    if (path == null && !options.save && !options.directory)
+                    {
+                        if (!(yield Dialogs.confirm(this, "Download a local copy?", "This location cannot be shared directly with the requesting application. Download a separate copy (up to 64 MiB) to Downloads/Files Imports? The copy will be retained. Changes to it will not update the remote original.", "Download Copy")))
+                            throw new IOError.CANCELLED("Download declined");
+                        selection_token.set_error_if_cancelled();
+                        path = (yield ChooserImport.download(file, selection_token)).get_path();
+                    }
                     if (path == null)
-                        throw new FileError.UNSUPPORTED("This location cannot be returned through the document portal. Mount it through GVfs first.");
+                        throw new FileError.UNSUPPORTED(options.save ? "This remote destination has no local GVfs bridge. Reconnect it with GVfs/FUSE before saving so writes reach the intended folder." : "This location has no local GVfs bridge. Copy the file to a local folder before selecting it. The document portal cannot grant access to this remote URI.");
                     uris += File.new_for_path(path).get_uri();
                 }
-                if (!finished)
+                selection_token.set_error_if_cancelled();
+                if (!finished && generation == location_generation)
                     finish(0, ChooserOptions.response(uris, filter, choice_results()));
             }
             catch (Error e) {
