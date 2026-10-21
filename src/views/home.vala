@@ -29,7 +29,7 @@ namespace MajorisFiles {
             var pending = token;
             while(sections.get_first_child() != null)
                 sections.remove(sections.get_first_child());
-            var title = new Gtk.Label("Home");
+            var title = new Gtk.Label(_("Home"));
             title.add_css_class("title-1");
             title.halign = Gtk.Align.START;
             sections.append(title);
@@ -132,7 +132,7 @@ namespace MajorisFiles {
                 catch(Error e) {}
             }
             if(count == 0)
-                list.append(new Gtk.Label("No items yet"));
+                list.append(new Gtk.Label(_("No items yet")));
         }
     }
 }

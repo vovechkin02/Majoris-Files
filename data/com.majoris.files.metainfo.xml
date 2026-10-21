@@ -1,2 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component type="desktop-application"><id>com.majoris.files</id><name>Files</name><summary>Browse and manage files on Majoris</summary><metadata_license>CC0-1.0</metadata_license><project_license>GPL-3.0-or-later</project_license><description><p>Browse local and network locations, organize files, and choose files through the Majoris desktop portal.</p></description><launchable type="desktop-id">com.majoris.files.desktop</launchable><provides><binary>majoris-files</binary></provides></component>
+<component type="desktop-application">
+  <id>com.majoris.files</id>
+  <name>Files</name>
+  <summary>Browse and manage files on Majoris</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer id="majoris.local"><name>Majoris Developers</name></developer>
+  <description>
+    <p>Browse local and network locations, organize files, and choose files through the Majoris desktop portal.</p>
+  </description>
+  <url type="homepage">https://github.com/vovechkin02/Majoris-Files</url>
+  <url type="bugtracker">https://github.com/vovechkin02/Majoris-Files/issues</url>
+  <launchable type="desktop-id">com.majoris.files.desktop</launchable>
+  <provides><binary>majoris-files</binary></provides>
+  <content_rating type="oars-1.1"/>
+</component>

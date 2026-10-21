@@ -4,8 +4,8 @@ namespace MajorisFiles {
     public class Dialogs : Object {
         public static void error(Gtk.Widget parent, string message)
         {
-            var dialog = new Adw.AlertDialog("Could not complete the action", message);
-            dialog.add_response("close", "Close");
+            var dialog = new Adw.AlertDialog(_("Could not complete the action"), message);
+            dialog.add_response("close", _("Close"));
             dialog.present(parent);
         }
         public static async string? prompt(Gtk.Widget parent, string title, string initial = "")
@@ -15,8 +15,8 @@ namespace MajorisFiles {
             entry.text = initial;
             entry.activates_default = true;
             dialog.extra_child = entry;
-            dialog.add_response("cancel", "Cancel");
-            dialog.add_response("apply", "Apply");
+            dialog.add_response("cancel", _("Cancel"));
+            dialog.add_response("apply", _("Apply"));
             dialog.default_response = "apply";
             dialog.close_response = "cancel";
             dialog.set_response_appearance("apply", Adw.ResponseAppearance.SUGGESTED);
@@ -26,7 +26,7 @@ namespace MajorisFiles {
         public static async bool confirm(Gtk.Widget parent, string title, string body, string action)
         {
             var dialog = new Adw.AlertDialog(title, body);
-            dialog.add_response("cancel", "Cancel");
+            dialog.add_response("cancel", _("Cancel"));
             dialog.add_response("apply", action);
             dialog.close_response = "cancel";
             dialog.set_response_appearance("apply", Adw.ResponseAppearance.DESTRUCTIVE);
@@ -40,15 +40,15 @@ namespace MajorisFiles {
                 var dialog = new Adw.AlertDialog(title, message);
                 var fields = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
                 var entry = new Adw.PasswordEntryRow();
-                entry.title = "Password";
+                entry.title = _("Password");
                 fields.append(entry);
                 var repeat = new Adw.PasswordEntryRow();
-                repeat.title = "Confirm Password";
+                repeat.title = _("Confirm Password");
                 if(confirmation)
                     fields.append(repeat);
                 dialog.extra_child = fields;
-                dialog.add_response("cancel", "Cancel");
-                dialog.add_response("apply", "Continue");
+                dialog.add_response("cancel", _("Cancel"));
+                dialog.add_response("apply", _("Continue"));
                 dialog.close_response = "cancel";
                 dialog.default_response = "apply";
                 dialog.set_response_appearance("apply", Adw.ResponseAppearance.SUGGESTED);
@@ -66,20 +66,26 @@ namespace MajorisFiles {
                 message = "Enter a non-empty password up to 4096 bytes. Confirmation must match.";
             }
         }
-        public static void show_properties(Gtk.Window parent, Gee.List<FileItem> items, MetadataStore metadata, owned PropertiesPermissions? permissions = null, owned PropertiesSharing? sharing = null)
+        public static void show_properties(Gtk.Window parent, Gee.List<FileItem> items, MetadataStore metadata, owned PropertiesSharing? permissions = null, owned PropertiesSharing? sharing = null, owned PropertiesSharing? details = null, owned PropertiesSharing? associations = null)
         {
             if(items.size == 0)
                 return;
             var dialog = new Adw.PreferencesDialog();
-            dialog.title = "Properties";
+            dialog.title = _("Properties");
             var page = new Adw.PreferencesPage();
-            page.title = "General";
+            page.title = _("General");
             page.icon_name = "document-properties-symbolic";
             var group = new Adw.PreferencesGroup();
             page.add(group);
             dialog.add(page);
             if (sharing != null && items.size == 1 && items[0].directory && items[0].file.is_native() && !items[0].info.get_is_symlink())
                 dialog.add(sharing());
+            if (details != null && items.size == 1)
+                dialog.add(details());
+            if (permissions != null)
+                dialog.add(permissions());
+            if (associations != null && items.size == 1 && !items[0].directory)
+                dialog.add(associations());
             uint64 size = 0;
             foreach (var item in items)
                 size += item.bytes;
@@ -96,7 +102,7 @@ namespace MajorisFiles {
             foreach(var item in items)
                 roots.add(item.file);
             counts.updated.connect(() => {
-                counts_row.subtitle = "%" + uint64.FORMAT + " files, %" + uint64.FORMAT + " folders";
+                counts_row.subtitle = _("%") + uint64.FORMAT + " files, %" + uint64.FORMAT + " folders";
                 counts_row.subtitle = counts_row.subtitle.printf(counts.files, counts.folders) + (counts.unreadable > 0 ? " · Some items are unreadable" : "");
                 allocated_row.subtitle = Paths.size(counts.allocated);
                 size_row.subtitle = Paths.size(counts.bytes) + " (" + counts.bytes.to_string() + " bytes)" + (counts.unreadable > 0 ? " · Partial total" : "");
@@ -146,7 +152,7 @@ namespace MajorisFiles {
                 }
                 group.add(row("Common Tags", common_tags.size == 0 ? "None" : string.joinv(", ", common_tags.to_array())));
                 var favorites = new Adw.SwitchRow();
-                favorites.title = "Favorite All Selected Items";
+                favorites.title = _("Favorite All Selected Items");
                 bool all_favorites = true;
                 foreach(var item in items)
                     if(!metadata.favorite(item.file))
@@ -157,20 +163,12 @@ namespace MajorisFiles {
                                                                metadata.set_favorite(item.file, favorites.active);
                     });
                 var tags = new Adw.EntryRow();
-                tags.title = "Replace Tags on All Selected Items";
+                tags.title = _("Replace Tags on All Selected Items");
                 tags.show_apply_button = true;
                 tags.apply.connect(() => { foreach(var item in items)
                                                metadata.set_tags(item.file, tags.text);
                     });
                 group.add(tags);
-            }
-            if(permissions != null)
-            {
-                var edit = new Gtk.Button.with_label("Edit Permissions…");
-                edit.clicked.connect(() => { dialog.close();
-                                             permissions();
-                    });
-                group.add(edit);
             }
             if (items.size == 1)
             {
@@ -198,12 +196,12 @@ namespace MajorisFiles {
                 if (item.info.get_is_symlink())
                     group.add(row("Link target", item.info.get_symlink_target() ?? "Unavailable"));
                 var favorite = new Adw.SwitchRow();
-                favorite.title = "Favorite";
+                favorite.title = _("Favorite");
                 favorite.active = metadata.favorite(item.file);
                 favorite.notify["active"].connect(() => metadata.set_favorite(item.file, favorite.active));
                 group.add(favorite);
                 var tags = new Adw.EntryRow();
-                tags.title = "Tags (comma separated)";
+                tags.title = _("Tags (comma separated)");
                 tags.text = metadata.tags(item.file);
                 tags.show_apply_button = true;
                 tags.apply.connect(() => metadata.set_tags(item.file, tags.text));

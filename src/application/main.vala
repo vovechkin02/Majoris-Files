@@ -5,6 +5,8 @@ namespace MajorisFiles {
         OperationManager operations;
         FileManagerService? manager;
         uint owner;
+        ShellSearchProvider? shell_search;
+        uint shell_registration;
         string recovery_session = "";
         string recovery_details = "";
         bool activated_once;
@@ -28,6 +30,11 @@ namespace MajorisFiles {
             window_removed.connect(queue_session_save);
             places = new Places(metadata);
             operations = new OperationManager(metadata);
+            try {
+                shell_search = new ShellSearchProvider(this, metadata, places, operations);
+                shell_registration = get_dbus_connection().register_object("/com/majoris/files/SearchProvider", shell_search);
+            }
+            catch (Error e) { warning("Desktop search registration failed: %s", e.message); }
             var action = new SimpleAction("new-window", null);
             action.activate.connect(() => new FilesWindow(this, metadata, places, operations).present());
             add_action(action);
@@ -49,6 +56,7 @@ namespace MajorisFiles {
             save_session();
             metadata.set_state("session-clean", "true");
             Bus.unown_name(owner);
+            if (shell_registration != 0) get_dbus_connection().unregister_object(shell_registration);
             base.shutdown();
         }
         protected override void activate()
@@ -184,5 +192,6 @@ namespace MajorisFiles {
 }
 int main(string[] args)
 {
+    MajorisFiles.I18n.initialize();
     return new MajorisFiles.Application().run(args);
 }

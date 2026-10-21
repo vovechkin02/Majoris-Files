@@ -1,0 +1,7 @@
+[Extension]
+Id=com.majoris.Files.ExampleChecksum
+Name=Checksum Example
+Version=1
+BusName=com.majoris.Files.ExampleChecksum
+ObjectPath=/com/majoris/Files/ExampleChecksum
+Capabilities=actions;metadata;columns;properties;

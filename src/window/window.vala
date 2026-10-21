@@ -10,6 +10,7 @@ namespace MajorisFiles {
         Gee.ArrayList<File> closed = new Gee.ArrayList<File>();
         ExtraActions extra;
         QuickActionRegistry providers = new QuickActionRegistry();
+        ExtensionManager extension_manager;
         Adw.TabPage? menu_page;
         public Browser? current {
             get {
@@ -18,10 +19,13 @@ namespace MajorisFiles {
         }
         public FilesWindow(Gtk.Application app, MetadataStore metadata, Places places, OperationManager operations, File? initial = null, bool blank = false)
         {
-            Object(application: app, title: "Files", default_width: 1100, default_height: 740);
+            Object(application: app, title: _("Files"), default_width: 1100, default_height: 740);
             this.metadata = metadata;
             this.places = places;
             this.operations = operations;
+            operations.conflict_presentation = (dialog, source, destination) => ConflictThumbnails.attach(dialog, source, destination, metadata);
+            extension_manager = ExtensionManager.get_default(metadata);
+            foreach (var extension in extension_manager.extensions) providers.register_provider(extension);
             close_request.connect(() => { for(int i = 0; i < tabs.n_pages; i++)
                                               ((Browser)tabs.get_nth_page(i).child).cancel();
                                           return false;
@@ -42,10 +46,10 @@ namespace MajorisFiles {
             var toolbar = new Adw.ToolbarView();
             var header = new Adw.HeaderBar();
             header.title_widget = new Adw.WindowTitle("Files", "");
-            header.pack_start(Browser.button("tab-new-symbolic", "New Tab", () => new_tab(current.location)));
+            header.pack_start(Browser.button("tab-new-symbolic", _("New Tab"), () => new_tab(current.location)));
             var progress = new Gtk.MenuButton();
             progress.icon_name = "folder-download-symbolic";
-            progress.tooltip_text = "File Operations";
+            progress.tooltip_text = _("File Operations");
             var popover = new Gtk.Popover();
             var jobs = new Gtk.ListBox();
             jobs.selection_mode = Gtk.SelectionMode.NONE;
@@ -54,10 +58,10 @@ namespace MajorisFiles {
                                                         var label = new Gtk.Label(job.error != "" ? job.error : job.current == "" ? job.title : job.current);
                                                         var bar = new Gtk.ProgressBar();
                                                         bar.fraction = job.progress;
-                                                        var cancel = new Gtk.Button.with_label("Cancel");
+                                                        var cancel = new Gtk.Button.with_label(_("Cancel"));
                                                         cancel.sensitive = !job.done;
                                                         cancel.clicked.connect(() => job.cancellable.cancel());
-                                                        var retry = new Gtk.Button.with_label("Retry Remaining Items");
+                                                        var retry = new Gtk.Button.with_label(_("Retry Remaining Items"));
                                                         retry.visible = job.can_retry;
                                                         retry.clicked.connect(() => operations.retry.begin(job, this, (obj, res) => {
                     try { operations.retry.end(res);
@@ -71,7 +75,7 @@ namespace MajorisFiles {
                                                         box.append(retry);
                                                         job.notify.connect(() => { label.label = job.error != "" ? job.error : job.current;
                                                                                    if(job.cancelled)
-                                                                                       label.label = "Cancelled · " + job.current;
+                                                                                       label.label = _("Cancelled · ") + job.current;
                                                                                    bar.fraction = job.progress;
                                                                                    cancel.sensitive = !job.done;
                                                                                    retry.visible = job.can_retry;
@@ -84,6 +88,7 @@ namespace MajorisFiles {
             header.pack_end(progress);
             var menu = new Menu();
             menu.append("Shared Folders", "win.shared-folders");
+            menu.append("Recover Previous Replaced Files…", "win.recover-replacements");
             foreach (var entry in new string[] {"New Window|app.new-window", "New Tab|win.new-tab", "Reopen Closed Tab|win.reopen", "Duplicate Tab|win.duplicate-tab", "New Folder|win.new-folder", "New Empty File|win.new-file", "Show Hidden Files|win.hidden", "Preview Pane|win.preview", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified", "Descending Order|win.descending", "Bookmarks: Add Current Folder|win.bookmark", "Save Search|win.save-search", "Preferences|win.preferences", "Keyboard Shortcuts|win.shortcuts"})
             {
                 var parts = entry.split("|", 2);
@@ -157,7 +162,7 @@ namespace MajorisFiles {
             overview.view = tabs;
             overview.child = toolbar;
             content = overview;
-            header.pack_end(Browser.button("view-grid-symbolic", "Tab Overview", () => overview.open = !overview.open));
+            header.pack_end(Browser.button("view-grid-symbolic", _("Tab Overview"), () => overview.open = !overview.open));
             tabs.close_page.connect((page) => { var browser = page.child as Browser;
                                                 if (browser != null)
                                                 {
@@ -216,8 +221,8 @@ namespace MajorisFiles {
                 }));
             action("properties", () => { var chosen = current.selected();
                                          if (chosen.size > 0)
-                                             Dialogs.show_properties(this, chosen, metadata, () => { new PermissionsDialog(this, chosen);
-                                                 }, () => { return new SharingPage(this, chosen[0].file); });
+                                             Dialogs.show_properties(this, chosen, metadata, () => { return new PermissionsPage(this, chosen);
+                                                 }, () => { return new SharingPage(this, chosen[0].file); }, () => { return new MetadataPage(chosen[0], metadata); }, () => { return new AssociationsPage(this, chosen[0]); });
                 });
             action("favorite", () => { foreach (var item in current.selected())
                                            metadata.set_favorite(item.file, !metadata.favorite(item.file));
@@ -310,40 +315,89 @@ namespace MajorisFiles {
                                                         root.new_tab(file);
                 });
             var context = new Menu();
-            foreach (var entry in new string[] {"Open Preview|win.quick-preview", "Cut|win.cut", "Copy|win.copy", "Paste|win.paste", "Rename|win.rename", "Favorite|win.favorite", "Tags|win.tags", "Checksums…|win.checksum", "Split File|win.split", "Join Split File|win.join", "Move to Trash|win.trash", "Properties|win.properties"})
-            {
-                var parts = entry.split("|", 2);
-                context.append(parts[0], parts[1]);
-            }
-            context.append("Open With…", "win.open-with");
-            context.append("Default Application…", "win.associations");
-            context.append("Custom Icon…", "win.custom-icon");
-            context.append("Reset Icon", "win.reset-icon");
-            var quick = new Menu();
-            quick.append("Compress…", "win.compress");
-            quick.append("Create Encrypted ZIP…", "win.compress-encrypted");
-            quick.append("Extract…", "win.extract");
-            quick.append("Extract with Password…", "win.extract-encrypted");
-            quick.append("Split File…", "win.split");
-            quick.append("Join Split File…", "win.join");
-            context.append_submenu("Quick Actions", quick);
-            context.append("Share Folder…", "win.share-folder");
-            context.append("Permissions…", "win.permissions");
             var popup = new Gtk.PopoverMenu.from_model(context);
-            var extensions = new Menu();
-            context.append_submenu("User Actions", extensions);
             popup.set_parent(browser);
+            extension_manager.columns.begin(browser);
             var click = new Gtk.GestureClick();
             click.button = 3;
-            click.pressed.connect((n, x, y) => { Gdk.Rectangle rect = {(int)x, (int)y, 1, 1};
-                                                 var root = browser.get_root() as FilesWindow;
-                                                 extensions.remove_all();
-                                                 if(root != null)
-                                                     extensions.append_section(null, root.providers.menu(browser.selected()));
-                                                 popup.pointing_to = rect;
-                                                 popup.popup();
-                });
+            click.pressed.connect((n, x, y) => {
+                Gdk.Rectangle rect = {(int)x, (int)y, 1, 1};
+                var root = browser.get_root() as FilesWindow;
+                context.remove_all();
+                popup.pointing_to = rect;
+                if (root != null) root.open_context.begin(context, browser, popup);
+            });
             browser.add_controller(click);
+            var context_keys = new Gtk.EventControllerKey();
+            context_keys.key_pressed.connect((key, code, modifiers) => {
+                if (key != Gdk.Key.Menu && !(key == Gdk.Key.F10 && (modifiers & Gdk.ModifierType.SHIFT_MASK) != 0))
+                    return false;
+                var root = browser.get_root() as FilesWindow;
+                if (root == null || root.get_focus() is Gtk.Editable || root.get_focus() is Gtk.TextView)
+                    return false;
+                Gdk.Rectangle rect = {browser.get_width() / 2, browser.get_height() / 3, 1, 1};
+                popup.pointing_to = rect;
+                root.open_context.begin(context, browser, popup);
+                return true;
+            });
+            browser.add_controller(context_keys);
+        }
+        void populate_context(Menu menu, Browser browser)
+        {
+            var selection = browser.selected();
+            bool one = selection.size == 1;
+            bool regular = one && selection[0].info.get_file_type() == FileType.REGULAR;
+            if (selection.size > 0) {
+                foreach (var entry in new string[] {"Cut|win.cut", "Copy|win.copy", "Copy To…|win.copy-to", "Move To…|win.move-to", "Duplicate|win.duplicate-items", "New Folder with Selection…|win.folder-with-selection", "Favorite|win.favorite", "Tags…|win.tags", "Move to Trash|win.trash", "Properties|win.properties"}) {
+                    var parts = entry.split("|", 2); menu.append(parts[0], parts[1]);
+                }
+                menu.append("Permissions…", "win.permissions");
+                if (one) {
+                    menu.append("Open Preview", "win.quick-preview");
+                    menu.append("Rename…", "win.rename");
+                    menu.append("Open With…", "win.open-with");
+                    menu.append("Default Application…", "win.associations");
+                    menu.append("Custom Icon…", "win.custom-icon");
+                    menu.append("Reset Icon", "win.reset-icon");
+                    if (selection[0].file.is_native()) menu.append("Create Link…", "win.link");
+                    if (selection[0].directory && selection[0].file.is_native() && !selection[0].info.get_is_symlink())
+                        menu.append("Share Folder…", "win.share-folder");
+                }
+                var quick = new Menu();
+                quick.append("Compress…", "win.compress");
+                quick.append("Create 7z / Multi-volume Archive…", "win.compress-sevenzip");
+                quick.append("Create Encrypted ZIP…", "win.compress-encrypted");
+                if (regular) {
+                    quick.append("Checksums…", "win.checksum");
+                    quick.append("Split File…", "win.split");
+                    bool joinable = selection[0].name.has_suffix(".parts.json");
+                    try { SplitService.raw_name(selection[0].file); joinable = true; } catch (Error e) {}
+                    if (joinable) quick.append("Join Split File…", "win.join");
+                    if (new ArchivePreview().supports(selection[0])) {
+                        quick.append("Extract…", "win.extract");
+                        quick.append("Extract with Password…", "win.extract-encrypted");
+                    }
+                }
+                menu.append_submenu("Quick Actions", quick);
+                menu.append_submenu("User Actions", providers.menu(selection));
+            }
+            var formats = get_clipboard().get_formats();
+            if (formats.contain_mime_type("text/uri-list") || formats.contain_mime_type("x-special/gnome-copied-files") || formats.contain_gtype(typeof(Gdk.FileList))) {
+                menu.append("Paste", "win.paste");
+                if (browser.location.is_native()) menu.append("Paste as Link", "win.paste-link");
+            }
+            menu.append("New Folder…", "win.new-folder");
+        }
+        async void open_context(Menu menu, Browser browser, Gtk.Popover popup)
+        {
+            var selection = browser.selected();
+            menu.remove_all(); populate_context(menu, browser); popup.popup();
+            yield extension_manager.prepare(selection);
+            if (browser.get_root() != this || !popup.visible) return;
+            var current = browser.selected();
+            if (current.size != selection.size) return;
+            for (int i = 0; i < current.size; i++) if (!current[i].file.equal(selection[i].file)) return;
+            menu.remove_all(); populate_context(menu, browser);
         }
         Gee.ArrayList<File> selected_files()
         {

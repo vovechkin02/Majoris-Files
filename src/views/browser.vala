@@ -96,6 +96,9 @@ namespace MajorisFiles {
         Gtk.ToggleButton recursive_button;
         bool ascending = true;
         string sort_key = "Name";
+        bool rank_results = true;
+        SharedFoldersState shares = SharedFoldersState.get_default();
+        ulong shares_changed;
         bool folders_first = true;
         int icon_size = 64;
         bool selection_checkboxes;
@@ -124,6 +127,10 @@ namespace MajorisFiles {
         {
             Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
             this.metadata = metadata;
+            notify["root"].connect(() => {
+                if (get_root() != null && shares_changed == 0)
+                    shares_changed = shares.changed.connect(() => display_changed());
+            });
             this.places = places;
             this.chooser_mode = chooser_mode;
             thumbnails = new ThumbnailService(metadata);
@@ -175,25 +182,25 @@ namespace MajorisFiles {
             toolbar.margin_end = 8;
             toolbar.margin_top = 6;
             toolbar.margin_bottom = 6;
-            toolbar.append(button("sidebar-show-symbolic", "Show or Hide Locations", () => { if (narrow)
+            toolbar.append(button("sidebar-show-symbolic", _("Show or Hide Locations"), () => { if (narrow)
                                                                                               sidebar_overlay.show_sidebar = !sidebar_overlay.show_sidebar;
                                                                                           else sidebar_pane.start_child.visible = !sidebar_pane.start_child.visible;
                 }));
-            toolbar.append(button("go-previous-symbolic", "Back", () => { var file = history.back();
+            toolbar.append(button("go-previous-symbolic", _("Back"), () => { var file = history.back();
                                                                           if (file != null)
                                                                               navigate(file, false);
                 }));
-            toolbar.append(button("go-next-symbolic", "Forward", () => { var file = history.forward();
+            toolbar.append(button("go-next-symbolic", _("Forward"), () => { var file = history.forward();
                                                                          if (file != null)
                                                                              navigate(file, false);
                 }));
-            toolbar.append(button("go-up-symbolic", "Parent Folder", () => { var parent = location.get_parent();
+            toolbar.append(button("go-up-symbolic", _("Parent Folder"), () => { var parent = location.get_parent();
                                                                              if (parent != null)
                                                                                  navigate(parent);
                 }));
             path.hexpand = true;
-            path.placeholder_text = "Location or URI";
-            path.tooltip_text = "Location (Ctrl+L)";
+            path.placeholder_text = _("Location or URI");
+            path.tooltip_text = _("Location (Ctrl+L)");
             path.activate.connect(() => { completion_popup.popdown();
                                           navigate(Paths.parse(path.text));
                 });
@@ -244,21 +251,21 @@ namespace MajorisFiles {
             location_bar.add_named(crumbs_scroll, "breadcrumbs");
             location_bar.visible_child_name = "breadcrumbs";
             toolbar.append(location_bar);
-            var edit_location_button = button("document-edit-symbolic", "Edit Location", () => edit_location());
+            var edit_location_button = button("document-edit-symbolic", _("Edit Location"), () => edit_location());
             toolbar.append(edit_location_button);
-            var reload_button = button("view-refresh-symbolic", "Reload", () => navigate(location, false));
+            var reload_button = button("view-refresh-symbolic", _("Reload"), () => navigate(location, false));
             toolbar.append(reload_button);
-            toolbar.append(button("system-search-symbolic", "Search", () => { searches.visible = !searches.visible;
+            toolbar.append(button("system-search-symbolic", _("Search"), () => { searches.visible = !searches.visible;
                                                                               if (searches.visible)
                                                                                   search_entry.grab_focus();
                 }));
             modes = new Gtk.DropDown.from_strings(chooser_mode ? new string[] {"Grid", "List"}
                                                                                              : new string[] {"Grid", "List", "Columns", "Gallery"});
-            modes.tooltip_text = "View";
+            modes.tooltip_text = _("View");
             modes.notify["selected"].connect(() => set_view(new string[] {"Grid", "List", "Columns", "Gallery"}
                 [modes.selected]));
             toolbar.append(modes);
-            toolbar.append(button("preferences-system-symbolic", "View Settings", () => show_view_settings()));
+            toolbar.append(button("preferences-system-symbolic", _("View Settings"), () => show_view_settings()));
             append(toolbar);
             location_error.button_label = "Retry";
             location_error.button_clicked.connect(() => navigate(directory.location, false));
@@ -283,7 +290,7 @@ namespace MajorisFiles {
                                                      run_search();
                 });
             searches.append(recursive_button);
-            searches.append(button("globe-symbolic", "Search Home", () => {
+            searches.append(button("globe-symbolic", _("Search Home"), () => {
                 search_query.text = search_entry.text;
                 var query = search_query;
                 navigate(File.new_for_path(Environment.get_home_dir()));
@@ -293,7 +300,7 @@ namespace MajorisFiles {
                 recursive_button.active = true;
                 run_search();
             }));
-            searches.append(button("network-workgroup-symbolic", "Search Everywhere (Home and mounted locations)", () => {
+            searches.append(button("network-workgroup-symbolic", _("Search Everywhere (Home and mounted locations)"), () => {
                 search_query.text = search_entry.text;
                 var query = search_query;
                 navigate(File.new_for_path(Environment.get_home_dir()));
@@ -304,7 +311,7 @@ namespace MajorisFiles {
                 recursive_button.active = true;
                 run_search();
             }));
-            searches.append(button("view-filter-symbolic", "Search Filters", () => {
+            searches.append(button("view-filter-symbolic", _("Search Filters"), () => {
                 search_query.text = search_entry.text;
                 var dialog = new SearchFilters(search_query);
                 dialog.applied.connect((query) => { search_query = query;
@@ -447,7 +454,7 @@ namespace MajorisFiles {
                                                               remembered_selection.add(item.file);
                 });
             directory.failed.connect((message) => {
-                location_error.title = "Cannot load " + directory.location.get_parse_name() + ": " + message;
+                location_error.title = _("Cannot load ") + directory.location.get_parse_name() + ": " + message;
                 location_error.revealed = true;
             });
             directory.loaded.connect(() => { update_status();
@@ -458,7 +465,7 @@ namespace MajorisFiles {
             search.found.connect((item) => directory.items.append(item));
             search.progress.connect((folders, skipped) => {
                 if(search_results)
-                    status.label = "%u results · %u folders scanned · %u unavailable".printf(sorted.get_n_items(), folders, skipped);
+                    status.label = _("%u results · %u folders scanned · %u unavailable").printf(sorted.get_n_items(), folders, skipped) + " · " + search.backend_status;
             });
             var keys = new Gtk.EventControllerKey();
             keys.key_pressed.connect((key, code, mods) => {
@@ -561,7 +568,7 @@ namespace MajorisFiles {
             {
                 menu.insert_action_group("cloudprovider", place.cloud.get_action_group());
                 var provider_menu = new Gtk.MenuButton();
-                provider_menu.label = "Cloud Account Actions";
+                provider_menu.label = _("Cloud Account Actions");
                 provider_menu.menu_model = place.cloud.get_menu_model();
                 box.append(provider_menu);
             }
@@ -570,19 +577,19 @@ namespace MajorisFiles {
             };
             menu.pointing_to = rect;
             menu.closed.connect(() => menu.unparent());
-            var tab = new Gtk.Button.with_label("Open in New Tab");
+            var tab = new Gtk.Button.with_label(_("Open in New Tab"));
             tab.clicked.connect(() => { open_in_tab(place.file);
                                         menu.popdown();
                 });
             box.append(tab);
             if(place.bookmark)
             {
-                var rename = new Gtk.Button.with_label("Rename Bookmark");
+                var rename = new Gtk.Button.with_label(_("Rename Bookmark"));
                 rename.clicked.connect(() => { menu.popdown();
                                                rename_bookmark.begin(place);
                     });
                 box.append(rename);
-                var remove = new Gtk.Button.with_label("Remove Bookmark");
+                var remove = new Gtk.Button.with_label(_("Remove Bookmark"));
                 remove.clicked.connect(() => { menu.popdown();
                                                places.edit_bookmark.begin(place.file, null, true, 0, (obj, res) => { try { places.edit_bookmark.end(res);
                                                                                                                      }
@@ -614,7 +621,7 @@ namespace MajorisFiles {
             }
             if(place.volume != null)
             {
-                var mount = new Gtk.Button.with_label("Mount");
+                var mount = new Gtk.Button.with_label(_("Mount"));
                 mount.clicked.connect(() => { menu.popdown();
                                               open_place.begin(place);
                     });
@@ -689,7 +696,7 @@ namespace MajorisFiles {
                 breadcrumbs.remove(breadcrumbs.get_first_child());
             if(file.get_uri() == "majoris:///home")
             {
-                var label = new Gtk.Label("Home");
+                var label = new Gtk.Label(_("Home"));
                 label.add_css_class("heading");
                 breadcrumbs.append(label);
                 location_bar.visible_child_name = "breadcrumbs";
@@ -855,6 +862,8 @@ namespace MajorisFiles {
         }
         int compare_items(FileItem x, FileItem y)
         {
+            if (search_results && rank_results && x.relevance != y.relevance)
+                return x.relevance > y.relevance ? -1 : 1;
             if(folders_first && x.directory != y.directory)
                 return x.directory ? -1 : 1;
             int result;
@@ -950,14 +959,14 @@ namespace MajorisFiles {
         public void show_view_settings()
         {
             var dialog = new Adw.PreferencesDialog();
-            dialog.title = "View Settings";
+            dialog.title = _("View Settings");
             var page = new Adw.PreferencesPage();
             dialog.add(page);
             var group = new Adw.PreferencesGroup();
-            group.title = "This Folder";
+            group.title = _("This Folder");
             page.add(group);
             var view = new Adw.ComboRow();
-            view.title = "View";
+            view.title = _("View");
             string[] view_names = chooser_mode ? new string[] {
                 "Grid", "List"
             }
@@ -971,12 +980,12 @@ namespace MajorisFiles {
             view.notify["selected"].connect(() => set_view(view_names[view.selected]));
             group.add(view);
             var size = new Adw.ComboRow();
-            size.title = "Icon Density";
+            size.title = _("Icon Density");
             size.model = new Gtk.StringList({"Compact", "Standard", "Large"});
             size.selected = icon_size < 64 ? 0 : icon_size > 64 ? 2 : 1;
             group.add(size);
             var grouping = new Adw.ComboRow();
-            grouping.title = "Group By";
+            grouping.title = _("Group By");
             grouping.model = new Gtk.StringList(group_modes);
             for(uint i = 0; i < group_modes.length; i++)
                 if(group_modes[i] == group_key)
@@ -984,7 +993,7 @@ namespace MajorisFiles {
             group.add(grouping);
             grouping.notify["selected"].connect(() => set_group(group_modes[grouping.selected]));
             var caption = new Adw.ComboRow();
-            caption.title = "Grid Metadata Caption";
+            caption.title = _("Grid Metadata Caption");
             string[] captions = {
                 "None"
             };
@@ -1005,7 +1014,7 @@ namespace MajorisFiles {
                                                     save_display();
                 });
             var checkboxes = new Adw.SwitchRow();
-            checkboxes.title = "Selection Checkboxes";
+            checkboxes.title = _("Selection Checkboxes");
             checkboxes.active = selection_checkboxes;
             group.add(checkboxes);
             checkboxes.notify["active"].connect(() => { selection_checkboxes = checkboxes.active;
@@ -1013,7 +1022,7 @@ namespace MajorisFiles {
                                                         save_display();
                 });
             var folders = new Adw.SwitchRow();
-            folders.title = "Folders First";
+            folders.title = _("Folders First");
             folders.active = folders_first;
             group.add(folders);
             folders.notify["active"].connect(() => { folders_first = folders.active;
@@ -1021,7 +1030,7 @@ namespace MajorisFiles {
                                                      save_display();
                 });
             var sort = new Adw.ComboRow();
-            sort.title = "Sort By";
+            sort.title = _("Sort By");
             sort.model = new Gtk.StringList(column_titles);
             for(uint i = 0; i < column_titles.length; i++)
                 if(column_titles[i] == sort_key)
@@ -1029,12 +1038,12 @@ namespace MajorisFiles {
             group.add(sort);
             sort.notify["selected"].connect(() => set_sort(column_titles[sort.selected], ascending));
             var direction = new Adw.SwitchRow();
-            direction.title = "Descending Order";
+            direction.title = _("Descending Order");
             direction.active = !ascending;
             group.add(direction);
             direction.notify["active"].connect(() => set_sort(sort_key, !direction.active));
             var columns_group = new Adw.PreferencesGroup();
-            columns_group.title = "List Columns";
+            columns_group.title = _("List Columns");
             page.add(columns_group);
             for(uint i = 0; i < details.columns.get_n_items(); i++)
             {
@@ -1052,14 +1061,14 @@ namespace MajorisFiles {
                 var width = new Gtk.SpinButton.with_range(40, 1200, 10);
                 width.valign = Gtk.Align.CENTER;
                 width.value = column.fixed_width > 0 ? column.fixed_width : 160;
-                width.tooltip_text = "Column Width (pixels)";
+                width.tooltip_text = _("Column Width (pixels)");
                 row.add_suffix(width);
                 width.value_changed.connect(() => { column.fixed_width = width.get_value_as_int();
                                                     save_display();
                     });
                 var up = new Gtk.Button.from_icon_name("go-up-symbolic");
                 up.valign = Gtk.Align.CENTER;
-                up.tooltip_text = "Move Column Left";
+                up.tooltip_text = _("Move Column Left");
                 row.add_suffix(up);
                 up.clicked.connect(() => {
                     for(uint j = 1; j < details.columns.get_n_items(); j++)
@@ -1391,7 +1400,7 @@ namespace MajorisFiles {
         {
             if(directory.location.get_uri() == "majoris:///home")
             {
-                status.label = "Local activity · nothing is uploaded";
+                status.label = _("Local activity · nothing is uploaded");
                 return;
             }
             var chosen = selected();
@@ -1399,10 +1408,11 @@ namespace MajorisFiles {
             foreach(var item in chosen)
                 if(!item.directory)
                     bytes += item.bytes;
-            status.label = "%u items · %d selected".printf(sorted.get_n_items(), chosen.size) + (chosen.size > 0 ? " · " + Paths.size(bytes) : "") + (search_results ? " · %u folders scanned · %u unavailable".printf(search.scanned, search.unreadable) : "");
+            status.label = _("%u items · %d selected").printf(sorted.get_n_items(), chosen.size) + (chosen.size > 0 ? " · " + Paths.size(bytes) : "") + (search_results ? " · %u folders scanned · %u unavailable".printf(search.scanned, search.unreadable) : "");
         }
         void run_search()
         {
+            rank_results = metadata.state("rank-search-results", "true") == "true";
             search.cancellable.cancel();
             search_query.text = search_entry.text;
             search_query.scope = everywhere ? "everywhere" : recursive ? "recursive" : "folder";
@@ -1640,7 +1650,7 @@ namespace MajorisFiles {
                                        if(grid)
                                            box.append(caption);
                                        var checkbox = new Gtk.CheckButton();
-                                       checkbox.tooltip_text = "Select Item";
+                                       checkbox.tooltip_text = _("Select Item");
                                        box.append(checkbox);
                                        checkbox.toggled.connect(() => {
                     if(li.item == null || checkbox.active == li.selected)
@@ -1663,6 +1673,8 @@ namespace MajorisFiles {
                         caption.label = column_text((FileItem)li.item, caption_key);
                     if(li.item != null)
                         label.label = visible_name((FileItem)li.item);
+                    if (li.item != null && ((FileItem)li.item).directory)
+                        icon.set_from_gicon(item_icon((FileItem)li.item));
                     string settings = metadata.state("thumbnail-policy", "Local") + metadata.state("remote-thumbnail-limit", "8");
                     if(settings != thumbnail_settings && li.item != null)
                     {
@@ -1711,7 +1723,7 @@ namespace MajorisFiles {
                                       var item = (FileItem)li.item;
                                       var box = (Gtk.Box)li.child;
                                       var image = (Gtk.Image)box.get_first_child();
-                                      image.set_from_gicon(item.info.get_icon());
+                                      image.set_from_gicon(item_icon(item));
                                       ((Gtk.Label)image.get_next_sibling()).label = visible_name(item);
                                       if(grid)
                                           ((Gtk.Label)image.get_next_sibling().get_next_sibling()).label = caption_key == "None" ? "" : column_text(item, caption_key);
@@ -1772,7 +1784,7 @@ namespace MajorisFiles {
         {
             if(thumbnail_jobs.has_key(li))
                 thumbnail_jobs[li].cancel();
-            image.set_from_gicon(item.info.get_icon());
+            image.set_from_gicon(item_icon(item));
             var token = new Cancellable();
             thumbnail_jobs[li] = token;
             thumbnails.texture.begin(item, token, (service, res) => {
@@ -1786,10 +1798,23 @@ namespace MajorisFiles {
         }
         protected override void dispose()
         {
+            if (shares_changed != 0) { shares.disconnect(shares_changed); shares_changed = 0; }
             cancel();
             if(completion_popup.get_parent() != null)
                 completion_popup.unparent();
             base.dispose();
+        }
+        public override void unroot()
+        {
+            if (shares_changed != 0) { shares.disconnect(shares_changed); shares_changed = 0; }
+            base.unroot();
+        }
+        Icon item_icon(FileItem item)
+        {
+            var icon = item.info.get_icon() ?? new ThemedIcon("text-x-generic");
+            if (item.directory && shares.contains(item.file))
+                return new EmblemedIcon(icon, new Emblem(new ThemedIcon("emblem-shared")));
+            return icon;
         }
         delegate File? DropFolder();
         async void recover_metadata(Adw.Banner banner)
@@ -1799,7 +1824,7 @@ namespace MajorisFiles {
             try {
                 var backup = metadata.recover();
                 banner.revealed = false;
-                Dialogs.error(get_root() as Gtk.Window, "A fresh metadata database is ready. The previous database is preserved at " + backup);
+                Dialogs.error(get_root() as Gtk.Window, _("A fresh metadata database is ready. The previous database is preserved at ") + backup);
             }
             catch(Error e) {
                 error(e.message);

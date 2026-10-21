@@ -16,11 +16,47 @@ static gboolean safe_name(const char *name) {
     for (int i=0;parts[i];i++) if (!strcmp(parts[i],"..")) safe = FALSE;
     g_strfreev(parts); return safe;
 }
+static int open_reader(struct archive *reader, const char *source, size_t block, char ***volumes, GError **error) {
+    if (!g_str_has_suffix(source, ".7z.001")) return archive_read_open_filename(reader, source, block);
+    char *stem = g_strndup(source, strlen(source) - 3);
+    char *folder = g_path_get_dirname(source);
+    char *base = g_path_get_basename(stem);
+    GDir *dir = g_dir_open(folder, 0, error);
+    guint maximum = 0;
+    if (!dir) { g_free(stem); g_free(folder); g_free(base); return ARCHIVE_FATAL; }
+    const char *name;
+    while ((name = g_dir_read_name(dir))) {
+        if (!g_str_has_prefix(name, base)) continue;
+        const char *suffix = name + strlen(base);
+        if (!*suffix) continue;
+        gboolean digits = TRUE;
+        for (const char *p = suffix; *p; p++) if (!g_ascii_isdigit(*p)) { digits = FALSE; break; }
+        if (digits) {
+            guint64 part = g_ascii_strtoull(suffix, NULL, 10);
+            if (part <= 10000) maximum = MAX(maximum, part);
+        }
+    }
+    g_dir_close(dir); g_free(folder); g_free(base);
+    GPtrArray *files = g_ptr_array_new_with_free_func(g_free);
+    for (guint i = 1; i <= maximum; i++) {
+        char *part = g_strdup_printf("%s%03u", stem, i);
+        struct stat st;
+        if (lstat(part, &st) || !S_ISREG(st.st_mode)) {
+            g_set_error(error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA, "Missing or non-regular archive volume: %s", part);
+            g_free(part); g_ptr_array_unref(files); g_free(stem); return ARCHIVE_FATAL;
+        }
+        g_ptr_array_add(files, part);
+    }
+    g_free(stem); g_ptr_array_add(files, NULL);
+    *volumes = (char **)g_ptr_array_free(files, FALSE);
+    return archive_read_open_filenames(reader, (const char **)*volumes, block);
+}
 char *majoris_archive_list(const char *source, GCancellable *cancel, GError **error) {
     struct archive *reader = archive_read_new();
+    char **volumes = NULL;
     GString *text = g_string_new(NULL);
     archive_read_support_filter_all(reader); archive_read_support_format_all(reader);
-    if(archive_read_open_filename(reader, source, 65536) != ARCHIVE_OK) { failure(reader, error); goto fail; }
+    if(open_reader(reader, source, 65536, &volumes, error) != ARCHIVE_OK) { if (!error || !*error) failure(reader, error); goto fail; }
     struct archive_entry *entry; int result; guint count = 0;
     while((result = archive_read_next_header(reader, &entry)) != ARCHIVE_EOF) {
         if(g_cancellable_set_error_if_cancelled(cancel, error)) goto fail;
@@ -32,16 +68,17 @@ char *majoris_archive_list(const char *source, GCancellable *cancel, GError **er
         if(++count >= 2000 || text->len > 1024 * 1024) { g_string_append(text, "\n[Entry preview limit reached]\n"); break; }
         if(archive_read_data_skip(reader) < ARCHIVE_OK) { failure(reader, error); goto fail; }
     }
-    archive_read_free(reader); return g_string_free(text, FALSE);
+    archive_read_free(reader); g_strfreev(volumes); return g_string_free(text, FALSE);
 fail:
-    archive_read_free(reader); g_string_free(text, TRUE); return NULL;
+    archive_read_free(reader); g_strfreev(volumes); g_string_free(text, TRUE); return NULL;
 }
 gboolean majoris_archive_extract(const char *source, const char *destination, const char *password, GCancellable *cancel, GError **error) {
     struct archive *reader = archive_read_new(), *writer = archive_write_disk_new(); gboolean ok = FALSE;
+    char **volumes = NULL;
     archive_read_support_filter_all(reader); archive_read_support_format_all(reader);
     if(password && archive_read_add_passphrase(reader, password) != ARCHIVE_OK) { failure(reader, error); goto out; }
     archive_write_disk_set_options(writer, ARCHIVE_EXTRACT_SECURE_SYMLINKS | ARCHIVE_EXTRACT_SECURE_NODOTDOT | ARCHIVE_EXTRACT_NO_OVERWRITE | ARCHIVE_EXTRACT_SAFE_WRITES);
-    if (archive_read_open_filename(reader,source,1024*1024) != ARCHIVE_OK) { failure(reader,error); goto out; }
+    if (open_reader(reader,source,1024*1024,&volumes,error) != ARCHIVE_OK) { if (!error || !*error) failure(reader,error); goto out; }
     struct archive_entry *entry; int result; guint count=0; guint64 bytes=0;
     while ((result=archive_read_next_header(reader,&entry)) != ARCHIVE_EOF) {
         if (g_cancellable_set_error_if_cancelled(cancel,error)) goto out;
@@ -65,7 +102,7 @@ gboolean majoris_archive_extract(const char *source, const char *destination, co
     }
     ok=TRUE;
 out:
-    archive_read_free(reader); archive_write_free(writer); return ok;
+    archive_read_free(reader); g_strfreev(volumes); archive_write_free(writer); return ok;
 }
 static gboolean add_path(struct archive *writer,const char *source,const char *name,GCancellable *cancel,GError **error) {
     if (g_cancellable_set_error_if_cancelled(cancel,error)) return FALSE;

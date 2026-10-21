@@ -1,4 +1,42 @@
 namespace MajorisFiles {
+    public class ConflictThumbnails : Object {
+        public static void attach(Adw.AlertDialog dialog, File source, File destination, MetadataStore metadata)
+        {
+            var token = new Cancellable();
+            var box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 24);
+            box.homogeneous = true;
+            dialog.extra_child = box;
+            dialog.closed.connect(() => token.cancel());
+            foreach (var file in new File[] {source, destination}) {
+                var column = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
+                var image = new Gtk.Picture(); image.height_request = 96;
+                image.content_fit = Gtk.ContentFit.CONTAIN;
+                image.alternative_text = file.equal(source) ? _("Source preview") : _("Destination preview");
+                column.append(image);
+                var label = new Gtk.Label(file.equal(source) ? _("Source") : _("Destination"));
+                column.append(label); box.append(column);
+                load.begin(file, image, metadata, token);
+            }
+        }
+        static async void load(File file, Gtk.Picture picture, MetadataStore metadata, Cancellable token)
+        {
+            try {
+                var info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.LOW, token);
+                // Honor the normal remote-download and thumbnail policy. An unavailable
+                // thumbnail leaves the labeled comparison without delaying the prompt.
+                var texture = yield new ThumbnailService(metadata).texture(new FileItem(file, info), token);
+                if (!token.is_cancelled() && texture != null) picture.paintable = texture;
+            }
+            catch (Error e) {} // Preview failure never changes the conflict decision.
+        }
+    }
+    public class VideoThumbnail : Object, ThumbnailProvider {
+        public bool supports(FileItem item) { return item.mime.has_prefix("video/") && item.bytes <= 1024UL * 1024 * 1024; }
+        public async Bytes render(FileItem item, Cancellable token) throws Error
+        {
+            return yield PreviewSandbox.run(item, "video-thumbnail", {}, token);
+        }
+    }
     public interface ThumbnailProvider : Object {
         public abstract bool supports(FileItem item);
         public abstract async Bytes render(FileItem item, Cancellable token) throws Error;
@@ -34,6 +72,7 @@ namespace MajorisFiles {
             providers.add(new ImageThumbnail());
             providers.add(new PdfThumbnail());
             providers.add(new FontThumbnail());
+            providers.add(new VideoThumbnail());
         }
         public void register_provider(ThumbnailProvider provider)
         {

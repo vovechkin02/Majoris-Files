@@ -14,10 +14,13 @@ namespace MajorisFiles {
         Cancellable token = new Cancellable();
         Gee.HashMap<string, Gtk.Widget> choice_widgets = new Gee.HashMap<string, Gtk.Widget>();
         ChooserState state;
+        MetadataStore metadata;
+        Gtk.ProgressBar transfer_progress = new Gtk.ProgressBar();
         public ChooserWindow(ChooserOptions options, MetadataStore metadata, Places places, string application_id = "")
         {
             Object(title: options.save ? "Save As" : (options.directory ? "Select Folder" : "Open"), default_width: 960, default_height: 660, modal: options.modal);
             this.options = options;
+            this.metadata = metadata;
             volumes = VolumeMonitor.get();
             mount_removed = volumes.mount_removed.connect((mount) => {
                 var root = mount.get_root();
@@ -32,7 +35,7 @@ namespace MajorisFiles {
                     browser.cancel();
                     browser.selection.unselect_all();
                     browser.navigate(File.new_for_path(Environment.get_home_dir()));
-                    Dialogs.error(this, "The device or network location was disconnected. Select the file again after reconnecting, or choose another location.");
+                    Dialogs.error(this, _("The device or network location was disconnected. Select the file again after reconnecting, or choose another location."));
                 }
             });
             state = new ChooserState(metadata, application_id);
@@ -45,14 +48,17 @@ namespace MajorisFiles {
             var toolbar = new Adw.ToolbarView();
             var header = new Adw.HeaderBar();
             toolbar.add_top_bar(header);
-            header.pack_start(Browser.button("folder-new-symbolic", "New Folder", () => create_folder.begin()));
-            header.pack_end(Browser.button("view-reveal-symbolic", "Preview Pane", () => { browser.preview.visible = !browser.preview.visible;
+            header.pack_start(Browser.button("folder-new-symbolic", _("New Folder"), () => create_folder.begin()));
+            header.pack_end(Browser.button("view-reveal-symbolic", _("Preview Pane"), () => { browser.preview.visible = !browser.preview.visible;
                                                                                            var chosen = browser.selected();
                                                                                            if (chosen.size > 0 && browser.preview.visible)
                                                                                                browser.preview.show_item.begin(chosen[0]);
                 }));
             var box = new Gtk.Box(Gtk.Orientation.VERTICAL, 8);
             box.append(browser);
+            transfer_progress.show_text = true;
+            transfer_progress.visible = false;
+            box.append(transfer_progress);
             var footer = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8);
             footer.margin_start = 12;
             footer.margin_end = 12;
@@ -60,12 +66,12 @@ namespace MajorisFiles {
             footer.margin_bottom = 12;
             if (options.save && !options.save_many)
             {
-                var label = new Gtk.Label("Name:");
+                var label = new Gtk.Label(_("Name:"));
                 label.mnemonic_widget = filename;
                 footer.append(label);
                 filename.hexpand = true;
                 filename.text = options.current_name;
-                filename.tooltip_text = "Filename";
+                filename.tooltip_text = _("Filename");
                 filename.activate.connect(() => accept_selection.begin());
                 footer.append(filename);
             }
@@ -76,7 +82,7 @@ namespace MajorisFiles {
                     names += filter.name;
                 filters = new Gtk.DropDown.from_strings(names);
                 filters.selected = options.selected_filter;
-                filters.tooltip_text = "File Type";
+                filters.tooltip_text = _("File Type");
                 filters.notify["selected"].connect(() => { options.selected_filter = filters.selected;
                                                            browser.chooser_filter = options.filters[(int)filters.selected];
                                                            browser.refilter();
@@ -87,7 +93,7 @@ namespace MajorisFiles {
             var spacer = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
             spacer.hexpand = true;
             footer.append(spacer);
-            var cancel = new Gtk.Button.with_label("Cancel");
+            var cancel = new Gtk.Button.with_label(_("Cancel"));
             cancel.clicked.connect(() => finish(1, new VariantBuilder(VariantType.VARDICT).end()));
             footer.append(cancel);
             accept = new Gtk.Button.with_label(options.accept_label != "" ? options.accept_label : (options.save ? "Save" : options.directory ? "Select" : "Open"));
@@ -97,7 +103,7 @@ namespace MajorisFiles {
             box.append(footer);
             if (options.save_many)
             {
-                var summary = new Gtk.Label("Choose a destination folder for %u files. Existing files are kept; conflicting names receive a number.".printf(options.filenames.size));
+                var summary = new Gtk.Label(_("Choose a destination folder for %u files. Existing files are kept; conflicting names receive a number.").printf(options.filenames.size));
                 summary.wrap = true;
                 summary.margin_start = 12;
                 summary.margin_end = 12;
@@ -289,10 +295,15 @@ namespace MajorisFiles {
                     var path = file.get_path();
                     if (path == null && !options.save && !options.directory)
                     {
-                        if (!(yield Dialogs.confirm(this, "Download a local copy?", "This location cannot be shared directly with the requesting application. Download a separate copy (up to 64 MiB) to Downloads/Files Imports? The copy will be retained. Changes to it will not update the remote original.", "Download Copy")))
+                        if (!(yield Dialogs.confirm(this, "Download a local copy?", "This location cannot be shared directly with the requesting application. Download a separate, retained local copy using your remote download preferences? Changes to it will not update the remote original. The document portal controls the requesting application's access.", "Download Copy")))
                             throw new IOError.CANCELLED("Download declined");
                         selection_token.set_error_if_cancelled();
-                        path = (yield ChooserImport.download(file, selection_token)).get_path();
+                        transfer_progress.visible = true;
+                        path = (yield ChooserImport.download(file, selection_token, null, new ImportPolicy(metadata), (done, total) => {
+                            transfer_progress.fraction = total == 0 ? 0 : (double)done / total;
+                            transfer_progress.text = "Downloading %s / %s".printf(Paths.size(done), Paths.size(total));
+                        })).get_path();
+                        transfer_progress.visible = false;
                     }
                     if (path == null)
                         throw new FileError.UNSUPPORTED(options.save ? "This remote destination has no local GVfs bridge. Reconnect it with GVfs/FUSE before saving so writes reach the intended folder." : "This location has no local GVfs bridge. Copy the file to a local folder before selecting it. The document portal cannot grant access to this remote URI.");
@@ -307,6 +318,7 @@ namespace MajorisFiles {
                     Dialogs.error(this, e.message);
             }
             accepting = false;
+            transfer_progress.visible = false;
             if (!finished)
                 accept.sensitive = true;
         }

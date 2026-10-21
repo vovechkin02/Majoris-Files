@@ -286,5 +286,21 @@ int main(string[] args)
         }
         catch (Error e) { error("%s", e.message); }
     });
+    Test.add_func("/rename/templates-and-modes", () => {
+        try {
+            var info = new FileInfo(); info.set_name("photo.jpg"); info.set_display_name("photo.jpg"); info.set_file_type(FileType.REGULAR);
+            var item = new FileItem(File.new_for_path("/tmp/photo.jpg"), info);
+            assert(RenamePlan.name(item, 0, "photo", "holiday", 1, 3) == "holiday.jpg");
+            assert(RenamePlan.name(item, 1, "Before-", "", 1, 3) == "Before-photo.jpg");
+            assert(RenamePlan.name(item, 2, "-After", "", 1, 3) == "photo-After.jpg");
+            assert(RenamePlan.name(item, 3, "{stem}-{counter}{extension}", "", 7, 3) == "photo-007.jpg");
+            var metadata = new Gee.HashMap<string, string>(); metadata["Artist"] = "Artist"; metadata["Title"] = "Title";
+            assert(RenamePlan.name(item, 6, "{artist}-{title}{extension}", "", 1, 3, metadata) == "Artist-Title.jpg");
+            bool rejected = false;
+            try { RenamePlan.name(item, 3, "{camera}.jpg", "", 1, 3); } catch (Error e) { rejected = true; }
+            assert(rejected);
+        }
+        catch (Error e) { error("%s", e.message); }
+    });
     return Test.run();
 }

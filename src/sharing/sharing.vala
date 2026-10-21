@@ -1,4 +1,36 @@
 namespace MajorisFiles {
+    public class SharedFoldersState : Object {
+        static SharedFoldersState? instance;
+        Gee.HashSet<string> paths = new Gee.HashSet<string>();
+        bool refreshing;
+        public signal void changed();
+        public static SharedFoldersState get_default()
+        {
+            if (instance == null) instance = new SharedFoldersState();
+            return instance;
+        }
+        SharedFoldersState()
+        {
+            refresh.begin();
+            Timeout.add_seconds(15, () => { refresh.begin(); return Source.CONTINUE; });
+        }
+        public bool contains(File file) { return paths.contains(file.get_uri()); }
+        public async void refresh()
+        {
+            if (refreshing) return;
+            refreshing = true;
+            var next = new Gee.HashSet<string>();
+            try {
+                foreach (var share in (yield new SharingManager().inventory())) next.add(File.new_for_path(share.path).get_uri());
+            }
+            catch (Error e) {} // Unavailable sharing discovery must not block browsing.
+            bool different = next.size != paths.size;
+            foreach (var path in next) if (!paths.contains(path)) different = true;
+            paths = next;
+            refreshing = false;
+            if (different) changed();
+        }
+    }
     public class ShareRecord : Object {
         public string name;
         public string path;
@@ -37,6 +69,37 @@ namespace MajorisFiles {
         }
     }
     public class SharePolicy : Object {
+        public static Gee.HashMap<string, string> parse_acl(string acl) throws Error
+        {
+            var result = new Gee.HashMap<string, string>();
+            foreach (var entry in acl.split(","))
+            {
+                var pair = entry.split(":");
+                if (pair.length != 2 || !Regex.match_simple("^[a-zA-Z0-9_][a-zA-Z0-9_.-]*$", pair[0]) ||
+                    !(pair[1] in new string[] {"R", "F", "D"}) || result.has_key(pair[0]))
+                    throw new FileError.INVALID("Unsupported or duplicate Samba access entry");
+                result[pair[0] == "S-1-1-0" ? "Everyone" : pair[0]] = pair[1];
+            }
+            return result;
+        }
+        public static string mixed_acl(Gee.Map<string, string> entries) throws Error
+        {
+            if (entries.size == 0)
+                throw new FileError.INVALID("Select at least one access assignment");
+            var names = new Gee.ArrayList<string>();
+            names.add_all(entries.keys);
+            names.sort((a, b) => {
+                if (entries[a] == "D" && entries[b] != "D") return -1;
+                if (entries[b] == "D" && entries[a] != "D") return 1;
+                return strcmp(a, b);
+            });
+            string[] acl = {};
+            foreach (var name in names)
+                acl += name + ":" + entries[name];
+            string result = string.joinv(",", acl);
+            parse_acl(result);
+            return result;
+        }
         public static bool valid_name(string name)
         {
             if (name.length == 0 || name.length > 80 || name == "." || name == ".." || name.has_prefix("-"))
@@ -74,8 +137,12 @@ namespace MajorisFiles {
     public interface SharingProxy : Object {
         public abstract async void enable_services() throws DBusError, IOError;
         public abstract async void provision_password(string password) throws DBusError, IOError;
+        public abstract async void configure_firewall(bool enabled) throws DBusError, IOError;
+        public abstract async void reconcile_firewall() throws DBusError, IOError;
+        public abstract async string get_clients(string share) throws DBusError, IOError;
     }
     public class SharingManager : Object {
+        public signal void warning_message(string message);
         public async Gee.ArrayList<ShareRecord> inventory(Cancellable? token = null) throws Error
         {
             return ShareRecord.parse(yield invoke({"net", "usershare", "info", "--long"}, token));
@@ -95,7 +162,7 @@ namespace MajorisFiles {
                 throw new FileError.INVALID(errors.strip() != "" ? errors.strip() : "The Majoris sharing system component needs repair");
             return output;
         }
-        public async void share(File folder, string name, bool writable, bool guest, string[] users) throws Error
+        public async void share(File folder, string name, bool writable, bool guest, string[] users, Gee.Map<string, string>? access = null, string? expected_state = null) throws Error
         {
             if (!folder.is_native())
                 throw new FileError.INVALID("Only local folders can be shared");
@@ -106,18 +173,33 @@ namespace MajorisFiles {
             if (path == "/" || path.has_prefix("/etc") || path.has_prefix("/proc") || path.has_prefix("/sys") || path.has_prefix("/dev") || path.has_prefix("/boot") || path.has_prefix("/root"))
                 throw new FileError.INVALID("System folders cannot be shared");
             var args = SharePolicy.arguments(name, path, writable, guest, users);
-            foreach (var existing in (yield inventory()))
+            if (access != null)
+                args[6] = SharePolicy.mixed_acl(access);
+            string actual_state = "";
+            foreach (var existing in (yield inventory())) {
                 if (existing.name == name && !File.new_for_path(existing.path).equal(folder))
                     throw new FileError.CONFLICT("That share name already belongs to another folder. Choose a different share name.");
+                if (existing.name == name)
+                    actual_state = existing.acl + "|" + existing.guest.to_string();
+            }
+            if (expected_state != null && expected_state != actual_state)
+                throw new FileError.CONFLICT("This share changed outside Files. Close and reopen Sharing before applying your changes.");
             SharingProxy helper = yield Bus.get_proxy(BusType.SYSTEM, "com.majoris.Files.Sharing", "/com/majoris/Files/Sharing");
             yield helper.enable_services();
             yield invoke(args);
+            SharedFoldersState.get_default().refresh.begin();
         }
         public async void remove(string name) throws Error
         {
             if (!SharePolicy.valid_name(name))
                 throw new FileError.INVALID("Invalid share name");
             yield invoke({"net", "usershare", "delete", name});
+            SharedFoldersState.get_default().refresh.begin();
+            try {
+                SharingProxy helper = yield Bus.get_proxy(BusType.SYSTEM, "com.majoris.Files.Sharing", "/com/majoris/Files/Sharing");
+                yield helper.reconcile_firewall();
+            }
+            catch (Error e) { warning_message("Sharing stopped. Files-owned firewall cleanup could not be verified: " + e.message); }
         }
     }
 }

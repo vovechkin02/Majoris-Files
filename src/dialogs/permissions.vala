@@ -1,23 +1,40 @@
 namespace MajorisFiles {
     public class PermissionsDialog : Adw.PreferencesDialog {
+        public PermissionsDialog(Gtk.Window owner_window, Gee.List<FileItem> items) {
+            title = _("Permissions");
+            var page = new PermissionsPage(owner_window, items);
+            add(page); page.applied.connect(() => close());
+            closed.connect(() => page.cancel()); present(owner_window);
+        }
+    }
+    public class PermissionsPage : Adw.PreferencesPage {
+        public signal void applied();
+        public void cancel() { token.cancel(); }
         Gee.List<FileItem> items;
         Gtk.Window owner_window;
         Cancellable token = new Cancellable();
-        public PermissionsDialog(Gtk.Window owner_window, Gee.List<FileItem> items)
+        public PermissionsPage(Gtk.Window owner_window, Gee.List<FileItem> items)
         {
             this.owner_window = owner_window;
             this.items = items;
-            title = "Permissions";
-            var page = new Adw.PreferencesPage();
+            title = _("Permissions");
+            icon_name = "changes-prevent-symbolic";
             var group = new Adw.PreferencesGroup();
-            page.add(group);
-            add(page);
+            add(group);
+            foreach (var item in items)
+                if (!item.file.is_native() || item.info.get_is_symlink() || !item.info.has_attribute("unix::mode")) {
+                    var unavailable = new Adw.ActionRow();
+                    unavailable.title = _("Permissions unavailable");
+                    unavailable.subtitle = _("This selection does not expose editable local POSIX permissions. Symbolic links are not followed.");
+                    group.add(unavailable);
+                    return;
+                }
             var files = new Adw.EntryRow();
-            files.title = "File Permissions (octal)";
+            files.title = _("File Permissions (octal)");
             files.text = "0644";
             group.add(files);
             var folders = new Adw.EntryRow();
-            folders.title = "Folder Permissions (octal)";
+            folders.title = _("Folder Permissions (octal)");
             folders.text = "0755";
             group.add(folders);
             foreach(var item in items)
@@ -28,8 +45,8 @@ namespace MajorisFiles {
                     else files.text = "%04o".printf(item.info.get_attribute_uint32("unix::mode") & 0777);
                 }
             var explanation = new Adw.ActionRow();
-            explanation.title = "Read · Write · Execute";
-            explanation.subtitle = "4 = read, 2 = write, 1 = execute. Each digit sets owner, group, and others. Folders need execute to enter.";
+            explanation.title = _("Read · Write · Execute");
+            explanation.subtitle = _("4 = read, 2 = write, 1 = execute. Each digit sets owner, group, and others. Folders need execute to enter.");
             group.add(explanation);
             var matrix = new Gtk.Grid();
             matrix.column_spacing = 16;
@@ -57,28 +74,27 @@ namespace MajorisFiles {
                 }
             }
             var owner = new Adw.EntryRow();
-            owner.title = "Owner UID (blank preserves owner)";
+            owner.title = _("Owner UID (blank preserves owner)");
             group.add(owner);
             var owning_group = new Adw.EntryRow();
-            owning_group.title = "Group GID (blank preserves group)";
+            owning_group.title = _("Group GID (blank preserves group)");
             group.add(owning_group);
             account_picker.begin(group, owner, true);
             account_picker.begin(group, owning_group, false);
             var recursive = new Adw.SwitchRow();
-            recursive.title = "Apply to Folder Contents";
+            recursive.title = _("Apply to Folder Contents");
             group.add(recursive);
-            var apply = new Gtk.Button.with_label("Apply Permissions");
+            var apply = new Gtk.Button.with_label(_("Apply Permissions"));
             apply.add_css_class("suggested-action");
             group.add(apply);
             apply.clicked.connect(() => apply_permissions.begin(files.text, folders.text, owner.text, owning_group.text, recursive.active, apply));
             if(items.size == 1)
             {
-                var acl = new Gtk.Button.with_label("Edit Access Control List…");
+                var acl = new Gtk.Button.with_label(_("Edit Access Control List…"));
                 group.add(acl);
                 acl.clicked.connect(() => edit_acl.begin(items[0].file));
             }
-            closed.connect(() => token.cancel());
-            present(owner_window);
+            notify["root"].connect(() => { if (get_root() == null) token.cancel(); });
         }
         async void apply_permissions(string files, string folders, string owner, string group, bool recursive, Gtk.Button apply)
         {
@@ -106,7 +122,7 @@ namespace MajorisFiles {
                     roots.add(item.file);
                 apply.sensitive = false;
                 yield PermissionService.apply(roots, file_mode, folder_mode, recursive, uid, gid, token);
-                close();
+                applied();
             }
             catch(Error e) {
                 if(!(e is IOError.CANCELLED))
@@ -121,7 +137,7 @@ namespace MajorisFiles {
             var row = new Adw.ComboRow();
             row.title = users ? "Choose Owner Account" : "Choose Group";
             if(items.size == 1)
-                row.subtitle = "Current: " + (items[0].info.get_attribute_string(users ? "owner::user" : "owner::group") ?? "Unavailable");
+                row.subtitle = _("Current: ") + (items[0].info.get_attribute_string(users ? "owner::user" : "owner::group") ?? "Unavailable");
             row.model = new Gtk.StringList({"Keep Current"});
             row.enable_search = true;
             group.add(row);
@@ -143,7 +159,7 @@ namespace MajorisFiles {
             catch(Error e) {
                 if(!token.is_cancelled())
                 {
-                    row.subtitle = "Account lookup unavailable; enter a numeric ID above";
+                    row.subtitle = _("Account lookup unavailable; enter a numeric ID above");
                     row.sensitive = false;
                 }
             }
@@ -158,10 +174,10 @@ namespace MajorisFiles {
                 var scroll = new Gtk.ScrolledWindow();
                 scroll.height_request = 260;
                 scroll.set_child(view);
-                var dialog = new Adw.AlertDialog("Access Control List", "Advanced POSIX ACL entries. Changes can remove access.");
+                var dialog = new Adw.AlertDialog(_("Access Control List"), "Advanced POSIX ACL entries. Changes can remove access.");
                 dialog.extra_child = scroll;
-                dialog.add_response("cancel", "Cancel");
-                dialog.add_response("apply", "Apply ACL");
+                dialog.add_response("cancel", _("Cancel"));
+                dialog.add_response("apply", _("Apply ACL"));
                 dialog.close_response = "cancel";
                 if((yield dialog.choose(owner_window, token)) == "apply")
                     yield PermissionService.write_acl(file, view.buffer.text);

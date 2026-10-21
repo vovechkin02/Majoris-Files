@@ -35,26 +35,26 @@ namespace MajorisFiles {
             this.pages = pages;
             this.token = token;
             var controls = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-            controls.append(Browser.button("go-previous-symbolic", "Previous Page", () => { if(!busy && index > 0)
+            controls.append(Browser.button("go-previous-symbolic", _("Previous Page"), () => { if(!busy && index > 0)
                                                                                             {
                                                                                                 index--;
                                                                                                 render_page.begin();
                                                                                             }
                 }));
             controls.append(count);
-            controls.append(Browser.button("go-next-symbolic", "Next Page", () => { if(!busy && index + 1 < pages)
+            controls.append(Browser.button("go-next-symbolic", _("Next Page"), () => { if(!busy && index + 1 < pages)
                                                                                     {
                                                                                         index++;
                                                                                         render_page.begin();
                                                                                     }
                 }));
-            controls.append(Browser.button("zoom-in-symbolic", "Zoom In", () => { if(!busy)
+            controls.append(Browser.button("zoom-in-symbolic", _("Zoom In"), () => { if(!busy)
                                                                                   {
                                                                                       zoom = double.min(zoom * 1.2, 3);
                                                                                       render_page.begin();
                                                                                   }
                 }));
-            controls.append(Browser.button("zoom-out-symbolic", "Zoom Out", () => { if(!busy)
+            controls.append(Browser.button("zoom-out-symbolic", _("Zoom Out"), () => { if(!busy)
                                                                                     {
                                                                                         zoom = double.max(zoom / 1.2, 0.25);
                                                                                         render_page.begin();
@@ -78,11 +78,11 @@ namespace MajorisFiles {
                 var bytes = yield PreviewSandbox.run(item, "pdf-page", {index.to_string(), zoom.to_string()}, token);
                 token.set_error_if_cancelled();
                 picture.paintable = Gdk.Texture.from_bytes(bytes);
-                count.label = "%d / %d".printf(index + 1, pages);
+                count.label = _("%d / %d").printf(index + 1, pages);
             }
             catch(Error e) {
                 if(!token.is_cancelled())
-                    failure.label = "Preview unavailable\n" + e.message;
+                    failure.label = _("Preview unavailable\n") + e.message;
             }
             busy = false;
         }

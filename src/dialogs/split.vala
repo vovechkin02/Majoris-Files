@@ -26,26 +26,26 @@ namespace MajorisFiles {
             source.subtitle = Paths.size(item.bytes);
             group.add(source);
             var target = new Adw.ActionRow();
-            target.title = "Destination";
+            target.title = _("Destination");
             target.subtitle = destination.get_parse_name();
-            var choose = new Gtk.Button.with_label("Choose…");
+            var choose = new Gtk.Button.with_label(_("Choose…"));
             target.add_suffix(choose);
             group.add(target);
             choose.clicked.connect(() => choose_destination.begin(target));
-            method.title = "Split By";
+            method.title = _("Split By");
             method.model = new Gtk.StringList({"Part Size", "Number of Parts", "Destination Filesystem Limit"});
             group.add(method);
             var preset = new Adw.ComboRow();
-            preset.title = "Preset";
+            preset.title = _("Preset");
             preset.model = new Gtk.StringList({"Custom", "25 MB", "100 MB", "500 MB", "1 GB", "2 GB", "4 GB"});
             group.add(preset);
             var value = new Adw.ActionRow();
-            value.title = "Amount";
+            value.title = _("Amount");
             amount.value = 2048;
             amount.digits = 0;
             value.add_suffix(amount);
             group.add(value);
-            units.title = "Size Unit";
+            units.title = _("Size Unit");
             units.model = new Gtk.StringList({"Bytes", "KiB", "MiB", "GiB"});
             units.selected = 2;
             group.add(units);
@@ -60,17 +60,17 @@ namespace MajorisFiles {
             });
             // Decimal presets may exceed the custom unit's initial spin range.
             amount.set_range(1, 4000000000);
-            estimate.title = "Estimated Output";
+            estimate.title = _("Estimated Output");
             group.add(estimate);
             var explanation = new Adw.ActionRow();
-            explanation.title = "Original kept";
-            explanation.subtitle = "Parts are streamed to new files. Existing outputs are never overwritten. Up to 10,000 parts.";
+            explanation.title = _("Original kept");
+            explanation.subtitle = _("Parts are streamed to new files. Existing outputs are never overwritten. Up to 10,000 parts.");
             group.add(explanation);
-            manifest.title = "Include SHA-256 Manifest";
-            manifest.subtitle = "Recommended: verifies every part and the reconstructed file. Without it, missing final parts cannot be detected.";
+            manifest.title = _("Include SHA-256 Manifest");
+            manifest.subtitle = _("Recommended: verifies every part and the reconstructed file. Without it, missing final parts cannot be detected.");
             manifest.active = true;
             group.add(manifest);
-            var start = new Gtk.Button.with_label("Split File");
+            var start = new Gtk.Button.with_label(_("Split File"));
             start.add_css_class("suggested-action");
             group.add(start);
             start.clicked.connect(() => split.begin(start));
@@ -89,7 +89,7 @@ namespace MajorisFiles {
         {
             try {
                 var chooser = new Gtk.FileDialog();
-                chooser.title = "Split Destination";
+                chooser.title = _("Split Destination");
                 chooser.initial_folder = destination;
                 destination = yield chooser.select_folder(owner_window, token);
                 row.subtitle = destination.get_parse_name();
@@ -125,7 +125,7 @@ namespace MajorisFiles {
                 if(token.is_cancelled())
                     return;
                 uint64 count = item.bytes / size + (item.bytes % size == 0 ? 0 : 1);
-                estimate.subtitle = "%" + uint64.FORMAT + " parts · up to %s each";
+                estimate.subtitle = _("%") + uint64.FORMAT + " parts · up to %s each";
                 estimate.subtitle = estimate.subtitle.printf(count, Paths.size(size));
             }
             catch(Error e) {

@@ -12,7 +12,7 @@ namespace MajorisFiles {
                 "Any", "Folder", "Image", "Video", "Audio", "PDF", "Document", "Spreadsheet", "Archive", "Text"
             };
             var type_row = new Adw.ComboRow();
-            type_row.title = "Type";
+            type_row.title = _("Type");
             type_row.model = new Gtk.StringList(kinds);
             for(uint i = 0; i < kinds.length; i++)
                 if(kinds[i] == current.kind)
@@ -21,8 +21,8 @@ namespace MajorisFiles {
             var mime = entry(group, "MIME Type", current.mime);
             var content = entry(group, "Containing Text", current.content);
             var explanation = new Adw.ActionRow();
-            explanation.title = "Content search";
-            explanation.subtitle = "Local text, JSON, and XML files up to 4 MiB";
+            explanation.title = _("Content search");
+            explanation.subtitle = _("Indexed document content, including PDFs and Office files, when indexed by the system. Filesystem fallback searches local text, JSON and XML up to 4 MiB.");
             group.add(explanation);
             var minimum = entry(group, "Minimum Size (bytes)", current.minimum == 0 ? "" : current.minimum.to_string());
             var maximum = entry(group, "Maximum Size (bytes)", current.maximum == uint64.MAX ? "" : current.maximum.to_string());
@@ -33,7 +33,7 @@ namespace MajorisFiles {
                 "modified", "created", "access"
             };
             var date_row = new Adw.ComboRow();
-            date_row.title = "Date Field";
+            date_row.title = _("Date Field");
             date_row.model = new Gtk.StringList(fields);
             for(uint i = 0; i < attributes.length; i++)
                 if(attributes[i] == current.date_field)
@@ -42,7 +42,7 @@ namespace MajorisFiles {
             var after = entry(group, "From (YYYY-MM-DD)", date_text(current.after));
             var before = entry(group, "Through (YYYY-MM-DD)", date_text(current.before));
             var ranges = new Adw.ComboRow();
-            ranges.title = "Date Range";
+            ranges.title = _("Date Range");
             ranges.model = new Gtk.StringList({"Custom / Any", "Today", "Yesterday", "Past Week", "Past Month", "Past Year"});
             group.add(ranges);
             ranges.notify["selected"].connect(() => {
@@ -66,20 +66,20 @@ namespace MajorisFiles {
             var tag = entry(group, "Tag", current.tag);
             var owner = entry(group, "Owner", current.owner);
             var favorites = new Adw.SwitchRow();
-            favorites.title = "Favorites Only";
+            favorites.title = _("Favorites Only");
             favorites.active = current.favorites_only;
             group.add(favorites);
             var actions = new Adw.PreferencesGroup();
             page.add(actions);
             var buttons = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8);
-            var clear = new Gtk.Button.with_label("Clear Filters");
+            var clear = new Gtk.Button.with_label(_("Clear Filters"));
             buttons.append(clear);
             clear.clicked.connect(() => { var query = new SearchQuery();
                                           query.text = current.text;
                                           applied(query);
                                           close();
                 });
-            var apply = new Gtk.Button.with_label("Apply");
+            var apply = new Gtk.Button.with_label(_("Apply"));
             apply.add_css_class("suggested-action");
             buttons.append(apply);
             actions.add(buttons);

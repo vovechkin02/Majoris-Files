@@ -49,13 +49,25 @@ namespace MajorisFiles {
             if(FileUtils.test("/etc/ld.so.cache", FileTest.EXISTS))
                 foreach(var argument in new string[] {"--ro-bind", "/etc/ld.so.cache", "/etc/ld.so.cache"})
                     args += argument;
+            if (mode == "office-pdf") {
+                string script = OFFICE_HELPER_PATH;
+                if (helper != PREVIEW_HELPER_PATH) script = OFFICE_SOURCE_HELPER_PATH;
+                if (!FileUtils.test(script, FileTest.IS_REGULAR))
+                    throw new FileError.UNSUPPORTED("The isolated Office renderer is not installed");
+                foreach (var argument in new string[] {"--ro-bind", script, "/office-render.py"}) args += argument;
+                foreach (var argument in new string[] {"--ro-bind", "/bin", "/bin"}) args += argument;
+                if (FileUtils.test("/etc/libreoffice", FileTest.IS_DIR))
+                    foreach (var argument in new string[] {"--ro-bind", "/etc/libreoffice", "/etc/libreoffice"}) args += argument;
+            }
             foreach(var argument in new string[] {"--ro-bind", helper, "/helper", "--ro-bind", item.file.get_path(), "/input", "--", "/helper", mode, "/input"})
                 args += argument;
             foreach(var parameter in parameters)
                 args += parameter;
+            if (mode == "office-pdf")
+                args += item.name.substring(item.name.last_index_of(".") + 1).down();
             var process = new Subprocess.newv(args, SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDERR_PIPE);
             bool timed_out = false;
-            uint timeout = Timeout.add_seconds(15, () => { timed_out = true;
+            uint timeout = Timeout.add_seconds(mode == "office-pdf" ? 60 : 15, () => { timed_out = true;
                                                            process.force_exit();
                                                            return Source.REMOVE;
                 });
@@ -78,8 +90,12 @@ namespace MajorisFiles {
             token.set_error_if_cancelled();
             if(timed_out)
                 throw new IOError.TIMED_OUT("The preview took too long");
-            if(!process.get_successful())
-                throw new FileError.UNSUPPORTED("The preview provider could not render this file in its sandbox");
+            if(!process.get_successful()) {
+                string detail = "";
+                if (mode == "office-pdf" && errors != null && errors.get_size() < 4096)
+                    detail = "\n" + ((string)errors.get_data()).make_valid((ssize_t)errors.get_size());
+                throw new FileError.UNSUPPORTED("The preview provider could not render this file in its sandbox" + detail);
+            }
             if(output == null || output.get_size() > 80 * 1024 * 1024)
                 throw new FileError.INVALID("Invalid preview output");
             return output;
@@ -102,18 +118,18 @@ namespace MajorisFiles {
             this.texture = texture;
             this.token = token;
             var controls = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
-            controls.append(Browser.button("zoom-in-symbolic", "Zoom In", () => { fit = false;
+            controls.append(Browser.button("zoom-in-symbolic", _("Zoom In"), () => { fit = false;
                                                                                   zoom = double.min(zoom * 1.25, 3);
                                                                                   update();
                 }));
-            controls.append(Browser.button("zoom-out-symbolic", "Zoom Out", () => { fit = false;
+            controls.append(Browser.button("zoom-out-symbolic", _("Zoom Out"), () => { fit = false;
                                                                                     zoom = double.max(zoom / 1.25, 0.1);
                                                                                     update();
                 }));
-            controls.append(Browser.button("zoom-fit-best-symbolic", "Fit Image", () => { fit = true;
+            controls.append(Browser.button("zoom-fit-best-symbolic", _("Fit Image"), () => { fit = true;
                                                                                           update();
                 }));
-            controls.append(Browser.button("object-rotate-right-symbolic", "Rotate Preview Clockwise", () => { if(!busy)
+            controls.append(Browser.button("object-rotate-right-symbolic", _("Rotate Preview Clockwise"), () => { if(!busy)
                                                                                                                {
                                                                                                                    angle = (angle + 90) % 360;
                                                                                                                    rotate.begin();
@@ -131,7 +147,7 @@ namespace MajorisFiles {
             picture.paintable = texture;
             picture.can_shrink = fit;
             picture.set_size_request(fit ? -1 : (int)(texture.get_width() * zoom), fit ? -1 : (int)(texture.get_height() * zoom));
-            description.label = "%d × %d preview · %s".printf(texture.get_width(), texture.get_height(), Paths.size(item.bytes));
+            description.label = _("%d × %d preview · %s").printf(texture.get_width(), texture.get_height(), Paths.size(item.bytes));
         }
         async void rotate()
         {
@@ -144,7 +160,7 @@ namespace MajorisFiles {
             }
             catch(Error e) {
                 if(!token.is_cancelled())
-                    description.label = "Preview unavailable\n" + e.message;
+                    description.label = _("Preview unavailable\n") + e.message;
             }
             busy = false;
         }

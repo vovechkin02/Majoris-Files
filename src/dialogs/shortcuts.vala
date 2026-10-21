@@ -6,7 +6,7 @@ namespace MajorisFiles {
             var page = new Adw.PreferencesPage();
             add(page);
             var browsing = new Adw.PreferencesGroup();
-            browsing.title = "Browsing";
+            browsing.title = _("Browsing");
             page.add(browsing);
             foreach(var entry in new string[] {
                 "New Window|<Control>n", "New Tab|<Control>t", "Close Tab|<Control>w", "Reopen Closed Tab|<Control><Shift>t",
@@ -14,7 +14,7 @@ namespace MajorisFiles {
             })
                 add_shortcut(browsing, entry);
             var files = new Adw.PreferencesGroup();
-            files.title = "Files and Selection";
+            files.title = _("Files and Selection");
             page.add(files);
             foreach(var entry in new string[] {
                 "New Folder|<Control><Shift>n", "Select All|<Control>a", "Rename|F2", "Move to Trash|Delete", "Permanently Delete|<Shift>Delete",

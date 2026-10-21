@@ -1,21 +1,27 @@
 namespace MajorisFiles {
     public class AssociationsDialog : Adw.PreferencesDialog {
-        public AssociationsDialog(Gtk.Window parent, FileItem item)
+        public AssociationsDialog(Gtk.Window parent, FileItem item) {
+            title = _("Open With"); var page = new AssociationsPage(parent, item);
+            add(page); page.opened.connect(() => close()); present(parent);
+        }
+    }
+    public class AssociationsPage : Adw.PreferencesPage {
+        public signal void opened();
+        public AssociationsPage(Gtk.Window parent, FileItem item)
         {
-            title = "Applications for " + ContentType.get_description(item.mime);
-            var page = new Adw.PreferencesPage();
+            title = _("Open With");
+            icon_name = "application-x-executable-symbolic";
             var group = new Adw.PreferencesGroup();
-            page.add(group);
-            add(page);
+            add(group);
             var current = AppInfo.get_default_for_type(item.mime, false);
             var default_row = new Adw.ActionRow();
-            default_row.title = "Default Application";
+            default_row.title = _("Default Application");
             default_row.subtitle = current == null ? "None" : current.get_display_name();
             group.add(default_row);
-            var reset = new Gtk.Button.with_label("Reset Association");
+            var reset = new Gtk.Button.with_label(_("Reset Association"));
             group.add(reset);
             reset.clicked.connect(() => { AppInfo.reset_type_associations(item.mime);
-                                          default_row.subtitle = "System default restored";
+                                          default_row.subtitle = _("System default restored");
                 });
             foreach(var app in AppInfo.get_all_for_type(item.mime))
             {
@@ -23,7 +29,7 @@ namespace MajorisFiles {
                 row.title = app.get_display_name();
                 if(app.get_icon() != null)
                     row.add_prefix(new Gtk.Image.from_gicon(app.get_icon()));
-                var open = new Gtk.Button.with_label("Open");
+                var open = new Gtk.Button.with_label(_("Open"));
                 row.add_suffix(open);
                 open.clicked.connect(() => {
                     try {
@@ -40,12 +46,12 @@ namespace MajorisFiles {
                                files.append(item.file);
                                app.launch(files, context);
                         }
-                        close();
+                        opened();
                     }
                     catch(Error e) { Dialogs.error(parent, e.message);
                     }
                 });
-                var set_default = new Gtk.Button.with_label("Set Default");
+                var set_default = new Gtk.Button.with_label(_("Set Default"));
                 row.add_suffix(set_default);
                 set_default.clicked.connect(() => { try { app.set_as_default_for_type(item.mime);
                                                           default_row.subtitle = app.get_display_name();
@@ -55,7 +61,7 @@ namespace MajorisFiles {
                     });
                 group.add(row);
             }
-            var choose = new Gtk.Button.with_label("Choose Another Application…");
+            var choose = new Gtk.Button.with_label(_("Choose Another Application…"));
             group.add(choose);
             choose.clicked.connect(() => { var launcher = new Gtk.FileLauncher(item.file);
                                            launcher.always_ask = true;
@@ -66,7 +72,7 @@ namespace MajorisFiles {
                                                                                                }
                                                });
                 });
-            present(parent);
+
         }
     }
 }

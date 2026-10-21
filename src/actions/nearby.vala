@@ -59,12 +59,12 @@ namespace MajorisFiles {
                     names.append(peer.name);
                 }
                 var target = new Adw.ComboRow();
-                target.title = "Device";
+                target.title = _("Device");
                 target.model = names;
-                var dialog = new Adw.AlertDialog("Send Selected Files?", "%d selected items will be sent by the installed Nearby Share provider.".printf(selection.size));
+                var dialog = new Adw.AlertDialog(_("Send Selected Files?"), "%d selected items will be sent by the installed Nearby Share provider.".printf(selection.size));
                 dialog.extra_child = target;
-                dialog.add_response("cancel", "Cancel");
-                dialog.add_response("send", "Send");
+                dialog.add_response("cancel", _("Cancel"));
+                dialog.add_response("send", _("Send"));
                 dialog.close_response = "cancel";
                 if((yield dialog.choose(parent, token)) != "send")
                     return;

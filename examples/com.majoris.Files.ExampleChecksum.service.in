@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=com.majoris.Files.ExampleChecksum
+Exec=/usr/bin/python3 @example_helper@

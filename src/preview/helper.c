@@ -14,6 +14,9 @@
 #include "../archive/native.h"
 #include <archive.h>
 #include <archive_entry.h>
+gboolean majoris_media_info(const char *path);
+gboolean majoris_video_thumbnail(const char *path);
+gboolean majoris_image_metadata(const char *path);
 
 typedef struct { GString *text; guint depth; } OfficeText;
 static void office_start(GMarkupParseContext *context, const gchar *name, const gchar **keys, const gchar **values, gpointer data, GError **error) {
@@ -115,10 +118,73 @@ static void markdown_node(MarkdownOutput *out, cmark_node *node, guint style, gu
 }
 int main(int argc, char **argv) {
     struct rlimit memory = {768 * 1024 * 1024, 768 * 1024 * 1024}, cpu = {10, 10}, files = {64, 64}, core = {0, 0};
+    if (argc >= 3 && g_str_equal(argv[1], "office-pdf")) {
+        memory.rlim_cur = memory.rlim_max = 2UL * 1024 * 1024 * 1024;
+        cpu.rlim_cur = cpu.rlim_max = 30;
+        files.rlim_cur = files.rlim_max = 128;
+    }
+    struct rlimit output_limit = {128 * 1024 * 1024, 128 * 1024 * 1024};
+    if (setrlimit(RLIMIT_FSIZE, &output_limit)) return 2;
     if(setrlimit(RLIMIT_AS, &memory) || setrlimit(RLIMIT_CPU, &cpu) || setrlimit(RLIMIT_NOFILE, &files) || setrlimit(RLIMIT_CORE, &core)) return 2;
     if(prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) != 0 || argc < 3) return 2;
     GError *error = NULL;
+    if (g_str_equal(argv[1], "office-pdf")) {
+        if (argc != 4) return 2;
+        const char *arguments[] = {"/usr/bin/python3", "/office-render.py", argv[3], NULL};
+        GSubprocess *renderer = g_subprocess_newv(arguments, G_SUBPROCESS_FLAGS_NONE, &error);
+        if (!renderer) { g_clear_error(&error); return 2; }
+        gboolean ok = g_subprocess_wait_check(renderer, NULL, &error);
+        g_object_unref(renderer); g_clear_error(&error); return ok ? 0 : 2;
+    }
+    if(g_str_equal(argv[1], "media-info")) return majoris_media_info(argv[2]) ? 0 : 2;
+    if(g_str_equal(argv[1], "image-info")) return majoris_image_metadata(argv[2]) ? 0 : 2;
+    if(g_str_equal(argv[1], "video-thumbnail")) return majoris_video_thumbnail(argv[2]) ? 0 : 2;
     if(g_str_equal(argv[1], "office")) return office_preview(argv[2]) ? 0 : 2;
+    if (g_str_equal(argv[1], "image-animation")) {
+        GdkPixbufAnimation *animation = gdk_pixbuf_animation_new_from_file(argv[2], &error);
+        if (!animation) goto fail;
+        if (gdk_pixbuf_animation_is_static_image(animation)) { g_object_unref(animation); return 3; }
+        GTimeVal now = {1, 0};
+        GdkPixbufAnimationIter *iterator = gdk_pixbuf_animation_get_iter(animation, &now);
+        JsonBuilder *builder = json_builder_new(); json_builder_begin_array(builder);
+        gsize total = 0, pixels = 0;
+        char *first_hash = NULL;
+        for (guint frame = 0; frame < 240; frame++) {
+            GdkPixbuf *original = gdk_pixbuf_animation_iter_get_pixbuf(iterator);
+            GdkPixbuf *oriented = gdk_pixbuf_apply_embedded_orientation(original);
+            double scale = MIN(1.0, 800.0 / MAX(gdk_pixbuf_get_width(oriented), gdk_pixbuf_get_height(oriented)));
+            GdkPixbuf *image = gdk_pixbuf_scale_simple(oriented, MAX(1, (int)(gdk_pixbuf_get_width(oriented) * scale)), MAX(1, (int)(gdk_pixbuf_get_height(oriented) * scale)), GDK_INTERP_BILINEAR);
+            g_object_unref(oriented);
+            pixels += (gsize)gdk_pixbuf_get_width(image) * gdk_pixbuf_get_height(image);
+            if (pixels > 16 * 1024 * 1024) { g_object_unref(image); break; }
+            char *png = NULL; gsize size = 0;
+            if (!gdk_pixbuf_save_to_buffer(image, &png, &size, "png", &error, NULL)) { g_object_unref(image); break; }
+            g_object_unref(image);
+            char *hash = g_compute_checksum_for_data(G_CHECKSUM_SHA256, (guchar *)png, size);
+            if (frame > 0 && g_str_equal(first_hash, hash)) { g_free(hash); g_free(png); break; }
+            if (frame == 0) first_hash = g_strdup(hash);
+            g_free(hash);
+            if (total + size > 24 * 1024 * 1024) { g_free(png); break; }
+            total += size;
+            int delay = gdk_pixbuf_animation_iter_get_delay_time(iterator);
+            delay = CLAMP(delay, 20, 10000);
+            char *encoded = g_base64_encode((guchar *)png, size); g_free(png);
+            json_builder_begin_object(builder);
+            json_builder_set_member_name(builder, "png"); json_builder_add_string_value(builder, encoded); g_free(encoded);
+            json_builder_set_member_name(builder, "delay"); json_builder_add_int_value(builder, delay);
+            json_builder_end_object(builder);
+            now.tv_usec += delay * 1000;
+            now.tv_sec += now.tv_usec / 1000000;
+            now.tv_usec %= 1000000;
+            if (!gdk_pixbuf_animation_iter_advance(iterator, &now)) break;
+        }
+        g_free(first_hash);
+        json_builder_end_array(builder);
+        JsonGenerator *generator = json_generator_new(); JsonNode *root = json_builder_get_root(builder);
+        json_generator_set_root(generator, root); char *text = json_generator_to_data(generator, NULL); fputs(text, stdout);
+        g_free(text); json_node_free(root); g_object_unref(generator); g_object_unref(builder); g_object_unref(iterator); g_object_unref(animation);
+        return 0;
+    }
     if(g_str_equal(argv[1], "thumbnail-cache")) {
         if(argc != 5) return 2;
         int width, height;

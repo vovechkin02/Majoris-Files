@@ -19,6 +19,7 @@ namespace MajorisFiles {
             }
         }
         public bool resolved_directory;
+        public double relevance;
         public bool navigable {
             get {
                 return directory || info.get_file_type() == FileType.SHORTCUT || info.get_file_type() == FileType.MOUNTABLE;

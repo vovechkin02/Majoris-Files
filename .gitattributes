@@ -1,0 +1,5 @@
+# Linux packaging and executable scripts must retain Unix line endings on Windows.
+debian/** text eol=lf
+data/** text eol=lf
+*.py text eol=lf
+*.sh text eol=lf

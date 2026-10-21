@@ -25,15 +25,48 @@ namespace MajorisFiles {
             }
             yield input.close_async(Priority.LOW, null);
             bytes[count] = 0;
-            string text = ((string)bytes).make_valid();
-            var view = new Gtk.TextView();
+            var buffer = new GtkSource.Buffer(null);
+            buffer.language = GtkSource.LanguageManager.get_default().guess_language(item.name, item.mime);
+            buffer.highlight_syntax = true;
+            var view = new GtkSource.View.with_buffer(buffer);
+            view.show_line_numbers = true;
             view.editable = false;
             view.monospace = true;
             view.wrap_mode = Gtk.WrapMode.WORD_CHAR;
-            view.buffer.text = text + (item.bytes > count ? "\n\n[Preview limited to 256 KiB]" : "");
+            var box = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
+            string[] encodings = {"Automatic", "UTF-8", "UTF-16LE", "UTF-16BE", "WINDOWS-1252", "ISO-8859-1"};
+            var encoding = new Gtk.DropDown.from_strings(encodings);
+            encoding.tooltip_text = _("Text Encoding");
+            var status = new Gtk.Label("");
+            status.wrap = true;
+            Callback update = () => {
+                try {
+                    string selected = encodings[encoding.selected];
+                    if (selected == "Automatic") {
+                        if (count >= 2 && bytes[0] == 0xff && bytes[1] == 0xfe) selected = "UTF-16LE";
+                        else if (count >= 2 && bytes[0] == 0xfe && bytes[1] == 0xff) selected = "UTF-16BE";
+                        else selected = ((string)bytes).validate((ssize_t)count) ? "UTF-8" : "WINDOWS-1252";
+                    }
+                    if (!selected.has_prefix("UTF-16"))
+                        for (size_t i = 0; i < count; i++)
+                            if (bytes[i] == 0)
+                                throw new FileError.UNSUPPORTED("This file contains binary data");
+                    size_t read, written;
+                    string text = GLib.convert((string)bytes, (ssize_t)count, "UTF-8", selected, out read, out written);
+                    buffer.text = text;
+                    status.label = selected + (item.bytes > count ? " · Preview limited to 256 KiB" : "");
+                }
+                catch (Error e) { buffer.text = ""; status.label = e.message + " · Select another encoding if appropriate"; }
+            };
+            encoding.notify["selected"].connect(() => update());
+            update();
+            box.append(encoding);
+            box.append(status);
             var scroll = new Gtk.ScrolledWindow();
             scroll.set_child(view);
-            return scroll;
+            scroll.vexpand = true;
+            box.append(scroll);
+            return box;
         }
     }
     public class ImagePreview : Object, PreviewProvider {
@@ -45,6 +78,14 @@ namespace MajorisFiles {
         {
             if (item.bytes > 64 * 1024 * 1024)
                 throw new FileError.UNSUPPORTED("This image exceeds the preview size limit");
+            if (item.mime == "image/gif" || item.mime == "image/webp") {
+                try {
+                    var animation = yield PreviewSandbox.run(item, "image-animation", {}, token);
+                    return new AnimatedImageView(animation, token);
+                }
+                catch (IOError.CANCELLED e) { throw e; }
+                catch (Error e) {} // Static files and unavailable animation decoders use the image provider.
+            }
             var bytes = yield PreviewSandbox.run(item, "image", {"0"}, token);
             return new ImageView(item, Gdk.Texture.from_bytes(bytes), token);
         }
@@ -78,16 +119,37 @@ namespace MajorisFiles {
                 audio.append(name);
                 var controls = new Gtk.MediaControls(media);
                 audio.append(controls);
+                add_metadata.begin(audio, item, token);
                 if (metadata != null && metadata.state("autoplay-media", "false") == "true")
                     media.play();
                 return audio;
             }
             var video = new Gtk.Video.for_media_stream(media);
             video.autoplay = metadata != null && metadata.state("autoplay-media", "false") == "true";
-            return video;
+            var box = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
+            video.vexpand = true;
+            box.append(video);
+            add_metadata.begin(box, item, token);
+            return box;
+        }
+        async void add_metadata(Gtk.Box box, FileItem item, Cancellable token)
+        {
+            try {
+                var fields = yield RichMetadata.load(item, token);
+                token.set_error_if_cancelled();
+                box.append(RichMetadata.presentation(fields));
+            }
+            catch (Error e) {
+                if (!token.is_cancelled()) {
+                    var label = new Gtk.Label(_("Metadata unavailable: ") + e.message);
+                    label.wrap = true;
+                    box.append(label);
+                }
+            }
         }
     }
     public class PreviewPane : Gtk.Box {
+        MetadataStore? metadata;
         Cancellable token = new Cancellable();
         Gee.ArrayList<PreviewProvider> providers = new Gee.ArrayList<PreviewProvider>();
         uint generation;
@@ -95,6 +157,7 @@ namespace MajorisFiles {
         {
             Object(orientation: Gtk.Orientation.VERTICAL, spacing: 8);
             width_request = 280;
+            this.metadata = metadata;
             providers.add(new ImagePreview());
             providers.add(new MarkdownPreview());
             providers.add(new TextPreview());
@@ -124,7 +187,7 @@ namespace MajorisFiles {
                 remove(child);
             }
         }
-        public async void show_item(FileItem item)
+        public async void show_item(owned FileItem item, bool remote_requested = false)
         {
             cancel();
             token = new Cancellable();
@@ -133,9 +196,33 @@ namespace MajorisFiles {
             var label = new Gtk.Label(item.name);
             label.wrap = true;
             append(label);
+            File? staging = null;
             try {
-                if (!item.file.is_native())
-                    throw new FileError.UNSUPPORTED("Remote previews require a local copy");
+                if (!item.file.is_native()) {
+                    string policy = metadata == null ? "On Request" : metadata.state("remote-preview-policy", "On Request");
+                    if (policy == "Never")
+                        throw new FileError.UNSUPPORTED("Remote previews are disabled in Preferences");
+                    if (policy != "Automatic" && !remote_requested) {
+                        var download = new Gtk.Button.with_label(_("Download Preview"));
+                        download.clicked.connect(() => show_item.begin(item, true));
+                        append(download);
+                        return;
+                    }
+                    uint limit = 16;
+                    if (metadata != null) uint.try_parse(metadata.state("remote-preview-limit-mib", "16"), out limit);
+                    var limits = new ImportPolicy();
+                    limits.maximum_bytes = (uint64)limit.clamp(1, 1024) * 1024 * 1024;
+                    limits.timeout_seconds = 30;
+                    staging = File.new_for_path(DirUtils.make_tmp("majoris-remote-preview-XXXXXX"));
+                    var local = yield ChooserImport.download(item.file, pending, staging, limits);
+                    pending.set_error_if_cancelled();
+                    var info = yield local.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.LOW, pending);
+                    info.set_content_type(item.mime);
+                    info.set_display_name(item.name);
+                    item = new FileItem(local, info);
+                    var retained = staging;
+                    pending.cancelled.connect(() => OperationManager.remove_tree.begin(retained, new Cancellable()));
+                }
                 foreach (var provider in providers)
                     if (provider.supports(item))
                     {
@@ -150,9 +237,11 @@ namespace MajorisFiles {
                 append(new Gtk.Label(Paths.size(item.bytes) + "\n" + item.mime));
             }
             catch (Error e) {
+                if (staging != null)
+                    try { yield OperationManager.remove_tree(staging, new Cancellable()); } catch (Error ignored) {}
                 if (!pending.is_cancelled() && epoch == generation)
                 {
-                    var message = new Gtk.Label("Preview unavailable\n" + e.message);
+                    var message = new Gtk.Label(_("Preview unavailable\n") + e.message);
                     message.wrap = true;
                     append(message);
                 }

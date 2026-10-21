@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policy target="CONTINUE" priority="32767">
+  <short>Majoris Files sharing</short>
+  <description>Majoris Files owned SMB policy v1</description>
+  <egress-zone name="HOST"/>
+  <service name="samba"/>
+</policy>

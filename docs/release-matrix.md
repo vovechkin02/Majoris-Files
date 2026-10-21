@@ -1,71 +1,100 @@
-# Release verification matrix
+# Release completion matrix
 
-This pass is **partial implementation, not release completion**. The supplied
-remaining-features task and Nautilus chooser/portal/XML references were reviewed.
-The original 102-section specification and complete expanded Section 79 were not
-provided, so a full comparison against them cannot be asserted.
+Status is assessed against the supplied remaining-feature audit. **Partial** means
+that either implementation or required verification remains. A passing narrow
+fixture is not evidence for an entire feature family. The original specification
+and complete expanded Section 79 were not supplied; their full comparison is open.
+Source paths below are relative to `src/` unless otherwise stated.
 
-Automated tests run in Debian 13 WSL with GTK 4.18.6, libadwaita 1.7.6 and Vala
-0.56.18. Headless X11 tests exercise application code; they are not Flatpak,
-Wayland, hardware, firewall or external Windows-client acceptance.
+| Feature / task | Implementation | Tests / evidence | Status and outstanding work |
+|---|---|---|---|
+| Remote Open (2.1) | `chooser/import.vala`, `chooser/window.vala`: configurable limits, progress, space and source checks, cancellation, retained imports | Filesystem import/hash/cancellation fixtures | Partial: real large SMB/SFTP/WebDAV/cloud transfers and receiving-application lifetime acceptance pending; direct backend results are local/FUSE paths |
+| Remote Save (2.2) | Chooser verifies destination and overwrite; usable GVfs/FUSE destinations go through document portal | Chooser destination tests; local real Flatpak save | Partial: actual writable SMB/SFTP/WebDAV, disconnect and overwrite acceptance pending; non-FUSE writeback is unsupported and explicitly rejected |
+| Portal routing/security (2.3–2.4) | `portal/backend.vala`, registration/config, shared request lifecycle | `tests/portal.vala`; actual Flatpak public Open/multiple/Save/folder/SaveFiles/cancel and Gtk.FileDialog five modes in `tests/flatpak-*` | Partial: actual concurrent Flatpak callers, external parent focus/modality, caller exit and alternate GTK selection APIs remain |
+| SaveFiles (2.5) | Bounded names, ordered outputs, existing/repeated-name avoidance, no premature output creation | Core parser, component D-Bus, actual sandbox writes and host contents | Partial: case-insensitive backend and concurrent external creation acceptance; returned names are not reservations |
+| Parenting/devices/a11y (2.6–2.8) | X11/Wayland parent bridge, mount-loss invalidation, cancellation, browser keyboard controls | Headless chooser/cancellation and adaptive tests | Partial: real X11/Wayland parent ownership/focus, five removal scenarios and screen reader audit |
+| Hidden shares (3.1) | Existing usershare creation preserved | No true browseability fixture | Partial: a per-share non-browseable policy is not implemented; a dollar suffix is not advertised as that policy |
+| Samba per-user policy (3.2) | `sharing/sharing.vala`, `sharing/settings.vala`: individual R/F/D, mixed policies, external-change refusal | ACL parse/policy tests | Partial: Windows/Samba effective permission enforcement, mixed filesystem ACL and guest configurations |
+| Shared emblems/live inventory (3.3,3.5) | Shared state poll and immediate reconciliation; directory emblems and reload after outside policy changes | UI/shared-state component coverage | Partial: real Samba external-change/rename/removal acceptance |
+| Connected clients (3.4) | Polkit service checks caller-owned usershare; bounded smbstatus JSON filtered to that share | `tests/firewall.vala` client privacy filtering | Partial: actual server sessions, authorization denial and stale/disconnected clients |
+| Firewall (3.6) | `sharing-service/firewall.vala`, bundled firewalld policy, graphical opt-in/close, owned-rule validation, last-share reconciliation | Owned-policy scope/refusal tests | Partial: real firewalld runtime/permanent behavior and Polkit denial; other firewall backends are explicitly unsupported |
+| Samba acceptance (3.7) | Graphical share/account/password/start/stop workflows | Component tests only | Partial: disposable Majoris VM plus Windows client still required; no developer-host Samba configuration was changed |
+| Animated images (4.1) | `preview/animation.vala`, bounded sandbox frames, playback, fit/zoom, reduced motion | Real multi-frame GIF fixture | Partial: broad GIF/WebP decoder/timing fixtures and large-animation UX; WebP animation depends on installed decoder |
+| RAW/HEIF/AVIF/HDR (4.2) | Installed system image decoders remain usable | Existing image tests | Partial: explicit decoder coverage, camera RAW and HDR/color-managed paths remain |
+| Video/audio metadata (4.3–4.4) | `preview/media.c`, `metadata/details.vala`: streams, codecs, duration, tags, sanitized artwork, season/episode where tagged | Sandboxed generated video fixture and metadata fields | Partial: real MP4 sound, codec matrix, artwork/metadata varieties and full playback controls audit |
+| Video thumbnails (4.5) | Sandboxed representative frame and existing thumbnail cache/policy | Video thumbnail fixture | Partial: remote/codecs/rotation and cache invalidation acceptance |
+| Text (4.6) | GtkSourceView, syntax detection, encoding choices, binary checks, bounded content | UI text/source-view tests | Partial: broad encoding fixtures and full text keyboard/accessibility acceptance |
+| Office (4.7) | Isolated LibreOffice UNO to PDF with macros/updates disabled; page navigation/zoom; explicit extracted-text fallback | Real ODT and formatted two-page DOCX rendered to PDF; DOCX indexed extraction | Partial: broader DOCX/XLSX/PPTX and legacy layout corpus, cancellation and hostile macro/link corpus |
+| Remote preview/security (4.8–4.9) | Configurable policy, explicit download, bounded streaming/temp cleanup; bubblewrap isolation for metadata/image/PDF/font/Office/archive preview | Sandbox and preview fixtures | Partial: real remote failures, full parser fuzz corpus; GtkMediaFile playback still decodes in main process |
+| Indexed search (5) | `search/indexed.vala`: system LocalSearch/Tracker connection, bound queries, relevance, deduplication, GIO fallback | Real PDF and DOCX extractor output indexed in TinySPARQL fixture | Partial: actual system miner/index lifecycle, stale remote content and large ranking workloads |
+| Batch rename (6) | `dialogs/batch-rename.vala`, `operations/rename-plan.vala`: live preflight, ordering/metadata, swap-safe staging and grouped history | Rename template/error tests; swap/tag preservation; restarted Undo/Redo | Partial: case-insensitive backend, missing/varied real media metadata, crash during temporary staging, granular per-file progress |
+| Archives (7) | `archive/sevenzip.vala`, native numbered volume reader, password stdin, compression/progress and staged outputs | Actual volume create/verify/extract/hash; encrypted create/verify; wrong-password refusal | Partial: encrypted 7z extraction compatibility, remote archive staging, broader multipart and hostile archive corpus |
+| Split/join/checksum (8) | Existing filesystem limit handling, cancellation/identity cleanup, optional manifest, SHA-256/SHA-512 GUI verification | Split/join/manifests and checksum fixtures | Partial: 100 GB run, disk-full/interruption boundary corpus and arbitrary backend limit reporting |
+| Ordinary actions (9.1–9.2) | Copy To/Move To/Duplicate/grouped folder/paste-link, shared operations/journal/retry | Filesystem operations and persistent history tests | Partial: every new GUI action across remote/backends, permission/cancel and Undo boundary corpus |
+| Conflicts (9.3) | Size/date, replace/skip/keep both/all, merge and rename | UI merge/conflict choice tests | Partial: both sandboxed thumbnails are displayed asynchronously and covered by UI fixtures; broad conflict/backend acceptance remains |
+| Replacement recovery (9.4) | `operations/replacements.vala`: durable pre-backup records, committed identity, nonoverwriting graphical recovery | Persisted interrupted-backup/new-output fixture | Partial: all output is not staged before publication; kill-at-every-boundary and directory transaction reconciliation remain |
+| Remote Trash (9.5) | GIO trash errors are surfaced; permanent delete remains explicit | Existing local Trash identity/Undo fixtures | Partial: actual remote backend capability and reconciliation tests |
+| Context menus (9.6) | Selection/type/native/clipboard-aware actions, extension refresh, Shift+F10/Menu | Existing action/provider tests | Partial: exhaustive mixed-selection and keyboard focus acceptance |
+| Properties (10) | General/Metadata/Sharing/Permissions/Open With, EXIF/XMP/media fields, backend permission refusal | Existing multi-selection/account tests and shared metadata fixtures | Partial: real POSIX ACL/ownership authorization, remote capability UX, complete image/media field corpus |
+| Cloud (11) | Existing libcloudproviders roots/status/menus/actions retained | Existing discovery code; no real per-file provider fixture | Partial: provider-neutral per-file availability/offline/materialization/progress/errors/quota and capability-driven context actions remain |
+| Extensions (12) | `extensions/manager.vala`: versioned D-Bus actions/metadata/columns/Properties, opt-in user manifests, isolated example | Real separate checksum service lifecycle/action/metadata/column/property/failure/disable test | Partial: column sorting with lazy bounded cache and invalidation, broader malicious/slow/version fixtures and live enable/disable column refresh |
+| Shell search (13.1) | `application/shell-search.vala`, installed SearchProvider2 registration, bounded results, activation/selection | D-Bus protocol/activation fixture in portal suite | Partial: actual shell lifecycle and desktop search UX |
+| FileManager1 (13.2) | Existing D-Bus windows/select/Properties retained | Existing protocol/session tests | Partial: external desktop multi-URI and caller lifecycle acceptance |
+| Nearby/desktop actions (13.3,13.5) | Existing real-provider interface, wallpaper/email portals, opt-in user scripts and extension actions | Existing mock provider/action fixtures | Partial: real transport, wallpaper/email parent integration and persistent image rotation |
+| Disk images/devices (13.4) | Existing UDisks integration and mounted-location handling retained | Existing inventory tests | Partial: hardware/mount/Polkit/busy-device and filesystem acceptance |
+| Grid groups (14.1) | Existing type/date/size/tag group ordering; List/Gallery section headings | Existing model grouping tests | Partial: Grid still lacks visible section headings |
+| Adaptive layout (14.2) | Existing overlay sidebar retained, secondary controls/preview collapse | 500-pixel sidebar transition and other UI tests | Partial: very narrow Column/Gallery/preview, tablet, high DPI and long localized labels |
+| Accessibility (14.3) | Existing controls/tooltips, keyboard navigation and context shortcuts | Headless control flows | Partial: full focus ordering, semantic names, touch, screen reader and reduced-motion audit |
+| Preferences/localization (14.4–14.5) | Network/indexing/extension preferences, gettext initialization/POTFILES/template generation | Template target builds | Partial: remaining dynamic strings, translations/catalogs and locale acceptance |
+| Performance (15) | Bounded async directory/search/preview work; optional directory benchmarks | 10k: 0.279 s / 59,424 KiB RSS; 100k: 2.743 s / 378,184 KiB RSS; main-loop heartbeats verified | Partial: complete view sorting/filtering, thumbnails, huge search/archive/split workloads, long sessions and leak profiling |
+| Packaging (16) | Debian dependencies updated, optional example, service/policy/search/gettext/Office helper installed | dpkg-checkbuilddeps, staged installation, unsigned Debian binary package build including six suites; desktop/AppStream validators | Partial: Debian package builds successfully; broader package lint and exact Majoris ISO configuration/defaults acceptance remain |
+| Automated/system testing (17–18) | Core/filesystem/UI/portal/session/firewall suites and separate real Flatpak harness | See reproducible commands below | Partial: all unexecuted cases listed above remain release gates |
 
-| Requirement | Existing implementation / changes in this pass | Code paths | Automated coverage | Manual acceptance / remaining limitation |
-|---|---|---|---|---|
-| Open, multiple Open, Save, folder selection | Existing shared browser and portal retained | chooser/window.vala; portal/backend.vala | Existing UI and portal suites | Actual installed GTK/Flatpak routing and document permissions not verified |
-| SaveFiles | Added bounded filename parsing, folder UI, conflict naming and ordered results through existing authenticated requests | chooser/options.vala; chooser/window.vala; portal/backend.vala | core validation; portal/save-files; filesystem destination checks | Real sandbox writes, case-insensitive filesystem behavior and concurrent external name creation need acceptance; results are not reservations |
-| Remote chooser results | Existing native/FUSE normalization retained; explicit durable Open import added with byte/time limits and cleanup | chooser/import.vala; chooser/window.vala | Local copy/hash and cancellation fixtures | Actual SMB/SFTP/WebDAV/cloud mediation unverified; Save and folders need GVfs/FUSE; import edits do not write back |
-| Chooser cancellation/security/parenting | Existing ownership, Close, concurrency and parent bridge retained | portal/backend.vala; portal/parent.c | Existing portal authorization/concurrent cancellation | Wayland/X11 external parenting, focus and caller exit acceptance pending |
-| Detached devices | Mount removal cancels/invalidate acceptance, clears selection, navigates Home | chooser/window.vala | No physical mount-removal test | USB/network removal and recovery need actual hardware/service test |
-| Adaptive browser/chooser | Added Adwaita sidebar overlay at narrow breakpoint, retains wide paned sidebar | views/browser.vala | UI adaptive sidebar transition | Broad size, keyboard, accessibility and display acceptance pending |
-| Folder sharing UI | Shared Properties/standalone page, existing state loading, graphical accounts, explicit authenticated-user policy | sharing/settings.vala; dialogs/dialogs.vala; window/window.vala; application/file-manager.vala | Inventory/policy parser fixtures; no real Samba mutations | Windows read/write/deny/change/removal not verified; advanced ACLs refuse editing; share rename disabled while shared |
-| Shared Folders | Queries actual usershares; Open/Edit/Copy/Stop actions | sharing/sharing.vala; sharing/settings.vala; window/extra-actions.vala | Inventory parser fixture | smb.conf shares administrator managed; live external changes require reopening; emblems and clients outstanding |
-| Sharing authorization/firewall/ISO | Existing Polkit service retained | sharing-service/main.vala; data/*Sharing* | Existing policy validation only | Owned firewall rules, trusted-network approval, hidden shares and exact ISO configuration outstanding |
-| Animated/extended images | Existing sandbox static-image decoder preserved | preview/helper.c; preview/sandbox.vala | Existing preview fixtures | Animation, extended codec/color metadata and persistent rotation outstanding |
-| Audio/video | Dedicated audio presentation with GTK controls and cancellation cleanup added | preview/preview.vala | Build and existing provider suite | Actual playback, metadata/artwork, fullscreen, probing/isolation and video thumbnails outstanding |
-| Text/Office/remote previews | Existing bounded text, sandbox extracted Office text and thumbnail downloads retained | preview/preview.vala; preview/office.vala; preview/thumbnail.vala | Existing preview fixtures | GtkSourceView/encoding UI, formatted Office rendering and remote preview materialization outstanding |
-| Properties/metadata/permissions | Sharing integrated; existing general/permissions preserved | dialogs/dialogs.vala; dialogs/permissions.vala; operations/permissions.vala | Existing multi-selection and account fixtures | Unified metadata/Open With sections, EXIF/XMP/media extraction and ACL acceptance outstanding |
-| Batch rename | Existing basic templates and preflight retained | window/extra-actions.vala; operations/manager.vala | Existing file-operation tests | Metadata templates, full preview UI, temporary ordering and complete grouped recovery outstanding |
-| Indexed/full-text search | Existing recursive GIO/text fallback retained | search/search.vala; search/filters.vala | Existing search/filter/content tests | Indexed provider, PDF/Office content, ranking and indexing preferences outstanding |
-| File operations/recovery | Existing operations/journal/retry retained | operations/manager.vala | Filesystem/UI conflict, undo/retry tests | Durable replacement recovery, remote Trash and expanded workflows/acceptance outstanding |
-| Archives | Existing libarchive and encrypted ZIP retained | archive/archive.vala; archive/native.c | Existing archive roundtrip | Native multi-volume/encrypted 7z and broader progress outstanding |
-| Splitting/checksums | Optional manifest; SHA-256/SHA-512 UI and pasted/file verification added; checksum error closes stream | split/split.vala; dialogs/split.vala; dialogs/checksum.vala | Parser tests; split-without-manifest fixture; existing split/join | 100 GB benchmark and arbitrary filesystem capability detection outstanding; unknown limits are not invented |
-| Cloud | Existing libcloudproviders discovery/actions retained | sidebar/cloud.vala; models/accounts.vala | No real-provider fixture | Per-item availability/materialization/quota capability interfaces outstanding |
-| Extensions | Existing internal action/column interfaces retained | actions/registry.vala; views/column-provider.vala | Existing provider tests | External protocol/discovery/example/integration test outstanding |
-| Shell/desktop/devices | Existing FileManager1, desktop portals, Nearby interface, UDisks retained; serialized byte-array handling fixed | application/file-manager.vala; actions/desktop.vala; actions/nearby.vala; devices/disk-images.vala | Existing UDisks inventory and Nearby flow tests | Shell search provider, real transport, wallpaper/email, mounts/Polkit/busy-device and persistent rotation acceptance outstanding |
-| Localization/accessibility/performance | Existing theme behavior retained | application-wide | Existing UI tests only | Gettext coverage, full keyboard/screen-reader audit and required workload benchmarks outstanding |
-| Packaging/release | No new runtime library dependencies; new Vala sources included in Meson | meson.build; debian/control | Meson build/test | Debian binary-package validation and complete ISO/platform acceptance outstanding |
+## Reproducible verification
 
-## Reproducing automated verification
-
-From the repository in Debian 13 with the dependencies in platform-integration.md:
+On the supported Debian toolchain with dependencies from `debian/control`:
 
 ```sh
-meson setup build --prefix=/usr  # use meson setup --reconfigure build when configured
+meson setup build --prefix=/usr
 meson compile -C build
 meson test -C build --print-errorlogs
+meson test -C build --benchmark --print-errorlogs
+meson compile -C build majoris-files-pot
+DESTDIR="$PWD/build/staging" meson install -C build --no-rebuild
+dpkg-checkbuilddeps
 ```
 
-The new fixtures do not change the host's Samba or firewall policy. The import
-fixture supplies its own temporary destination. No real share or SMB account is
-created by the automated tests.
+The real Flatpak fixture additionally needs Flatpak, xdg-desktop-portal,
+xdg-desktop-portal-gtk, FUSE, Xvfb and an available document-portal FUSE mount.
+It creates private application/runtime/configuration data and a minimal test
+runtime from installed runner libraries. It does not install production libraries
+or remotes into the user's Flatpak installation. On WSL, run in a private mount
+namespace (replace 1000 with the unprivileged runner UID):
 
-## Required platform acceptance
+```sh
+sudo unshare --mount --propagation private env MAJORIS_TEST_UID=1000 \
+  python3 tests/flatpak-session.py build/flatpak-client build/flatpak-host \
+  --privileged-namespace
+```
 
-Use a disposable Majoris VM, separate Windows SMB client and a Flatpak test caller.
-Install the built Files components with the documented portal routing. Run local
-Open/multiple/Save/folder/SaveFiles requests through public portal APIs; read/write
-the returned files inside the sandbox, and verify unselected paths and cancelled
-requests receive no new access. Repeat with GVfs SMB/SFTP/WebDAV and a disconnected
-USB mount. Test explicit remote imports separately, confirming the local copy is
-retained and changes do not modify the remote source. Repeat external-window focus,
-modality and cancellation under both X11 and Wayland.
+Only the namespace setup is privileged; clients and desktop services run as the
+specified unprivileged UID. The fixture replaces `/run/user` only inside that
+private namespace. Network namespace sharing is required for Xvfb's abstract X11
+socket on this runner; the app receives no general host filesystem grant.
 
-Create a test folder through Properties → Sharing, configure SMB credentials in
-the existing GUI, then verify read-only, authenticated-user, guest and read/write
-policies from Windows. Change policy, reconnect clients, remove sharing and confirm
-denial. Check POSIX permissions independently. Do not declare the sharing release
-criterion met until owned trusted-network firewall policy is implemented and tested.
+Run remaining Windows SMB/firewall, Wayland parenting, USB, cloud and sound
+acceptance in a disposable Majoris VM with dedicated fixture data. Record version,
+backend, denied authorization, cancellation, disconnection and saved-byte results.
+No such tests are claimed by headless WSL component coverage.
 
-Run all media/document/image, batch rename, search, archive, extension and workload
-scenarios in section 18 of the supplied task after their remaining implementations
-exist. No manual scenario in that list has been declared passed by this report.
+## Executed verification snapshot
+
+On Debian 13 WSL (GTK 4.18.6, libadwaita 1.7.6, Vala 0.56.18): all six suites
+passed (18 core, 11 filesystem, 25 UI, 5 portal/extension/shell and 2 firewall/client
+cases, plus the session script). Eleven real Flatpak caller flows passed through
+the public and document portals. The generated DOCX retained its two-page structure
+and both pages' expected text in the rendered PDF. Translation-template generation,
+staged installation, build-dependency checking and desktop/AppStream validation
+passed. The unsigned amd64 package and debug-symbol package built in an isolated
+Linux source copy, including the same six test suites. Packages are development
+artifacts; these results do not close the remaining release gates in the table.

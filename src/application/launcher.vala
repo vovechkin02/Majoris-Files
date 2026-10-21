@@ -8,11 +8,11 @@ namespace MajorisFiles {
         {
             if(executable(item))
             {
-                var dialog = new Adw.AlertDialog("Open an executable file?", "“" + item.name + "” can run code with your account’s permissions. Only run files from a source you trust.");
-                dialog.add_response("cancel", "Cancel");
-                dialog.add_response("open", "Open With…");
+                var dialog = new Adw.AlertDialog(_("Open an executable file?"), "“" + item.name + "” can run code with your account’s permissions. Only run files from a source you trust.");
+                dialog.add_response("cancel", _("Cancel"));
+                dialog.add_response("open", _("Open With…"));
                 if(item.file.is_native())
-                    dialog.add_response("run", "Run");
+                    dialog.add_response("run", _("Run"));
                 dialog.close_response = "cancel";
                 var response = yield dialog.choose(parent, null);
                 if(response == "cancel")

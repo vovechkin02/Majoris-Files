@@ -27,5 +27,6 @@ namespace MajorisFiles {
 }
 int main(string[] args)
 {
+    MajorisFiles.I18n.initialize();
     return new MajorisFiles.PortalApplication().run(args);
 }

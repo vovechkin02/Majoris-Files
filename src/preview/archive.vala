@@ -2,7 +2,7 @@ namespace MajorisFiles {
     public class ArchivePreview : Object, PreviewProvider {
         public bool supports(FileItem item)
         {
-            return item.mime.contains("zip") || item.mime.contains("tar") || item.mime.contains("7z") || item.mime.contains("rar") || item.mime.contains("compressed");
+            return item.name.has_suffix(".7z.001") || item.mime.contains("zip") || item.mime.contains("tar") || item.mime.contains("7z") || item.mime.contains("rar") || item.mime.contains("compressed");
         }
         public async Gtk.Widget render(FileItem item, Cancellable token) throws Error
         {
@@ -136,7 +136,7 @@ namespace MajorisFiles {
             views.visible_child_name = rendered != null ? "rendered" : "source";
             if(failure != "")
             {
-                var message = new Gtk.Label("Rendered preview unavailable\n" + failure);
+                var message = new Gtk.Label(_("Rendered preview unavailable\n") + failure);
                 message.wrap = true;
                 append(message);
             }

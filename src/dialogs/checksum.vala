@@ -7,8 +7,8 @@ namespace MajorisFiles {
         Adw.EntryRow expected = new Adw.EntryRow();
         Adw.ActionRow result = new Adw.ActionRow();
         Cancellable token = new Cancellable();
-        Gtk.Button calculate = new Gtk.Button.with_label("Calculate / Verify");
-        Gtk.Button load = new Gtk.Button.with_label("Load Checksum File…");
+        Gtk.Button calculate = new Gtk.Button.with_label(_("Calculate / Verify"));
+        Gtk.Button load = new Gtk.Button.with_label(_("Load Checksum File…"));
         public ChecksumDialog(Gtk.Window parent, File file, OperationManager operations)
         {
             title = "Checksums";
@@ -20,12 +20,12 @@ namespace MajorisFiles {
             group.title = file.get_basename();
             page.add(group);
             add(page);
-            algorithm.title = "Algorithm";
+            algorithm.title = _("Algorithm");
             algorithm.model = new Gtk.StringList({"SHA-256", "SHA-512"});
             group.add(algorithm);
-            expected.title = "Expected Checksum (optional)";
+            expected.title = _("Expected Checksum (optional)");
             group.add(expected);
-            result.title = "Result";
+            result.title = _("Result");
             result.subtitle_selectable = true;
             group.add(result);
             group.add(load);
@@ -39,7 +39,7 @@ namespace MajorisFiles {
         {
             try {
                 var chooser = new Gtk.FileDialog();
-                chooser.title = "Select Checksum File";
+                chooser.title = _("Select Checksum File");
                 var selected = yield chooser.open(parent_window, token);
                 var input = yield selected.read_async(Priority.LOW, token);
                 uint8[] data = new uint8[1024 * 1024 + 1];

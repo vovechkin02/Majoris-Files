@@ -42,6 +42,9 @@ int main(string[] args)
             assert(shares[1].path == "/srv/team" && shares[1].writable && shares[1].guest);
             assert(shares[1].address.has_suffix("/Team"));
             assert(ShareRecord.parse("").size == 0);
+            var policy = SharePolicy.parse_acl("alice:F,bob:R,carol:D");
+            assert(policy["alice"] == "F" && policy["bob"] == "R" && policy["carol"] == "D");
+            assert(SharePolicy.mixed_acl(policy).has_prefix("carol:D,"));
             bool rejected = false;
             try { ShareRecord.parse("[Bad]\npath=relative\nusershare_acl=Everyone:F\nguest_ok=n\n"); }
             catch (Error e) { rejected = true; }
@@ -50,6 +53,16 @@ int main(string[] args)
         catch (Error e) { error("%s", e.message); }
     });
     Test.add_func("/ui/open-single", () => chooser_flow(false, false, false));
+    Test.add_func("/preview/media-and-office-rendering", () => {
+        var loop = new MainLoop();
+        rich_preview_case.begin((obj, res) => {
+            try { rich_preview_case.end(res); } catch (Error e) { error("%s", e.message); }
+            loop.quit();
+        });
+        uint watchdog = Timeout.add_seconds(90, () => { error("Rich preview fixtures timed out"); });
+        loop.run();
+        Source.remove(watchdog);
+    });
     Test.add_func("/ui/adaptive-sidebar", () => {
         try {
             var root = DirUtils.make_tmp("majoris-adaptive-XXXXXX");
@@ -83,7 +96,7 @@ int main(string[] args)
                 }
                 return Source.CONTINUE;
             });
-            uint watchdog = Timeout.add_seconds(10, () => { error("Adaptive sidebar transition timed out"); });
+            uint watchdog = Timeout.add_seconds(10, () => { error("Adaptive sidebar transition timed out: stage=%d window=%d browser=%d", stage, window.get_width(), window.browser.get_width()); });
             loop.run();
             Source.remove(watchdog);
             assert(poll > 0 && stage == 1);
@@ -257,6 +270,82 @@ void merge_test(string decision = "both")
     Source.remove(watchdog);
     assert(passed);
 }
+GtkSource.View? find_source_view(Gtk.Widget widget)
+{
+    if (widget is GtkSource.View) return (GtkSource.View)widget;
+    for (var child = widget.get_first_child(); child != null; child = child.get_next_sibling()) {
+        var found = find_source_view(child);
+        if (found != null) return found;
+    }
+    return null;
+}
+async void rich_preview_case() throws Error
+{
+    var root = File.new_for_path(DirUtils.make_tmp("majoris-rich-preview-XXXXXX"));
+    var token = new Cancellable();
+    var gif = root.get_child("animated.gif");
+    yield gif.replace_contents_async(Base64.decode("R0lGODlhAQABAIAAAAAAAP///yH5BAAKAAAALAAAAAABAAEAAAICRAEAIfkEAAoAAAAsAAAAAAEAAQAAAgJMAQA7"), null, false, FileCreateFlags.PRIVATE, token, null);
+    var gif_info = yield gif.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+    var gif_item = new FileItem(gif, gif_info);
+    var frames = yield PreviewSandbox.run(gif_item, "image-animation", {}, token);
+    var parser = new Json.Parser(); parser.load_from_data((string)frames.get_data(), (ssize_t)frames.get_size());
+    var gif_frames = parser.get_root().get_array();
+    assert(gif_frames.get_length() >= 2);
+    bool distinct = false;
+    foreach (var frame in gif_frames.get_elements())
+        if (frame.get_object().get_string_member("png") != gif_frames.get_object_element(0).get_string_member("png")) distinct = true;
+    assert(distinct);
+    var animation = yield new ImagePreview().render(gif_item, token);
+    assert(animation is AnimatedImageView);
+    string? gst = Environment.find_program_in_path("gst-launch-1.0");
+    if (gst != null) {
+        var video = root.get_child("sample.ogv");
+        var generator = new Subprocess.newv({gst, "-q", "videotestsrc", "num-buffers=30", "!", "video/x-raw,width=160,height=90,framerate=10/1", "!", "videoconvert", "!", "theoraenc", "!", "oggmux", "!", "filesink", "location=" + video.get_path()}, SubprocessFlags.STDOUT_SILENCE | SubprocessFlags.STDERR_PIPE);
+        yield generator.wait_check_async(token);
+        var info = yield video.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+        var item = new FileItem(video, info);
+        Test.message("Discovering media fixture %s", video.get_path());
+        var fields = yield RichMetadata.load(item, token);
+        assert(fields["Resolution"] == "160 × 90" && fields.has_key("Video Codec"));
+        Test.message("Rendering video thumbnail");
+        var png = yield new VideoThumbnail().render(item, token);
+        var texture = Gdk.Texture.from_bytes(png);
+        assert(texture.get_width() <= 128 && texture.get_height() <= 128);
+    } else Test.message("Media fixture generator unavailable; media fixture not executed");
+    if (FileUtils.test("/usr/bin/soffice", FileTest.IS_EXECUTABLE)) {
+        var content = root.get_child("content.xml");
+        FileUtils.set_contents(content.get_path(), "<?xml version=\"1.0\"?><office:document-content xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\" office:version=\"1.2\"><office:body><office:text><text:p>Formatted Majoris document fixture</text:p></office:text></office:body></office:document-content>");
+        FileUtils.set_contents(root.get_child("mimetype").get_path(), "application/vnd.oasis.opendocument.text");
+        var files = new Gee.ArrayList<File>(); files.add(content); files.add(root.get_child("mimetype"));
+        var meta = root.get_child("META-INF"); yield meta.make_directory_async(Priority.DEFAULT, token);
+        FileUtils.set_contents(meta.get_child("manifest.xml").get_path(), "<manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\"><manifest:file-entry manifest:full-path=\"/\" manifest:media-type=\"application/vnd.oasis.opendocument.text\"/><manifest:file-entry manifest:full-path=\"content.xml\" manifest:media-type=\"text/xml\"/></manifest:manifest>");
+        files.add(meta);
+        var document = root.get_child("sample.odt");
+        yield ArchiveService.compress(files, document, "zip", new Job("Office fixture"));
+        var info = yield document.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+        var item = new FileItem(document, info);
+        Test.message("Rendering Office fixture %s", document.get_path());
+        var pdf = yield PreviewSandbox.run(item, "office-pdf", {}, token);
+        assert(pdf.get_size() > 100 && ((string)pdf.get_data()).has_prefix("%PDF-"));
+        var view = yield new OfficePreview().render(item, token);
+        assert(view is PdfView);
+        var word = root.get_child("word"); yield word.make_directory_async(Priority.DEFAULT, token);
+        var rels = root.get_child("_rels"); yield rels.make_directory_async(Priority.DEFAULT, token);
+        FileUtils.set_contents(word.get_child("document.xml").get_path(), """<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:rPr><w:b/><w:color w:val="245AB8"/><w:sz w:val="36"/></w:rPr><w:t>Formatted Majoris DOCX</w:t></w:r></w:p><w:tbl><w:tblPr><w:tblBorders><w:top w:val="single" w:sz="8"/><w:bottom w:val="single" w:sz="8"/></w:tblBorders></w:tblPr><w:tblGrid><w:gridCol w:w="4000"/></w:tblGrid><w:tr><w:tc><w:p><w:r><w:t>Table content</w:t></w:r></w:p></w:tc></w:tr></w:tbl><w:p><w:r><w:br w:type="page"/><w:t>Second page</w:t></w:r></w:p><w:sectPr><w:pgSz w:w="12240" w:h="15840"/></w:sectPr></w:body></w:document>""");
+        FileUtils.set_contents(root.get_child("[Content_Types].xml").get_path(), """<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>""");
+        FileUtils.set_contents(rels.get_child(".rels").get_path(), """<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>""");
+        var entries = new Gee.ArrayList<File>(); entries.add(word); entries.add(rels); entries.add(root.get_child("[Content_Types].xml"));
+        var docx = root.get_child("formatted.docx"); yield ArchiveService.compress(entries, docx, "zip", new Job("DOCX fixture"));
+        var docx_info = yield docx.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+        var docx_pdf = yield PreviewSandbox.run(new FileItem(docx, docx_info), "office-pdf", {}, token);
+        var rendered = new Poppler.Document.from_bytes(docx_pdf, null);
+        assert(rendered.get_n_pages() == 2);
+        assert(rendered.get_page(0).get_text().contains("Formatted Majoris DOCX"));
+        assert(rendered.get_page(1).get_text().contains("Second page"));
+    } else Test.message("LibreOffice not installed; Office rendering fixture not executed");
+    token.cancel();
+    yield OperationManager.remove_tree(root, new Cancellable());
+}
 void collect_lists(Gtk.Widget widget, Gee.ArrayList<Gtk.ListView> lists)
 {
     if(widget is Gtk.ListView && widget.get_mapped())
@@ -285,7 +374,8 @@ async void preview_case() throws Error
     view.buffer.get_start_iter(out text_start);
     assert(text_start.forward_search("Bold", Gtk.TextSearchFlags.TEXT_ONLY, out match_start, out match_end, null));
     assert(match_start.has_tag(view.buffer.get_tag_table().lookup("strong")));
-    var source_view = (Gtk.TextView)((Gtk.ScrolledWindow)markdown_view.source).get_child();
+    var source_view = find_source_view(markdown_view.source);
+    assert(source_view != null && source_view.show_line_numbers && !source_view.editable);
     assert(source_view.buffer.text.contains("**Bold**"));
     var files = new Gee.ArrayList<File>();
     files.add(file);
@@ -316,6 +406,18 @@ async void preview_case() throws Error
     assert(thumbnail != null && thumbnail.get_width() <= 128 && thumbnail.get_height() <= 128);
     var cached_thumbnail = yield new ThumbnailService().texture(pdf_item, new Cancellable());
     assert(cached_thumbnail != null && cached_thumbnail.get_width() == thumbnail.get_width());
+    var comparison_copy = root.get_child("comparison.pdf");
+    yield pdf_file.copy_async(comparison_copy, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
+    var comparison = new Adw.AlertDialog("Conflict fixture", null);
+    ConflictThumbnails.attach(comparison, pdf_file, comparison_copy, new MetadataStore(root.get_child("conflict-state.db").get_path()));
+    var previews = (Gtk.Box)comparison.extra_child;
+    var first_preview = (Gtk.Picture)previews.get_first_child().get_first_child();
+    var second_preview = (Gtk.Picture)previews.get_last_child().get_first_child();
+    for (int i = 0; i < 100 && (first_preview.paintable == null || second_preview.paintable == null); i++) {
+        Timeout.add(20, () => { preview_case.callback(); return Source.REMOVE; }); yield;
+    }
+    assert(first_preview.paintable != null && second_preview.paintable != null);
+    assert(first_preview.alternative_text != second_preview.alternative_text);
     string cache_name = Checksum.compute_for_string(ChecksumType.MD5, pdf_item.file.get_uri()) + ".png";
     FileUtils.set_contents(Path.build_filename(Environment.get_user_cache_dir(), "thumbnails", "normal", cache_name), "corrupted thumbnail");
     cached_thumbnail = yield new ThumbnailService().texture(pdf_item, new Cancellable());

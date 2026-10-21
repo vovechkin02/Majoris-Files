@@ -106,6 +106,8 @@ namespace MajorisFiles {
     }
     public class SearchController : Object {
         public Cancellable cancellable = new Cancellable();
+        public SearchProvider indexed = new IndexedSearchProvider();
+        public string backend_status { get; private set; default = ""; }
         public signal void found(FileItem item);
         public uint unreadable {
             get;
@@ -134,6 +136,29 @@ namespace MajorisFiles {
             var queue = new Gee.ArrayQueue<File>();
             var visited = new Gee.HashSet<string>();
             var emitted = new Gee.HashSet<string>();
+            if (metadata == null || metadata.state("indexed-search", "true") == "true") {
+                var index_token = new Cancellable();
+                ulong cancel = token.cancelled.connect(() => index_token.cancel());
+                uint timeout = Timeout.add_seconds(10, () => { index_token.cancel(); return Source.REMOVE; });
+                // A separate one-shot flag avoids removing an already-expired source.
+                Source? timer = MainContext.default().find_source_by_id(timeout);
+                ulong handler = indexed.hit.connect((item) => {
+                    if (!token.is_cancelled() && criteria.matches(item, metadata) && emitted.add(item.file.get_uri())) found(item);
+                });
+                try {
+                    yield indexed.search(roots, criteria, recursive, index_token);
+                    backend_status = "Indexed results with filesystem reconciliation";
+                }
+                catch (Error e) {
+                    token.set_error_if_cancelled();
+                    backend_status = "Index unavailable; searching the filesystem";
+                }
+                finally {
+                    indexed.disconnect(handler);
+                    token.disconnect(cancel);
+                    if (timer != null && !timer.is_destroyed()) Source.remove(timeout);
+                }
+            }
             foreach(var root in roots)
                 if(visited.add(root.get_uri()))
                     queue.offer(root);
@@ -153,6 +178,7 @@ namespace MajorisFiles {
                         {
                             token.set_error_if_cancelled();
                             var item = new FileItem(folder.get_child(info.get_name()), info);
+                            item.relevance = criteria.text == "" ? 0 : item.name.casefold() == criteria.text.casefold() ? 30 : item.name.casefold().has_prefix(criteria.text.casefold()) ? 20 : 10;
                             if (criteria.matches(item, metadata) && (criteria.content == "" || (yield content_matches(item, criteria.content, token))) && emitted.add(item.file.get_uri()))
                                 found(item);
                             if (recursive && item.directory && !info.get_is_symlink() && !info.get_is_hidden() && visited.add(item.file.get_uri()))

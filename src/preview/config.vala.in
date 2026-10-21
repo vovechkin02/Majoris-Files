@@ -1,3 +1,5 @@
 namespace MajorisFiles {
+    public const string OFFICE_HELPER_PATH = "@office_helper_path@";
+    public const string OFFICE_SOURCE_HELPER_PATH = "@office_source_helper_path@";
     public const string PREVIEW_HELPER_PATH = "@helper_path@";
 }

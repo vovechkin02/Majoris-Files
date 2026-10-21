@@ -43,7 +43,7 @@ namespace MajorisFiles {
             {
                 var window = new FilesWindow(application, metadata, places, operations, items[0].file.get_parent());
                 window.present();
-                Dialogs.show_properties(window, items, metadata, () => { new PermissionsDialog(window, items); }, () => { return new SharingPage(window, items[0].file); });
+                Dialogs.show_properties(window, items, metadata, () => { return new PermissionsPage(window, items); }, () => { return new SharingPage(window, items[0].file); }, () => { return new MetadataPage(items[0], metadata); }, () => { return new AssociationsPage(window, items[0]); });
             }
         }
     }

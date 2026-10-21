@@ -298,5 +298,15 @@ namespace MajorisFiles {
             stmt.bind_text(2, value);
             stmt.step();
         }
+        public void set_state_checked(string key, string value) throws Error
+        {
+            var stmt = prepare("INSERT OR REPLACE INTO state VALUES(?,?)");
+            if (stmt == null || !available)
+                throw new FileError.INVALID("Durable operation storage is unavailable");
+            stmt.bind_text(1, key);
+            stmt.bind_text(2, value);
+            if (stmt.step() != Sqlite.DONE)
+                throw new FileError.INVALID("Could not persist the operation recovery record");
+        }
     }
 }

@@ -35,7 +35,139 @@ int main(string[] args)
         loop.run();
         Source.remove(timeout);
     });
+    Test.add_func("/filesystem/replacement-recovery", () => {
+        var loop = new MainLoop();
+        replacement_case.begin((obj, res) => {
+            try { replacement_case.end(res); } catch (Error e) { error("%s", e.message); }
+            loop.quit();
+        });
+        loop.run();
+    });
+    Test.add_func("/search/indexed-document-content", () => {
+        var loop = new MainLoop();
+        indexed_content_case.begin((obj, res) => {
+            try { indexed_content_case.end(res); } catch (Error e) { error("%s", e.message); }
+            loop.quit();
+        });
+        loop.run();
+    });
+    Test.add_func("/archive/sevenzip-volumes-and-encryption", () => {
+        if (Environment.find_program_in_path("7z") == null && Environment.find_program_in_path("7zz") == null) { Test.skip("7-Zip is unavailable"); return; }
+        var loop = new MainLoop();
+        sevenzip_case.begin((obj, res) => { try { sevenzip_case.end(res); } catch (Error e) { error("%s", e.message); } loop.quit(); });
+        loop.run();
+    });
+    Test.add_func("/filesystem/batch-rename-swap-undo", () => {
+        var loop = new MainLoop();
+        batch_rename_case.begin((obj, res) => { try { batch_rename_case.end(res); } catch (Error e) { error("%s", e.message); } loop.quit(); });
+        loop.run();
+    });
     return Test.run();
+}
+async void batch_rename_case() throws Error
+{
+    var root = File.new_for_path(DirUtils.make_tmp("majoris-batch-XXXXXX"));
+    var first = root.get_child("first.txt"); var second = root.get_child("second.txt");
+    FileUtils.set_contents(first.get_path(), "first"); FileUtils.set_contents(second.get_path(), "second");
+    var metadata = new MetadataStore(root.get_child("state.db").get_path());
+    metadata.set_tags(first, "First"); metadata.set_tags(second, "Second");
+    var manager = new OperationManager(metadata);
+    var sources = new Gee.ArrayList<File>(); sources.add(first); sources.add(second);
+    var names = new Gee.ArrayList<string>(); names.add("second.txt"); names.add("first.txt");
+    yield manager.batch_rename(sources, names);
+    assert(metadata.tags(first) == "Second" && metadata.tags(second) == "First");
+    // Reopen the journal to verify the logical rename group survives a restart.
+    manager = new OperationManager(new MetadataStore(root.get_child("state.db").get_path()));
+    yield manager.undo();
+    string contents; FileUtils.get_contents(first.get_path(), out contents); assert(contents == "first");
+    assert(metadata.tags(first) == "First");
+    yield manager.redo(); FileUtils.get_contents(first.get_path(), out contents); assert(contents == "second");
+    yield OperationManager.remove_tree(root, new Cancellable());
+}
+async void sevenzip_case() throws Error
+{
+    var root = File.new_for_path(DirUtils.make_tmp("majoris-7z-XXXXXX"));
+    var source = root.get_child("payload.bin");
+    uint8[] bytes = new uint8[3 * 1024 * 1024];
+    // Nontrivial data plus store mode forces multiple native volumes.
+    for (int i = 0; i < bytes.length; i++) bytes[i] = (uint8)(i % 251);
+    yield source.replace_contents_async(bytes, null, false, FileCreateFlags.PRIVATE, null, null);
+    var sources = new Gee.ArrayList<File>(); sources.add(source);
+    yield SevenZip.create(sources, root.get_child("Backup.7z"), 1024 * 1024, 0, null, new Job("Create volumes"));
+    assert(root.get_child("Backup.7z.001").query_exists() && root.get_child("Backup.7z.003").query_exists());
+    yield SevenZip.verify(root.get_child("Backup.7z.001"), null, new Job("Verify volumes"));
+    yield ArchiveService.extract(root.get_child("Backup.7z.001"), root.get_child("extracted"), new Job("Extract volumes"));
+    var restored = root.get_child("extracted/payload.bin");
+    assert((yield SplitService.checksum(source, ChecksumType.SHA256, new Cancellable())) == (yield SplitService.checksum(restored, ChecksumType.SHA256, new Cancellable())));
+    yield SevenZip.create(sources, root.get_child("Encrypted.7z"), 0, 1, "fixture-only", new Job("Encrypt"));
+    yield SevenZip.verify(root.get_child("Encrypted.7z"), "fixture-only", new Job("Verify encrypted"));
+    bool rejected = false;
+    try { yield SevenZip.verify(root.get_child("Encrypted.7z"), "wrong-fixture", new Job("Wrong password")); }
+    catch (Error e) { rejected = true; }
+    assert(rejected);
+    yield OperationManager.remove_tree(root, new Cancellable());
+}
+async void replacement_case() throws Error
+{
+    var root = File.new_for_path(DirUtils.make_tmp("majoris-replacement-XXXXXX"));
+    var target = root.get_child("report.txt");
+    var backup = root.get_child(".majoris-backup-fixture");
+    FileUtils.set_contents(target.get_path(), "previous data");
+    var metadata = new MetadataStore(root.get_child("state.db").get_path());
+    var journal = new ReplacementJournal(metadata);
+    yield journal.prepare(target, backup);
+    yield target.move_async(backup, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
+    FileUtils.set_contents(target.get_path(), "new or interrupted output");
+    // A new journal simulates restarting after the destination was moved aside.
+    var restarted = new ReplacementJournal(new MetadataStore(root.get_child("state.db").get_path()));
+    assert(restarted.records.size == 1);
+    var restored = yield restarted.restore(restarted.records[0], new Cancellable());
+    assert(!restored.equal(target));
+    string old_contents, current_contents;
+    FileUtils.get_contents(restored.get_path(), out old_contents);
+    FileUtils.get_contents(target.get_path(), out current_contents);
+    assert(old_contents == "previous data" && current_contents == "new or interrupted output");
+    assert(new ReplacementJournal(metadata).records.size == 0);
+    yield OperationManager.remove_tree(root, new Cancellable());
+}
+async void indexed_content_case() throws Error
+{
+    string? extractor = Environment.find_program_in_path("localsearch-extractor-3");
+    if (extractor == null && FileUtils.test("/usr/libexec/localsearch-extractor-3", FileTest.IS_EXECUTABLE)) extractor = "/usr/libexec/localsearch-extractor-3";
+    if (extractor == null) { Test.skip("System document extractor not installed"); return; }
+    var root = File.new_for_path(DirUtils.make_tmp("majoris-index-fixture-XXXXXX"));
+    var pdf = root.get_child("report.pdf");
+    var surface = new Cairo.PdfSurface(pdf.get_path(), 300, 200);
+    var cr = new Cairo.Context(surface);
+    cr.move_to(10, 40); cr.show_text("MajorisIndexedNeedle"); cr.show_page(); surface.finish();
+    var word = root.get_child("word"); yield word.make_directory_async(Priority.DEFAULT, null);
+    FileUtils.set_contents(word.get_child("document.xml").get_path(), "<w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"><w:body><w:p><w:r><w:t>MajorisIndexedNeedle</w:t></w:r></w:p></w:body></w:document>");
+    FileUtils.set_contents(root.get_child("[Content_Types].xml").get_path(), "<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\"><Override PartName=\"/word/document.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml\"/></Types>");
+    var entries = new Gee.ArrayList<File>(); entries.add(word); entries.add(root.get_child("[Content_Types].xml"));
+    var docx = root.get_child("letter.docx");
+    yield ArchiveService.compress(entries, docx, "zip", new Job("Index fixture"));
+    var token = new Cancellable();
+    var connection = yield Tsparql.SparqlConnection.new_async(Tsparql.SparqlConnectionFlags.NONE, null, File.new_for_uri("resource:///org/freedesktop/tracker/nepomuk"), token);
+    foreach (var file in new File[] {pdf, docx}) {
+        var process = new Subprocess.newv({extractor, "--file=" + file.get_path(), "--mime=" + (file.equal(pdf) ? "application/pdf" : "application/vnd.openxmlformats-officedocument.wordprocessingml.document"), "--output-format=turtle"}, SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDERR_PIPE);
+        string output, errors;
+        yield process.communicate_utf8_async(null, token, out output, out errors);
+        if (!process.get_successful()) throw new IOError.FAILED("Document extraction failed: " + errors);
+        assert(output.contains("MajorisIndexedNeedle"));
+        yield connection.deserialize_async(Tsparql.DeserializeFlags.NONE, Tsparql.RdfFormat.TURTLE, "http://tracker.api.gnome.org/ontology/v3/tracker#Documents", new MemoryInputStream.from_data(output.data), token);
+        // The system miner adds the storage relation after extraction.
+        yield connection.update_async("INSERT DATA { GRAPH tracker:Documents { <" + file.get_uri() + "> nie:isStoredAs <" + file.get_uri() + "> . } }", token);
+        yield connection.update_async("INSERT DATA { GRAPH tracker:FileSystem { <" + file.get_uri() + "> a nfo:FileDataObject; nie:url \"" + file.get_uri() + "\"; nfo:fileName \"" + file.get_basename() + "\" . } }", token);
+    }
+    var provider = new IndexedSearchProvider(connection);
+    var query = new SearchQuery(); query.content = "MajorisIndexedNeedle";
+    var roots = new Gee.ArrayList<File>(); roots.add(root);
+    var found = new Gee.HashSet<string>();
+    provider.hit.connect((item) => { assert(item.relevance >= 100); found.add(item.name); });
+    yield provider.search(roots, query, true, token);
+    assert(found.contains("report.pdf") && found.contains("letter.docx"));
+    connection.close();
+    yield OperationManager.remove_tree(root, token);
 }
 async void chooser_files_case() throws Error
 {
@@ -46,6 +178,20 @@ async void chooser_files_case() throws Error
     assert(imported.is_native() && !imported.equal(source));
     assert((yield SplitService.checksum(source, ChecksumType.SHA512, new Cancellable())) ==
            (yield SplitService.checksum(imported, ChecksumType.SHA512, new Cancellable())));
+    yield imported.delete_async(Priority.DEFAULT, null);
+    yield imported.get_parent().delete_async(Priority.DEFAULT, null);
+    var abandoned = root.get_child("imports/.pending-2147483646-abandoned");
+    yield abandoned.make_directory_async(Priority.DEFAULT, null);
+    FileUtils.set_contents(abandoned.get_child("partial").get_path(), "incomplete");
+    yield ChooserImport.cleanup_abandoned(root.get_child("imports"), new Cancellable());
+    assert(!abandoned.query_exists());
+    var large = root.get_child("large.bin");
+    var output = yield large.create_async(FileCreateFlags.PRIVATE, Priority.DEFAULT, null);
+    ((Seekable)output).truncate(65 * 1024 * 1024, null);
+    yield output.close_async(Priority.DEFAULT, null);
+    uint64 transferred = 0;
+    imported = yield ChooserImport.download(large, new Cancellable(), root.get_child("imports"), new ImportPolicy(), (done, total) => { transferred = done; assert(done <= total); });
+    assert(transferred == 65 * 1024 * 1024);
     yield imported.delete_async(Priority.DEFAULT, null);
     yield imported.get_parent().delete_async(Priority.DEFAULT, null);
     var cancelled = new Cancellable();

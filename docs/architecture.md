@@ -63,7 +63,7 @@ Request Close is restricted to its invoking owner; owner disappearance cancels
 the chooser. X11 and Wayland parent identifiers are imported through a small
 native bridge. Results contain normalized `file://` URIs; GVfs locations without
 a local FUSE representation require an explicitly approved local import for Open.
-Imports are durable copies in Downloads/Files Imports, limited to 64 MiB/60 seconds;
+Imports are retained copies in the application data directory with configurable byte/time limits, free-space checks and progress;
 Save never substitutes an import for the intended remote destination. SaveFiles
 uses the same request lifecycle and validates/generates destination names without
 creating them. Mount removal invalidates outstanding acceptance work.
@@ -74,12 +74,12 @@ permissions directly.
 Sharing uses unprivileged Samba usershares. A narrow Polkit-protected system
 service can start the fixed `smbd.service` unit and provision only the calling
 non-root account's SMB credentials through stdin. It accepts neither arbitrary
-commands nor arbitrary account names. Separate read/write/delete ACL policy and
-owned firewall integration remain release work.
+commands nor arbitrary account names. Per-account R/F/D policy and owned firewalld
+integration are implemented; actual server/firewall acceptance remains open.
 
 Sharing pages and the usershare inventory read the actual Samba usershare state.
-Account selection uses the shared asynchronous system account directory. Advanced
-ACLs are displayed as unavailable for editing rather than flattened. System-wide
+Account selection uses the shared asynchronous system account directory. Mixed
+R/F/D ACLs are preserved; unsupported ACL forms are displayed without editing. System-wide
 smb.conf shares remain administrator managed. Narrow browsing reparents the shared
 sidebar into AdwOverlaySplitView; wide browsing retains the resizable GtkPaned.
 
@@ -93,3 +93,23 @@ Relevant sources included `nautilus-file-operations.c`, `nautilus-file-chooser.c
 `nautilus-search-engine-simple.c`, `nautilus-thumbnails.c`, and the portal XML.
 The implementation is independently written; reference sources are not bundled
 or installed with Files.
+
+## Additional subsystem boundaries
+
+`ReplacementJournal` persists intent before an existing destination is renamed
+aside. Recovery validates preserved identities and restores without overwriting
+current data. This is not yet a fully staged transaction for every output or a
+complete crash journal for batch rename staging.
+
+The indexed search provider talks to the system TinySPARQL service through bound
+queries; it never opens the system index database. Recursive GIO search reconciles
+results and remains the fallback. Shell search reuses this controller.
+
+Rich metadata and thumbnails use the preview sandbox. Formatted Office conversion
+uses a trusted UNO script with macros/updates disabled and returns bounded PDF
+bytes; the regular PDF presentation handles navigation. GtkMediaFile playback
+still runs in the GUI process and requires further isolation work.
+
+Extensions use versioned session D-Bus, bounded replies and deadlines, with no
+in-process dynamic loading. User manifests are opt-in. The complete external
+contract and its remaining limitations are in `docs/extensions.md`.

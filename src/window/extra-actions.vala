@@ -14,7 +14,14 @@ namespace MajorisFiles {
             this.operations = operations;
             this.metadata = metadata;
             action("shared-folders", () => new SharedFoldersDialog(window));
+            action("copy-to", () => transfer_to.begin(false));
+            action("move-to", () => transfer_to.begin(true));
+            action("duplicate-items", () => duplicate_items.begin());
+            action("folder-with-selection", () => folder_with_selection.begin());
+            action("paste-link", () => paste_link.begin());
+            action("recover-replacements", () => recover_replacements.begin());
             action("compress", () => compress.begin());
+            action("compress-sevenzip", () => { var items = current.selected(); if (items.size > 0) new SevenZipDialog(window, items, current.location, operations); });
             action("compress-encrypted", () => compress.begin(true));
             action("extract", () => extract.begin());
             action("extract-encrypted", () => extract.begin(true));
@@ -51,6 +58,106 @@ namespace MajorisFiles {
             action("smb-password", () => smb_password.begin());
             action("connect-server", () => connect_server.begin());
         }
+        async void recover_replacements()
+        {
+            var pending = new Gee.ArrayList<ReplacementRecord>();
+            pending.add_all(operations.replacements.records);
+            if (pending.size == 0) {
+                Dialogs.error(window, _("There are no pending replacement recovery records."));
+                return;
+            }
+            foreach (var record in pending)
+                if (yield Dialogs.confirm(window, "Recover previous “" + record.target.get_basename() + "”?", "The preserved item will be restored without overwriting any current destination. If the name is occupied, a recovered-original name is used.\n" + record.backup.get_parse_name(), "Recover Previous Item")) {
+                    try {
+                        var restored = yield operations.replacements.restore(record, new Cancellable());
+                        window.current.navigate(restored.get_parent());
+                        window.current.select_file(restored);
+                    }
+                    catch (Error e) { Dialogs.error(window, e.message); }
+                }
+        }
+        async File? destination_folder(string title)
+        {
+            try {
+                var settings = new VariantBuilder(VariantType.VARDICT);
+                settings.add("{sv}", "directory", new Variant.boolean(true));
+                var options = new ChooserOptions(false, settings.end());
+                options.initial = current.location;
+                var chooser = new ChooserWindow(options, metadata, new Places());
+                chooser.title = title;
+                chooser.transient_for = window;
+                File? result = null;
+                SourceFunc resume = destination_folder.callback;
+                chooser.completed.connect((code, value) => {
+                    if (code == 0) result = File.new_for_uri(value.lookup_value("uris", null).get_child_value(0).get_string());
+                    Idle.add((owned)resume);
+                });
+                chooser.present();
+                yield;
+                return result;
+            }
+            catch (Error e) { Dialogs.error(window, e.message); return null; }
+        }
+        Gee.ArrayList<File> files(Gee.List<FileItem> selection)
+        {
+            var result = new Gee.ArrayList<File>();
+            foreach (var item in selection) result.add(item.file);
+            return result;
+        }
+        async void transfer_to(bool move)
+        {
+            var selected = files(current.selected());
+            if (selected.size == 0) return;
+            var folder = yield destination_folder(move ? "Move To" : "Copy To");
+            if (folder != null) yield operations.run(move ? OperationKind.MOVE : OperationKind.COPY, selected, folder, window);
+        }
+        async void duplicate_items()
+        {
+            var selection = current.selected();
+            if (selection.size == 0) return;
+            var folder = current.location;
+            try {
+                var names = new Gee.HashMap<string, string>();
+                var reserved = new Gee.HashSet<string>();
+                foreach (var item in selection) {
+                    for (uint i = 1; ; i++) {
+                        if (i > 10000) throw new FileError.CONFLICT("No free duplicate filename was found");
+                        int dot = item.name.last_index_of(".");
+                        if (item.directory || dot <= 0) dot = item.name.length;
+                        string candidate = item.name.substring(0, dot) + " (copy %u)".printf(i) + item.name.substring(dot);
+                        if (reserved.contains(candidate)) continue;
+                        try { yield folder.get_child(candidate).query_info_async("standard::type", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null); }
+                        catch (IOError.NOT_FOUND e) { reserved.add(candidate); names[item.file.get_uri()] = candidate; break; }
+                    }
+                }
+                yield operations.run(OperationKind.COPY, files(selection), folder, window, null, names);
+            }
+            catch (Error e) { Dialogs.error(window, e.message); }
+        }
+        async void folder_with_selection()
+        {
+            var selected = files(current.selected());
+            if (selected.size == 0) return;
+            var parent = current.location;
+            var name = yield Dialogs.prompt(window, "New Folder with Selection", "New Folder");
+            if (name == null) return;
+            try {
+                string group = Uuid.string_random();
+                yield operations.new_folder(parent, name, group);
+                yield operations.run(OperationKind.MOVE, selected, parent.get_child(name), window, group);
+            }
+            catch (Error e) { Dialogs.error(window, e.message); }
+        }
+        async void paste_link()
+        {
+            try {
+                var target = current.location;
+                if (!target.is_native()) throw new FileError.UNSUPPORTED("Symbolic links require a compatible local destination");
+                var clipboard = yield FileClipboard.read(window.get_clipboard());
+                yield operations.run(OperationKind.LINK, clipboard.files, target, window);
+            }
+            catch (Error e) { Dialogs.error(window, e.message); }
+        }
         void action(string name, owned Callback callback)
         {
             var action = new SimpleAction(name, null);
@@ -74,7 +181,7 @@ namespace MajorisFiles {
                 }
             if (!Paths.valid_name(name) || format == "")
             {
-                Dialogs.error(window, "Choose a supported archive extension");
+                Dialogs.error(window, _("Choose a supported archive extension"));
                 return;
             }
             string? password = null;
@@ -82,7 +189,7 @@ namespace MajorisFiles {
             {
                 if(format != "zip")
                 {
-                    Dialogs.error(window, "Encrypted creation currently requires a .zip filename");
+                    Dialogs.error(window, _("Encrypted creation currently requires a .zip filename"));
                     return;
                 }
                 password = yield Dialogs.password(window, "Create AES-256 ZIP", true, "File contents are encrypted. ZIP entry names remain visible.");
@@ -112,7 +219,7 @@ namespace MajorisFiles {
                 return;
             if(!Paths.valid_name(name))
             {
-                Dialogs.error(window, "Invalid folder name");
+                Dialogs.error(window, _("Invalid folder name"));
                 return;
             }
             string? password = null;
@@ -196,7 +303,7 @@ namespace MajorisFiles {
                 yield process.wait_check_async(null);
             }
             catch(Error e) {
-                Dialogs.error(window, "The configured Majoris terminal could not be opened: " + e.message);
+                Dialogs.error(window, _("The configured Majoris terminal could not be opened: ") + e.message);
             }
         }
         async void open_with()
@@ -225,7 +332,9 @@ namespace MajorisFiles {
             try {
                 if(!Paths.valid_name(name))
                     throw new FileError.INVALID("Invalid name");
-                yield current.location.get_child(name).make_symbolic_link_async(items[0].file.get_path(), Priority.DEFAULT, null);
+                var names = new Gee.HashMap<string, string>();
+                names[items[0].file.get_uri()] = name;
+                yield operations.run(OperationKind.LINK, files(items), current.location, window, null, names);
             }
             catch(Error e) {
                 Dialogs.error(window, e.message);
@@ -241,7 +350,7 @@ namespace MajorisFiles {
                 if(!reset)
                 {
                     var dialog = new Gtk.FileDialog();
-                    dialog.title = "Choose Custom Icon";
+                    dialog.title = _("Choose Custom Icon");
                     var filter = new Gtk.FileFilter();
                     filter.name = "Images";
                     filter.add_mime_type("image/*");
@@ -269,81 +378,7 @@ namespace MajorisFiles {
         async void batch_rename()
         {
             var items = current.selected();
-            if(items.size == 0)
-                return;
-            var pattern = yield Dialogs.prompt(window, "Batch Rename — {original}, {counter}, {date}", "{original} - {counter}");
-            if(pattern == null)
-                return;
-            var names = new Gee.ArrayList<string>();
-            var seen = new Gee.HashSet<string>();
-            var preview = new StringBuilder();
-            int counter = 1;
-            foreach(var item in items)
-            {
-                var date = item.info.get_modification_date_time();
-                string name = pattern.replace("{original}", item.name).replace("{counter}", "%03d".printf(counter++)).replace("{date}", date == null ? "" : date.format("%Y-%m-%d"));
-                if(!Paths.valid_name(name) || !seen.add(name))
-                {
-                    Dialogs.error(window, "The pattern produces an invalid or duplicate name");
-                    return;
-                }
-                names.add(name);
-                if(counter <= 20)
-                    preview.append(item.name + " → " + name + "\n");
-            }
-            if(!(yield Dialogs.confirm(window, "Apply Batch Rename?", preview.str, "Rename")))
-                return;
-            try {
-                foreach(var item in items)
-                    if(!item.file.get_parent().equal(items[0].file.get_parent()))
-                        throw new FileError.INVALID("Batch rename requires a shared folder");
-                var folder = items[0].file.get_parent();
-                foreach(var name in names)
-                {
-                    bool occupied = false;
-                    try {
-                        yield folder.get_child(name).query_info_async("standard::type", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null);
-                        occupied = true;
-                    }
-                    catch(IOError.NOT_FOUND e) {}
-                    if(occupied)
-                    {
-                        bool ours = false;
-                        foreach(var item in items)
-                            if(item.file.get_basename() == name)
-                                ours = true;
-                        if(!ours)
-                            throw new FileError.CONFLICT("Destination already exists: " + name);
-                    }
-                }
-                var temp = new Gee.ArrayList<File>();
-                try {
-                    foreach(var item in items)
-                    {
-                        var moved = yield item.file.set_display_name_async(".majoris-rename-" + Uuid.string_random(), Priority.DEFAULT, null);
-                        temp.add(moved);
-                    }
-                    for(int i = 0; i < temp.size; i++)
-                    {
-                        var result = yield temp[i].set_display_name_async(names[i], Priority.DEFAULT, null);
-                        metadata.relocate(items[i].file, result);
-                        temp[i] = result;
-                    }
-                }
-                catch(Error e) {
-                    for(int i = 0; i < temp.size; i++)
-                    {
-                        try {
-                            yield temp[i].set_display_name_async(items[i].file.get_basename(), Priority.DEFAULT, null);
-                        }
-                        catch(Error rollback) {}
-                    }
-                    throw e;
-                }
-            }
-            catch(Error e) {
-                Dialogs.error(window, e.message);
-            }
+            if (items.size > 0) new BatchRenameDialog(window, items, operations);
         }
         async void templates()
         {
@@ -360,7 +395,7 @@ namespace MajorisFiles {
             }
             options.initial = File.new_for_path(path);
             var chooser = new ChooserWindow(options, metadata, new Places());
-            chooser.title = "New Document from Template";
+            chooser.title = _("New Document from Template");
             chooser.transient_for = window;
             chooser.completed.connect((code, result) => { if(code != 0)
                                                               return;
@@ -382,11 +417,11 @@ namespace MajorisFiles {
         }
         async void smb_password()
         {
-            var dialog = new Adw.AlertDialog("SMB Account Password", "Set a password for network access to your local account.");
+            var dialog = new Adw.AlertDialog(_("SMB Account Password"), "Set a password for network access to your local account.");
             var password = new Gtk.PasswordEntry();
             dialog.extra_child = password;
-            dialog.add_response("cancel", "Cancel");
-            dialog.add_response("set", "Set Password");
+            dialog.add_response("cancel", _("Cancel"));
+            dialog.add_response("set", _("Set Password"));
             if((yield dialog.choose(window, null)) != "set")
                 return;
             try {
@@ -407,7 +442,7 @@ namespace MajorisFiles {
             var file = Paths.parse(uri);
             if(file.is_native() || !uri.contains("://"))
             {
-                Dialogs.error(window, "Enter a server URI");
+                Dialogs.error(window, _("Enter a server URI"));
                 return;
             }
             current.navigate(file);

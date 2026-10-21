@@ -11,13 +11,115 @@ int main(string[] args)
     catch(Error e) {
         error("%s", e.message);
     }
+    // Own the mock portal name before GTK can auto-activate the installed portal
+    // while reading desktop settings. These are backend component tests.
+    DBusConnection mock_portal_bus;
+    try {
+        mock_portal_bus = Bus.get_sync(BusType.SESSION);
+        var bus = mock_portal_bus;
+        var result = bus.call_sync("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "RequestName", new Variant("(su)", "org.freedesktop.portal.Desktop", 0u), new VariantType("(u)"), DBusCallFlags.NONE, 5000, null);
+        assert(result.get_child_value(0).get_uint32() == 1);
+    }
+    catch (Error e) { error("%s", e.message); }
     Gtk.init();
     Adw.init();
     Test.init(ref args);
     Test.add_func("/portal/roundtrip-and-isolation", () => test_portal());
     Test.add_func("/portal/success-close-and-authorization", () => test_success_and_authorization());
     Test.add_func("/portal/save-files", () => test_save_files());
-    return Test.run();
+    Test.add_func("/extensions/out-of-process-lifecycle", () => {
+        var loop = new MainLoop();
+        extension_case.begin((obj, res) => { try { extension_case.end(res); } catch (Error e) { error("%s", e.message); } loop.quit(); });
+        uint watchdog = Timeout.add_seconds(15, () => { error("Extension integration timed out"); });
+        loop.run(); Source.remove(watchdog);
+    });
+    Test.add_func("/desktop/shell-search-protocol", () => {
+        var loop = new MainLoop();
+        shell_case.begin((obj, res) => { try { shell_case.end(res); } catch (Error e) { error("%s", e.message); } loop.quit(); });
+        uint watchdog = Timeout.add_seconds(15, () => { error("Shell search integration timed out"); });
+        loop.run(); Source.remove(watchdog);
+    });
+    int result = Test.run();
+    mock_portal_bus.flush_sync(null);
+    return result;
+}
+async void shell_case() throws Error
+{
+    var root = File.new_for_path(DirUtils.make_tmp("majoris-shell-XXXXXX"));
+    var file = root.get_child("shell-hit.txt"); FileUtils.set_contents(file.get_path(), "shell fixture");
+    var metadata = new MetadataStore(root.get_child("state.db").get_path());
+    metadata.set_state("indexed-search", "false");
+    var app = new Adw.Application("com.majoris.files.shelltest", ApplicationFlags.NON_UNIQUE); app.register(null);
+    var roots = new Gee.ArrayList<File>(); roots.add(root);
+    var provider = new ShellSearchProvider(app, metadata, new Places(), new OperationManager(metadata), roots);
+    var bus = Bus.get_sync(BusType.SESSION);
+    uint registration = bus.register_object("/com/majoris/files/SearchProvider", provider);
+    try {
+        var reply = yield bus.call(bus.unique_name, "/com/majoris/files/SearchProvider", "org.gnome.Shell.SearchProvider2", "GetInitialResultSet", new Variant("(^as)", new string[] {"shell-hit"}), new VariantType("(as)"), DBusCallFlags.NONE, 10000, null);
+        var ids = reply.get_child_value(0).dup_strv(); assert(ids.length == 1 && ids[0] == file.get_uri());
+        var metas = yield bus.call(bus.unique_name, "/com/majoris/files/SearchProvider", "org.gnome.Shell.SearchProvider2", "GetResultMetas", new Variant("(^as)", ids), new VariantType("(aa{sv})"), DBusCallFlags.NONE, 1000, null);
+        assert(metas.get_child_value(0).n_children() == 1);
+        yield bus.call(bus.unique_name, "/com/majoris/files/SearchProvider", "org.gnome.Shell.SearchProvider2", "ActivateResult", new Variant("(s^asu)", ids[0], new string[] {"shell-hit"}, 0u), new VariantType("()"), DBusCallFlags.NONE, 1000, null);
+        var window = app.get_windows().data as FilesWindow; assert(window != null);
+        for (int i = 0; i < 100 && window.current.selected().size == 0; i++) {
+            Timeout.add(20, () => { shell_case.callback(); return Source.REMOVE; }); yield;
+        }
+        assert(window.current.location.equal(root) && window.current.selected().size == 1 && window.current.selected()[0].file.equal(file));
+        window.close();
+        bool refused = false; try { provider.activate_result("file:///unrequested", {}, 0); } catch (Error e) { refused = true; }
+        assert(refused);
+    }
+    finally { bus.unregister_object(registration); }
+    yield OperationManager.remove_tree(root, new Cancellable());
+}
+async void extension_case() throws Error
+{
+    string build = Path.get_dirname(FileUtils.read_link("/proc/self/exe"));
+    string examples = Path.build_filename(build, "..", "examples");
+    var root = File.new_for_path(DirUtils.make_tmp("majoris-extension-XXXXXX"));
+    string manifest;
+    FileUtils.get_contents(Path.build_filename(examples, "checksum.extension"), out manifest);
+    FileUtils.set_contents(root.get_child("checksum.extension").get_path(), manifest);
+    var metadata = new MetadataStore(root.get_child("state.db").get_path());
+    var manager = new ExtensionManager(metadata, {root.get_path()});
+    assert(manager.extensions.size == 1 && !manager.extensions[0].enabled);
+    var extension = manager.extensions[0]; extension.set_enabled(true);
+    var process = new Subprocess.newv({"/usr/bin/python3", Path.build_filename(examples, "checksum-extension.py")}, SubprocessFlags.STDOUT_SILENCE | SubprocessFlags.STDERR_SILENCE);
+    bool stopped = false;
+    try {
+        var bus = Bus.get_sync(BusType.SESSION);
+        bool ready = false;
+        for (int i = 0; i < 100; i++) {
+            var reply = yield bus.call("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "NameHasOwner", new Variant("(s)", extension.bus_name), new VariantType("(b)"), DBusCallFlags.NONE, 1000, null);
+            if (reply.get_child_value(0).get_boolean()) { ready = true; break; }
+            Timeout.add(20, () => { extension_case.callback(); return Source.REMOVE; }); yield;
+        }
+        assert(ready);
+        var file = root.get_child("example.txt"); FileUtils.set_contents(file.get_path(), "external provider fixture");
+        var info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
+        var item = new FileItem(file, info);
+        var selected = new Gee.ArrayList<FileItem>(); selected.add(item);
+        yield manager.prepare(selected);
+        assert(extension.actions(selected).size == 1);
+        var values = yield extension.file_info(item); assert(values["Extension"] == ".txt");
+        var properties = yield extension.call("GetProperties", new Variant("(s)", file.get_uri()), "(a(ss))");
+        assert(properties.get_child_value(0).n_children() == 2);
+        var column = new ExternalColumn(extension, "Bytes", "Example Bytes");
+        column.text(item, metadata);
+        for (int i = 0; i < 100 && column.text(item, metadata) == "…"; i++) { Timeout.add(20, () => { extension_case.callback(); return Source.REMOVE; }); yield; }
+        assert(column.text(item, metadata) == "25");
+        var parent = new Gtk.Window();
+        yield extension.execute("checksum", selected, parent);
+        string checksum; FileUtils.get_contents(root.get_child("example.txt.sha256").get_path(), out checksum);
+        assert(checksum.has_prefix(Checksum.compute_for_string(ChecksumType.SHA256, "external provider fixture")));
+        parent.destroy();
+        process.force_exit(); yield process.wait_async(null); stopped = true;
+        yield extension.prepare(selected);
+        assert(extension.actions(selected).size == 0 && extension.failure != "");
+        extension.set_enabled(false); assert(column.text(item, metadata) == "");
+    }
+    finally { if (!stopped) process.force_exit(); }
+    yield OperationManager.remove_tree(root, new Cancellable());
 }
 void test_save_files()
 {

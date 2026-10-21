@@ -16,7 +16,7 @@ namespace MajorisFiles {
                 page.remove(group);
             group = new Adw.PreferencesGroup();
             page.add(group);
-            var add_button = new Gtk.Button.with_label("New Tag");
+            var add_button = new Gtk.Button.with_label(_("New Tag"));
             add_button.clicked.connect(() => add_tag.begin());
             group.add(add_button);
             var names = metadata.all_tags();
@@ -36,11 +36,11 @@ namespace MajorisFiles {
                                                                     cr.fill();
                     });
                 row.add_prefix(swatch);
-                row.add_suffix(Browser.button("document-edit-symbolic", "Rename Tag", () => rename.begin(name)));
-                row.add_suffix(Browser.button("applications-graphics-symbolic", "Tag Color", () => recolor.begin(name)));
-                row.add_suffix(Browser.button("go-up-symbolic", "Move Tag Up", () => reorder(name, -1)));
-                row.add_suffix(Browser.button("go-down-symbolic", "Move Tag Down", () => reorder(name, 1)));
-                row.add_suffix(Browser.button("edit-delete-symbolic", "Delete Tag", () => remove_tag.begin(name)));
+                row.add_suffix(Browser.button("document-edit-symbolic", _("Rename Tag"), () => rename.begin(name)));
+                row.add_suffix(Browser.button("applications-graphics-symbolic", _("Tag Color"), () => recolor.begin(name)));
+                row.add_suffix(Browser.button("go-up-symbolic", _("Move Tag Up"), () => reorder(name, -1)));
+                row.add_suffix(Browser.button("go-down-symbolic", _("Move Tag Down"), () => reorder(name, 1)));
+                row.add_suffix(Browser.button("edit-delete-symbolic", _("Delete Tag"), () => remove_tag.begin(name)));
                 group.add(row);
             }
         }
@@ -70,7 +70,7 @@ namespace MajorisFiles {
             var color = Gdk.RGBA();
             if(!color.parse(replacement))
             {
-                Dialogs.error(get_root() as Gtk.Window, "Enter a color such as #3584e4");
+                Dialogs.error(get_root() as Gtk.Window, _("Enter a color such as #3584e4"));
                 return;
             }
             metadata.define_tag(name, color.to_string(), metadata.all_tags().index_of(name));
