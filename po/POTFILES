@@ -1,6 +1,7 @@
 src/actions/desktop.vala
 src/actions/nearby.vala
 src/actions/registry.vala
+src/actions/rotation.vala
 src/application/file-manager.vala
 src/application/launcher.vala
 src/application/main.vala
@@ -44,6 +45,7 @@ src/preview/animation.vala
 src/preview/archive.vala
 src/preview/office.vala
 src/preview/pdf.vala
+src/preview/playback.vala
 src/preview/preview.vala
 src/preview/sandbox.vala
 src/preview/thumbnail.vala
@@ -60,6 +62,7 @@ src/utils/paths.vala
 src/views/browser.vala
 src/views/column-provider.vala
 src/views/file-groups.vala
+src/views/grid-rows.vala
 src/views/home.vala
 src/window/extra-actions.vala
 src/window/window.vala

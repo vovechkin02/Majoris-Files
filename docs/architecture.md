@@ -44,10 +44,11 @@ before output creation. Oversized regular files on known constrained
 filesystems can be split after confirmation; the source is retained.
 
 Image/text/media/PDF preview providers share one cancellable presentation layer.
-Text reads at most 256 KiB; images and PDFs have explicit size limits. Media
-uses GtkMediaFile and the installed GTK GStreamer backend, with autoplay off.
-PDF loading/rendering and libarchive work run on worker threads. Complex parsers
-are currently in-process; a parser sandbox is still required for release.
+Text reads at most 256 KiB; images and PDFs have explicit size limits. Complex
+preview decoders run in bounded bubblewrap workers with read-only input and no
+home/network. Media uses the isolated GStreamer playback worker and a GtkMediaStream
+adapter receiving validated raw RGBA/PCM, with autoplay off. Archive operations
+retain their worker/cancellation paths; encrypted 7-Zip extraction is sandboxed.
 Local image thumbnails use the Freedesktop cache naming and URI/mtime metadata.
 
 Archive extraction uses libarchive, rejects traversal, symlinks, hard links and
@@ -96,19 +97,35 @@ or installed with Files.
 
 ## Additional subsystem boundaries
 
-`ReplacementJournal` persists intent before an existing destination is renamed
-aside. Recovery validates preserved identities and restores without overwriting
-current data. This is not yet a fully staged transaction for every output or a
-complete crash journal for batch rename staging.
+`ReplacementJournal` persists intent before local replacement staging. File/tree
+data and containing directories are synchronized before/after atomic exchange;
+unsupported exchange uses a journaled rename fallback. Snapshot guards refuse
+concurrent modifications. Recovery recognizes both preserved-original locations
+and never overwrites current data. Batch rename records its fixed staging paths
+before moving names and commits history with journal removal in one SQLite
+transaction. Image rotation preserves the original bytes for Undo; interrupted
+Undo/Redo exchanges reconcile their guarded intent before further history actions.
 
 The indexed search provider talks to the system TinySPARQL service through bound
-queries; it never opens the system index database. Recursive GIO search reconciles
-results and remains the fallback. Shell search reuses this controller.
+queries; it never opens the system index database. Only completed queries with
+certified scope coverage skip traversal. Unknown/excluded roots, content coverage,
+remote scopes and explicit exhaustive search retain GIO reconciliation. Shell
+search reuses this controller. No stale index is described as instant filesystem
+consistency.
 
 Rich metadata and thumbnails use the preview sandbox. Formatted Office conversion
 uses a trusted UNO script with macros/updates disabled and returns bounded PDF
-bytes; the regular PDF presentation handles navigation. GtkMediaFile playback
-still runs in the GUI process and requires further isolation work.
+bytes; the regular PDF presentation handles navigation. GStreamer playback now
+runs in a separately sandboxed worker. A GtkMediaStream/GdkPaintable adapter keeps
+GTK video/audio controls, accepts bounded raw RGBA/PCM packets, supervises startup
+and playback stalls, and handles seeking/cancellation/decoder failure. The GUI's
+audio pipeline accepts PCM only and does not demux/decode the source file.
+
+Image helpers use LibRaw, libheif and LittleCMS, including supported timed AVIF
+sequences and PQ/HLG-to-SDR conversion. Grid grouping uses a virtualized row model
+with section boundaries and bounded grid slices sharing the existing selection.
+Cloud state is a separate capability-driven adapter interface over provider-owned
+GIO entries; account discovery alone never fabricates per-file state.
 
 Extensions use versioned session D-Bus, bounded replies and deadlines, with no
 in-process dynamic loading. User manifests are opt-in. The complete external

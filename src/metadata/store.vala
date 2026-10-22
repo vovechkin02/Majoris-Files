@@ -46,7 +46,7 @@ namespace MajorisFiles {
             db = (owned) connection;
             FileUtils.chmod(filename, 0600);
             db.busy_timeout(1000);
-            if(db.exec("PRAGMA journal_mode=WAL; CREATE TABLE IF NOT EXISTS metadata(uri TEXT PRIMARY KEY,favorite INTEGER DEFAULT 0,tags TEXT DEFAULT '',view TEXT DEFAULT 'Grid'); CREATE TABLE IF NOT EXISTS searches(name TEXT PRIMARY KEY,location TEXT,query TEXT); CREATE TABLE IF NOT EXISTS state(key TEXT PRIMARY KEY,value TEXT); CREATE TABLE IF NOT EXISTS identities(identity TEXT PRIMARY KEY,uri TEXT); CREATE TABLE IF NOT EXISTS tags(name TEXT PRIMARY KEY,color TEXT DEFAULT '#3584e4',position INTEGER DEFAULT 0);") != Sqlite.OK)
+            if(db.exec("PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS metadata(uri TEXT PRIMARY KEY,favorite INTEGER DEFAULT 0,tags TEXT DEFAULT '',view TEXT DEFAULT 'Grid'); CREATE TABLE IF NOT EXISTS searches(name TEXT PRIMARY KEY,location TEXT,query TEXT); CREATE TABLE IF NOT EXISTS state(key TEXT PRIMARY KEY,value TEXT); CREATE TABLE IF NOT EXISTS identities(identity TEXT PRIMARY KEY,uri TEXT); CREATE TABLE IF NOT EXISTS tags(name TEXT PRIMARY KEY,color TEXT DEFAULT '#3584e4',position INTEGER DEFAULT 0);") != Sqlite.OK)
                 storage_error = db.errmsg();
         }
         public string recover() throws Error
@@ -307,6 +307,14 @@ namespace MajorisFiles {
             stmt.bind_text(2, value);
             if (stmt.step() != Sqlite.DONE)
                 throw new FileError.INVALID("Could not persist the operation recovery record");
+        }
+        public void set_states_checked(string[] keys,string[] values) throws Error {
+            if(!available||db==null||keys.length!=values.length||keys.length>32)throw new FileError.INVALID("Durable operation storage is unavailable");
+            if(db.exec("BEGIN IMMEDIATE")!=Sqlite.OK)throw new FileError.INVALID("Could not begin operation history transaction");
+            try{
+                for(int i=0;i<keys.length;i++)set_state_checked(keys[i],values[i]);
+                if(db.exec("COMMIT")!=Sqlite.OK)throw new FileError.INVALID("Could not commit operation history");
+            }catch(Error e){db.exec("ROLLBACK");throw e;}
         }
     }
 }

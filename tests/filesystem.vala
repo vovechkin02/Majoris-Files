@@ -51,6 +51,12 @@ int main(string[] args)
         });
         loop.run();
     });
+    Test.add_func("/search/coverage-and-unicode", () => {
+        var loop = new MainLoop();
+        indexed_coverage_case.begin((obj, res) => { try { indexed_coverage_case.end(res); } catch (Error e) { error("%s", e.message); } loop.quit(); });
+        uint timer = Timeout.add_seconds(20, () => { error("Index coverage fixture timed out"); });
+        loop.run(); Source.remove(timer);
+    });
     Test.add_func("/archive/sevenzip-volumes-and-encryption", () => {
         if (Environment.find_program_in_path("7z") == null && Environment.find_program_in_path("7zz") == null) { Test.skip("7-Zip is unavailable"); return; }
         var loop = new MainLoop();
@@ -104,6 +110,23 @@ async void sevenzip_case() throws Error
     bool rejected = false;
     try { yield SevenZip.verify(root.get_child("Encrypted.7z"), "wrong-fixture", new Job("Wrong password")); }
     catch (Error e) { rejected = true; }
+    assert(rejected);
+    yield SevenZip.create(sources,root.get_child("Secret.7z"),1024*1024,0,"fixture-only",new Job("Encrypted volumes"));
+    yield ArchiveService.extract(root.get_child("Secret.7z.001"),root.get_child("secret-output"),new Job("Extract encrypted volumes"),"fixture-only");
+    assert((yield SplitService.checksum(source,ChecksumType.SHA256,new Cancellable()))==(yield SplitService.checksum(root.get_child("secret-output/payload.bin"),ChecksumType.SHA256,new Cancellable())));
+    rejected=false;
+    try{yield ArchiveService.extract(root.get_child("Secret.7z.001"),root.get_child("wrong-output"),new Job("Wrong password"),"wrong-fixture");}catch(Error e){rejected=true;}
+    assert(rejected&&!root.get_child("wrong-output").query_exists());
+    uint8[] corrupted;yield root.get_child("Secret.7z.002").load_contents_async(null,out corrupted,null);corrupted[512]^=1;
+    yield root.get_child("Secret.7z.002").replace_contents_async(corrupted,null,false,FileCreateFlags.NONE,null,null);
+    rejected=false;try{yield ArchiveService.extract(root.get_child("Secret.7z.001"),root.get_child("corrupt-output"),new Job("Corrupt volume"),"fixture-only");}catch(Error e){rejected=true;}
+    assert(rejected&&!root.get_child("corrupt-output").query_exists());
+    yield root.get_child("Secret.7z.002").delete_async(Priority.DEFAULT,null);
+    rejected=false;
+    try{yield ArchiveService.extract(root.get_child("Secret.7z.001"),root.get_child("missing-output"),new Job("Missing volume"),"fixture-only");}catch(Error e){rejected=true;}
+    assert(rejected&&!root.get_child("missing-output").query_exists());
+    FileUtils.set_contents(root.get_child("Backup.7z.majoris-incomplete").get_path(),"Interrupted fixture publication");
+    rejected=false;try{yield SevenZip.verify(root.get_child("Backup.7z.001"),null,new Job("Interrupted set"));}catch(Error e){rejected=true;}
     assert(rejected);
     yield OperationManager.remove_tree(root, new Cancellable());
 }
@@ -336,8 +359,10 @@ async void archive_case() throws Error
     {
         var archive = root.get_child("test." + format);
         yield ArchiveService.compress(files, archive, format, job);
+        assert(job.current.contains(Paths.size(13))&&job.current.contains("archived"));
         var target = root.get_child("extracted-" + format);
         yield ArchiveService.extract(archive, target, job);
+        assert(job.current.contains(Paths.size(13))&&job.current.contains("extracted"));
         string result;
         FileUtils.get_contents(target.get_child("hello.txt").get_path(), out result);
         assert(result == "hello archive");
@@ -625,4 +650,38 @@ async void durable_retry_case() throws Error
     var completed = new OperationManager(new MetadataStore(root.get_child("metadata.db").get_path()));
     assert(completed.jobs.get_n_items() == 0);
     yield OperationManager.remove_tree(root, new Cancellable());
+}
+
+class FixtureIndexCoverage : Object, MajorisFiles.SearchCoverage {
+    File root;
+    public FixtureIndexCoverage(File root) { this.root = root; }
+    public async bool covers(File location, bool recursive, Cancellable token) throws Error { token.set_error_if_cancelled(); return location.equal(root); }
+}
+async void indexed_coverage_case() throws Error {
+    var root = File.new_for_path(DirUtils.make_tmp("majoris-index-coverage-XXXXXX"));
+    var indexed = root.get_child("indexed"); var unindexed = root.get_child("unindexed");
+    yield indexed.make_directory_async(Priority.DEFAULT, null); yield unindexed.make_directory_async(Priority.DEFAULT, null);
+    var nested = indexed.get_child("nested"); yield nested.make_directory_async(Priority.DEFAULT, null);
+    var files = new File[] {indexed.get_child("Straße-needle.txt"), nested.get_child("needle-two.txt")};
+    var connection = yield Tsparql.SparqlConnection.new_async(Tsparql.SparqlConnectionFlags.NONE, null, File.new_for_uri("resource:///org/freedesktop/tracker/nepomuk"), null);
+    foreach (var file in files) {
+        FileUtils.set_contents(file.get_path(), "fixture");
+        yield connection.update_async("INSERT DATA { GRAPH tracker:FileSystem { <" + file.get_uri() + "> a nfo:FileDataObject; nie:url \"" + file.get_uri() + "\"; nfo:fileName \"" + file.get_basename() + "\" . } }", null);
+    }
+    FileUtils.set_contents(unindexed.get_child("needle-local.txt").get_path(), "fixture");
+    var provider = new IndexedSearchProvider(connection, new FixtureIndexCoverage(indexed));
+    var controller = new SearchController(); controller.indexed = provider;
+    var found = new Gee.HashSet<string>(); controller.found.connect((item) => found.add(item.file.get_uri()));
+    var roots = new Gee.ArrayList<File>(); roots.add(indexed);
+    var query = new SearchQuery(); query.text = "needle";
+    yield controller.search_roots(roots, query); assert(found.size == 2 && controller.scanned == 0);
+    Test.message("Complete indexed scope: %u results, %u filesystem directories scanned", found.size, controller.scanned);
+    roots.add(unindexed); found.clear();
+    yield controller.search_roots(roots, query); assert(found.size == 3 && controller.scanned == 1);
+    Test.message("Mixed scope: %u results, %u unindexed directories scanned", found.size, controller.scanned);
+    found.clear(); roots.remove(unindexed); query.text = "SS";
+    yield controller.search_roots(roots, query); assert(found.size == 1 && found.contains(files[0].get_uri()) && controller.scanned == 0);
+    found.clear(); controller.exhaustive = true; query.text = "needle";
+    yield controller.search_roots(roots, query); assert(found.size == 2 && controller.scanned == 2);
+    connection.close(); yield OperationManager.remove_tree(root, new Cancellable());
 }

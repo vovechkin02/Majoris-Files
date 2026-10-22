@@ -1,4 +1,28 @@
 using MajorisFiles;
+struct FixturePeer {public string id;public string name;}
+[DBus(name="com.majoris.Files.Extension1")]
+class NearbyDBusFixture : Object {
+    string folder;
+    public bool hold=false;
+    public bool cancelled=false;
+    public bool invalid=false;
+    public uint delay_ms=0;
+    public NearbyDBusFixture(string folder){this.folder=folder;}
+    public uint get_version() throws DBusError,IOError{return 1;}
+    public async FixturePeer[] get_actions(string[] uris) throws DBusError,IOError {
+        if(delay_ms>0){Timeout.add(delay_ms,()=>{get_actions.callback();return Source.REMOVE;});yield;}
+        return {FixturePeer(){id="fixture-action",name=invalid?string.nfill(201,'x'):"Fixture action"}};
+    }
+    public HashTable<string,string> get_file_info(string uri) throws DBusError,IOError {var result=new HashTable<string,string>(str_hash,str_equal);result["Invalid"]=string.nfill(16385,'x');return result;}
+    public FixturePeer[] get_nearby_peers() throws DBusError,IOError {return {FixturePeer(){id="fixture-peer",name="Fixture receiver"}};}
+    public ObjectPath start_nearby_transfer(string peer,string[] uris) throws DBusError,IOError {
+        if(peer!="fixture-peer"||uris.length!=1||!File.new_for_uri(uris[0]).equal(File.new_for_path(folder).get_child("payload.txt")))throw new IOError.INVALID_ARGUMENT("Unexpected fixture selection");
+        try{string data;FileUtils.get_contents(File.new_for_uri(uris[0]).get_path(),out data);FileUtils.set_contents(Path.build_filename(folder,"received.txt"),data);}catch(Error e){throw new IOError.FAILED(e.message);}
+        return new ObjectPath("/com/majoris/Files/NearbyFixture/transfer");
+    }
+    public void get_nearby_transfer(ObjectPath operation,out string state,out string error) throws DBusError,IOError {state=hold?"running":"completed";error="";}
+    public void cancel_nearby_transfer(ObjectPath operation) throws DBusError,IOError {cancelled=true;}
+}
 int main(string[] args)
 {
     try {
@@ -39,9 +63,33 @@ int main(string[] args)
         uint watchdog = Timeout.add_seconds(15, () => { error("Shell search integration timed out"); });
         loop.run(); Source.remove(watchdog);
     });
+    Test.add_func("/extensions/nearby-registration-and-transfer",()=>{
+        var loop=new MainLoop();nearby_extension_case.begin((obj,res)=>{try{nearby_extension_case.end(res);}catch(Error e){error("%s",e.message);}loop.quit();});loop.run();
+    });
     int result = Test.run();
     mock_portal_bus.flush_sync(null);
     return result;
+}
+async void nearby_extension_case() throws Error {
+    var root=File.new_for_path(DirUtils.make_tmp("majoris-nearby-dbus-XXXXXX"));FileUtils.set_contents(root.get_child("payload.txt").get_path(),"actual selected fixture bytes");
+    var fixture=new NearbyDBusFixture(root.get_path());var bus=Bus.get_sync(BusType.SESSION);uint registered=bus.register_object("/com/majoris/Files/NearbyFixture",fixture);
+    yield bus.call("org.freedesktop.DBus","/org/freedesktop/DBus","org.freedesktop.DBus","RequestName",new Variant("(su)","com.majoris.Files.NearbyFixture",0u),null,DBusCallFlags.NONE,1000,null);
+    FileUtils.set_contents(root.get_child("nearby.extension").get_path(),"[Extension]\nVersion=1\nId=nearby-fixture\nName=Nearby fixture\nBusName=com.majoris.Files.NearbyFixture\nObjectPath=/com/majoris/Files/NearbyFixture\nCapabilities=nearby;\n");
+    try{
+        var metadata=new MetadataStore(root.get_child("state.db").get_path());var extension=new ExternalExtension(root.get_child("nearby.extension").get_path(),false,metadata);extension.set_enabled(true);var provider=new ExternalNearby(extension);
+        var peers=yield provider.discover(new Cancellable());assert(peers.size==1&&peers[0].id=="fixture-peer");var files=new Gee.ArrayList<File>();files.add(root.get_child("payload.txt"));
+        yield provider.send(peers[0].id,files,new Cancellable());string received;FileUtils.get_contents(root.get_child("received.txt").get_path(),out received);assert(received=="actual selected fixture bytes");
+        fixture.hold=true;var cancel=new Cancellable();Timeout.add(50,()=>{cancel.cancel();return Source.REMOVE;});bool cancelled=false;try{yield provider.send(peers[0].id,files,cancel);}catch(IOError.CANCELLED e){cancelled=true;}assert(cancelled&&fixture.cancelled);
+        FileUtils.set_contents(root.get_child("actions.extension").get_path(),"[Extension]\nVersion=1\nId=actions-fixture\nName=Action fixture\nBusName=com.majoris.Files.NearbyFixture\nObjectPath=/com/majoris/Files/NearbyFixture\nCapabilities=actions;\n");
+        var manager=new ExtensionManager(metadata,{root.get_path()});assert(manager.extensions.size==2);
+        ExternalExtension? action=null;foreach(var candidate in manager.extensions)if(candidate.id=="actions-fixture")action=candidate;
+        assert(action!=null);action.set_enabled(true);
+        var selected=new Gee.ArrayList<FileItem>();selected.add(new FileItem(files[0],yield files[0].query_info_async(FileItem.ATTRIBUTES,FileQueryInfoFlags.NONE,Priority.DEFAULT,null)));
+        yield manager.prepare(selected);assert(action.actions(selected).size==1);
+        fixture.invalid=true;yield action.prepare(selected);assert(action.actions(selected).size==0&&action.failure!="");fixture.invalid=false;
+        fixture.delay_ms=2500;int64 start=get_monotonic_time();yield action.prepare(selected);assert(action.actions(selected).size==0&&action.failure!=""&&get_monotonic_time()-start<3000000);fixture.delay_ms=0;
+        bool rejected=false;try{yield action.file_info(selected[0]);}catch(Error e){rejected=true;}assert(rejected);
+    }finally{bus.unregister_object(registered);try{yield OperationManager.remove_tree(root,new Cancellable());}catch(Error ignored){}}
 }
 async void shell_case() throws Error
 {
@@ -108,6 +156,20 @@ async void extension_case() throws Error
         column.text(item, metadata);
         for (int i = 0; i < 100 && column.text(item, metadata) == "…"; i++) { Timeout.add(20, () => { extension_case.callback(); return Source.REMOVE; }); yield; }
         assert(column.text(item, metadata) == "25");
+        var small=root.get_child("small.txt");FileUtils.set_contents(small.get_path(),"short");
+        var sort_model=new GLib.ListStore(typeof(FileItem));sort_model.append(item);var small_item=new FileItem(small,yield small.query_info_async(FileItem.ATTRIBUTES,FileQueryInfoFlags.NONE,Priority.DEFAULT,null));sort_model.append(small_item);
+        yield column.prepare_sort(sort_model,new Cancellable());assert(column.sort_ready&&column.compare(item,small_item,metadata)>0);
+        FileUtils.set_contents(small.get_path(),string.nfill(30,'x'));small_item=new FileItem(small,yield small.query_info_async(FileItem.ATTRIBUTES,FileQueryInfoFlags.NONE,Priority.DEFAULT,null));sort_model.remove(1);sort_model.append(small_item);
+        yield column.prepare_sort(sort_model,new Cancellable());assert(column.compare(item,small_item,metadata)<0);
+        var browser=new Browser(metadata,new Places(metadata));yield manager.columns(browser);assert(browser.has_column(extension.name+": Bytes"));
+        extension.set_enabled(false);yield manager.columns(browser);assert(!browser.has_column(extension.name+": Bytes"));extension.set_enabled(true);yield manager.columns(browser);assert(browser.has_column(extension.name+": Bytes"));
+        var sort_folder=root.get_child("sort-fixture");yield sort_folder.make_directory_async(Priority.DEFAULT,null);FileUtils.set_contents(sort_folder.get_child("small.txt").get_path(),"short");FileUtils.set_contents(sort_folder.get_child("large.txt").get_path(),string.nfill(25,'x'));
+        browser.navigate(sort_folder);browser.set_sort(extension.name+": Bytes",true);
+        for(int i=0;i<200;i++){if(!browser.directory.loading&&browser.active_selection.get_n_items()==2&&((FileItem)browser.active_selection.get_item(0)).name=="small.txt"&&metadata.state("display:"+sort_folder.get_uri()).contains(extension.name+": Bytes"))break;Timeout.add(20,()=>{extension_case.callback();return Source.REMOVE;});yield;}
+        assert(((FileItem)browser.active_selection.get_item(0)).name=="small.txt");
+        FileUtils.set_contents(sort_folder.get_child("small.txt").get_path(),string.nfill(30,'x'));
+        for(int i=0;i<200&&((FileItem)browser.active_selection.get_item(0)).name!="large.txt";i++){Timeout.add(20,()=>{extension_case.callback();return Source.REMOVE;});yield;}
+        assert(((FileItem)browser.active_selection.get_item(0)).name=="large.txt");browser.cancel();
         var parent = new Gtk.Window();
         yield extension.execute("checksum", selected, parent);
         string checksum; FileUtils.get_contents(root.get_child("example.txt.sha256").get_path(), out checksum);
@@ -116,6 +178,18 @@ async void extension_case() throws Error
         process.force_exit(); yield process.wait_async(null); stopped = true;
         yield extension.prepare(selected);
         assert(extension.actions(selected).size == 0 && extension.failure != "");
+        yield root.get_child("example.txt.sha256").delete_async(Priority.DEFAULT,null);
+        process=new Subprocess.newv({"/usr/bin/python3",Path.build_filename(examples,"checksum-extension.py")},SubprocessFlags.STDOUT_SILENCE|SubprocessFlags.STDERR_SILENCE);stopped=false;
+        for(int i=0;i<100;i++){
+            var owner=yield bus.call("org.freedesktop.DBus","/org/freedesktop/DBus","org.freedesktop.DBus","NameHasOwner",new Variant("(s)",extension.bus_name),new VariantType("(b)"),DBusCallFlags.NONE,1000,null);
+            if(owner.get_child_value(0).get_boolean())break;
+            Timeout.add(20,()=>{extension_case.callback();return Source.REMOVE;});yield;
+        }
+        yield extension.prepare(selected);assert(extension.actions(selected).size==1);
+        FileUtils.set_contents(root.get_child("invalid.extension").get_path(),"[Extension]\nVersion=999\n");
+        assert(new ExtensionManager(metadata,{root.get_path()}).extensions.size==1);
+        yield root.get_child("checksum.extension").delete_async(Priority.DEFAULT,null);
+        yield extension.prepare(selected);assert(extension.actions(selected).size==0&&extension.failure!="");
         extension.set_enabled(false); assert(column.text(item, metadata) == "");
     }
     finally { if (!stopped) process.force_exit(); }

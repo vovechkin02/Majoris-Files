@@ -46,6 +46,9 @@ namespace MajorisFiles {
         Gtk.CustomSorter group_sorter;
         string group_key = "None";
         uint group_refresh;
+        Cancellable column_sort_token=new Cancellable();
+        bool column_sort_pending;
+        uint column_model_revision;
         Variant? column_restore;
         bool applying_column_restore;
         string[] group_modes = {
@@ -54,6 +57,10 @@ namespace MajorisFiles {
         Gtk.FilterListModel filtered;
         Gtk.SortListModel sorted;
         Gtk.Stack views = new Gtk.Stack();
+        Gtk.Stack grid_views = new Gtk.Stack();
+        GridRows grid_rows;
+        Gtk.ListView grouped_grid;
+        uint grid_anchor = uint.MAX;
         HomeView home;
         Gtk.ListBox sidebar = new Gtk.ListBox();
         Gtk.Label status = new Gtk.Label("");
@@ -99,6 +106,7 @@ namespace MajorisFiles {
         bool rank_results = true;
         SharedFoldersState shares = SharedFoldersState.get_default();
         ulong shares_changed;
+        ulong cloud_changed;
         bool folders_first = true;
         int icon_size = 64;
         bool selection_checkboxes;
@@ -127,9 +135,15 @@ namespace MajorisFiles {
         {
             Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
             this.metadata = metadata;
+            CloudFiles.get_default().configure(metadata);
             notify["root"].connect(() => {
                 if (get_root() != null && shares_changed == 0)
                     shares_changed = shares.changed.connect(() => display_changed());
+                if (get_root() != null && cloud_changed == 0)
+                    cloud_changed = CloudFiles.get_default().changed.connect(() => {
+                        display_changed();
+                        if (chooser_filter != null || search_query.active) refilter();
+                    });
             });
             this.places = places;
             this.chooser_mode = chooser_mode;
@@ -154,9 +168,12 @@ namespace MajorisFiles {
                     apply_click_mode(views);
                 }
                 display_changed();
+                if(column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn&&!((ExternalColumn)column_providers[sort_key]).sort_ready&&!column_sort_pending)set_sort(sort_key,ascending);
                 if(group_key == "Tags" && group_refresh == 0)
                     group_refresh = Idle.add(() => { group_refresh = 0;
+                                                     var chosen=selection_uris();
                                                      group_sorter.changed(Gtk.SorterChange.DIFFERENT);
+                                                     restore_reordered(chosen);
                                                      return Source.REMOVE;
                         });
             });
@@ -165,11 +182,12 @@ namespace MajorisFiles {
             views.add_named(home, "Home");
             home.activated.connect((item) => activate_item.begin(item));
             directory.items.items_changed.connect((position, removed, added) => {
+                column_model_revision++;
                 for(uint i = position; i < position + added; i++)
                     metadata.reconcile((FileItem)directory.items.get_item(i));
             });
             filter = new Gtk.CustomFilter((obj) => { var item = (FileItem)obj;
-                                                     return (show_hidden || !item.info.get_is_hidden() || (initial_selection != null && initial_selection.equal(item.file))) && (!folders_only || item.navigable || item.info.get_is_symlink()) && (chooser_filter == null || chooser_filter.matches(item)) && (search_results || search_query.matches(item, metadata));
+                                                     return (show_hidden || !item.hidden || (initial_selection != null && initial_selection.equal(item.file))) && (!folders_only || item.navigable || Paths.is_symlink(item.info)) && (chooser_filter == null || chooser_filter.matches(item)) && (search_results || search_query.matches(item, metadata));
                 });
             sorter = new Gtk.CustomSorter((a, b) => compare_items((FileItem)a, (FileItem)b));
             filtered = new Gtk.FilterListModel(directory.items, filter);
@@ -353,6 +371,8 @@ namespace MajorisFiles {
             preview.visible = metadata.state("preview-pane-default", "false") == "true";
             body.end_child = content;
             sidebar_overlay.content = body;
+            sidebar_overlay.collapsed = true;
+            sidebar_overlay.show_sidebar = false;
             sidebar_overlay.min_sidebar_width = 180;
             sidebar_overlay.max_sidebar_width = 300;
             adaptive.child = sidebar_overlay;
@@ -370,7 +390,7 @@ namespace MajorisFiles {
             breakpoint.unapply.connect(() => {
                 sidebar_overlay.show_sidebar = false;
                 sidebar_overlay.sidebar = null;
-                sidebar_overlay.collapsed = false;
+                sidebar_overlay.collapsed = true;
                 body.start_child = side_scroll;
                 side_scroll.visible = true;
             });
@@ -386,7 +406,45 @@ namespace MajorisFiles {
             grid.enable_rubberband = true;
             grid.single_click_activate = metadata.state("single-click", "false") == "true";
             grid.activate.connect(activate_position);
-            views.add_named(scrolled(grid), "Grid");
+            grid_views.add_named(grid, "plain");
+            grid_rows = new GridRows(sorted, metadata);
+            var rows_factory = new Gtk.SignalListItemFactory();
+            rows_factory.bind.connect((obj) => {
+                var li=(Gtk.ListItem)obj;var row=(GridRow)li.item;
+                li.selectable=false;li.activatable=false;
+                if(row.heading){
+                    var label=new Gtk.Label(row.label);
+                    label.halign=Gtk.Align.START;label.margin_start=16;label.margin_top=12;label.margin_bottom=6;
+                    label.add_css_class("heading");label.update_property(Gtk.AccessibleProperty.LABEL,label.label,-1);
+                    li.child=label;
+                }else{
+                    var slice=new GridSlice(selection,row.start,row.count);
+                    var cells=new Gtk.GridView(slice,factory(true,slice));
+                    cells.min_columns=grid_rows.columns;cells.max_columns=grid_rows.columns;
+                    cells.single_click_activate=metadata.state("single-click","false")=="true";
+                    cells.enable_rubberband=true;
+                    cells.set_data<GridSlice>("majoris-grid-slice",slice);
+                    cells.activate.connect((p)=>activate_position(slice.offset+p));
+                    li.child=cells;
+                }
+            });
+            rows_factory.unbind.connect((obj)=>{var li=(Gtk.ListItem)obj;if(li.child is Gtk.GridView){var cells=(Gtk.GridView)li.child;var slice=cells.get_data<GridSlice>("majoris-grid-slice");cells.model=null;if(slice!=null)slice.detach();}li.child=null;});
+            grouped_grid=new Gtk.ListView(null,rows_factory);
+            grid_views.add_named(grouped_grid,"grouped");
+            grid_views.visible_child_name="plain";
+            grid_views.add_tick_callback(()=>{
+                if(grid_views.visible_child_name=="grouped"){
+                    // Measure against the viewport, not the child's forced
+                    // minimum width (which otherwise feeds back into columns).
+                    var context=get_pango_context();var metrics=context.get_metrics(null,context.get_language());
+                    int text_width=(int)(18L*metrics.get_approximate_char_width()/Pango.SCALE);
+                    int cell_width=int.max(icon_size,text_width)+64;
+                    int available=get_width()-(sidebar_pane.start_child==null?0:sidebar_pane.position)-(preview.visible?preview.get_width():0)-24;
+                    grid_rows.resize((uint)int.max(1,available/cell_width));
+                }
+                return Source.CONTINUE;
+            });
+            views.add_named(scrolled(grid_views), "Grid");
             var list = new Gtk.ColumnView(selection);
             list.header_factory = group_headers();
             list.show_column_separators = true;
@@ -459,6 +517,7 @@ namespace MajorisFiles {
             });
             directory.loaded.connect(() => { update_status();
                                              restore_selection();
+                                             if(column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn&&!column_sort_pending)set_sort(sort_key,ascending);
                                              if (view_mode == "Columns")
                                                  build_columns();
                 });
@@ -531,6 +590,7 @@ namespace MajorisFiles {
         {
             var b = new Gtk.Button.from_icon_name(icon);
             b.tooltip_text = tooltip;
+            b.update_property(Gtk.AccessibleProperty.LABEL,tooltip,-1);
             b.clicked.connect(() => callback());
             return b;
         }
@@ -909,7 +969,10 @@ namespace MajorisFiles {
             group_key = remember ? metadata.state("group:" + location.get_uri(), "None") : "None";
             if(!(group_key in group_modes))
                 group_key = "None";
+            grid_rows.mode = group_key;
             sorted.section_sorter = group_key == "None" ? null : group_sorter;
+            grid_views.visible_child_name = group_key == "None" ? "plain" : "grouped";
+            grouped_grid.model = group_key == "None" || view_mode!="Grid" ? null : new Gtk.NoSelection(grid_rows);
             group_sorter.changed(Gtk.SorterChange.DIFFERENT);
             caption_key = remember ? metadata.state("caption:" + location.get_uri(), "None") : "None";
             if(caption_key != "None" && !(caption_key in column_titles))
@@ -955,6 +1018,7 @@ namespace MajorisFiles {
             sorter.changed(Gtk.SorterChange.DIFFERENT);
             display_changed();
             loading_display = false;
+            if(column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn){string key=sort_key;sort_key="Name";column_sort_token.cancel();column_sort_token=new Cancellable();column_sort_pending=true;prepare_external_sort.begin(key,ascending,location,column_sort_token);}
         }
         public void show_view_settings()
         {
@@ -1086,21 +1150,53 @@ namespace MajorisFiles {
         }
         public void set_sort(string key, bool ascending)
         {
+            column_sort_token.cancel();column_sort_token=new Cancellable();
+            if(column_providers.has_key(key)&&column_providers[key] is ExternalColumn){column_sort_pending=true;prepare_external_sort.begin(key,ascending,directory.location,column_sort_token);return;}
+            column_sort_pending=false;
+            if(sort_key!=key&&column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn)((ExternalColumn)column_providers[sort_key]).release_sort();
+            var chosen=selection_uris();
             sort_key = key;
             this.ascending = ascending;
             sorter.changed(Gtk.SorterChange.DIFFERENT);
+            restore_reordered(chosen);
             save_display();
             session_changed();
+        }
+        async void prepare_external_sort(string key,bool direction,File expected,Cancellable token){
+            status.label=_("Preparing extension sort…");
+            try{
+                int64 deadline=get_monotonic_time()+30*1000000L;
+                while(directory.loading||!directory.location.equal(expected)){token.set_error_if_cancelled();if(get_monotonic_time()>deadline)throw new IOError.TIMED_OUT("Folder did not finish loading for extension sorting");Timeout.add(50,()=>{prepare_external_sort.callback();return Source.REMOVE;});yield;}
+                uint revision=column_model_revision;var column=(ExternalColumn)column_providers[key];yield column.prepare_sort(directory.items,token);token.set_error_if_cancelled();
+                if(revision!=column_model_revision||!directory.location.equal(expected)){if(sort_key==key)set_sort("Name",direction);throw new IOError.BUSY("Folder changed while extension sort values were loading; choose the sort again");}
+                var chosen=selection_uris();if(sort_key!=key&&column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn)((ExternalColumn)column_providers[sort_key]).release_sort();
+                sort_key=key;ascending=direction;sorter.changed(Gtk.SorterChange.DIFFERENT);restore_reordered(chosen);save_display();session_changed();
+            }catch(Error e){if(!(e is IOError.CANCELLED))error(e.message);}
+            finally{if(column_sort_token==token){column_sort_pending=false;update_status();}}
         }
         public void set_group(string mode)
         {
             if(!(mode in group_modes))
                 return;
+            var chosen=selection_uris();
             group_key = mode;
+            grid_rows.mode = mode;
             sorted.section_sorter = mode == "None" ? null : group_sorter;
+            grid_views.visible_child_name = mode == "None" ? "plain" : "grouped";
+            grouped_grid.model = mode == "None" || view_mode!="Grid" ? null : new Gtk.NoSelection(grid_rows);
             group_sorter.changed(Gtk.SorterChange.DIFFERENT);
+            restore_reordered(chosen);
             save_display();
             session_changed();
+        }
+        Gee.HashSet<string> selection_uris(){
+            var result=new Gee.HashSet<string>();var iterator=Gtk.BitsetIter();uint position;
+            if(iterator.init_first(selection.get_selection(),out position))do{var item=selection.get_item(position) as FileItem;if(item!=null)result.add(item.file.get_uri());}while(iterator.next(out position));return result;
+        }
+        void restore_reordered(Gee.HashSet<string> uris){
+            var selected=new Gtk.Bitset.empty();var mask=new Gtk.Bitset.empty();mask.add_range(0,selection.get_n_items());
+            for(uint i=0;i<selection.get_n_items();i++){var item=selection.get_item(i) as FileItem;if(item!=null&&uris.contains(item.file.get_uri()))selected.add(i);}
+            selection.set_selection(selected,mask);grid_anchor=uint.MAX;
         }
         Gtk.SignalListItemFactory group_headers()
         {
@@ -1137,6 +1233,12 @@ namespace MajorisFiles {
             column.notify["fixed-width"].connect(save_display);
             load_display(directory.location);
         }
+        public string extension_columns_signature="";
+        public bool has_column(string title){return detail_columns.has_key(title);}
+        public void remove_extension_columns(Gee.Set<string> retained){
+            var obsolete=new Gee.ArrayList<string>();foreach(var title in column_providers.keys)if(column_providers[title] is ExternalColumn&&!retained.contains(title))obsolete.add(title);
+            foreach(var title in obsolete){if(sort_key==title)set_sort("Name",ascending);details.remove_column(detail_columns[title]);detail_columns.unset(title);column_providers.unset(title);var names=new Gee.ArrayList<string>();foreach(var name in column_titles)if(name!=title)names.add(name);column_titles=names.to_array();}
+        }
         public void set_view(string mode, bool remember = true)
         {
             if(chooser_mode && mode != "Grid" && mode != "List")
@@ -1144,6 +1246,7 @@ namespace MajorisFiles {
             if(view_mode == mode)
                 return;
             view_mode = mode;
+            grouped_grid.model = group_key == "None" || mode!="Grid" ? null : new Gtk.NoSelection(grid_rows);
             views.visible_child_name = directory.location.get_uri() == "majoris:///home" ? "Home" : mode;
             if(remember && metadata.state("remember-folder-settings", "true") == "true")
                 metadata.set_state("view:" + location.get_uri(), mode);
@@ -1210,6 +1313,7 @@ namespace MajorisFiles {
         }
         public void navigate(File file, bool record = true)
         {
+            column_sort_token.cancel();column_sort_pending=false;
             if(narrow)
                 sidebar_overlay.show_sidebar = false;
             column_restore = null;
@@ -1381,7 +1485,7 @@ namespace MajorisFiles {
                         return;
                     }
                 }
-                if(item.info.get_is_symlink())
+                if(Paths.is_symlink(item.info))
                 {
                     var info = yield item.file.query_info_async("standard::type", FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
                     if(info.get_file_type() == FileType.DIRECTORY)
@@ -1619,7 +1723,7 @@ namespace MajorisFiles {
             });
             return factory;
         }
-        Gtk.SignalListItemFactory factory(bool grid, Gtk.MultiSelection? row_selection = null)
+        Gtk.SignalListItemFactory factory(bool grid, Gtk.SelectionModel? row_selection = null)
         {
             var f = new Gtk.SignalListItemFactory();
             var display_handlers = new Gee.HashMap<Gtk.ListItem, ulong?>();
@@ -1631,7 +1735,11 @@ namespace MajorisFiles {
                                        box.margin_bottom = 8;
                                        var icon = new Gtk.Image();
                                        icon.pixel_size = grid ? 64 : 24;
-                                       box.append(icon);
+                                       var icon_area = new Gtk.Overlay(); icon_area.child = icon;
+                                       var cloud_badge = new Gtk.Image(); cloud_badge.pixel_size = 16;
+                                       cloud_badge.halign = Gtk.Align.END; cloud_badge.valign = Gtk.Align.END;
+                                       cloud_badge.can_target = false; cloud_badge.visible = false;
+                                       icon_area.add_overlay(cloud_badge); box.append(icon_area);
                                        var label = new Gtk.Label("");
                                        label.ellipsize = Pango.EllipsizeMode.END;
                                        label.max_width_chars = grid ? 18 : 50;
@@ -1673,6 +1781,7 @@ namespace MajorisFiles {
                         caption.label = column_text((FileItem)li.item, caption_key);
                     if(li.item != null)
                         label.label = visible_name((FileItem)li.item);
+                    if(li.item != null) cloud_badge_for(cloud_badge, (FileItem)li.item);
                     if (li.item != null && ((FileItem)li.item).directory)
                         icon.set_from_gicon(item_icon((FileItem)li.item));
                     string settings = metadata.state("thumbnail-policy", "Local") + metadata.state("remote-thumbnail-limit", "8");
@@ -1685,6 +1794,32 @@ namespace MajorisFiles {
                                        icon.pixel_size = grid ? icon_size : (icon_size > 64 ? 32 : 24);
                                        checkbox.visible = selection_checkboxes;
                                        li.child = box;
+                                       if(row_selection is GridSlice){
+                                           var slice=(GridSlice)row_selection;
+                                           var click=new Gtk.GestureClick();click.button=1;click.propagation_phase=Gtk.PropagationPhase.CAPTURE;
+                                           click.pressed.connect(()=>{
+                                               uint position=slice.offset+li.position;
+                                               if((click.get_current_event_state()&Gdk.ModifierType.SHIFT_MASK)!=0&&grid_anchor!=uint.MAX){
+                                                   uint start=uint.min(position,grid_anchor),end=uint.max(position,grid_anchor);
+                                                   selection.select_range(start,end-start+1,true);click.set_state(Gtk.EventSequenceState.CLAIMED);
+                                               }else grid_anchor=position;
+                                           });box.add_controller(click);
+                                           var keys=new Gtk.EventControllerKey();keys.propagation_phase=Gtk.PropagationPhase.CAPTURE;
+                                           keys.key_pressed.connect((key,code,state)=>{
+                                               int current=(int)(slice.offset+li.position),target=current;
+                                               if(key==Gdk.Key.Up)target-=(int)grid_rows.columns;
+                                               else if(key==Gdk.Key.Down)target+=(int)grid_rows.columns;
+                                               else if(key==Gdk.Key.Left)target--;
+                                               else if(key==Gdk.Key.Right)target++;
+                                               else if(key==Gdk.Key.Home)target=0;
+                                               else if(key==Gdk.Key.End)target=(int)selection.get_n_items()-1;
+                                               else return false;
+                                               target=target.clamp(0,(int)selection.get_n_items()-1);
+                                               if((state&Gdk.ModifierType.SHIFT_MASK)!=0){if(grid_anchor==uint.MAX)grid_anchor=(uint)current;uint start=uint.min(grid_anchor,(uint)target);selection.select_range(start,uint.max(grid_anchor,(uint)target)-start+1,true);}
+                                               else{grid_anchor=(uint)target;if((state&Gdk.ModifierType.CONTROL_MASK)==0)selection.select_item((uint)target,true);}
+                                               focus_grouped((uint)target);return true;
+                                           });box.add_controller(keys);
+                                       }
                                        var middle = new Gtk.GestureClick();
                                        middle.button = 2;
                                        middle.pressed.connect(() => { var item = li.item as FileItem;
@@ -1694,8 +1829,8 @@ namespace MajorisFiles {
                                        box.add_controller(middle);
                                        var right = new Gtk.GestureClick();
                                        right.button = 3;
-                                       right.pressed.connect(() => { if(li.item != null && !active_selection.is_selected(li.position))
-                                                                         active_selection.select_item(li.position, true);
+                                       right.pressed.connect(() => { var model=row_selection??active_selection; if(li.item != null && !model.is_selected(li.position))
+                                                                         model.select_item(li.position, true);
                                            });
                                        box.add_controller(right);
                                        if(!chooser_mode)
@@ -1706,8 +1841,9 @@ namespace MajorisFiles {
                         var item = li.item as FileItem;
                         if(item == null)
                             return null;
-                        if(!active_selection.is_selected(li.position))
-                            active_selection.select_item(li.position, true);
+                        var model=row_selection??active_selection;
+                        if(!model.is_selected(li.position))
+                            model.select_item(li.position, true);
                         var files = new Gee.ArrayList<File>();
                         foreach(var chosen in selected())
                             files.add(chosen.file);
@@ -1722,11 +1858,13 @@ namespace MajorisFiles {
             f.bind.connect((obj) => { var li = (Gtk.ListItem)obj;
                                       var item = (FileItem)li.item;
                                       var box = (Gtk.Box)li.child;
-                                      var image = (Gtk.Image)box.get_first_child();
+                                      var area = (Gtk.Overlay)box.get_first_child();
+                                      var image = (Gtk.Image)area.child;
+                                      cloud_badge_for((Gtk.Image)area.child.get_next_sibling(), item);
                                       image.set_from_gicon(item_icon(item));
-                                      ((Gtk.Label)image.get_next_sibling()).label = visible_name(item);
+                                      ((Gtk.Label)area.get_next_sibling()).label = visible_name(item);
                                       if(grid)
-                                          ((Gtk.Label)image.get_next_sibling().get_next_sibling()).label = caption_key == "None" ? "" : column_text(item, caption_key);
+                                          ((Gtk.Label)area.get_next_sibling().get_next_sibling()).label = caption_key == "None" ? "" : column_text(item, caption_key);
                                       ((Gtk.CheckButton)box.get_last_child()).active = li.selected;
                                       box.tooltip_text = item.file.get_parse_name();
                                       refresh_thumbnail(li, image, item);
@@ -1747,8 +1885,19 @@ namespace MajorisFiles {
             });
             return f;
         }
+        void focus_grouped(uint position){
+            grouped_grid.scroll_to(grid_rows.row_for(position),Gtk.ListScrollFlags.NONE,null);
+            Idle.add(()=>{focus_grouped_cell(grouped_grid,position);return Source.REMOVE;});
+        }
+        bool focus_grouped_cell(Gtk.Widget widget,uint position){
+            if(widget is Gtk.GridView){var slice=widget.get_data<GridSlice>("majoris-grid-slice");if(slice!=null&&position>=slice.offset&&position<slice.offset+slice.get_n_items()){((Gtk.GridView)widget).scroll_to(position-slice.offset,Gtk.ListScrollFlags.FOCUS,null);return true;}}
+            for(var child=widget.get_first_child();child!=null;child=child.get_next_sibling())if(focus_grouped_cell(child,position))return true;
+            return false;
+        }
         public void cancel()
         {
+            column_sort_token.cancel();column_sort_pending=false;
+            grouped_grid.model=null;
             if(group_refresh != 0)
             {
                 Source.remove(group_refresh);
@@ -1798,6 +1947,8 @@ namespace MajorisFiles {
         }
         protected override void dispose()
         {
+            if(grid_rows!=null)grid_rows.detach();
+            if (cloud_changed != 0) { CloudFiles.get_default().disconnect(cloud_changed); cloud_changed = 0; }
             if (shares_changed != 0) { shares.disconnect(shares_changed); shares_changed = 0; }
             cancel();
             if(completion_popup.get_parent() != null)
@@ -1806,6 +1957,7 @@ namespace MajorisFiles {
         }
         public override void unroot()
         {
+            if (cloud_changed != 0) { CloudFiles.get_default().disconnect(cloud_changed); cloud_changed = 0; }
             if (shares_changed != 0) { shares.disconnect(shares_changed); shares_changed = 0; }
             base.unroot();
         }
@@ -1815,6 +1967,14 @@ namespace MajorisFiles {
             if (item.directory && shares.contains(item.file))
                 return new EmblemedIcon(icon, new Emblem(new ThemedIcon("emblem-shared")));
             return icon;
+        }
+        static void cloud_badge_for(Gtk.Image badge, FileItem item) {
+            var cloud = CloudFiles.get_default().peek(item.file);
+            badge.visible = cloud != null && cloud.emblem != null;
+            if (badge.visible) {
+                badge.set_from_icon_name(cloud.emblem); badge.tooltip_text = cloud.state + (cloud.error == "" ? "" : ": " + cloud.error);
+                badge.update_property(Gtk.AccessibleProperty.LABEL, cloud.state, -1);
+            }
         }
         delegate File? DropFolder();
         async void recover_metadata(Adw.Banner banner)

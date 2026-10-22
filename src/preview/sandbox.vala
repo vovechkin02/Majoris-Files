@@ -23,7 +23,7 @@ namespace MajorisFiles {
         static async Bytes execute(FileItem item, string mode, string[] parameters, Cancellable token) throws Error
         {
             token.set_error_if_cancelled();
-            if(!item.file.is_native() || item.info.get_is_symlink() || item.info.get_file_type() != FileType.REGULAR)
+            if(!item.file.is_native() || Paths.is_symlink(item.info) || item.info.get_file_type() != FileType.REGULAR)
                 throw new FileError.UNSUPPORTED("This preview requires a local regular file");
             var bwrap = Environment.find_program_in_path("bwrap");
             if(bwrap == null)
@@ -49,6 +49,9 @@ namespace MajorisFiles {
             if(FileUtils.test("/etc/ld.so.cache", FileTest.EXISTS))
                 foreach(var argument in new string[] {"--ro-bind", "/etc/ld.so.cache", "/etc/ld.so.cache"})
                     args += argument;
+            if(FileUtils.test("/etc/alternatives",FileTest.IS_DIR))
+                foreach(var argument in new string[]{"--ro-bind","/etc/alternatives","/etc/alternatives"})args+=argument;
+            foreach(var argument in new string[]{"--setenv","OPENBLAS_NUM_THREADS","1","--setenv","OMP_NUM_THREADS","2"})args+=argument;
             if (mode == "office-pdf") {
                 string script = OFFICE_HELPER_PATH;
                 if (helper != PREVIEW_HELPER_PATH) script = OFFICE_SOURCE_HELPER_PATH;

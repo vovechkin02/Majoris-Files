@@ -135,6 +135,10 @@ namespace MajorisFiles {
     }
     [DBus(name = "com.majoris.Files.Sharing")]
     public interface SharingProxy : Object {
+        public abstract async bool visibility_supported() throws DBusError, IOError;
+        public abstract async string firewall_backend() throws DBusError, IOError;
+        public abstract async bool get_hidden(string share) throws DBusError, IOError;
+        public abstract async void set_hidden(string share, bool hidden) throws DBusError, IOError;
         public abstract async void enable_services() throws DBusError, IOError;
         public abstract async void provision_password(string password) throws DBusError, IOError;
         public abstract async void configure_firewall(bool enabled) throws DBusError, IOError;
@@ -167,7 +171,7 @@ namespace MajorisFiles {
             if (!folder.is_native())
                 throw new FileError.INVALID("Only local folders can be shared");
             var info = yield folder.query_info_async("standard::type,standard::is-symlink,owner::user", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null);
-            if (info.get_file_type() != FileType.DIRECTORY || info.get_is_symlink())
+            if (info.get_file_type() != FileType.DIRECTORY || Paths.is_symlink(info))
                 throw new FileError.INVALID("Select a local folder rather than a symbolic link");
             string path = folder.get_path();
             if (path == "/" || path.has_prefix("/etc") || path.has_prefix("/proc") || path.has_prefix("/sys") || path.has_prefix("/dev") || path.has_prefix("/boot") || path.has_prefix("/root"))
@@ -193,6 +197,8 @@ namespace MajorisFiles {
         {
             if (!SharePolicy.valid_name(name))
                 throw new FileError.INVALID("Invalid share name");
+            SharingProxy visibility = yield Bus.get_proxy(BusType.SYSTEM, "com.majoris.Files.Sharing", "/com/majoris/Files/Sharing");
+            if (yield visibility.get_hidden(name)) yield visibility.set_hidden(name, false);
             yield invoke({"net", "usershare", "delete", name});
             SharedFoldersState.get_default().refresh.begin();
             try {

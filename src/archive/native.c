@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+typedef struct {MajorisArchiveProgress callback;gpointer data;guint64 bytes;guint files;gint64 deadline;} Progress;
+static void report_progress(Progress *progress,gboolean final){gint64 now=g_get_monotonic_time();if(progress->callback&&(final||now>=progress->deadline)){progress->callback(progress->bytes,progress->files,progress->data);progress->deadline=now+100000;}}
 static gboolean failure(struct archive *a, GError **error) {
     g_set_error(error, G_IO_ERROR, G_IO_ERROR_FAILED, "%s", archive_error_string(a) ?: "Archive operation failed");
     return FALSE;
@@ -72,7 +74,8 @@ char *majoris_archive_list(const char *source, GCancellable *cancel, GError **er
 fail:
     archive_read_free(reader); g_strfreev(volumes); g_string_free(text, TRUE); return NULL;
 }
-gboolean majoris_archive_extract(const char *source, const char *destination, const char *password, GCancellable *cancel, GError **error) {
+gboolean majoris_archive_extract(const char *source, const char *destination, const char *password, GCancellable *cancel,MajorisArchiveProgress progress,gpointer data,GError **error) {
+    Progress counters={.callback=progress,.data=data};
     struct archive *reader = archive_read_new(), *writer = archive_write_disk_new(); gboolean ok = FALSE;
     char **volumes = NULL;
     archive_read_support_filter_all(reader); archive_read_support_format_all(reader);
@@ -96,15 +99,18 @@ gboolean majoris_archive_extract(const char *source, const char *destination, co
             bytes+=length;
             if (bytes>(((guint64)1)<<40)) { g_set_error_literal(error,G_IO_ERROR,G_IO_ERROR_NO_SPACE,"Archive exceeds the 1 TiB extraction safety limit"); goto out; }
             if (archive_write_data_block(writer,buffer,length,offset) < ARCHIVE_OK) { failure(writer,error); goto out; }
+            counters.bytes+=length;report_progress(&counters,FALSE);
         }
         if (result != ARCHIVE_EOF) { failure(reader,error); goto out; }
         if (archive_write_finish_entry(writer)<ARCHIVE_OK) { failure(writer,error); goto out; }
+        counters.files++;report_progress(&counters,FALSE);
     }
     ok=TRUE;
+    report_progress(&counters,TRUE);
 out:
     archive_read_free(reader); g_strfreev(volumes); archive_write_free(writer); return ok;
 }
-static gboolean add_path(struct archive *writer,const char *source,const char *name,GCancellable *cancel,GError **error) {
+static gboolean add_path(struct archive *writer,const char *source,const char *name,GCancellable *cancel,Progress *progress,GError **error) {
     if (g_cancellable_set_error_if_cancelled(cancel,error)) return FALSE;
     struct stat st;
     if (lstat(source,&st)) { g_set_error(error,G_IO_ERROR,g_io_error_from_errno(errno),"Cannot read %s: %s",source,g_strerror(errno)); return FALSE; }
@@ -114,17 +120,18 @@ static gboolean add_path(struct archive *writer,const char *source,const char *n
     if (S_ISREG(st.st_mode)) {
         int fd=open(source,O_RDONLY|O_NOFOLLOW); if (fd<0) { g_set_error(error,G_IO_ERROR,g_io_error_from_errno(errno),"Cannot open source: %s",g_strerror(errno)); return FALSE; }
         guint8 *buffer=g_malloc(1024*1024); ssize_t count; gboolean ok=TRUE;
-        while ((count=read(fd,buffer,1024*1024))>0) { if (g_cancellable_set_error_if_cancelled(cancel,error)) { ok=FALSE; break; } if (archive_write_data(writer,buffer,count)!=count) { failure(writer,error); ok=FALSE; break; } }
+        while ((count=read(fd,buffer,1024*1024))>0) { if (g_cancellable_set_error_if_cancelled(cancel,error)) { ok=FALSE; break; } if (archive_write_data(writer,buffer,count)!=count) { failure(writer,error); ok=FALSE; break; }progress->bytes+=count;report_progress(progress,FALSE); }
         if (count<0 && ok) { g_set_error(error,G_IO_ERROR,g_io_error_from_errno(errno),"Cannot read source: %s",g_strerror(errno)); ok=FALSE; }
         g_free(buffer); close(fd); if (!ok) return FALSE;
     } else {
         GDir *dir=g_dir_open(source,0,error); if (!dir) return FALSE; const char *child;
-        while ((child=g_dir_read_name(dir))) { char *path=g_build_filename(source,child,NULL); char *relative=g_build_filename(name,child,NULL); gboolean ok=add_path(writer,path,relative,cancel,error); g_free(path); g_free(relative); if (!ok) { g_dir_close(dir); return FALSE; } }
+        while ((child=g_dir_read_name(dir))) { char *path=g_build_filename(source,child,NULL); char *relative=g_build_filename(name,child,NULL); gboolean ok=add_path(writer,path,relative,cancel,progress,error); g_free(path); g_free(relative); if (!ok) { g_dir_close(dir); return FALSE; } }
         g_dir_close(dir);
     }
-    return archive_write_finish_entry(writer)>=ARCHIVE_OK || failure(writer,error);
+    progress->files++;report_progress(progress,FALSE);return archive_write_finish_entry(writer)>=ARCHIVE_OK || failure(writer,error);
 }
-gboolean majoris_archive_create(const char *destination,const char *format,char **sources,const char *password,GCancellable *cancel,GError **error) {
+gboolean majoris_archive_create(const char *destination,const char *format,char **sources,const char *password,GCancellable *cancel,MajorisArchiveProgress progress,gpointer data,GError **error) {
+    Progress counters={.callback=progress,.data=data};
     int fd=open(destination,O_WRONLY|O_CREAT|O_EXCL,0600);
     if (fd<0) { g_set_error(error,G_IO_ERROR,g_io_error_from_errno(errno),"Cannot create archive: %s",g_strerror(errno)); return FALSE; }
     struct archive *writer=archive_write_new(); gboolean ok=FALSE; int result;
@@ -136,8 +143,9 @@ gboolean majoris_archive_create(const char *destination,const char *format,char 
         if(archive_write_set_passphrase(writer, password) != ARCHIVE_OK || archive_write_set_options(writer, "zip:encryption=aes256") != ARCHIVE_OK) { failure(writer, error); goto out; }
     }
     if (result<ARCHIVE_OK || archive_write_open_fd(writer,fd)<ARCHIVE_OK) { failure(writer,error); goto out; }
-    for (int i=0;sources[i];i++) { char *name=g_path_get_basename(sources[i]); gboolean added=add_path(writer,sources[i],name,cancel,error); g_free(name); if (!added) goto out; }
+    for (int i=0;sources[i];i++) { char *name=g_path_get_basename(sources[i]); gboolean added=add_path(writer,sources[i],name,cancel,&counters,error); g_free(name); if (!added) goto out; }
     ok=archive_write_close(writer)>=ARCHIVE_OK; if (!ok) failure(writer,error);
+    if(ok)report_progress(&counters,TRUE);
 out:
     archive_write_free(writer); close(fd); if (!ok) unlink(destination); return ok;
 }

@@ -64,7 +64,7 @@ namespace MajorisFiles {
                     foreach (var info in batch)
                     {
                         var item = new FileItem(folder.get_child(info.get_name()), info);
-                        if(info.get_is_symlink())
+                        if(Paths.is_symlink(info))
                         {
                             try {
                                 var target = yield item.file.query_info_async("standard::type", FileQueryInfoFlags.NONE, Priority.DEFAULT, token);

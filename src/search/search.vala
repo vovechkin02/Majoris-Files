@@ -107,6 +107,7 @@ namespace MajorisFiles {
     public class SearchController : Object {
         public Cancellable cancellable = new Cancellable();
         public SearchProvider indexed = new IndexedSearchProvider();
+        public bool exhaustive { get; set; default = false; }
         public string backend_status { get; private set; default = ""; }
         public signal void found(FileItem item);
         public uint unreadable {
@@ -136,6 +137,8 @@ namespace MajorisFiles {
             var queue = new Gee.ArrayQueue<File>();
             var visited = new Gee.HashSet<string>();
             var emitted = new Gee.HashSet<string>();
+            var covered = new Gee.HashSet<string>();
+            backend_status = "Filesystem scan";
             if (metadata == null || metadata.state("indexed-search", "true") == "true") {
                 var index_token = new Cancellable();
                 ulong cancel = token.cancelled.connect(() => index_token.cancel());
@@ -147,10 +150,15 @@ namespace MajorisFiles {
                 });
                 try {
                     yield indexed.search(roots, criteria, recursive, index_token);
-                    backend_status = "Indexed results with filesystem reconciliation";
+                    if (!exhaustive && (metadata == null || metadata.state("exhaustive-search", "false") != "true") && indexed is CoveredSearchProvider) {
+                        foreach (var root in roots)
+                            if (yield ((CoveredSearchProvider)indexed).covers(root, criteria, recursive, index_token)) covered.add(root.get_uri());
+                    }
+                    backend_status = covered.size == roots.size ? "Indexed locations; updates can lag the filesystem" : "Indexed results; scanning uncovered locations";
                 }
                 catch (Error e) {
                     token.set_error_if_cancelled();
+                    covered.clear();
                     backend_status = "Index unavailable; searching the filesystem";
                 }
                 finally {
@@ -160,7 +168,7 @@ namespace MajorisFiles {
                 }
             }
             foreach(var root in roots)
-                if(visited.add(root.get_uri()))
+                if(!covered.contains(root.get_uri()) && visited.add(root.get_uri()))
                     queue.offer(root);
             while (!queue.is_empty)
             {
@@ -181,7 +189,7 @@ namespace MajorisFiles {
                             item.relevance = criteria.text == "" ? 0 : item.name.casefold() == criteria.text.casefold() ? 30 : item.name.casefold().has_prefix(criteria.text.casefold()) ? 20 : 10;
                             if (criteria.matches(item, metadata) && (criteria.content == "" || (yield content_matches(item, criteria.content, token))) && emitted.add(item.file.get_uri()))
                                 found(item);
-                            if (recursive && item.directory && !info.get_is_symlink() && !info.get_is_hidden() && visited.add(item.file.get_uri()))
+                            if (recursive && item.directory && !Paths.is_symlink(info) && !item.hidden && !covered.contains(item.file.get_uri()) && visited.add(item.file.get_uri()))
                                 queue.offer(item.file);
                         }
                     }
@@ -212,11 +220,12 @@ namespace MajorisFiles {
                 scanned++;
                 progress(scanned, unreadable);
             }
+            progress(scanned, unreadable);
         }
         static async bool content_matches(FileItem item, string needle, Cancellable token) throws Error
         {
             // Direct content search is deliberately bounded and never reads network files.
-            if(!item.file.is_native() || item.info.get_file_type() != FileType.REGULAR || item.info.get_is_symlink() || item.bytes > 4 * 1024 * 1024 || !(item.mime.has_prefix("text/") || item.mime.contains("json") || item.mime.contains("xml")))
+            if(!item.file.is_native() || item.info.get_file_type() != FileType.REGULAR || Paths.is_symlink(item.info) || item.bytes > 4 * 1024 * 1024 || !(item.mime.has_prefix("text/") || item.mime.contains("json") || item.mime.contains("xml")))
                 return false;
             try {
                 var stream = yield item.file.read_async(Priority.LOW, token);

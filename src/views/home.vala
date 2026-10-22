@@ -69,7 +69,7 @@ namespace MajorisFiles {
                             if(batch == null)
                                 break;
                             foreach(var info in batch)
-                                if(!info.get_is_hidden())
+                                if(!Paths.is_hidden(info))
                                     entries.add(new FileItem(folder.get_child(info.get_name()), info));
                         }
                     }

@@ -10,7 +10,8 @@ int main(string[] args)
         FileUtils.set_contents(Path.build_filename(root, "notes.txt"), "Majoris Files preview\nA local document.");
         DirUtils.create(Path.build_filename(root, "Documents"), 0700);
         DirUtils.create(Path.build_filename(root, "Pictures"), 0700);
-        Gtk.init();
+        Environment.set_variable("GDK_BACKEND","x11",true);Environment.set_variable("GSK_RENDERER","cairo",true);Gtk.init();
+        Gtk.Settings.get_default().gtk_enable_animations=false;
         Environment.set_prgname("majoris-files-visual-check");
         Environment.set_application_name("Majoris Files Visual Check");
         Adw.init();
@@ -23,6 +24,7 @@ int main(string[] args)
         var operations = new OperationManager(metadata);
         var window = new FilesWindow(app, metadata, places, operations, File.new_for_path(root));
         window.present();
+        window.current.set_group("Type");
         var loop = new MainLoop();
         int stage = 0;
         Timeout.add(600, () => { if(stage == 0)

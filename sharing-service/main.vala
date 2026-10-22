@@ -1,6 +1,30 @@
 namespace MajorisFiles {
     [DBus(name = "com.majoris.Files.Sharing")]
     public class SharingService : Object {
+        async uint caller_uid(BusName sender) throws Error {
+            var bus = yield Bus.get(BusType.SYSTEM);
+            var response = yield bus.call("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "GetConnectionUnixUser", new Variant("(s)", sender), new VariantType("(u)"), DBusCallFlags.NONE, 5000, null);
+            uint uid = response.get_child_value(0).get_uint32();
+            if (uid == 0) throw new IOError.PERMISSION_DENIED("Root usershares are not managed by Files");
+            return uid;
+        }
+        public async bool visibility_supported() throws DBusError, IOError {
+            try { return yield new ShareVisibility().supported(); } catch (Error e) { throw new IOError.NOT_SUPPORTED(e.message); }
+        }
+        public async string firewall_backend() throws DBusError, IOError {
+            try { return yield SharingFirewall.backend(yield Bus.get(BusType.SYSTEM)); }
+            catch (Error e) { throw new IOError.FAILED(e.message); }
+        }
+        public async bool get_hidden(string share, BusName sender) throws DBusError, IOError {
+            try { return yield new ShareVisibility().hidden(share, yield caller_uid(sender)); } catch (Error e) { throw new IOError.FAILED(e.message); }
+        }
+        public async void set_hidden(string share, bool hidden, BusName sender) throws DBusError, IOError {
+            try {
+                yield authorize(sender, "com.majoris.files.sharing.manage");
+                yield new ShareVisibility().set_hidden(share, yield caller_uid(sender), hidden);
+            }
+            catch (Error e) { throw new IOError.FAILED(e.message); }
+        }
         public async string get_clients(string share, BusName sender) throws DBusError, IOError
         {
             try {

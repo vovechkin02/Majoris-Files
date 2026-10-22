@@ -25,7 +25,7 @@ namespace MajorisFiles {
                 if(!file.is_native())
                     throw new FileError.UNSUPPORTED("POSIX permissions require local storage");
                 var info = yield file.query_info_async("standard::type,standard::is-symlink,unix::mode", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.LOW, token);
-                if(info.get_is_symlink())
+                if(Paths.is_symlink(info))
                     continue;
                 if(!info.has_attribute("unix::mode"))
                     throw new FileError.UNSUPPORTED("This filesystem does not expose POSIX permissions");
@@ -77,7 +77,7 @@ namespace MajorisFiles {
             if(!file.is_native() || Environment.find_program_in_path("getfacl") == null)
                 throw new FileError.UNSUPPORTED("ACL editing requires local storage and the acl utilities");
             var info = yield file.query_info_async("standard::is-symlink", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null);
-            if(info.get_is_symlink())
+            if(Paths.is_symlink(info))
                 throw new FileError.UNSUPPORTED("ACL editing does not follow symbolic links");
             var process = new Subprocess.newv({"getfacl", "--omit-header", "--absolute-names", "--", file.get_path()}, SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDERR_PIPE);
             string output, errors;
@@ -95,7 +95,7 @@ namespace MajorisFiles {
             if(acl.length > 128 * 1024)
                 throw new FileError.INVALID("The ACL is too large");
             var info = yield file.query_info_async("standard::is-symlink", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null);
-            if(info.get_is_symlink())
+            if(Paths.is_symlink(info))
                 throw new FileError.UNSUPPORTED("ACL editing does not follow symbolic links");
             foreach(var line in acl.split("\n"))
                 if(line.strip() != "" && !line.has_prefix("#") && !Regex.match_simple("^(default:)?(user|group|mask|other):[a-zA-Z0-9_.-]*:[r-][w-][x-]([ \\t]+#effective:[r-][w-][x-])?$", line))

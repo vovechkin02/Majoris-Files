@@ -14,11 +14,17 @@ namespace MajorisFiles {
         Gee.HashMap<string, Gee.HashMap<string, string>> fields = new Gee.HashMap<string, Gee.HashMap<string, string>>();
         Gee.HashSet<string> pending = new Gee.HashSet<string>();
         bool verified;
+        public uint revision {get;private set;default=0;}
         uint request_generation;
+        File manifest_file;
+        string manifest_identity;
+        uint owner_watch;
+        string provider_owner="";
         public ExternalExtension(string manifest, bool trusted, MetadataStore metadata) throws Error
         {
             this.metadata = metadata;
             var file = File.new_for_path(manifest);
+            manifest_file=file;
             var info = file.query_info("standard::size,standard::type", FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
             if (info.get_file_type() != FileType.REGULAR || info.get_size() > 65536) throw new FileError.INVALID("Invalid extension manifest");
             var key = new KeyFile(); key.load_from_file(manifest, KeyFileFlags.NONE);
@@ -29,23 +35,43 @@ namespace MajorisFiles {
                 !Regex.match_simple("^[A-Za-z0-9_.-]{1,100}$", id) || name.length > 100 || capabilities.length > 8)
                 throw new FileError.INVALID("Unsupported extension protocol or identity");
             enabled = metadata.state("extension-enabled:" + id, trusted ? "true" : "false") == "true";
+            manifest_identity=Checksum.compute_for_string(ChecksumType.SHA256,key.to_data());
+            owner_watch=Bus.watch_name(BusType.SESSION,bus_name,BusNameWatcherFlags.NONE,
+                ()=>refresh_owner.begin(),()=>refresh_owner.begin());
         }
+        async void refresh_owner(){try{var bus=yield Bus.get(BusType.SESSION);yield synchronize_owner(bus);}catch(Error e){if(provider_owner!=""){provider_owner="";invalidate();}}}
+        async void synchronize_owner(DBusConnection bus) throws Error {
+            var reply=yield bus.call("org.freedesktop.DBus","/org/freedesktop/DBus","org.freedesktop.DBus","GetNameOwner",new Variant("(s)",bus_name),new VariantType("(s)"),DBusCallFlags.NONE,2000,null);
+            string owner=reply.get_child_value(0).get_string();if(owner!=provider_owner){provider_owner=owner;invalidate();}
+        }
+        void invalidate(){revision++;verified=false;cached_actions.clear();fields.clear();failure="";metadata.changed();}
+        ~ExternalExtension(){if(owner_watch!=0)Bus.unwatch_name(owner_watch);}
         public void set_enabled(bool value)
         {
             enabled = value; metadata.set_state("extension-enabled:" + id, value ? "true" : "false");
-            cached_actions.clear(); fields.clear(); verified = false;
-            metadata.changed();
+            invalidate();
         }
         public async Variant call(string method, Variant? arguments, string reply, Cancellable? token = null) throws Error
         {
             if (!enabled) throw new IOError.PERMISSION_DENIED("Extension is disabled");
+            var current=new KeyFile();
+            try{current.load_from_file(manifest_file.get_path(),KeyFileFlags.NONE);}
+            catch(Error e){invalidate();throw new IOError.NOT_FOUND("Extension was uninstalled; reopen extension preferences after reinstalling it");}
+            if(Checksum.compute_for_string(ChecksumType.SHA256,current.to_data())!=manifest_identity){invalidate();throw new IOError.INVALID_DATA("Extension registration changed; reload Files before invoking it");}
             var connection = yield Bus.get(BusType.SESSION, token);
+            try{yield synchronize_owner(connection);}
+            catch(IOError.CANCELLED e){throw e;}
+            catch(Error e){
+                var activated=yield connection.call(bus_name,object_path,"com.majoris.Files.Extension1","GetVersion",null,new VariantType("(u)"),DBusCallFlags.NONE,2000,token);
+                if(activated.get_child_value(0).get_uint32()!=1)throw new FileError.UNSUPPORTED("Incompatible extension protocol");
+                yield synchronize_owner(connection);verified=true;
+            }
             if (!verified) {
-                var version = yield connection.call(bus_name, object_path, "com.majoris.Files.Extension1", "GetVersion", null, new VariantType("(u)"), DBusCallFlags.NONE, 2000, token);
+                var version = yield connection.call(provider_owner, object_path, "com.majoris.Files.Extension1", "GetVersion", null, new VariantType("(u)"), DBusCallFlags.NONE, 2000, token);
                 if (version.get_child_value(0).get_uint32() != 1) throw new FileError.UNSUPPORTED("Incompatible extension protocol");
                 verified = true;
             }
-            return yield connection.call(bus_name, object_path, "com.majoris.Files.Extension1", method, arguments, new VariantType(reply), DBusCallFlags.NONE, 2000, token);
+            return yield connection.call(provider_owner, object_path, "com.majoris.Files.Extension1", method, arguments, new VariantType(reply), DBusCallFlags.NONE, 2000, token);
         }
         static string[] uris(Gee.List<FileItem> selection)
         {
@@ -92,12 +118,12 @@ namespace MajorisFiles {
             if (!allowed) throw new FileError.UNSUPPORTED("The extension action is no longer available");
             yield call("Activate", new Variant("(s^as)", action_id, uris(selection)), "()");
         }
-        public async Gee.HashMap<string, string> file_info(FileItem item) throws Error
+        public async Gee.HashMap<string, string> file_info(FileItem item,Cancellable? token=null) throws Error
         {
             var selection = new Gee.ArrayList<FileItem>(); selection.add(item);
             if (uris(selection).length == 0) throw new FileError.UNSUPPORTED("Credential-bearing locations are not passed to extensions");
             var result = new Gee.HashMap<string, string>();
-            var reply = yield call("GetFileInfo", new Variant("(s)", item.file.get_uri()), "(a{ss})");
+            var reply = yield call("GetFileInfo", new Variant("(s)", item.file.get_uri()), "(a{ss})",token);
             var values = reply.get_child_value(0);
             if (values.n_children() > 64) throw new FileError.INVALID("Too much extension metadata");
             var iterator = values.iterator(); string key, value;
@@ -136,10 +162,38 @@ namespace MajorisFiles {
         ExternalExtension extension;
         string field;
         string label;
+        Gee.HashMap<string,string> sort_values=new Gee.HashMap<string,string>();
+        Gee.HashMap<string,string> sort_stamps=new Gee.HashMap<string,string>();
+        uint sort_revision=uint.MAX;
+        public bool sort_ready {get{return extension.enabled&&sort_revision==extension.revision;}}
         public string title { owned get { return label; } }
         public ExternalColumn(ExternalExtension extension, string field, string label) { this.extension = extension; this.field = field; this.label = label; }
         public string text(FileItem item, MetadataStore metadata) { return extension.column_value(item, field); }
-        public int compare(FileItem a, FileItem b, MetadataStore metadata) { return Paths.natural_compare(text(a, metadata), text(b, metadata)); }
+        public int compare(FileItem a, FileItem b, MetadataStore metadata) { return Paths.natural_compare(sort_values[a.file.get_uri()]??"",sort_values[b.file.get_uri()]??""); }
+        public void release_sort(){sort_values.clear();sort_stamps.clear();sort_revision=uint.MAX;}
+        public async void prepare_sort(ListModel model,Cancellable token) throws Error {
+            if(model.get_n_items()>100000)throw new IOError.NO_SPACE("Extension sorting exceeds the 100,000-item limit");
+            yield extension.call("GetVersion",null,"(u)",token);uint revision=extension.revision;
+            var items=new Gee.ArrayList<FileItem>();for(uint i=0;i<model.get_n_items();i++)items.add((FileItem)model.get_item(i));
+            var values=new Gee.HashMap<string,string>();var stamps=new Gee.HashMap<string,string>();uint64 bytes=0;int64 deadline=get_monotonic_time()+30*1000000L;
+            for(int start=0;start<items.size;start+=32){
+                token.set_error_if_cancelled();if(get_monotonic_time()>deadline)throw new IOError.TIMED_OUT("Preparing extension sort exceeded 30 seconds");
+                int pending=0;bool dispatching=true;Error? failure=null;
+                for(int i=start;i<int.min(start+32,items.size);i++){
+                    var item=items[i];string uri=item.file.get_uri();string stamp=new Variant("(stt)",item.info.get_attribute_string("etag::value")??"",item.info.get_attribute_uint64("time::modified")*1000000+item.info.get_attribute_uint32("time::modified-usec"),item.bytes).print(true);stamps[uri]=stamp;
+                    if(sort_revision==revision&&sort_stamps[uri]==stamp&&sort_values.has_key(uri)){values[uri]=sort_values[uri];bytes+=values[uri].length;if(bytes>16*1024*1024){failure=new IOError.NO_SPACE("Extension sort values exceed 16 MiB");break;}continue;}
+                    pending++;
+                    extension.file_info.begin(item,token,(obj,res)=>{
+                        try{var fields=extension.file_info.end(res);string value=fields[field]??"";bytes+=value.length;if(bytes>16*1024*1024)throw new IOError.NO_SPACE("Extension sort values exceed 16 MiB");values[item.file.get_uri()]=value;}
+                        catch(Error e){if(failure==null)failure=e;}
+                        pending--;if(pending==0&&!dispatching)Idle.add(()=>{prepare_sort.callback();return Source.REMOVE;});
+                    });
+                }
+                dispatching=false;if(pending>0)yield;else{Idle.add(()=>{prepare_sort.callback();return Source.REMOVE;});yield;}if(failure!=null)throw failure;
+            }
+            token.set_error_if_cancelled();if(revision!=extension.revision)throw new IOError.BUSY("Extension restarted while sort values were loading");
+            sort_values=values;sort_stamps=stamps;sort_revision=revision;
+        }
     }
     public class ExtensionManager : Object {
         static ExtensionManager? instance;
@@ -183,6 +237,9 @@ namespace MajorisFiles {
         }
         public async void columns(Browser browser)
         {
+            var signature=new StringBuilder();foreach(var extension in extensions)signature.append(extension.id+":"+extension.enabled.to_string()+":"+extension.revision.to_string()+";");
+            if(browser.extension_columns_signature==signature.str)return;browser.extension_columns_signature=signature.str;
+            var retained=new Gee.HashSet<string>();var providers=new Gee.ArrayList<ExternalColumn>();
             int total = 0;
             foreach (var extension in extensions) {
                 if (!extension.enabled || !("columns" in extension.capabilities)) continue;
@@ -191,13 +248,17 @@ namespace MajorisFiles {
                     var columns = reply.get_child_value(0);
                     if (columns.n_children() > 16) throw new FileError.INVALID("Too many extension columns");
                     for (size_t i = 0; i < columns.n_children(); i++) {
-                        if (total++ >= 32) return;
+                        if (total++ >= 32) break;
                         var column = columns.get_child_value(i);
-                        browser.register_column(new ExternalColumn(extension, column.get_child_value(0).get_string(), extension.name + ": " + column.get_child_value(1).get_string()));
+                        string title=extension.name+": "+column.get_child_value(1).get_string();retained.add(title);
+                        if(!browser.has_column(title))providers.add(new ExternalColumn(extension,column.get_child_value(0).get_string(),title));
                     }
                 }
                 catch (Error e) { extension.failure = e.message; }
             }
+            if(browser.extension_columns_signature!=signature.str)return;
+            browser.remove_extension_columns(retained);
+            foreach(var provider in providers)try{browser.register_column(provider);}catch(Error e){}
         }
     }
 }

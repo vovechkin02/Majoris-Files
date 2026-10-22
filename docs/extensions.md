@@ -9,7 +9,8 @@ Credential-bearing remote URIs are not passed to extensions.
 
 A `.extension` key file contains an `[Extension]` group with `Id`, localized `Name`,
 `Version=1`, `BusName`, `ObjectPath` and semicolon-separated `Capabilities`. Supported
-capabilities are `actions`, `metadata`, `columns` and `properties`.
+capabilities are `actions`, `metadata`, `columns`, `properties`, `nearby` and
+`cloud`. The per-file cloud contract is documented in [cloud-files.md](cloud-files.md).
 
 | Method | Input | Output | Purpose |
 |---|---|---|---|
@@ -24,9 +25,15 @@ Each call has a two-second deadline; incompatibility, timeouts and provider erro
 remain isolated from the file manager. Selection actions are rechecked on invocation.
 Manifests are bounded to 64 KiB and 128 providers, actions to 64 and 1,000 selected
 items, columns to 16 per provider/32 overall, and metadata/properties to 64 fields.
-Metadata keys are at most 100 bytes and values at most 16 KiB. Column metadata has a
-bounded asynchronous cache; broad lazy sorting/invalidation and live column refresh
-on provider enable/disable remain incomplete.
+Metadata keys are at most 100 bytes and values at most 16 KiB. Visible cells have a
+bounded asynchronous cache. Sorting prepares a complete asynchronous snapshot of
+the chosen column before changing order; comparisons never issue D-Bus requests.
+Snapshots are limited to 100,000 items / 16 MiB of values, 32 concurrent requests
+and a 30-second budget checked between batches. Unsupported/failed preparation
+keeps the existing sort and reports the error. File stamps avoid re-querying
+unchanged entries; provider revisions invalidate snapshots. Columns are refreshed
+when providers restart or their enable state changes, including removal of disabled
+provider columns. This is bounded sorting, not an unbounded background index.
 
 `examples/checksum.extension`, `checksum-extension.py` and the D-Bus activation
 service form a runnable example. It displays file metadata and a size column and
@@ -37,5 +44,28 @@ installation still requires enabling that provider in Preferences.
 
 `tests/portal.vala` starts the real example in a separate process and verifies
 discovery, opt-in, actions, metadata, columns, Properties, sidecar contents,
-provider failure isolation and disabling. Production providers should additionally
-exercise slow replies, malformed data, service restarts and cancellation.
+provider failure, restart, manifest removal and disabling. Additional D-Bus fixtures
+exercise multiple registrations, slow replies, invalid action/metadata bounds and
+Nearby transfer cancellation. A changed/uninstalled registration is rejected before
+invocation; compatibility and cached data are invalidated when the bus owner changes.
+
+## Nearby transport adapters
+
+A `nearby` extension is registered automatically with the Nearby action registry.
+Its service additionally implements these methods on `com.majoris.Files.Extension1`:
+
+| Method | Input | Output |
+|---|---|---|
+| GetNearbyPeers | none | `a(ss)` stable peer ID and display name, at most 100 |
+| StartNearbyTransfer | `s` peer ID, `as` selected local file URIs | `o` child operation path |
+| GetNearbyTransfer | `o` operation | `s` phase, `s` message |
+| CancelNearbyTransfer | `o` operation | none |
+
+Phases are `running`, `completed`, `cancelled`, `error`. Calls use the standard
+two-second deadline; transfers have a 30-minute deadline and are cancelled on
+interruption/failure. Files confirms the selected peer and files before invoking
+the installed transport. A provider is responsible for authenticated discovery,
+consent and secure transfer using its supported transport APIs. Files implements
+no wireless protocol and bundles no operational Nearby transport. Without an
+enabled compatible registration there is no advertised Send action. Tests use a
+clearly identified D-Bus fixture, not a claim of real wireless interoperability.

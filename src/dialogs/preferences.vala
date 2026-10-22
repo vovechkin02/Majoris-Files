@@ -48,6 +48,7 @@ namespace MajorisFiles {
                 extensions.add(row);
             }
             toggle(search, "Use the System Search Index", "indexed-search", true);
+            toggle(search, "Always Scan the Filesystem Exhaustively", "exhaustive-search", false);
             toggle(search, "Rank Search Results by Relevance", "rank-search-results", true);
             choice(search, "Recursive Search by Default", "recursive-search", {"Never", "Local", "Always"}, "Never");
             var home = group(page("Home", "go-home-symbolic"), "Home Sections");

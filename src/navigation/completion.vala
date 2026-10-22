@@ -74,7 +74,7 @@ namespace MajorisFiles {
                     {
                         token.set_error_if_cancelled();
                         scanned++;
-                        if(info.get_file_type() == FileType.DIRECTORY && info.get_name().casefold().has_prefix(prefix.casefold()) && (!info.get_is_hidden() || prefix.has_prefix(".")))
+                        if(info.get_file_type() == FileType.DIRECTORY && info.get_name().casefold().has_prefix(prefix.casefold()) && (!Paths.is_hidden(info) || prefix.has_prefix(".")))
                             matching.add(folder.get_child(info.get_name()));
                     }
                 }

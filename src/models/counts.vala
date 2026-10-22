@@ -20,7 +20,7 @@ namespace MajorisFiles {
                     continue;
                 try {
                     var info = yield file.query_info_async("standard::type,standard::is-symlink,standard::size,standard::allocated-size", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.LOW, token);
-                    if(info.get_file_type() == FileType.DIRECTORY && !info.get_is_symlink())
+                    if(info.get_file_type() == FileType.DIRECTORY && !Paths.is_symlink(info))
                     {
                         folders++;
                         var enumerator = yield file.enumerate_children_async("standard::name", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.LOW, token);

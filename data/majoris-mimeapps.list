@@ -1,0 +1,5 @@
+[Default Applications]
+inode/directory=com.majoris.files.desktop;
+
+[Added Associations]
+inode/directory=com.majoris.files.desktop;

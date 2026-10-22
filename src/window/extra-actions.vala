@@ -13,6 +13,11 @@ namespace MajorisFiles {
             this.window = window;
             this.operations = operations;
             this.metadata = metadata;
+            action("rotate-clockwise", () => rotate_image.begin(true));
+            action("rotate-counterclockwise", () => rotate_image.begin(false));
+            action("cloud-pin", () => cloud_operation.begin("pin"));
+            action("cloud-evict", () => cloud_operation.begin("evict"));
+            action("cloud-retry", () => cloud_operation.begin("retry"));
             action("shared-folders", () => new SharedFoldersDialog(window));
             action("copy-to", () => transfer_to.begin(false));
             action("move-to", () => transfer_to.begin(true));
@@ -20,6 +25,7 @@ namespace MajorisFiles {
             action("folder-with-selection", () => folder_with_selection.begin());
             action("paste-link", () => paste_link.begin());
             action("recover-replacements", () => recover_replacements.begin());
+            action("recover-rename",()=>recover_rename.begin());
             action("compress", () => compress.begin());
             action("compress-sevenzip", () => { var items = current.selected(); if (items.size > 0) new SevenZipDialog(window, items, current.location, operations); });
             action("compress-encrypted", () => compress.begin(true));
@@ -58,10 +64,32 @@ namespace MajorisFiles {
             action("smb-password", () => smb_password.begin());
             action("connect-server", () => connect_server.begin());
         }
+        async void cloud_operation(string action_name)
+        {
+            var selected = current.selected();
+            if (selected.size != 1) return;
+            var provider = CloudFiles.get_default().provider(selected[0].file);
+            if (provider == null) return;
+            var job = new Job(action_name == "pin" ? _("Make Available Offline") : action_name == "evict" ? _("Free Local Space") : _("Retry Cloud Sync"));
+            operations.jobs.append(job);
+            try {
+                yield provider.perform(selected[0].file, action_name, new ImportPolicy(metadata).maximum_bytes, job.cancellable, (fraction, message) => { job.progress = fraction < 0 ? 0 : fraction; job.current = message; });
+                job.progress = 1;
+            }
+            catch (Error e) { job.error = e.message; job.cancelled = e is IOError.CANCELLED; }
+            job.done = true;
+        }
+        async void rotate_image(bool clockwise) {
+            var selected = current.selected(); if (selected.size != 1) return;
+            try { yield ImageRotation.rotate(selected[0], clockwise, operations, window); }
+            catch (Error e) { if (!(e is IOError.CANCELLED)) Dialogs.error(window, e.message); }
+        }
         async void recover_replacements()
         {
+            try { yield operations.replacements.reconcile(new Cancellable()); }
+            catch (Error e) { Dialogs.error(window, e.message); return; }
             var pending = new Gee.ArrayList<ReplacementRecord>();
-            pending.add_all(operations.replacements.records);
+            foreach(var record in operations.replacements.records)if(record.phase!="history")pending.add(record);
             if (pending.size == 0) {
                 Dialogs.error(window, _("There are no pending replacement recovery records."));
                 return;
@@ -75,6 +103,11 @@ namespace MajorisFiles {
                     }
                     catch (Error e) { Dialogs.error(window, e.message); }
                 }
+        }
+        async void recover_rename(){
+            if(!operations.rename_recovery.pending){Dialogs.error(window,_("There is no interrupted batch rename to recover."));return;}
+            if(!(yield Dialogs.confirm(window,"Restore original batch names?","Restore the original names from the durable rename journal? Conflicting or externally replaced files will be preserved and reported.","Restore Names")))return;
+            try{yield operations.rename_recovery.recover(new Cancellable());window.current.navigate(window.current.location,false);}catch(Error e){Dialogs.error(window,e.message);}
         }
         async File? destination_folder(string title)
         {

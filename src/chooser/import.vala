@@ -35,7 +35,7 @@ namespace MajorisFiles {
                         var parts = entry.get_name().split("-", 3);
                         int pid = 0;
                         if (parts.length != 3 || parts[0] != ".pending" || !int.try_parse(parts[1], out pid) || pid <= 0 ||
-                            entry.get_file_type() != FileType.DIRECTORY || entry.get_is_symlink())
+                            entry.get_file_type() != FileType.DIRECTORY || Paths.is_symlink(entry))
                             continue;
                         if (!FileUtils.test("/proc/" + pid.to_string(), FileTest.IS_DIR))
                             yield OperationManager.remove_tree(root.get_child(entry.get_name()), token);
@@ -66,7 +66,7 @@ namespace MajorisFiles {
             else
                 try { yield root.make_directory_async(Priority.DEFAULT, token); } catch (IOError.EXISTS e) {}
             var root_info = yield root.query_info_async("standard::type,standard::is-symlink", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token);
-            if (root_info.get_file_type() != FileType.DIRECTORY || root_info.get_is_symlink())
+            if (root_info.get_file_type() != FileType.DIRECTORY || Paths.is_symlink(root_info))
                 throw new FileError.INVALID("The import destination must be a local directory");
             var filesystem = yield root.query_filesystem_info_async("filesystem::free", Priority.DEFAULT, token);
             if (!filesystem.has_attribute("filesystem::free") ||

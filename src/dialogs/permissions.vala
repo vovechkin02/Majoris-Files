@@ -22,7 +22,7 @@ namespace MajorisFiles {
             var group = new Adw.PreferencesGroup();
             add(group);
             foreach (var item in items)
-                if (!item.file.is_native() || item.info.get_is_symlink() || !item.info.has_attribute("unix::mode")) {
+                if (!item.file.is_native() || Paths.is_symlink(item.info) || !item.info.has_attribute("unix::mode")) {
                     var unavailable = new Adw.ActionRow();
                     unavailable.title = _("Permissions unavailable");
                     unavailable.subtitle = _("This selection does not expose editable local POSIX permissions. Symbolic links are not followed.");

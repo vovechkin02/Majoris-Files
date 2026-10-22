@@ -25,7 +25,9 @@ namespace MajorisFiles {
             this.operations = operations;
             operations.conflict_presentation = (dialog, source, destination) => ConflictThumbnails.attach(dialog, source, destination, metadata);
             extension_manager = ExtensionManager.get_default(metadata);
+            foreach(var extension in extension_manager.extensions)if("nearby" in extension.capabilities)providers.register_nearby(new ExternalNearby(extension));
             foreach (var extension in extension_manager.extensions) providers.register_provider(extension);
+            metadata.changed.connect(()=>{for(int i=0;i<tabs.n_pages;i++)extension_manager.columns.begin((Browser)tabs.get_nth_page(i).child);});
             close_request.connect(() => { for(int i = 0; i < tabs.n_pages; i++)
                                               ((Browser)tabs.get_nth_page(i).child).cancel();
                                           return false;
@@ -89,6 +91,7 @@ namespace MajorisFiles {
             var menu = new Menu();
             menu.append("Shared Folders", "win.shared-folders");
             menu.append("Recover Previous Replaced Files…", "win.recover-replacements");
+            menu.append("Recover Interrupted Batch Rename…", "win.recover-rename");
             foreach (var entry in new string[] {"New Window|app.new-window", "New Tab|win.new-tab", "Reopen Closed Tab|win.reopen", "Duplicate Tab|win.duplicate-tab", "New Folder|win.new-folder", "New Empty File|win.new-file", "Show Hidden Files|win.hidden", "Preview Pane|win.preview", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified", "Descending Order|win.descending", "Bookmarks: Add Current Folder|win.bookmark", "Save Search|win.save-search", "Preferences|win.preferences", "Keyboard Shortcuts|win.shortcuts"})
             {
                 var parts = entry.split("|", 2);
@@ -360,10 +363,14 @@ namespace MajorisFiles {
                     menu.append("Custom Icon…", "win.custom-icon");
                     menu.append("Reset Icon", "win.reset-icon");
                     if (selection[0].file.is_native()) menu.append("Create Link…", "win.link");
-                    if (selection[0].directory && selection[0].file.is_native() && !selection[0].info.get_is_symlink())
+                    if (selection[0].directory && selection[0].file.is_native() && !Paths.is_symlink(selection[0].info))
                         menu.append("Share Folder…", "win.share-folder");
                 }
                 var quick = new Menu();
+                if (selection.size == 1 && ImageRotation.supports(selection[0])) {
+                    quick.append(_("Rotate Image Clockwise"), "win.rotate-clockwise");
+                    quick.append(_("Rotate Image Counterclockwise"), "win.rotate-counterclockwise");
+                }
                 quick.append("Compress…", "win.compress");
                 quick.append("Create 7z / Multi-volume Archive…", "win.compress-sevenzip");
                 quick.append("Create Encrypted ZIP…", "win.compress-encrypted");
@@ -387,6 +394,14 @@ namespace MajorisFiles {
                 if (browser.location.is_native()) menu.append("Paste as Link", "win.paste-link");
             }
             menu.append("New Folder…", "win.new-folder");
+            if (selection.size == 1) {
+                var state = CloudFiles.get_default().peek(selection[0].file);
+                if (state != null) {
+                    if ("pin" in state.capabilities) menu.append(_("Make Available Offline"), "win.cloud-pin");
+                    if ("evict" in state.capabilities) menu.append(_("Free Local Space"), "win.cloud-evict");
+                    if ("retry" in state.capabilities) menu.append(_("Retry Cloud Sync"), "win.cloud-retry");
+                }
+            }
         }
         async void open_context(Menu menu, Browser browser, Gtk.Popover popup)
         {

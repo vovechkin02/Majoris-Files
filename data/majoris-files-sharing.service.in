@@ -7,7 +7,9 @@ ExecStart=@libexecdir@/majoris-files-sharing-service
 NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=strict
-ProtectHome=yes
-ReadWritePaths=/var/lib/samba /etc/samba
+ProtectHome=read-only
+StateDirectory=majoris-files/share-visibility
+StateDirectoryMode=0700
+ReadWritePaths=/var/lib/samba
 [Install]
 WantedBy=multi-user.target

@@ -1,5 +1,10 @@
 majoris-files (0.1.0-1) unstable; urgency=medium
 
-  * Initial development implementation; not approved for production deployment.
+  * Complete per-file cloud capabilities, remote chooser/archive workflows,
+    hidden Samba shares, guarded replacement recovery and saved rotation.
+  * Add bounded RAW/HEIF/HDR decoding, isolated media playback, indexed coverage,
+    grouped Grid headers and reliable external column/Nearby adapters.
+  * Expand crash, decoder, real service, portal and release verification.
+  * Unsigned development package; Majoris VM production acceptance remains open.
 
- -- Majoris Developers <developers@majoris.local>  Sun, 04 Oct 2026 16:00:00 +1100
+ -- Majoris Developers <developers@majoris.local>  Thu, 22 Oct 2026 16:00:00 +1100

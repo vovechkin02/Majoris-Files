@@ -19,6 +19,7 @@ namespace MajorisFiles {
             }
         }
         public bool resolved_directory;
+        public bool hidden {get{return Paths.is_hidden(info);}}
         public double relevance;
         public bool navigable {
             get {
@@ -27,11 +28,15 @@ namespace MajorisFiles {
         }
         public uint64 bytes {
             get {
-                return info.get_size();
+                var cloud = CloudFiles.get_default().cached(file);
+                if (cloud != null && cloud.online_only && cloud.size_known) return cloud.size;
+                return info.has_attribute("standard::size")?info.get_size():0;
             }
         }
         public string mime {
             owned get {
+                var cloud = CloudFiles.get_default().cached(file);
+                if (cloud != null && cloud.online_only && cloud.mime != "") return cloud.mime;
                 return info.get_content_type() ?? "application/octet-stream";
             }
         }

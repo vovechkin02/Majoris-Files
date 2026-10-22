@@ -9,10 +9,12 @@ meson test -C build --print-errorlogs
 ./build/majoris-files
 ```
 
-See [platform integration](docs/platform-integration.md) for dependencies,
-portal routing, GTK client examples and Samba setup;
-[architecture](docs/architecture.md) for service and security boundaries;
-and [implementation status](docs/status.md) for outstanding requirements.
+See [platform integration](docs/platform-integration.md) for dependencies, portal
+routing and Samba provisioning; [architecture](docs/architecture.md) for service
+and security boundaries; and [implementation status](docs/status.md) for changes,
+executed checks, dependencies and remaining limitations.
 
-This initial implementation builds and has automated core, filesystem, UI and
-D-Bus tests. It does not yet satisfy the full supplied production specification.
+The implemented feature set has automated regression and isolated real-service
+coverage. [Majoris VM acceptance](docs/vm-acceptance.md) and hardware/provider
+verification remain production release gates. Build an unsigned Debian package
+without installing it using `python3 tools/build-debian.py`.

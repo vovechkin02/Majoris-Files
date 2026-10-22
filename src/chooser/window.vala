@@ -275,6 +275,12 @@ namespace MajorisFiles {
                         files.add(browser.location);
                     foreach (var item in chosen)
                     {
+                        transfer_progress.visible = true;
+                        yield CloudFiles.get_default().materialize(item.file, new ImportPolicy(metadata).maximum_bytes, token, (fraction, message) => {
+                            transfer_progress.fraction = fraction < 0 ? 0 : fraction;
+                            transfer_progress.text = message;
+                        });
+                        transfer_progress.visible = false;
                         var info = yield item.file.query_info_async("standard::type,access::can-read", FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
                         if ((info.get_file_type() == FileType.DIRECTORY) != options.directory)
                             throw new FileError.INVALID(options.directory ? "Select a folder" : "Select a file");
@@ -307,7 +313,10 @@ namespace MajorisFiles {
                     }
                     if (path == null)
                         throw new FileError.UNSUPPORTED(options.save ? "This remote destination has no local GVfs bridge. Reconnect it with GVfs/FUSE before saving so writes reach the intended folder." : "This location has no local GVfs bridge. Copy the file to a local folder before selecting it. The document portal cannot grant access to this remote URI.");
-                    uris += File.new_for_path(path).get_uri();
+                    // The default GVfs implementation maps a FUSE pathname
+                    // back to its remote URI. The document portal needs the
+                    // actual file: bridge URI, not that reverse translation.
+                    uris += Vfs.get_local().get_file_for_path(path).get_uri();
                 }
                 selection_token.set_error_if_cancelled();
                 if (!finished && generation == location_generation)

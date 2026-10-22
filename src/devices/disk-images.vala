@@ -58,7 +58,7 @@ namespace MajorisFiles {
             if(!image.is_native())
                 throw new FileError.UNSUPPORTED("Disk images must be local files");
             var info = yield image.query_info_async("standard::type,standard::is-symlink", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null);
-            if(info.get_file_type() != FileType.REGULAR || info.get_is_symlink())
+            if(info.get_file_type() != FileType.REGULAR || Paths.is_symlink(info))
                 throw new FileError.INVALID("Select a regular disk-image file");
             var bus = yield Bus.get(BusType.SYSTEM);
             var objects = yield inventory(bus);
@@ -186,7 +186,7 @@ namespace MajorisFiles {
         public Gee.List<QuickAction> actions(Gee.List<FileItem> selection)
         {
             var result = new Gee.ArrayList<QuickAction>();
-            if(selection.size != 1 || !selection[0].file.is_native() || selection[0].directory || selection[0].info.get_is_symlink())
+            if(selection.size != 1 || !selection[0].file.is_native() || selection[0].directory || Paths.is_symlink(selection[0].info))
                 return result;
             var name = selection[0].name.down();
             if(name.has_suffix(".iso") || name.has_suffix(".img") || name.has_suffix(".raw"))

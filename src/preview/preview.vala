@@ -76,9 +76,9 @@ namespace MajorisFiles {
         }
         public async Gtk.Widget render(FileItem item, Cancellable token) throws Error
         {
-            if (item.bytes > 64 * 1024 * 1024)
+            if (item.bytes > 256 * 1024 * 1024)
                 throw new FileError.UNSUPPORTED("This image exceeds the preview size limit");
-            if (item.mime == "image/gif" || item.mime == "image/webp") {
+            if (item.mime == "image/gif" || item.mime == "image/webp" || item.mime == "image/avif" || item.mime == "image/heif" || item.mime == "image/heic") {
                 try {
                     var animation = yield PreviewSandbox.run(item, "image-animation", {}, token);
                     return new AnimatedImageView(animation, token);
@@ -102,10 +102,10 @@ namespace MajorisFiles {
         }
         public async Gtk.Widget render(FileItem item, Cancellable token) throws Error
         {
-            // GtkMediaFile delegates playback to GTK's installed GStreamer media backend.
-            var media = Gtk.MediaFile.for_file(item.file);
+            // GTK retains the controls and paintable. Only bounded raw RGBA and
+            // PCM from the isolated GStreamer decoder enter this process.
+            var media = IsolatedPlayback.open(item,token);
             media.set_volume(0.5);
-            token.cancelled.connect(() => { media.pause(); media.clear(); });
             if (item.mime.has_prefix("audio/"))
             {
                 var audio = new Gtk.Box(Gtk.Orientation.VERTICAL, 12);
@@ -119,6 +119,7 @@ namespace MajorisFiles {
                 audio.append(name);
                 var controls = new Gtk.MediaControls(media);
                 audio.append(controls);
+                add_error(audio,media);
                 add_metadata.begin(audio, item, token);
                 if (metadata != null && metadata.state("autoplay-media", "false") == "true")
                     media.play();
@@ -129,8 +130,15 @@ namespace MajorisFiles {
             var box = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
             video.vexpand = true;
             box.append(video);
+            add_error(box,media);
             add_metadata.begin(box, item, token);
             return box;
+        }
+        static void add_error(Gtk.Box box,Gtk.MediaStream media){
+            var label=new Gtk.Label("");label.wrap=true;label.visible=false;
+            media.notify["error"].connect(()=>{if(media.get_error()!=null){label.label=_("Media preview unavailable: ")+media.get_error().message;label.visible=true;}});
+            if(media.get_error()!=null){label.label=_("Media preview unavailable: ")+media.get_error().message;label.visible=true;}
+            box.append(label);
         }
         async void add_metadata(Gtk.Box box, FileItem item, Cancellable token)
         {
@@ -198,6 +206,20 @@ namespace MajorisFiles {
             append(label);
             File? staging = null;
             try {
+                var cloud = yield CloudFiles.get_default().query(item.file, pending);
+                if (cloud.online_only) {
+                    if (!remote_requested) {
+                        var download = new Gtk.Button.with_label(_("Download Cloud Preview"));
+                        download.clicked.connect(() => show_item.begin(item, true)); append(download); return;
+                    }
+                    uint limit = 16;
+                    if (metadata != null) uint.try_parse(metadata.state("remote-preview-limit-mib", "16"), out limit);
+                    var progress = new Gtk.ProgressBar(); progress.show_text = true; append(progress);
+                    var file = yield CloudFiles.get_default().materialize(item.file, (uint64)limit.clamp(1, 1024) * 1024 * 1024, pending, (fraction, message) => { progress.fraction = fraction < 0 ? 0 : fraction; progress.text = message; });
+                    remove(progress);
+                    var info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.LOW, pending);
+                    item = new FileItem(file, info);
+                }
                 if (!item.file.is_native()) {
                     string policy = metadata == null ? "On Request" : metadata.state("remote-preview-policy", "On Request");
                     if (policy == "Never")

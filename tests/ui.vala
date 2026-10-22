@@ -1,4 +1,6 @@
 using MajorisFiles;
+[CCode(cname="majoris_playback_new",cheader_filename="src/preview/playback.h")]
+extern Gtk.MediaStream fixture_playback(Subprocess process,bool output);
 int main(string[] args)
 {
     try {
@@ -53,6 +55,32 @@ int main(string[] args)
         catch (Error e) { error("%s", e.message); }
     });
     Test.add_func("/ui/open-single", () => chooser_flow(false, false, false));
+    Test.add_func("/preview/persistent-rotation", () => {
+        var loop = new MainLoop();
+        rotation_case.begin((obj, res) => { try { rotation_case.end(res); } catch (Error e) { error("%s", e.message); } loop.quit(); });
+        uint timer = Timeout.add_seconds(30, () => { error("Persistent rotation fixture timed out"); });
+        loop.run(); Source.remove(timer);
+    });
+    Test.add_func("/preview/isolated-codec-playback",()=>{
+        var loop=new MainLoop();playback_case.begin((obj,res)=>{try{playback_case.end(res);}catch(Error e){error("%s",e.message);}loop.quit();});
+        uint watchdog=Timeout.add_seconds(100,()=>{error("Isolated playback fixture timed out");});loop.run();Source.remove(watchdog);
+    });
+    Test.add_func("/ui/grid-grouped-model",()=>{
+        var store=new GLib.ListStore(typeof(FileItem));
+        for(int i=0;i<1000;i++){var info=new FileInfo();info.set_name("file-%04d".printf(i));info.set_display_name(info.get_name());info.set_file_type(FileType.REGULAR);store.append(new FileItem(File.new_for_path("/fixture/"+info.get_name()),info));}
+        var sorted=new Gtk.SortListModel(store,null);
+        sorted.section_sorter=new Gtk.CustomSorter((a,b)=>(((FileItem)a).name.collate("file-0500")<0?0:1)-(((FileItem)b).name.collate("file-0500")<0?0:1));
+        var selection=new Gtk.MultiSelection(sorted);var rows=new GridRows(sorted);
+        assert(rows.get_n_items()==252);assert(((GridRow)rows.get_item(0)).heading);assert(((GridRow)rows.get_item(126)).heading);
+        var first=new GridSlice(selection,0,4);var second=new GridSlice(selection,500,4);
+        first.select_item(1,true);second.select_item(2,false);assert(selection.is_selected(1)&&selection.is_selected(502));
+        second.select_all();assert(selection.get_selection().get_size()==1000);
+        first.unselect_all();assert(selection.get_selection().is_empty());
+        rows.resize(3);assert(rows.get_n_items()==336&&rows.row_for(500)==169);
+        store.remove(0);assert(rows.get_n_items()==336);
+        first.detach();second.detach();rows.detach();
+    });
+    Test.add_func("/ui/grid-headings-and-keyboard",()=>{var loop=new MainLoop();grouped_grid_case.begin((obj,res)=>{try{grouped_grid_case.end(res);}catch(Error e){error("%s",e.message);}loop.quit();});loop.run();});
     Test.add_func("/preview/media-and-office-rendering", () => {
         var loop = new MainLoop();
         rich_preview_case.begin((obj, res) => {
@@ -83,13 +111,15 @@ int main(string[] args)
                     assert(overlay.show_sidebar);
                     window.browser.navigate(File.new_for_path(root));
                     assert(!overlay.show_sidebar);
-                    window.set_default_size(960, 660);
+                    Timeout.add(100, () => { window.set_default_size(960, 660); return Source.REMOVE; });
                     stage = 1;
                 }
                 else if (stage == 1 && !window.browser.narrow)
                 {
                     var overlay = find_overlay(window.browser);
-                    assert(overlay != null && !overlay.collapsed && overlay.sidebar == null);
+                    // The empty overlay stays collapsed in wide mode so it
+                    // cannot reserve a second sidebar beside the Paned child.
+                    assert(overlay != null && overlay.collapsed && overlay.sidebar == null);
                     window.cancel_request();
                     loop.quit();
                     return Source.REMOVE;
@@ -975,4 +1005,115 @@ async void nearby_flow(bool confirm) throws Error
     parent.destroy();
     assert(provider.sent == confirm);
     yield OperationManager.remove_tree(root, new Cancellable());
+}
+
+async void rotation_case() throws Error {
+    var root = File.new_for_path(DirUtils.make_tmp("majoris-rotation-XXXXXX"));
+    var token = new Cancellable();
+    foreach (var format in new string[] {"png", "jpeg"}) {
+        var file = root.get_child("image." + format);
+        var pixbuf = new Gdk.Pixbuf(Gdk.Colorspace.RGB, format == "png", 8, 32, 16); pixbuf.fill(0x33669980);
+        pixbuf.savev(file.get_path(), format, {}, {});
+        var original = yield SplitService.checksum(file, ChecksumType.SHA256, token);
+        var metadata = new MetadataStore(root.get_child(format + ".db").get_path()); metadata.set_tags(file, "rotation fixture");
+        var manager = new OperationManager(metadata);
+        var info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+        yield ImageRotation.rotate(new FileItem(file, info), true, manager);
+        var rotated = new Gdk.Pixbuf.from_file(file.get_path()); assert(rotated.width == 16 && rotated.height == 32);
+        string rendered = yield SplitService.checksum(file, ChecksumType.SHA256, token);
+        assert(rendered != original && metadata.tags(file) == "rotation fixture");
+        manager = new OperationManager(new MetadataStore(root.get_child(format + ".db").get_path()));
+        yield manager.undo(); assert((yield SplitService.checksum(file, ChecksumType.SHA256, token)) == original);
+        manager = new OperationManager(new MetadataStore(root.get_child(format + ".db").get_path()));
+        yield manager.redo(); assert((yield SplitService.checksum(file, ChecksumType.SHA256, token)) == rendered);
+        info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+        yield ImageRotation.rotate(new FileItem(file, info), false, manager);
+        var restored = new Gdk.Pixbuf.from_file(file.get_path()); assert(restored.width == 32 && restored.height == 16);
+        yield manager.undo(); assert((yield SplitService.checksum(file, ChecksumType.SHA256, token)) == rendered);
+        var append = yield file.append_to_async(FileCreateFlags.NONE, Priority.DEFAULT, token);
+        size_t written; yield append.write_all_async("external".data, Priority.DEFAULT, token, out written); yield append.close_async(Priority.DEFAULT, token);
+        bool refused = false; try { yield manager.undo(); } catch (MajorisFiles.FileError.CONFLICT e) { refused = true; }
+        assert(refused);
+    }
+    var odd = root.get_child("odd.jpeg");
+    var pixbuf = new Gdk.Pixbuf(Gdk.Colorspace.RGB, false, 8, 31, 17); pixbuf.fill(0x884422ffU); pixbuf.savev(odd.get_path(), "jpeg", {}, {});
+    string before = yield SplitService.checksum(odd, ChecksumType.SHA256, token);
+    var manager = new OperationManager(new MetadataStore(root.get_child("odd.db").get_path()));
+    var info = yield odd.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+    bool rejected = false; try { yield ImageRotation.rotate(new FileItem(odd, info), true, manager); } catch (IOError.NOT_SUPPORTED e) { rejected = true; }
+    assert(rejected && (yield SplitService.checksum(odd, ChecksumType.SHA256, token)) == before);
+    yield ImageRotation.rotate(new FileItem(odd, info), true, manager, null, true);
+    var rotated = new Gdk.Pixbuf.from_file(odd.get_path()); assert(rotated.width == 17 && rotated.height == 31);
+    yield manager.undo(); assert((yield SplitService.checksum(odd, ChecksumType.SHA256, token)) == before);
+    yield OperationManager.remove_tree(root, token);
+}
+async void playback_case() throws Error {
+    var root=File.new_for_path(DirUtils.make_tmp("majoris-playback-XXXXXX"));
+    string[] names={"mp4","hevc.mkv","webm","mkv","mp3","aac","flac","opus"};
+    string[] encoders={"x264enc","x265enc","vp8enc","vp8enc","lamemp3enc","avenc_aac","flacenc","opusenc"};
+    string[] tails={"x264enc tune=zerolatency ! h264parse ! mp4mux","x265enc option-string=pools=1:frame-threads=1 ! h265parse ! matroskamux","vp8enc deadline=1 ! webmmux","vp8enc deadline=1 ! matroskamux","lamemp3enc ! id3v2mux","avenc_aac ! aacparse ! audio/mpeg,mpegversion=4,stream-format=adts","flacenc","opusenc ! oggmux"};
+    for(int index=0;index<names.length;index++){
+        var probe=new Subprocess.newv({"gst-inspect-1.0",encoders[index]},SubprocessFlags.STDOUT_SILENCE|SubprocessFlags.STDERR_SILENCE);yield probe.wait_async(null);
+        if(!probe.get_successful()){Test.message("Unverified codec %s: fixture encoder unavailable",names[index]);continue;}
+        var file=root.get_child("sample."+names[index]);
+        string prefix=index<4?"videotestsrc num-buffers=30 ! video/x-raw,width=160,height=90,framerate=10/1 ! videoconvert ! ":"audiotestsrc num-buffers=130 ! audioconvert ! audioresample ! ";
+        string pipeline=prefix+tails[index]+" ! filesink location="+file.get_path();
+        string[] args={"gst-launch-1.0","-q"};foreach(var arg in pipeline.split(" "))args+=arg;
+        var generator=new Subprocess.newv(args,SubprocessFlags.STDOUT_SILENCE|SubprocessFlags.STDERR_SILENCE);yield generator.wait_check_async(null);
+        var info=yield file.query_info_async(FileItem.ATTRIBUTES,FileQueryInfoFlags.NONE,Priority.DEFAULT,null);
+        var token=new Cancellable();var stream=IsolatedPlayback.open(new FileItem(file,info),token,false);
+        for(int i=0;i<750&&!stream.is_prepared()&&stream.get_error()==null;i++){Timeout.add(20,()=>{playback_case.callback();return Source.REMOVE;});yield;}
+        if(stream.get_error()!=null)throw new IOError.FAILED("%s: %s".printf(names[index],stream.get_error().message));
+        assert(stream.is_prepared()&&stream.get_duration()>1000000);
+        assert(index<4?stream.has_video:stream.has_audio);stream.set_volume(0.35);stream.play();
+        for(int i=0;i<200&&stream.get_timestamp()<200000&&stream.get_error()==null;i++){Timeout.add(20,()=>{playback_case.callback();return Source.REMOVE;});yield;}
+        if(stream.get_error()!=null)throw new IOError.FAILED("%s playback: %s".printf(names[index],stream.get_error().message));
+        assert(stream.get_timestamp()>=200000);
+        if(index<4)assert(((Gdk.Paintable)stream).get_intrinsic_width()==160);else assert(IsolatedPlayback.audio_bytes(stream)>0);
+        stream.pause();assert(!stream.get_playing());
+        if(stream.is_seekable()){
+            stream.seek(1000000);
+            for(int i=0;i<200&&stream.is_seeking();i++){Timeout.add(20,()=>{playback_case.callback();return Source.REMOVE;});yield;}
+            assert(!stream.is_seeking()&&stream.get_error()==null);
+        }
+        token.cancel();Test.message("PASS actual isolated decode/play/pause/seek: %s",names[index]);
+    }
+    var corrupt=root.get_child("corrupt.mp4");FileUtils.set_contents(corrupt.get_path(),"Not a video");
+    var info=yield corrupt.query_info_async(FileItem.ATTRIBUTES,FileQueryInfoFlags.NONE,Priority.DEFAULT,null);var token=new Cancellable();
+    var stream=IsolatedPlayback.open(new FileItem(corrupt,info),token,false);
+    for(int i=0;i<750&&stream.get_error()==null;i++){Timeout.add(20,()=>{playback_case.callback();return Source.REMOVE;});yield;}
+    assert(stream.get_error()!=null&&!stream.get_playing());token.cancel();
+    var broken=new Subprocess.newv({"/usr/bin/python3","-c","import struct,sys;sys.stdout.buffer.write(struct.pack('<II',86,4294967295));sys.stdout.flush()"},SubprocessFlags.STDIN_PIPE|SubprocessFlags.STDOUT_PIPE|SubprocessFlags.STDERR_SILENCE);
+    stream=fixture_playback(broken,false);
+    for(int i=0;i<100&&stream.get_error()==null;i++){Timeout.add(20,()=>{playback_case.callback();return Source.REMOVE;});yield;}
+    assert(stream.get_error()!=null);IsolatedPlayback.close(stream);
+    yield OperationManager.remove_tree(root,new Cancellable());
+}
+Gtk.Widget? find_grouped_grid(Gtk.Widget widget){
+    if(widget is Gtk.ListView){var model=((Gtk.ListView)widget).model as Gtk.NoSelection;if(model!=null&&model.model is GridRows)return widget;}
+    for(var child=widget.get_first_child();child!=null;child=child.get_next_sibling()){var found=find_grouped_grid(child);if(found!=null)return found;}return null;
+}
+uint count_headings(Gtk.Widget widget){uint count=widget is Gtk.Label&&widget.has_css_class("heading")?1u:0u;for(var child=widget.get_first_child();child!=null;child=child.get_next_sibling())count+=count_headings(child);return count;}
+Gtk.EventControllerKey? find_grid_keys(Gtk.Widget widget){
+    if(widget is Gtk.Box&&widget.get_first_child() is Gtk.Overlay){var controllers=widget.observe_controllers();for(uint i=0;i<controllers.get_n_items();i++){var key=controllers.get_item(i) as Gtk.EventControllerKey;if(key!=null&&key.propagation_phase==Gtk.PropagationPhase.CAPTURE)return key;}}
+    for(var child=widget.get_first_child();child!=null;child=child.get_next_sibling()){var key=find_grid_keys(child);if(key!=null)return key;}return null;
+}
+async void grouped_grid_case() throws Error {
+    var temporary=File.new_for_path(DirUtils.make_tmp("majoris-grid-ui-XXXXXX"));var root=temporary.get_child("files");yield root.make_directory_async(Priority.DEFAULT,null);
+    for(int i=0;i<2;i++){FileUtils.set_contents(root.get_child("text-%d.txt".printf(i)).get_path(),"Fixture text");var image=new Gdk.Pixbuf(Gdk.Colorspace.RGB,false,8,16,16);image.fill(0x336699ffU);image.savev(root.get_child("image-%d.png".printf(i)).get_path(),"png",{},{});}
+    for(int i=0;i<4;i++)yield root.get_child("folder-%d".printf(i)).make_directory_async(Priority.DEFAULT,null);
+    var metadata=new MetadataStore(temporary.get_child("state.db").get_path());metadata.set_state("thumbnail-policy","Never");
+    var browser=new Browser(metadata,new Places(metadata));var window=new Gtk.Window();window.set_default_size(900,650);window.child=browser;browser.navigate(root);browser.set_group("Type");window.present();
+    Gtk.Widget? grouped=null;Gtk.EventControllerKey? keys=null;
+    for(int attempt=0;attempt<200;attempt++){
+        grouped=find_grouped_grid(browser);if(grouped!=null)keys=find_grid_keys(grouped);
+        if(!browser.directory.loading&&count_headings(grouped??browser)>=2&&keys!=null)break;
+        Timeout.add(20,()=>{grouped_grid_case.callback();return Source.REMOVE;});yield;
+    }
+    assert(grouped!=null&&keys!=null&&count_headings(grouped)==3&&browser.active_selection.get_n_items()==8);
+    var cells=keys.get_widget().get_ancestor(typeof(Gtk.GridView));Graphene.Rect bounds;assert(cells.compute_bounds(browser,out bounds));assert(bounds.origin.x+bounds.size.width<=browser.get_width()+1);
+    bool handled=false;Signal.emit_by_name(keys,"key-pressed",Gdk.Key.End,0u,Gdk.ModifierType.SHIFT_MASK,out handled);assert(handled&&browser.selected().size==8);
+    Signal.emit_by_name(keys,"key-pressed",Gdk.Key.Home,0u,(Gdk.ModifierType)0,out handled);assert(handled&&browser.selected().size==1&&browser.active_selection.is_selected(0));
+    File selected=browser.selected()[0].file;browser.set_group("Size");assert(browser.selected().size==1&&browser.selected()[0].file.equal(selected));
+    browser.cancel();window.destroy();yield OperationManager.remove_tree(temporary,new Cancellable());
 }

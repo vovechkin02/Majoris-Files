@@ -49,7 +49,7 @@ namespace MajorisFiles {
         }
         public async ReplacementRecord prepare(File target, File backup) throws Error
         {
-            string identity = yield OperationManager.file_identity(target);
+            string identity = "guard2:" + (yield DurableFiles.snapshot(target));
             if (identity == "")
                 throw new FileError.UNSUPPORTED("This backend cannot identify the previous destination safely for replacement recovery");
             var record = new ReplacementRecord(target, backup, identity);
@@ -63,15 +63,44 @@ namespace MajorisFiles {
             record.phase = "committed";
             persist();
         }
+        public async void staged(ReplacementRecord record, File staging) throws Error
+        {
+            record.current_identity = yield OperationManager.file_identity(staging);
+            record.phase = "staged";
+            persist();
+        }
+        public static async bool matches(ReplacementRecord record, File file) throws Error {
+            if (record.previous_identity.has_prefix("guard2:")) {
+                try { return record.previous_identity == "guard2:" + (yield DurableFiles.snapshot(file)); }
+                catch (IOError.NOT_FOUND e) { return false; }
+            }
+            return (yield OperationManager.file_identity(file)) == record.previous_identity;
+        }
         public void forget(ReplacementRecord record) throws Error
         {
             records.remove(record);
             persist();
         }
+        public void history(ReplacementRecord record) throws Error { record.phase = "history"; persist(); }
         public async File restore(ReplacementRecord record, Cancellable token) throws Error
         {
-            if ((yield OperationManager.file_identity(record.backup)) != record.previous_identity)
-                throw new FileError.INTEGRITY("The preserved item is missing or has changed; it has not been touched");
+            if (yield matches(record, record.target)) {
+                var staging = DurableFiles.staging(record);
+                string identity = yield OperationManager.file_identity(staging);
+                if (identity != "") {
+                    if (record.current_identity == "" || identity != record.current_identity)
+                        throw new FileError.INTEGRITY("The original is intact. Unverified staged data was retained at " + staging.get_parse_name());
+                    var retained = record.target.get_parent().get_child(record.target.get_basename() + " (unpublished replacement " + record.id + ")");
+                    yield staging.move_async(retained, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token, null);
+                }
+                forget(record); return record.target;
+            }
+            File preserved = record.backup;
+            if (!(yield matches(record, preserved))) {
+                preserved = DurableFiles.staging(record);
+                if (!(yield matches(record, preserved)))
+                    throw new FileError.INTEGRITY("The preserved item is missing or has changed; it has not been touched");
+            }
             File destination = record.target;
             for (uint i = 0; ; i++) {
                 if (i > 10000) throw new FileError.CONFLICT("No free recovery filename was found");
@@ -82,9 +111,19 @@ namespace MajorisFiles {
                 catch (IOError.NOT_FOUND e) { break; }
             }
             // No overwrite: another writer winning the race produces an error.
-            yield record.backup.move_async(destination, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token, null);
+            yield preserved.move_async(destination, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token, null);
             forget(record);
             return destination;
+        }
+        public async void reconcile(Cancellable token) throws Error {
+            var snapshot = new Gee.ArrayList<ReplacementRecord>(); snapshot.add_all(records);
+            foreach (var record in snapshot) {
+                token.set_error_if_cancelled();
+                if (record.phase == "committed" && record.current_identity != "" &&
+                    (yield OperationManager.file_identity(record.target)) == record.current_identity &&
+                    (yield OperationManager.file_identity(record.backup)) == "" &&
+                    (yield OperationManager.file_identity(DurableFiles.staging(record))) == "") forget(record);
+            }
         }
     }
 }

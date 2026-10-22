@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: majoris-files\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 20:18+1100\n"
+"POT-Creation-Date: 2026-10-22 13:16+1100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,26 +17,56 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/actions/nearby.vala:62
+#: src/actions/nearby.vala:95
 msgid "Device"
 msgstr ""
 
-#: src/actions/nearby.vala:64
+#: src/actions/nearby.vala:97
 msgid "Send Selected Files?"
 msgstr ""
 
-#: src/actions/nearby.vala:66 src/application/launcher.vala:12
+#: src/actions/nearby.vala:99 src/application/launcher.vala:12
 #: src/chooser/window.vala:96 src/dialogs/dialogs.vala:18
 #: src/dialogs/dialogs.vala:29 src/dialogs/dialogs.vala:50
-#: src/dialogs/permissions.vala:179 src/operations/manager.vala:429
-#: src/operations/manager.vala:611 src/operations/manager.vala:693
-#: src/operations/manager.vala:1056 src/window/extra-actions.vala:423
-#: src/window/window.vala:61
+#: src/dialogs/permissions.vala:179 src/operations/manager.vala:546
+#: src/operations/manager.vala:731 src/operations/manager.vala:813
+#: src/operations/manager.vala:1186 src/window/extra-actions.vala:456
+#: src/window/window.vala:63
 msgid "Cancel"
 msgstr ""
 
-#: src/actions/nearby.vala:67
+#: src/actions/nearby.vala:100
 msgid "Send"
+msgstr ""
+
+#: src/actions/rotation.vala:12 src/window/window.vala:371
+msgid "Rotate Image Clockwise"
+msgstr ""
+
+#: src/actions/rotation.vala:12 src/window/window.vala:372
+msgid "Rotate Image Counterclockwise"
+msgstr ""
+
+#: src/actions/rotation.vala:21
+msgid "Rendering the saved image in the isolated helper"
+msgstr ""
+
+#: src/actions/rotation.vala:29
+msgid "Lossless rotation is unavailable"
+msgstr ""
+
+#: src/actions/rotation.vala:29
+msgid ""
+"The JPEG edges may not align with its compression blocks. Re-encoding can "
+"reduce image quality. The original bytes will be kept for Undo."
+msgstr ""
+
+#: src/actions/rotation.vala:29
+msgid "Re-encode JPEG"
+msgstr ""
+
+#: src/actions/rotation.vala:41
+msgid "Publishing the rotated image and preserving Undo data"
 msgstr ""
 
 #: src/application/launcher.vala:11
@@ -190,7 +220,8 @@ msgstr ""
 msgid "Could not complete the action"
 msgstr ""
 
-#: src/dialogs/dialogs.vala:8 src/sharing/settings.vala:121
+#: src/dialogs/dialogs.vala:8 src/sharing/settings.vala:119
+#: src/sharing/settings.vala:139
 msgid "Close"
 msgstr ""
 
@@ -414,7 +445,19 @@ msgstr ""
 msgid "Split Destination"
 msgstr ""
 
-#: src/metadata/details.vala:90
+#: src/metadata/details.vala:58
+msgid "Cloud file state"
+msgstr ""
+
+#: src/metadata/details.vala:60
+msgid "Cloud account storage"
+msgstr ""
+
+#: src/metadata/details.vala:61
+msgid "%s of %s used"
+msgstr ""
+
+#: src/metadata/details.vala:98
 msgid "Extension unavailable: "
 msgstr ""
 
@@ -446,51 +489,51 @@ msgstr ""
 msgid "Enter a color such as #3584e4"
 msgstr ""
 
-#: src/operations/manager.vala:427 src/operations/manager.vala:691
+#: src/operations/manager.vala:544 src/operations/manager.vala:811
 msgid "An item already exists"
 msgstr ""
 
-#: src/operations/manager.vala:430 src/operations/manager.vala:694
+#: src/operations/manager.vala:547 src/operations/manager.vala:814
 msgid "Skip"
 msgstr ""
 
-#: src/operations/manager.vala:431 src/operations/manager.vala:695
+#: src/operations/manager.vala:548 src/operations/manager.vala:815
 msgid "Skip All"
 msgstr ""
 
-#: src/operations/manager.vala:432 src/operations/manager.vala:696
+#: src/operations/manager.vala:549 src/operations/manager.vala:816
 msgid "Keep Both"
 msgstr ""
 
-#: src/operations/manager.vala:433 src/operations/manager.vala:697
+#: src/operations/manager.vala:550 src/operations/manager.vala:817
 msgid "Rename"
 msgstr ""
 
-#: src/operations/manager.vala:435
+#: src/operations/manager.vala:552
 msgid "Merge Folders"
 msgstr ""
 
-#: src/operations/manager.vala:436 src/operations/manager.vala:698
+#: src/operations/manager.vala:553 src/operations/manager.vala:818
 msgid "Replace"
 msgstr ""
 
-#: src/operations/manager.vala:437 src/operations/manager.vala:699
+#: src/operations/manager.vala:554 src/operations/manager.vala:819
 msgid "Replace All"
 msgstr ""
 
-#: src/operations/manager.vala:610
+#: src/operations/manager.vala:730
 msgid "This file is too large for the destination filesystem."
 msgstr ""
 
-#: src/operations/manager.vala:612
+#: src/operations/manager.vala:732
 msgid "Split into Compatible Parts"
 msgstr ""
 
-#: src/operations/manager.vala:1055
+#: src/operations/manager.vala:1185
 msgid "Undo Copy?"
 msgstr ""
 
-#: src/operations/manager.vala:1057
+#: src/operations/manager.vala:1187
 msgid "Move Copies to Trash"
 msgstr ""
 
@@ -499,16 +542,16 @@ msgid "Play or Pause Animation"
 msgstr ""
 
 #: src/preview/animation.vala:34 src/preview/pdf.vala:51
-#: src/preview/sandbox.vala:121
+#: src/preview/sandbox.vala:124
 msgid "Zoom In"
 msgstr ""
 
 #: src/preview/animation.vala:35 src/preview/pdf.vala:57
-#: src/preview/sandbox.vala:125
+#: src/preview/sandbox.vala:128
 msgid "Zoom Out"
 msgstr ""
 
-#: src/preview/animation.vala:36 src/preview/sandbox.vala:129
+#: src/preview/animation.vala:36 src/preview/sandbox.vala:132
 msgid "Fit Image"
 msgstr ""
 
@@ -536,8 +579,8 @@ msgstr ""
 msgid "%d / %d"
 msgstr ""
 
-#: src/preview/pdf.vala:85 src/preview/preview.vala:244
-#: src/preview/sandbox.vala:163
+#: src/preview/pdf.vala:85 src/preview/preview.vala:266
+#: src/preview/sandbox.vala:166
 msgid "Preview unavailable\n"
 msgstr ""
 
@@ -545,19 +588,27 @@ msgstr ""
 msgid "Text Encoding"
 msgstr ""
 
-#: src/preview/preview.vala:144
+#: src/preview/preview.vala:139 src/preview/preview.vala:140
+msgid "Media preview unavailable: "
+msgstr ""
+
+#: src/preview/preview.vala:152
 msgid "Metadata unavailable: "
 msgstr ""
 
-#: src/preview/preview.vala:206
+#: src/preview/preview.vala:212
+msgid "Download Cloud Preview"
+msgstr ""
+
+#: src/preview/preview.vala:228
 msgid "Download Preview"
 msgstr ""
 
-#: src/preview/sandbox.vala:132
+#: src/preview/sandbox.vala:135
 msgid "Rotate Preview Clockwise"
 msgstr ""
 
-#: src/preview/sandbox.vala:150
+#: src/preview/sandbox.vala:153
 msgid "%d × %d preview · %s"
 msgstr ""
 
@@ -604,284 +655,324 @@ msgstr ""
 msgid "Clear Filters"
 msgstr ""
 
-#: src/sharing/settings.vala:20 src/sharing/settings.vala:262
+#: src/sharing/settings.vala:22 src/sharing/settings.vala:293
 msgid "Share Folder"
 msgstr ""
 
-#: src/sharing/settings.vala:21 src/sharing/settings.vala:333
+#: src/sharing/settings.vala:23 src/sharing/settings.vala:364
 msgid "Stop Sharing"
 msgstr ""
 
-#: src/sharing/settings.vala:34
+#: src/sharing/settings.vala:36
 msgid ""
 "Network permissions also depend on filesystem permissions. Write access "
 "permits creating, modifying and deleting content."
 msgstr ""
 
-#: src/sharing/settings.vala:36
+#: src/sharing/settings.vala:38
 msgid "Share Name"
 msgstr ""
 
-#: src/sharing/settings.vala:39
+#: src/sharing/settings.vala:41
 msgid "All Authenticated Users"
 msgstr ""
 
-#: src/sharing/settings.vala:42
+#: src/sharing/settings.vala:44
 msgid "Read and Write"
 msgstr ""
 
-#: src/sharing/settings.vala:44
+#: src/sharing/settings.vala:46
 msgid "Allow Guest Access"
 msgstr ""
 
-#: src/sharing/settings.vala:46
+#: src/sharing/settings.vala:48
+msgid "Hide from network browsing"
+msgstr ""
+
+#: src/sharing/settings.vala:49
+msgid ""
+"Direct access still requires the configured authentication and permissions."
+msgstr ""
+
+#: src/sharing/settings.vala:52
 msgid "Network Address"
 msgstr ""
 
-#: src/sharing/settings.vala:47
+#: src/sharing/settings.vala:53
 msgid "Loading sharing state…"
 msgstr ""
 
-#: src/sharing/settings.vala:50
+#: src/sharing/settings.vala:56
 msgid "Allowed Accounts"
 msgstr ""
 
-#: src/sharing/settings.vala:51
+#: src/sharing/settings.vala:57
 msgid ""
 "Select at least one account when access for all authenticated users is "
 "disabled. Samba credentials must be configured for each account."
 msgstr ""
 
-#: src/sharing/settings.vala:64
+#: src/sharing/settings.vala:70
 msgid "Allow SMB on Home and Work Networks…"
 msgstr ""
 
-#: src/sharing/settings.vala:67
+#: src/sharing/settings.vala:73
 msgid "Close Files-owned SMB Firewall Access…"
 msgstr ""
 
-#: src/sharing/settings.vala:70
+#: src/sharing/settings.vala:76
 msgid "Reload Sharing State"
 msgstr ""
 
-#: src/sharing/settings.vala:73
+#: src/sharing/settings.vala:79
 msgid "Inspect Connected Clients…"
 msgstr ""
 
-#: src/sharing/settings.vala:93
+#: src/sharing/settings.vala:99
 msgid "Sharing changed outside Files. Reload Sharing State before editing."
 msgstr ""
 
-#: src/sharing/settings.vala:96
+#: src/sharing/settings.vala:105
+msgid ""
+"Share visibility changed outside Files. Reload Sharing State before editing."
+msgstr ""
+
+#: src/sharing/settings.vala:109
 msgid "Could not reconcile sharing state: "
 msgstr ""
 
-#: src/sharing/settings.vala:110
+#: src/sharing/settings.vala:118
+msgid "Sharing Firewall"
+msgstr ""
+
+#: src/sharing/settings.vala:118
+msgid ""
+"No active packet-filter rules were detected. There is no supported firewall "
+"policy for Files to change. Network access still depends on Samba "
+"permissions and the surrounding network."
+msgstr ""
+
+#: src/sharing/settings.vala:118
+msgid ""
+"An alternative or unknown firewall policy is present. Files cannot manage "
+"this policy; ask the administrator to configure SMB access. No rules were "
+"changed."
+msgstr ""
+
+#: src/sharing/settings.vala:128
 msgid "This folder is not currently shared."
 msgstr ""
 
-#: src/sharing/settings.vala:120
+#: src/sharing/settings.vala:138
 msgid "Connected Clients"
 msgstr ""
 
-#: src/sharing/settings.vala:123
+#: src/sharing/settings.vala:141
 msgid "Connection status unavailable. Sharing remains usable.\n"
 msgstr ""
 
-#: src/sharing/settings.vala:134
+#: src/sharing/settings.vala:152
 msgid "Share-level access; filesystem permissions can further restrict it."
 msgstr ""
 
-#: src/sharing/settings.vala:143
+#: src/sharing/settings.vala:161
 msgid "Access for "
 msgstr ""
 
-#: src/sharing/settings.vala:195 src/sharing/settings.vala:246
+#: src/sharing/settings.vala:213 src/sharing/settings.vala:277
 msgid "Apply Changes"
 msgstr ""
 
-#: src/sharing/settings.vala:198 src/sharing/settings.vala:261
+#: src/sharing/settings.vala:216 src/sharing/settings.vala:292
 msgid "Not shared"
 msgstr ""
 
-#: src/sharing/settings.vala:213
+#: src/sharing/settings.vala:233
+msgid "The Majoris Samba registry-share foundation is not enabled."
+msgstr ""
+
+#: src/sharing/settings.vala:239
 msgid "Sharing state unavailable: "
 msgstr ""
 
-#: src/sharing/settings.vala:233
+#: src/sharing/settings.vala:259
 msgid ""
 "Select at least one account or enable access for all authenticated users."
 msgstr ""
 
-#: src/sharing/settings.vala:245
+#: src/sharing/settings.vala:276
 msgid "smb://"
 msgstr ""
 
-#: src/sharing/settings.vala:296
+#: src/sharing/settings.vala:327
 msgid "Refresh Shared Folders"
 msgstr ""
 
-#: src/sharing/settings.vala:325
+#: src/sharing/settings.vala:356
 msgid "Open Folder"
 msgstr ""
 
-#: src/sharing/settings.vala:331
+#: src/sharing/settings.vala:362
 msgid "Copy Network Address"
 msgstr ""
 
-#: src/sharing/settings.vala:332
+#: src/sharing/settings.vala:363
 msgid "Edit Share"
 msgstr ""
 
-#: src/sharing/settings.vala:339
+#: src/sharing/settings.vala:370
 msgid "Could not read Samba configuration: "
 msgstr ""
 
-#: src/views/browser.vala:185
+#: src/views/browser.vala:203
 msgid "Show or Hide Locations"
 msgstr ""
 
-#: src/views/browser.vala:189
+#: src/views/browser.vala:207
 msgid "Back"
 msgstr ""
 
-#: src/views/browser.vala:193
+#: src/views/browser.vala:211
 msgid "Forward"
 msgstr ""
 
-#: src/views/browser.vala:197
+#: src/views/browser.vala:215
 msgid "Parent Folder"
 msgstr ""
 
-#: src/views/browser.vala:202
+#: src/views/browser.vala:220
 msgid "Location or URI"
 msgstr ""
 
-#: src/views/browser.vala:203
+#: src/views/browser.vala:221
 msgid "Location (Ctrl+L)"
 msgstr ""
 
-#: src/views/browser.vala:254
+#: src/views/browser.vala:272
 msgid "Edit Location"
 msgstr ""
 
-#: src/views/browser.vala:256
+#: src/views/browser.vala:274
 msgid "Reload"
 msgstr ""
 
-#: src/views/browser.vala:258
+#: src/views/browser.vala:276
 msgid "Search"
 msgstr ""
 
-#: src/views/browser.vala:264 src/views/browser.vala:969
+#: src/views/browser.vala:282 src/views/browser.vala:1033
 msgid "View"
 msgstr ""
 
-#: src/views/browser.vala:268 src/views/browser.vala:962
+#: src/views/browser.vala:286 src/views/browser.vala:1026
 msgid "View Settings"
 msgstr ""
 
-#: src/views/browser.vala:293
+#: src/views/browser.vala:311
 msgid "Search Home"
 msgstr ""
 
-#: src/views/browser.vala:303
+#: src/views/browser.vala:321
 msgid "Search Everywhere (Home and mounted locations)"
 msgstr ""
 
-#: src/views/browser.vala:314
+#: src/views/browser.vala:332
 msgid "Search Filters"
 msgstr ""
 
-#: src/views/browser.vala:457
+#: src/views/browser.vala:515
 msgid "Cannot load "
 msgstr ""
 
-#: src/views/browser.vala:468
+#: src/views/browser.vala:527
 msgid "%u results · %u folders scanned · %u unavailable"
 msgstr ""
 
-#: src/views/browser.vala:571
+#: src/views/browser.vala:631
 msgid "Cloud Account Actions"
 msgstr ""
 
-#: src/views/browser.vala:580
+#: src/views/browser.vala:640
 msgid "Open in New Tab"
 msgstr ""
 
-#: src/views/browser.vala:587
+#: src/views/browser.vala:647
 msgid "Rename Bookmark"
 msgstr ""
 
-#: src/views/browser.vala:592
+#: src/views/browser.vala:652
 msgid "Remove Bookmark"
 msgstr ""
 
-#: src/views/browser.vala:624
+#: src/views/browser.vala:684
 msgid "Mount"
 msgstr ""
 
-#: src/views/browser.vala:699 src/views/home.vala:32
+#: src/views/browser.vala:759 src/views/home.vala:32
 msgid "Home"
 msgstr ""
 
-#: src/views/browser.vala:966
+#: src/views/browser.vala:1030
 msgid "This Folder"
 msgstr ""
 
-#: src/views/browser.vala:983
+#: src/views/browser.vala:1047
 msgid "Icon Density"
 msgstr ""
 
-#: src/views/browser.vala:988
+#: src/views/browser.vala:1052
 msgid "Group By"
 msgstr ""
 
-#: src/views/browser.vala:996
+#: src/views/browser.vala:1060
 msgid "Grid Metadata Caption"
 msgstr ""
 
-#: src/views/browser.vala:1017
+#: src/views/browser.vala:1081
 msgid "Selection Checkboxes"
 msgstr ""
 
-#: src/views/browser.vala:1025
+#: src/views/browser.vala:1089
 msgid "Folders First"
 msgstr ""
 
-#: src/views/browser.vala:1033
+#: src/views/browser.vala:1097
 msgid "Sort By"
 msgstr ""
 
-#: src/views/browser.vala:1041
+#: src/views/browser.vala:1105
 msgid "Descending Order"
 msgstr ""
 
-#: src/views/browser.vala:1046
+#: src/views/browser.vala:1110
 msgid "List Columns"
 msgstr ""
 
-#: src/views/browser.vala:1064
+#: src/views/browser.vala:1128
 msgid "Column Width (pixels)"
 msgstr ""
 
-#: src/views/browser.vala:1071
+#: src/views/browser.vala:1135
 msgid "Move Column Left"
 msgstr ""
 
-#: src/views/browser.vala:1403
+#: src/views/browser.vala:1166
+msgid "Preparing extension sort…"
+msgstr ""
+
+#: src/views/browser.vala:1507
 msgid "Local activity · nothing is uploaded"
 msgstr ""
 
-#: src/views/browser.vala:1411
+#: src/views/browser.vala:1515
 msgid "%u items · %d selected"
 msgstr ""
 
-#: src/views/browser.vala:1653
+#: src/views/browser.vala:1761
 msgid "Select Item"
 msgstr ""
 
-#: src/views/browser.vala:1827
+#: src/views/browser.vala:1987
 msgid ""
 "A fresh metadata database is ready. The previous database is preserved at "
 msgstr ""
@@ -890,43 +981,59 @@ msgstr ""
 msgid "No items yet"
 msgstr ""
 
-#: src/window/extra-actions.vala:66
+#: src/window/extra-actions.vala:73 src/window/window.vala:400
+msgid "Make Available Offline"
+msgstr ""
+
+#: src/window/extra-actions.vala:73 src/window/window.vala:401
+msgid "Free Local Space"
+msgstr ""
+
+#: src/window/extra-actions.vala:73 src/window/window.vala:402
+msgid "Retry Cloud Sync"
+msgstr ""
+
+#: src/window/extra-actions.vala:94
 msgid "There are no pending replacement recovery records."
 msgstr ""
 
-#: src/window/extra-actions.vala:184
+#: src/window/extra-actions.vala:108
+msgid "There is no interrupted batch rename to recover."
+msgstr ""
+
+#: src/window/extra-actions.vala:217
 msgid "Choose a supported archive extension"
 msgstr ""
 
-#: src/window/extra-actions.vala:192
+#: src/window/extra-actions.vala:225
 msgid "Encrypted creation currently requires a .zip filename"
 msgstr ""
 
-#: src/window/extra-actions.vala:222
+#: src/window/extra-actions.vala:255
 msgid "Invalid folder name"
 msgstr ""
 
-#: src/window/extra-actions.vala:306
+#: src/window/extra-actions.vala:339
 msgid "The configured Majoris terminal could not be opened: "
 msgstr ""
 
-#: src/window/extra-actions.vala:353
+#: src/window/extra-actions.vala:386
 msgid "Choose Custom Icon"
 msgstr ""
 
-#: src/window/extra-actions.vala:398
+#: src/window/extra-actions.vala:431
 msgid "New Document from Template"
 msgstr ""
 
-#: src/window/extra-actions.vala:420
+#: src/window/extra-actions.vala:453
 msgid "SMB Account Password"
 msgstr ""
 
-#: src/window/extra-actions.vala:424
+#: src/window/extra-actions.vala:457
 msgid "Set Password"
 msgstr ""
 
-#: src/window/extra-actions.vala:445
+#: src/window/extra-actions.vala:478
 msgid "Enter a server URI"
 msgstr ""
 
@@ -934,22 +1041,22 @@ msgstr ""
 msgid "Files"
 msgstr ""
 
-#: src/window/window.vala:49
+#: src/window/window.vala:51
 msgid "New Tab"
 msgstr ""
 
-#: src/window/window.vala:52
+#: src/window/window.vala:54
 msgid "File Operations"
 msgstr ""
 
-#: src/window/window.vala:64
+#: src/window/window.vala:66
 msgid "Retry Remaining Items"
 msgstr ""
 
-#: src/window/window.vala:78
+#: src/window/window.vala:80
 msgid "Cancelled · "
 msgstr ""
 
-#: src/window/window.vala:165
+#: src/window/window.vala:168
 msgid "Tab Overview"
 msgstr ""

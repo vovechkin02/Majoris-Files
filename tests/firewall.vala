@@ -37,5 +37,13 @@ int main(string[] args)
         }
         catch (Error e) { error("%s", e.message); }
     });
+    Test.add_func("/firewall/empty-versus-unmanaged", () => {
+        try {
+            assert(SharingFirewall.empty_nft_ruleset("{\"nftables\":[{\"metainfo\":{\"version\":\"fixture\"}}]}"));
+            assert(!SharingFirewall.empty_nft_ruleset("{\"nftables\":[{\"table\":{\"name\":\"administrator\"}}]}"));
+            bool invalid = false; try { SharingFirewall.empty_nft_ruleset("{}"); } catch (Error e) { invalid = true; } assert(invalid);
+        }
+        catch (Error e) { error("%s", e.message); }
+    });
     return Test.run();
 }

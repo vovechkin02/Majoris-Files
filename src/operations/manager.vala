@@ -1,7 +1,7 @@
 namespace MajorisFiles {
     public delegate void ConflictPresentation(Adw.AlertDialog dialog, File source, File destination);
     public enum OperationKind {
-        COPY, MOVE, TRASH, DELETE, CREATE_FOLDER, RENAME, LINK
+        COPY, MOVE, TRASH, DELETE, CREATE_FOLDER, RENAME, LINK, EDIT_FILE
     }
     public class Job : Object {
         public string title {
@@ -75,23 +75,129 @@ namespace MajorisFiles {
         Gee.ArrayList<JournalEntry> redo_stack = new Gee.ArrayList<JournalEntry>();
         public MetadataStore metadata;
         public ReplacementJournal replacements;
+        public RenameRecovery rename_recovery;
         public ConflictPresentation? conflict_presentation;
         bool history_busy;
         Gee.HashSet<string> discarded_groups = new Gee.HashSet<string>();
         public signal void changed();
+        public signal void replacement_checkpoint(string phase, ReplacementRecord record);
+        public signal void rename_checkpoint(string phase);
+        public signal void edit_checkpoint(string phase);
+        public async bool replace_existing(File source, File destination, bool move, Job job, bool keep_backup = false, string? expected_guard = null) throws Error
+        {
+            if (!destination.is_native()) throw new IOError.NOT_SUPPORTED("Local staging requires a native destination");
+            var backup = destination.get_parent().get_child(".majoris-backup-" + Uuid.string_random());
+            var record = yield replacements.prepare(destination, backup);
+            if (expected_guard != null && record.previous_identity != "guard2:" + expected_guard) {
+                replacements.forget(record);
+                throw new FileError.INTEGRITY("The destination changed while the edited content was being prepared");
+            }
+            var staging = DurableFiles.staging(record);
+            string source_identity = yield DurableFiles.snapshot(source, job.cancellable);
+            bool published = false;
+            replacement_checkpoint("prepared", record);
+            ulong writing=job.notify["progress"].connect(()=>replacement_checkpoint("writing",record));
+            try {
+                if (!(yield transfer(source, staging, false, job))) throw new IOError.CANCELLED("Replacement staging was not completed; the original destination is preserved");
+                job.disconnect(writing);writing=0;
+                replacement_checkpoint("written", record);
+                yield DurableFiles.flush(staging, job.cancellable);
+                if (source_identity != (yield DurableFiles.snapshot(source, job.cancellable)))
+                    throw new FileError.INTEGRITY("Source changed while replacement data was being staged");
+                yield replacements.staged(record, staging);
+                replacement_checkpoint("staged", record);
+                if (!(yield ReplacementJournal.matches(record, destination)))
+                    throw new FileError.INTEGRITY("Destination changed before replacement publication; it was not overwritten");
+                job.cancellable.set_error_if_cancelled();
+                bool exchanged = false;
+                try {
+                    DurableFiles.exchange(destination.get_path(), staging.get_path());
+                    exchanged = true;
+                }
+                catch (IOError.NOT_SUPPORTED e) {}
+                if (exchanged) {
+                    published = true;
+                    replacement_checkpoint("exchanged", record);
+                    // The old item remains recoverable at the deterministic stage
+                    // path if the process exits before this rename completes.
+                    yield staging.move_async(backup, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null, null);
+                }
+                else {
+                    yield destination.move_async(backup, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable, null);
+                    replacement_checkpoint("backed-up", record);
+                    yield staging.move_async(destination, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null, null);
+                    published = true;
+                }
+                yield DurableFiles.flush(destination.get_parent(), new Cancellable(), false);
+                yield replacements.committed(record);
+                replacement_checkpoint("published", record);
+                if (keep_backup) {
+                    if (!(yield ReplacementJournal.matches(record, backup))) throw new FileError.INTEGRITY("The preserved original changed; edited-file history was not committed");
+                    yield this.record(OperationKind.EDIT_FILE, backup, destination, job.journal_group);
+                    persist_history_checked();
+                    replacements.history(record);
+                    return true;
+                }
+                // Never delete a concurrently changed backup based on its name.
+                if (!(yield ReplacementJournal.matches(record, backup)))
+                    throw new FileError.INTEGRITY("Preserved destination changed; recovery data was retained");
+                yield remove_tree(backup, new Cancellable());
+                yield DurableFiles.flush(destination.get_parent(), new Cancellable(), false);
+                replacement_checkpoint("cleaned", record);
+                replacements.forget(record);
+                if (move) {
+                    if (source_identity != (yield DurableFiles.snapshot(source, job.cancellable)))
+                        throw new FileError.INTEGRITY("Replacement was published; changed source was kept");
+                    yield remove_tree(source, job.cancellable);
+                }
+                return true;
+            }
+            catch (Error e) {
+                if (!published) {
+                    // The old target either remains in place or is recoverable
+                    // in backup. Do not remove a destination created externally.
+                    try { yield remove_tree(staging, new Cancellable()); } catch (Error ignored) {}
+                    if (!(yield ReplacementJournal.matches(record, destination)) && (yield ReplacementJournal.matches(record, backup))) {
+                        try { yield backup.move_async(destination, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null, null); } catch (Error ignored) {}
+                    }
+                    if (yield ReplacementJournal.matches(record, destination))
+                        replacements.forget(record);
+                }
+                throw e;
+            }
+            finally{if(writing!=0)job.disconnect(writing);}
+        }
         public OperationManager(MetadataStore metadata)
         {
             this.metadata = metadata;
             replacements = new ReplacementJournal(metadata);
-            if (replacements.records.size > 0) {
+            rename_recovery = new RenameRecovery(metadata);
+            if(rename_recovery.pending){var recovery=new Job("Interrupted batch rename");recovery.done=true;recovery.error="Use Recover Interrupted Batch Rename from the menu. Original names can be restored without overwriting unrelated files.";jobs.append(recovery);}
+            bool pending_recovery = false;
+            foreach (var entry in replacements.records) if (entry.phase != "history") pending_recovery = true;
+            if (pending_recovery) {
                 var recovery = new Job("Replacement recovery available");
                 recovery.done = true;
                 recovery.error = "Previous destination data may be preserved. Use Recover Previous Replaced Files from the menu to inspect and restore it without overwriting current files.";
                 jobs.append(recovery);
             }
-            restore_history("undo", undo_stack);
-            restore_history("redo", redo_stack);
+            string combined_history = metadata.state("operations-history-v4");
+            try {
+                if (combined_history == "") {
+                    restore_history("undo", undo_stack); restore_history("redo", redo_stack);
+                }
+                else {
+                    var history = Variant.parse(new VariantType("(a(usssss)a(usssss))"), combined_history);
+                    restore_history("undo", undo_stack, "v3:" + history.get_child_value(0).print(true));
+                    restore_history("redo", redo_stack, "v3:" + history.get_child_value(1).print(true));
+                }
+            }
+            catch (Error e) { warning("Operation history could not be read: %s", e.message); }
             restore_jobs();
+            if(metadata.state("image-edit-pending-v1")!=""){
+                var reconciliation=new Job("Reconcile interrupted image edit");jobs.append(reconciliation);
+                reconcile_edit.begin((obj,res)=>{try{reconcile_edit.end(res);reconciliation.done=true;}catch(Error e){reconciliation.error=e.message;reconciliation.done=true;}changed();});
+            }
             var interrupted = metadata.state("operations-active");
             if(interrupted != "" && jobs.get_n_items() == 0)
             {
@@ -167,9 +273,9 @@ namespace MajorisFiles {
                 warning("Cannot restore operation plans: %s", e.message);
             }
         }
-        void restore_history(string key, Gee.ArrayList<JournalEntry> stack)
+        void restore_history(string key, Gee.ArrayList<JournalEntry> stack, string? stored = null)
         {
-            var saved = metadata.state("operations-" + key);
+            var saved = stored ?? metadata.state("operations-" + key);
             if(saved == "")
                 return;
             try {
@@ -183,7 +289,7 @@ namespace MajorisFiles {
                     var entry = entries.get_child_value(i);
                     uint kind = entry.get_child_value(0).get_uint32();
                     string source = entry.get_child_value(1).get_string(), destination = entry.get_child_value(2).get_string();
-                    if(kind > OperationKind.LINK || kind == OperationKind.DELETE || Uri.parse_scheme(source) == null || Uri.parse_scheme(destination) == null)
+                    if(kind > OperationKind.EDIT_FILE || kind == OperationKind.DELETE || Uri.parse_scheme(source) == null || Uri.parse_scheme(destination) == null)
                         continue;
                     var restored = new JournalEntry((OperationKind)kind, File.new_for_uri(source), File.new_for_uri(destination));
                     if(version_two)
@@ -202,10 +308,16 @@ namespace MajorisFiles {
         }
         void persist_history()
         {
-            save_stack("undo", undo_stack);
-            save_stack("redo", redo_stack);
+            try { persist_history_checked(); } catch (Error e) { warning("Operation history could not be saved: %s", e.message); }
         }
-        void save_stack(string key, Gee.ArrayList<JournalEntry> stack)
+        void persist_history_checked(bool clear_rename = false,bool clear_edit = false) throws Error {
+            var undo = serialize_stack(undo_stack); var redo = serialize_stack(redo_stack);
+            string saved=new Variant("(@a(usssss)@a(usssss))", undo, redo).print(true);
+            if(clear_edit)metadata.set_states_checked({"operations-history-v4","image-edit-pending-v1"},{saved,""});
+            else if(clear_rename)metadata.set_states_checked({"operations-history-v4",RenameRecovery.KEY},{saved,""});
+            else metadata.set_state_checked("operations-history-v4",saved);
+        }
+        Variant serialize_stack(Gee.ArrayList<JournalEntry> stack)
         {
             while(stack.size > 1000)
             {
@@ -217,7 +329,7 @@ namespace MajorisFiles {
             var builder = new VariantBuilder(new VariantType("a(usssss)"));
             foreach(var entry in stack)
                 builder.add("(usssss)", (uint)entry.kind, entry.source.get_uri(), entry.destination.get_uri(), entry.source_identity, entry.destination_identity, entry.group);
-            metadata.set_state("operations-" + key, "v3:" + builder.end().print(true));
+            return builder.end();
         }
         public static async string file_identity(File file)
         {
@@ -243,11 +355,14 @@ namespace MajorisFiles {
                     Source.remove(timeout);
             }
         }
-        async void record(OperationKind kind, File source, File destination, string? group = null)
+        async void record(OperationKind kind, File source, File destination, string? group = null) throws Error
         {
             var entry = new JournalEntry(kind, source, destination);
             entry.source_identity = yield file_identity(source);
             entry.destination_identity = yield file_identity(destination);
+            if (kind == OperationKind.EDIT_FILE) {
+                entry.source_identity = "guard2:" + (yield DurableFiles.snapshot(source)); entry.destination_identity = "guard2:" + (yield DurableFiles.snapshot(destination));
+            }
             if(group != null)
                 entry.group = group;
             redo_stack.clear();
@@ -263,7 +378,8 @@ namespace MajorisFiles {
         {
             if(expected == "")
                 throw new FileError.UNSUPPORTED("This operation has no verified file identity and cannot safely be reversed");
-            if((yield file_identity(file)) != expected)
+            string actual = expected.has_prefix("guard2:") ? "guard2:" + (yield DurableFiles.snapshot(file)) : yield file_identity(file);
+            if(actual != expected)
                 throw new FileError.CONFLICT("The original item is missing or has been replaced: " + file.get_parse_name());
         }
         void persist_jobs()
@@ -413,6 +529,7 @@ namespace MajorisFiles {
                         catch (IOError.NOT_FOUND e) {}
                         File? backup = null;
                         ReplacementRecord? replacement = null;
+                        bool staged_replacement = false;
                         bool merge = false;
                         if (exists)
                         {
@@ -480,14 +597,17 @@ namespace MajorisFiles {
                                 } while (exists);
                             }
                             else {
-                                backup = target.get_child(".majoris-backup-" + Uuid.string_random());
-                                replacement = yield replacements.prepare(destination, backup);
-                                yield destination.move_async(backup, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable, null);
+                                if (destination.is_native()) staged_replacement = true;
+                                else {
+                                    backup = target.get_child(".majoris-backup-" + Uuid.string_random());
+                                    replacement = yield replacements.prepare(destination, backup);
+                                    yield destination.move_async(backup, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable, null);
+                                }
                             }
                         }
                         bool complete;
                         try {
-                            complete = merge ? yield merge_folders(source, destination, kind == OperationKind.MOVE, job) : yield transfer(source, destination, kind == OperationKind.MOVE, job);
+                            complete = staged_replacement ? yield replace_existing(source, destination, kind == OperationKind.MOVE, job) : merge ? yield merge_folders(source, destination, kind == OperationKind.MOVE, job) : yield transfer(source, destination, kind == OperationKind.MOVE, job);
                         }
                         catch (Error e) {
                             if (backup != null)
@@ -628,7 +748,7 @@ namespace MajorisFiles {
                 catch (IOError.WOULD_RECURSE e) {}
                 catch (IOError.NOT_SUPPORTED e) {}
             }
-            if (info.get_file_type() == FileType.DIRECTORY && !info.get_is_symlink())
+            if (info.get_file_type() == FileType.DIRECTORY && !Paths.is_symlink(info))
             {
                 yield destination.make_directory_async(Priority.DEFAULT, job.cancellable);
                 var en = yield source.enumerate_children_async("standard::name", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
@@ -741,6 +861,11 @@ namespace MajorisFiles {
                                 existing = null;
                             }
                             else {
+                                if (target.is_native()) {
+                                    yield replace_existing(child, target, move, job);
+                                    if (move) metadata.relocate(child, target);
+                                    continue;
+                                }
                                 backup = destination.get_child(".majoris-backup-" + Uuid.string_random());
                                 replacement = yield replacements.prepare(target, backup);
                                 yield target.move_async(backup, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable, null);
@@ -897,7 +1022,7 @@ namespace MajorisFiles {
         public static async void remove_tree(File file, Cancellable token) throws Error
         {
             var info = yield file.query_info_async("standard::type,standard::is-symlink", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token);
-            if (info.get_file_type() == FileType.DIRECTORY && !info.get_is_symlink())
+            if (info.get_file_type() == FileType.DIRECTORY && !Paths.is_symlink(info))
             {
                 var en = yield file.enumerate_children_async("standard::name", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token);
                 while (true)
@@ -946,15 +1071,18 @@ namespace MajorisFiles {
             var current = new Gee.ArrayList<File>(); current.add_all(sources);
             var temporary = new Gee.ArrayList<File>();
             for (int i = 0; i < sources.size; i++) temporary.add(parent.get_child(".majoris-rename-" + Uuid.string_random()));
+            yield rename_recovery.prepare(sources,temporary,names);rename_checkpoint("prepared");
             try {
                 for (int i = 0; i < sources.size; i++) {
                     yield current[i].move_async(temporary[i], FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token, null);
                     metadata.relocate(current[i], temporary[i]); current[i] = temporary[i];
+                    yield DurableFiles.flush(parent,token,false);rename_checkpoint("staged:"+i.to_string());
                 }
                 for (int i = 0; i < sources.size; i++) {
                     var target = parent.get_child(names[i]);
                     yield current[i].move_async(target, FileCopyFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token, null);
                     metadata.relocate(current[i], target); current[i] = target;
+                    yield DurableFiles.flush(parent,token,false);rename_checkpoint("published:"+i.to_string());
                 }
                 return current;
             }
@@ -970,6 +1098,7 @@ namespace MajorisFiles {
                         try { yield current[i].move_async(sources[i], FileCopyFlags.NONE, Priority.DEFAULT, null, null); metadata.relocate(current[i], sources[i]); }
                         catch (Error rollback) { failures.append(current[i].get_parse_name() + "\n"); }
                 if (failures.len > 0) throw new FileError.INTEGRITY("Batch rename stopped. Some items could not be restored and remain at:\n" + failures.str);
+                yield DurableFiles.flush(parent,new Cancellable(),false);rename_recovery.clear();
                 throw e;
             }
         }
@@ -993,7 +1122,7 @@ namespace MajorisFiles {
                     record.source_identity = identities[i]; record.destination_identity = yield file_identity(outputs[i]); record.group = group;
                     undo_stack.add(record);
                 }
-                redo_stack.clear(); persist_history(); changed(); job.progress = 1; finish(job);
+                redo_stack.clear(); persist_history_checked(true);rename_checkpoint("committed"); changed(); job.progress = 1; finish(job);
             }
             catch (Error e) { finish(job, e); throw e; }
             finally { history_busy = false; }
@@ -1010,7 +1139,7 @@ namespace MajorisFiles {
                 if (reverse) { record.source_identity = yield file_identity(outputs[i]); undo_stack.remove(record); redo_stack.add(record); }
                 else { record.destination_identity = yield file_identity(outputs[i]); redo_stack.remove(record); undo_stack.add(record); }
             }
-            persist_history(); changed(); return true;
+            persist_history_checked(true);rename_checkpoint("committed"); changed(); return true;
         }
         public async void new_folder(File parent, string name, string? group = null) throws Error
         {
@@ -1034,6 +1163,7 @@ namespace MajorisFiles {
             if(application != null)
                 application.hold();
             try {
+                yield reconcile_edit();
                 if(undo_stack.size == 0)
                     return;
                 string group = undo_stack[undo_stack.size - 1].group;
@@ -1082,6 +1212,10 @@ namespace MajorisFiles {
                 return;
             var entry = undo_stack[undo_stack.size - 1];
             yield require_identity(entry.destination, entry.destination_identity);
+            if (entry.kind == OperationKind.EDIT_FILE) {
+                yield exchange_edit(entry,true);
+                undo_stack.remove(entry); redo_stack.add(entry); persist_history_checked(false,true);edit_checkpoint("committed"); changed(); return;
+            }
             if (entry.kind == OperationKind.MOVE || entry.kind == OperationKind.RENAME || entry.kind == OperationKind.TRASH)
             {
                 yield ensure_parent(entry.source);
@@ -1109,6 +1243,7 @@ namespace MajorisFiles {
             if(application != null)
                 application.hold();
             try {
+                yield reconcile_edit();
                 if(redo_stack.size == 0)
                     return;
                 string group = redo_stack[redo_stack.size - 1].group;
@@ -1134,6 +1269,11 @@ namespace MajorisFiles {
                 return;
             var entry = redo_stack[redo_stack.size - 1];
             yield require_identity(entry.source, entry.source_identity);
+            if (entry.kind == OperationKind.EDIT_FILE) {
+                yield require_identity(entry.destination, entry.destination_identity);
+                yield exchange_edit(entry,false);
+                redo_stack.remove(entry); undo_stack.add(entry); persist_history_checked(false,true);edit_checkpoint("committed"); changed(); return;
+            }
             if (entry.kind == OperationKind.MOVE || entry.kind == OperationKind.RENAME)
             {
                 yield entry.source.move_async(entry.destination, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
@@ -1168,6 +1308,32 @@ namespace MajorisFiles {
             undo_stack.add(entry);
             persist_history();
             changed();
+        }
+        async void exchange_edit(JournalEntry entry,bool undo) throws Error {
+            yield require_identity(entry.source, entry.source_identity);
+            yield require_identity(entry.destination, entry.destination_identity);
+            metadata.set_state_checked("image-edit-pending-v1",new Variant("(sssss)",entry.source.get_uri(),entry.destination.get_uri(),entry.source_identity,entry.destination_identity,undo?"undo":"redo").print(true));edit_checkpoint("prepared");
+            DurableFiles.exchange(entry.destination.get_path(), entry.source.get_path());
+            yield DurableFiles.flush(entry.destination.get_parent(), new Cancellable(), false);
+            edit_checkpoint("exchanged");
+            string previous = entry.source_identity;
+            entry.source_identity = entry.destination_identity; entry.destination_identity = previous;
+        }
+        public async void reconcile_edit() throws Error {
+            string saved=metadata.state("image-edit-pending-v1");if(saved=="")return;
+            if(saved.length>16384)throw new FileError.INTEGRITY("Invalid pending image-edit history");
+            var data=Variant.parse(new VariantType("(sssss)"),saved);string source=data.get_child_value(0).get_string(),destination=data.get_child_value(1).get_string(),before_source=data.get_child_value(2).get_string(),before_destination=data.get_child_value(3).get_string(),direction=data.get_child_value(4).get_string();
+            JournalEntry? record=null;
+            foreach(var entry in undo_stack)if(entry.kind==OperationKind.EDIT_FILE&&entry.source.get_uri()==source&&entry.destination.get_uri()==destination)record=entry;
+            foreach(var entry in redo_stack)if(entry.kind==OperationKind.EDIT_FILE&&entry.source.get_uri()==source&&entry.destination.get_uri()==destination)record=entry;
+            if(record==null||!(direction in new string[]{"undo","redo"})||!before_source.has_prefix("guard2:")||!before_destination.has_prefix("guard2:"))throw new FileError.INTEGRITY("Pending image edit has no matching history; its preserved files were left unchanged");
+            string actual_source="guard2:"+(yield DurableFiles.snapshot(record.source)),actual_destination="guard2:"+(yield DurableFiles.snapshot(record.destination));
+            bool swapped=actual_source==before_destination&&actual_destination==before_source;
+            if(!swapped&&(actual_source!=before_source||actual_destination!=before_destination))throw new FileError.CONFLICT("Image-edit recovery found an external modification; both files were preserved");
+            record.source_identity=actual_source;record.destination_identity=actual_destination;
+            undo_stack.remove(record);redo_stack.remove(record);
+            if((direction=="undo")==swapped)redo_stack.add(record);else undo_stack.add(record);
+            persist_history_checked(false,true);changed();
         }
     }
 }

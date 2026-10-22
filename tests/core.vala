@@ -2,6 +2,11 @@ using MajorisFiles;
 int main(string[] args)
 {
     Test.init(ref args);
+    Test.add_func("/paths/optional-remote-attributes",()=>{
+        var info=new FileInfo();info.set_name(".remote-hidden");assert(Paths.is_hidden(info)&&!Paths.is_symlink(info));
+        info.set_attribute_boolean("standard::is-hidden",false);assert(!Paths.is_hidden(info));
+        info.set_file_type(FileType.SYMBOLIC_LINK);assert(Paths.is_symlink(info));
+    });
     Test.add_func("/paths/validation", () => { assert(Paths.valid_name("report.txt"));
                                                assert(!Paths.valid_name("../escape"));
                                                assert(!Paths.valid_name(".."));

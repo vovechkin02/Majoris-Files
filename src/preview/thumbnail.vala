@@ -44,7 +44,7 @@ namespace MajorisFiles {
     public class ImageThumbnail : Object, ThumbnailProvider {
         public bool supports(FileItem item)
         {
-            return item.mime.has_prefix("image/") && item.bytes <= 32 * 1024 * 1024;
+            return item.mime.has_prefix("image/") && item.bytes <= 256 * 1024 * 1024;
         }
         public async Bytes render(FileItem item, Cancellable token) throws Error
         {
@@ -79,8 +79,10 @@ namespace MajorisFiles {
             providers.insert(0, provider);
         }
         public async Gdk.Texture? texture(FileItem item, Cancellable token) throws Error {
+            var cloud = yield CloudFiles.get_default().query(item.file, token);
+            if (cloud.online_only || cloud.state == "unavailable" || cloud.state == "error") return null;
             string policy = metadata == null ? "Local" : metadata.state("thumbnail-policy", "Local");
-            if (!enabled || policy == "Never" || (!item.file.is_native() && policy != "All") || item.info.get_is_symlink())
+            if (!enabled || policy == "Never" || (!item.file.is_native() && policy != "All") || Paths.is_symlink(item.info))
                 return null;
             uint limit = 8;
             if(metadata != null)

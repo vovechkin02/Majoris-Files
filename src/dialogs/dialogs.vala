@@ -78,7 +78,7 @@ namespace MajorisFiles {
             var group = new Adw.PreferencesGroup();
             page.add(group);
             dialog.add(page);
-            if (sharing != null && items.size == 1 && items[0].directory && items[0].file.is_native() && !items[0].info.get_is_symlink())
+            if (sharing != null && items.size == 1 && items[0].directory && items[0].file.is_native() && !Paths.is_symlink(items[0].info))
                 dialog.add(sharing());
             if (details != null && items.size == 1)
                 dialog.add(details());
@@ -193,7 +193,7 @@ namespace MajorisFiles {
                 var accessed = item.info.get_access_date_time();
                 if(accessed != null)
                     group.add(row("Accessed", accessed.format("%c")));
-                if (item.info.get_is_symlink())
+                if (Paths.is_symlink(item.info))
                     group.add(row("Link target", item.info.get_symlink_target() ?? "Unavailable"));
                 var favorite = new Adw.SwitchRow();
                 favorite.title = _("Favorite");

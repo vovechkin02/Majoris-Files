@@ -8,6 +8,8 @@ namespace MajorisFiles {
         Adw.SwitchRow everyone = new Adw.SwitchRow();
         Adw.SwitchRow writable = new Adw.SwitchRow();
         Adw.SwitchRow guest = new Adw.SwitchRow();
+        Adw.SwitchRow hidden = new Adw.SwitchRow();
+        bool hidden_snapshot;
         Adw.ActionRow address = new Adw.ActionRow();
         Adw.PreferencesGroup accounts = new Adw.PreferencesGroup();
         Gee.HashMap<string, Gtk.CheckButton> assignments = new Gee.HashMap<string, Gtk.CheckButton>();
@@ -43,6 +45,10 @@ namespace MajorisFiles {
             group.add(writable);
             guest.title = _("Allow Guest Access");
             group.add(guest);
+            hidden.title = _("Hide from network browsing");
+            hidden.subtitle = _("Direct access still requires the configured authentication and permissions.");
+            hidden.sensitive = false;
+            group.add(hidden);
             address.title = _("Network Address");
             address.subtitle = _("Loading sharing state…");
             address.subtitle_selectable = true;
@@ -92,15 +98,27 @@ namespace MajorisFiles {
                     apply.sensitive = stop.sensitive = false;
                     address.subtitle = _("Sharing changed outside Files. Reload Sharing State before editing.");
                 }
+                if (existing != null && hidden.sensitive) {
+                    SharingProxy helper = yield Bus.get_proxy(BusType.SYSTEM, "com.majoris.Files.Sharing", "/com/majoris/Files/Sharing");
+                    if ((yield helper.get_hidden(existing)) != hidden_snapshot) {
+                        apply.sensitive = false;
+                        address.subtitle = _("Share visibility changed outside Files. Reload Sharing State before editing.");
+                    }
+                }
             }
             catch (Error e) { if (!token.is_cancelled()) address.subtitle = _("Could not reconcile sharing state: ") + e.message; }
             finally { monitoring = false; }
         }
         async void configure_firewall(bool enabled)
         {
-            if (!(yield Dialogs.confirm(parent_window, enabled ? "Allow local-network SMB sharing?" : "Close Files-owned SMB firewall access?", enabled ? "Only networks assigned to firewalld's Home or Work zones will be allowed. Public zones and administrator rules are unchanged. This applies to all local SMB shares." : "This removes only the trusted-zone access managed by Files. Other administrator rules remain unchanged.", enabled ? "Allow Trusted Networks" : "Close Access"))) return;
             try {
                 SharingProxy helper = yield Bus.get_proxy(BusType.SYSTEM, "com.majoris.Files.Sharing", "/com/majoris/Files/Sharing");
+                var backend = yield helper.firewall_backend();
+                if (backend != "firewalld") {
+                    var dialog = new Adw.AlertDialog(_("Sharing Firewall"), backend == "none" ? _("No active packet-filter rules were detected. There is no supported firewall policy for Files to change. Network access still depends on Samba permissions and the surrounding network.") : _("An alternative or unknown firewall policy is present. Files cannot manage this policy; ask the administrator to configure SMB access. No rules were changed."));
+                    dialog.add_response("close", _("Close")); dialog.present(parent_window); return;
+                }
+                if (!(yield Dialogs.confirm(parent_window, enabled ? "Allow local-network SMB sharing?" : "Close Files-owned SMB firewall access?", enabled ? "Only networks assigned to firewalld's Home or Work zones will be allowed. Public zones and administrator rules are unchanged. This applies to all local SMB shares." : "This removes only the trusted-zone access managed by Files. Other administrator rules remain unchanged.", enabled ? "Allow Trusted Networks" : "Close Access"))) return;
                 yield helper.configure_firewall(enabled);
             }
             catch (Error e) { Dialogs.error(parent_window, e.message); }
@@ -207,6 +225,14 @@ namespace MajorisFiles {
                     account(id, id + " (unresolved account; deselect to remove)", true, rights[id] ?? "R");
                 token.set_error_if_cancelled();
                 apply.sensitive = true;
+                try {
+                    SharingProxy helper = yield Bus.get_proxy(BusType.SYSTEM, "com.majoris.Files.Sharing", "/com/majoris/Files/Sharing");
+                    hidden.sensitive = yield helper.visibility_supported();
+                    hidden_snapshot = existing != null && (yield helper.get_hidden(existing));
+                    hidden.active = hidden_snapshot;
+                    if (!hidden.sensitive) hidden.subtitle = _("The Majoris Samba registry-share foundation is not enabled.");
+                }
+                catch (Error e) { hidden.sensitive = false; hidden.subtitle = e.message; }
             }
             catch (Error e) {
                 if (!token.is_cancelled())
@@ -237,6 +263,11 @@ namespace MajorisFiles {
             apply.sensitive = stop.sensitive = false;
             try {
                 yield manager.share(folder, share_name.text, writable.active, guest.active, users, access, snapshot);
+                if (hidden.sensitive) {
+                    SharingProxy helper = yield Bus.get_proxy(BusType.SYSTEM, "com.majoris.Files.Sharing", "/com/majoris/Files/Sharing");
+                    yield helper.set_hidden(share_name.text, hidden.active);
+                    hidden_snapshot = hidden.active;
+                }
                 foreach (var share in (yield manager.inventory(token)))
                     if (share.name == share_name.text)
                         snapshot = share.acl + "|" + share.guest.to_string();

@@ -24,6 +24,12 @@ namespace MajorisFiles {
         {
             return format_size(bytes, FormatSizeFlags.IEC_UNITS);
         }
+        public static bool is_symlink(FileInfo info){
+            return (info.has_attribute("standard::type")&&info.get_file_type()==FileType.SYMBOLIC_LINK)||(info.has_attribute("standard::is-symlink")&&info.get_is_symlink());
+        }
+        public static bool is_hidden(FileInfo info){
+            return info.has_attribute("standard::is-hidden")?info.get_is_hidden():(info.has_attribute("standard::name")&&info.get_name().has_prefix("."));
+        }
         public static uint64 max_file_size(string filesystem)
         {
             if (filesystem == "vfat" || filesystem == "fat" || filesystem == "msdos")

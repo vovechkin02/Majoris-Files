@@ -53,6 +53,14 @@ namespace MajorisFiles {
         async void load(FileItem item)
         {
             try {
+                var cloud = yield CloudFiles.get_default().query(item.file, token);
+                if (cloud.state != "unsupported") {
+                    var status = new Adw.ActionRow(); status.title = _("Cloud file state"); status.subtitle = cloud.state + (cloud.error == "" ? "" : "\n" + cloud.error); group.add(status);
+                    if (cloud.quota_known) {
+                        var quota = new Adw.ActionRow(); quota.title = _("Cloud account storage");
+                        quota.subtitle = _("%s of %s used").printf(Paths.size(cloud.quota_used), Paths.size(cloud.quota_total)); group.add(quota);
+                    }
+                }
                 var fields = yield RichMetadata.load(item, token);
                 token.set_error_if_cancelled();
                 group.description = fields.size == 0 ? "No additional metadata is available for this file." : "Stream metadata reported by the installed system decoders.";

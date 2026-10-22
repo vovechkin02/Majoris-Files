@@ -12,11 +12,13 @@
 #include <cmark.h>
 #include <json-glib/json-glib.h>
 #include "../archive/native.h"
+#include "image-decoders.h"
 #include <archive.h>
 #include <archive_entry.h>
 gboolean majoris_media_info(const char *path);
 gboolean majoris_video_thumbnail(const char *path);
 gboolean majoris_image_metadata(const char *path);
+gboolean majoris_rotate_file(const char *path, int angle, const char *format, gboolean lossy);
 
 typedef struct { GString *text; guint depth; } OfficeText;
 static void office_start(GMarkupParseContext *context, const gchar *name, const gchar **keys, const gchar **values, gpointer data, GError **error) {
@@ -116,6 +118,7 @@ static void markdown_node(MarkdownOutput *out, cmark_node *node, guint style, gu
     if(type == CMARK_NODE_LINK || type == CMARK_NODE_IMAGE) { markdown_text(out, " (", style); markdown_text(out, cmark_node_get_url(node), style); markdown_text(out, type == CMARK_NODE_IMAGE ? ")]" : ")", style); }
     if(type == CMARK_NODE_PARAGRAPH || type == CMARK_NODE_HEADING || type == CMARK_NODE_BLOCK_QUOTE) markdown_text(out, "\n\n", 0);
 }
+extern gboolean majoris_playback_worker(const char *path);
 int main(int argc, char **argv) {
     struct rlimit memory = {768 * 1024 * 1024, 768 * 1024 * 1024}, cpu = {10, 10}, files = {64, 64}, core = {0, 0};
     if (argc >= 3 && g_str_equal(argv[1], "office-pdf")) {
@@ -123,11 +126,21 @@ int main(int argc, char **argv) {
         cpu.rlim_cur = cpu.rlim_max = 30;
         files.rlim_cur = files.rlim_max = 128;
     }
+    if(argc==3&&g_str_equal(argv[1],"media-play")){
+        memory.rlim_cur=memory.rlim_max=2UL*1024*1024*1024;
+        cpu.rlim_cur=cpu.rlim_max=1800;
+        files.rlim_cur=files.rlim_max=128;
+    }
     struct rlimit output_limit = {128 * 1024 * 1024, 128 * 1024 * 1024};
     if (setrlimit(RLIMIT_FSIZE, &output_limit)) return 2;
     if(setrlimit(RLIMIT_AS, &memory) || setrlimit(RLIMIT_CPU, &cpu) || setrlimit(RLIMIT_NOFILE, &files) || setrlimit(RLIMIT_CORE, &core)) return 2;
     if(prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) != 0 || argc < 3) return 2;
     GError *error = NULL;
+    if(argc==3&&g_str_equal(argv[1],"media-play"))return majoris_playback_worker(argv[2])?0:2;
+    if (g_str_equal(argv[1], "image-rotate")) {
+        if (argc != 6 || !(g_str_equal(argv[3], "90") || g_str_equal(argv[3], "270"))) return 2;
+        return majoris_rotate_file(argv[2], atoi(argv[3]), argv[4], g_str_equal(argv[5], "lossy")) ? 0 : 2;
+    }
     if (g_str_equal(argv[1], "office-pdf")) {
         if (argc != 4) return 2;
         const char *arguments[] = {"/usr/bin/python3", "/office-render.py", argv[3], NULL};
@@ -141,6 +154,7 @@ int main(int argc, char **argv) {
     if(g_str_equal(argv[1], "video-thumbnail")) return majoris_video_thumbnail(argv[2]) ? 0 : 2;
     if(g_str_equal(argv[1], "office")) return office_preview(argv[2]) ? 0 : 2;
     if (g_str_equal(argv[1], "image-animation")) {
+        char *sequence=majoris_decode_avif_animation(argv[2],NULL);if(sequence){fputs(sequence,stdout);g_free(sequence);return 0;}
         GdkPixbufAnimation *animation = gdk_pixbuf_animation_new_from_file(argv[2], &error);
         if (!animation) goto fail;
         if (gdk_pixbuf_animation_is_static_image(animation)) { g_object_unref(animation); return 3; }
@@ -242,16 +256,14 @@ int main(int argc, char **argv) {
         double angle = 0;
         gboolean thumbnail = g_str_equal(argv[1], "image-thumbnail");
         if(!thumbnail && (argc != 4 || !number(argv[3], 0, 270, &angle) || floor(angle) != angle || ((int)angle % 90) != 0)) return 2;
-        int original_width = 0, original_height = 0;
-        if(!gdk_pixbuf_get_file_info(argv[2], &original_width, &original_height) || original_width < 1 || original_height < 1) return 2;
-        double image_scale = fmin(1, (thumbnail ? 128.0 : 1800.0) / MAX(original_width, original_height));
-        GdkPixbuf *decoded = gdk_pixbuf_new_from_file_at_scale(argv[2], MAX(1, (int)(original_width * image_scale)), MAX(1, (int)(original_height * image_scale)), TRUE, &error);
+        GdkPixbuf *decoded = majoris_decode_image(argv[2], thumbnail ? 128 : 1800, thumbnail, &error);
         if(!decoded) goto fail;
-        GdkPixbuf *oriented = gdk_pixbuf_apply_embedded_orientation(decoded); g_object_unref(decoded);
         GdkPixbufRotation rotation = angle == 90 ? GDK_PIXBUF_ROTATE_CLOCKWISE : angle == 180 ? GDK_PIXBUF_ROTATE_UPSIDEDOWN : angle == 270 ? GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE : GDK_PIXBUF_ROTATE_NONE;
-        GdkPixbuf *image = gdk_pixbuf_rotate_simple(oriented, rotation); g_object_unref(oriented);
+        GdkPixbuf *image = gdk_pixbuf_rotate_simple(decoded, rotation);
         char *buffer = NULL; gsize size = 0;
-        gboolean saved = gdk_pixbuf_save_to_buffer(image, &buffer, &size, "png", &error, NULL); g_object_unref(image);
+        const char *profile = gdk_pixbuf_get_option(decoded, "icc-profile");
+        gboolean saved = profile ? gdk_pixbuf_save_to_buffer(image, &buffer, &size, "png", &error, "icc-profile", profile, NULL) : gdk_pixbuf_save_to_buffer(image, &buffer, &size, "png", &error, NULL);
+        g_object_unref(image); g_object_unref(decoded);
         if(!saved) goto fail;
         gboolean written = fwrite(buffer, 1, size, stdout) == size; g_free(buffer); return written ? 0 : 2;
     }
