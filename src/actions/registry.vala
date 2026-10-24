@@ -25,10 +25,11 @@ namespace MajorisFiles {
         {
             register_provider(new NearbyActions(provider));
         }
-        public Menu menu(Gee.List<FileItem> selected)
+        public Menu menu(Gee.List<FileItem> selected, bool sharing = false)
         {
             var menu = new Menu();
             foreach(var provider in providers.values)
+                if (!sharing || provider is NearbyActions)
                 foreach(var action in provider.actions(selected))
                 {
                     var item = new MenuItem(action.label, null);

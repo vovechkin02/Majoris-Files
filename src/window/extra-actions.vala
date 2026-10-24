@@ -194,7 +194,11 @@ namespace MajorisFiles {
         void action(string name, owned Callback callback)
         {
             var action = new SimpleAction(name, null);
-            action.activate.connect(() => callback());
+            action.activate.connect(() => {
+                if (!window.command_available(name)) return;
+                if (name in new string[] {"duplicate-items", "folder-with-selection", "paste-link", "compress", "compress-sevenzip", "compress-encrypted", "extract", "extract-encrypted", "link", "templates"} && !current.accepts_destination) return;
+                callback();
+            });
             window.add_action(action);
         }
         async void compress(bool encrypted = false)

@@ -40,7 +40,7 @@ with tempfile.TemporaryDirectory(prefix="majoris-session-") as temporary:
     try:
         process = subprocess.Popen([sys.argv[1]], env=environment,
                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        wait_state(database, lambda state: "majoris:///home" in state.get("session-last", ""), process)
+        wait_state(database, lambda state: "recent:///" in state.get("session-last", ""), process)
         process.send_signal(signal.SIGKILL)
         process.wait(timeout=5)
         snapshot = f"[  ([('{first.as_uri()}', 'List'), ('{second.as_uri()}', 'Grid')], uint32 1)  ]"
@@ -59,7 +59,7 @@ with tempfile.TemporaryDirectory(prefix="majoris-session-") as temporary:
             db.execute("INSERT OR REPLACE INTO state VALUES('restore-session','false')")
         process = subprocess.Popen([sys.argv[1]], env=environment,
                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        state = wait_state(database, lambda state: "majoris:///home" in state.get("session-last", ""), process)
+        state = wait_state(database, lambda state: "recent:///" in state.get("session-last", ""), process)
         assert first.as_uri() not in state["session-last"]
         print("Crash recovery restored tab locations, views, and selection; opt-out respected.")
     finally:

@@ -108,7 +108,10 @@ namespace MajorisFiles {
             header.pack_end(menu_button);
             toolbar.add_top_bar(header);
             var tabbar = new Adw.TabBar();
+            tabbar.add_css_class("majoris-document-tabs");
             tabbar.view = tabs;
+            tabbar.autohide = false;
+            tabbar.expand_tabs = false;
             var tab_menu = new Menu();
             foreach(var entry in new string[] {"Duplicate|win.tab-duplicate", "Pin / Unpin|win.tab-pin", "Move Left|win.tab-left", "Move Right|win.tab-right", "Move to New Window|win.tab-detach", "Close Other Tabs|win.tab-close-others", "Close Tabs to the Right|win.tab-close-right", "Close|win.tab-close"})
             {
@@ -181,7 +184,7 @@ namespace MajorisFiles {
                                                window.present();
                                                return window.tabs;
                 });
-            tabs.notify["selected-page"].connect(() => { var recorder = app as SessionRecorder;
+            tabs.notify["selected-page"].connect(() => { update_commands(); var recorder = app as SessionRecorder;
                                                          if(recorder != null)
                                                              recorder.queue_session_save();
                 });
@@ -227,6 +230,7 @@ namespace MajorisFiles {
                                              Dialogs.show_properties(this, chosen, metadata, () => { return new PermissionsPage(this, chosen);
                                                  }, () => { return new SharingPage(this, chosen[0].file); }, () => { return new MetadataPage(chosen[0], metadata); }, () => { return new AssociationsPage(this, chosen[0]); });
                 });
+            action("source-folder", () => { var chosen = current.selected(); if (chosen.size == 1 && chosen[0].file.get_parent() != null) { var file = chosen[0].file; current.navigate(file.get_parent()); current.select_file(file); } });
             action("favorite", () => { foreach (var item in current.selected())
                                            metadata.set_favorite(item.file, !metadata.favorite(item.file));
                 });
@@ -262,7 +266,7 @@ namespace MajorisFiles {
                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
             extra = new ExtraActions(this, operations, metadata);
             if (!blank)
-                new_tab(initial ?? File.new_for_uri("majoris:///home"));
+                new_tab(initial ?? File.new_for_uri("recent:///"));
             close_request.connect(() => { for (int i = 0; i < tabs.n_pages; i++)
                                               ((Browser)tabs.get_nth_page(i).child).cancel();
                                           return false;
@@ -271,15 +275,45 @@ namespace MajorisFiles {
         void action(string name, owned Callback callback)
         {
             var a = new SimpleAction(name, null);
-            a.activate.connect(() => callback());
+            a.activate.connect(() => { if (command_available(name)) callback(); });
             add_action(a);
+        }
+        public bool command_available(string name) {
+            if (current == null) return false;
+            if (name in new string[] {"new-folder", "new-file", "paste", "bookmark", "split", "join", "duplicate-items", "folder-with-selection", "paste-link", "compress", "compress-sevenzip", "compress-encrypted", "extract", "extract-encrypted", "link", "templates"})
+                return current.accepts_destination;
+            int count = current.selected().size;
+            if (name == "rename") return count == 1;
+            if (name == "share-folder") return count == 1 && current.selected()[0].directory && current.selected()[0].file.is_native();
+            if (name in new string[] {"cut", "copy", "trash", "delete", "favorite", "properties"}) return count > 0;
+            return true;
+        }
+        public void update_commands() {
+            if (current != null) {
+                var share_menu = new Menu();
+                if (command_available("share-folder")) share_menu.append(_("Share Folder…"), "win.share-folder");
+                var provider_menu = providers.menu(current.selected(), true);
+                if (provider_menu.get_n_items() > 0) share_menu.append_section(null, provider_menu);
+                current.share_button.menu_model = share_menu;
+                current.share_button.sensitive = share_menu.get_n_items() > 0 && current.selected().size > 0;
+            }
+            foreach (var name in new string[] {"new-folder", "new-file", "paste", "bookmark", "split", "join", "rename", "share-folder", "cut", "copy", "trash", "delete", "favorite", "properties"}) {
+                var command = lookup_action(name) as SimpleAction;
+                if (command != null) command.set_enabled(command_available(name));
+            }
+        }
+        static string location_title(File file) {
+            if (file.has_uri_scheme("recent")) return _("Recent");
+            if (file.get_uri() == "majoris:///favorites") return _("Favorites");
+            if (file.equal(File.new_for_path(Environment.get_home_dir()))) return _("Home");
+            return file.get_basename() ?? file.get_parse_name();
         }
         public void new_tab(File location)
         {
             var browser = new Browser(metadata, places);
             var page = tabs.append(browser);
-            page.title = location.get_basename() ?? "Files";
-            browser.location_changed.connect((file) => page.title = file.get_basename() ?? file.get_parse_name());
+            page.title = location_title(location);
+            browser.location_changed.connect((file) => page.title = location_title(file));
             browser.session_changed.connect(() => { var root = browser.get_root() as FilesWindow;
                                                     var recorder = root == null ? null : root.application as SessionRecorder;
                                                     if(recorder != null)
@@ -312,6 +346,8 @@ namespace MajorisFiles {
                     });
             });
             tabs.selected_page = page;
+            browser.selection_changed.connect(() => { var window = browser.get_root() as FilesWindow; if (window != null) window.update_commands(); });
+            browser.location_changed.connect(() => { var window = browser.get_root() as FilesWindow; if (window != null) window.update_commands(); });
             browser.navigate(location);
             browser.open_in_tab.connect((file) => { var root = browser.get_root() as FilesWindow;
                                                     if(root != null)
@@ -406,13 +442,13 @@ namespace MajorisFiles {
         async void open_context(Menu menu, Browser browser, Gtk.Popover popup)
         {
             var selection = browser.selected();
-            menu.remove_all(); populate_context(menu, browser); popup.popup();
+            menu.remove_all(); populate_context(menu, browser); if (browser.virtual_collection && selection.size == 1) menu.append(_("Open Source Folder"), "win.source-folder"); popup.popup();
             yield extension_manager.prepare(selection);
             if (browser.get_root() != this || !popup.visible) return;
             var current = browser.selected();
             if (current.size != selection.size) return;
             for (int i = 0; i < current.size; i++) if (!current[i].file.equal(selection[i].file)) return;
-            menu.remove_all(); populate_context(menu, browser);
+            menu.remove_all(); populate_context(menu, browser); if (browser.virtual_collection && selection.size == 1) menu.append(_("Open Source Folder"), "win.source-folder");
         }
         Gee.ArrayList<File> selected_files()
         {
@@ -427,13 +463,13 @@ namespace MajorisFiles {
         }
         async void paste()
         {
-            if(current == null)
+            if(current == null || !current.accepts_destination)
                 return;
             var destination = current.location;
             try {
                 var content = yield FileClipboard.read(get_clipboard());
                 if(content.files.size > 0)
-                    yield operations.run(content.cut ? OperationKind.MOVE : OperationKind.COPY, content.files, destination, this);
+                    if (current.location.equal(destination) && current.accepts_destination) yield operations.run(content.cut ? OperationKind.MOVE : OperationKind.COPY, content.files, destination, this);
             }
             catch(Error e) {
                 Dialogs.error(this, e.message);

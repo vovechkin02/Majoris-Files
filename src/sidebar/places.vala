@@ -1,6 +1,7 @@
 namespace MajorisFiles {
     public class Place : Object {
         public string label;
+        public string section = "Locations";
         public File file;
         public Mount? mount;
         public Volume? volume;
@@ -21,6 +22,7 @@ namespace MajorisFiles {
         FileMonitor? watcher;
         MetadataStore? metadata;
         CloudAccounts cloud = new CloudAccounts();
+        string last_signature = "";
         public Places(MetadataStore? metadata = null)
         {
             this.metadata = metadata;
@@ -61,17 +63,9 @@ namespace MajorisFiles {
         public void reload()
         {
             entries.clear();
-            entries.add(new Place("Home Overview", File.new_for_uri("majoris:///home")));
-            entries.add(new Place("Home", File.new_for_path(Environment.get_home_dir())));
-            entries.add(new Place("Recent", File.new_for_uri("recent:///")));
-            entries.add(new Place("Favorites", File.new_for_uri("majoris:///favorites")));
-            if(metadata != null)
-            {
-                foreach(var tag in metadata.all_tags())
-                    entries.add(new Place("Tag: " + tag, File.new_for_uri("majoris:///tag/" + Uri.escape_string(tag))));
-                foreach(var saved in metadata.saved_searches())
-                    entries.add(new Place(saved.name, File.new_for_uri("majoris:///search/" + Uri.escape_string(saved.name))));
-            }
+            var recent = new Place("Recent", File.new_for_uri("recent:///")); recent.section = ""; entries.add(recent);
+            var favorites = new Place("Favorites", File.new_for_uri("majoris:///favorites")); favorites.section = ""; entries.add(favorites);
+            var home = new Place("Home", File.new_for_path(Environment.get_home_dir())); home.section = "Folders"; entries.add(home);
             UserDirectory[] dirs = {
                 UserDirectory.DESKTOP, UserDirectory.DOCUMENTS, UserDirectory.DOWNLOAD, UserDirectory.MUSIC, UserDirectory.PICTURES, UserDirectory.VIDEOS
             };
@@ -79,7 +73,7 @@ namespace MajorisFiles {
             {
                 var path = Environment.get_user_special_dir(dir);
                 if (path != null && path != Environment.get_home_dir())
-                    entries.add(new Place(Path.get_basename(path), File.new_for_path(path)));
+                { var folder = new Place(Path.get_basename(path), File.new_for_path(path)); folder.section = "Folders"; entries.add(folder); }
             }
             string content;
             try {
@@ -92,10 +86,18 @@ namespace MajorisFiles {
                     var file = File.new_for_uri(parts[0]);
                     var place = new Place(parts.length > 1 ? parts[1] : file.get_basename(), file);
                     place.bookmark = true;
+                    place.section = "Folders";
                     entries.add(place);
                 }
             }
             catch (Error e) {}
+            if(metadata != null)
+            {
+                foreach(var tag in metadata.all_tags())
+                    entries.add(new Place("Tag: " + tag, File.new_for_uri("majoris:///tag/" + Uri.escape_string(tag))));
+                foreach(var saved in metadata.saved_searches())
+                    entries.add(new Place(saved.name, File.new_for_uri("majoris:///search/" + Uri.escape_string(saved.name))));
+            }
             foreach (var mount in volumes.get_mounts())
                 entries.add(new Place(mount.get_name(), mount.get_root(), mount));
             foreach(var volume in volumes.get_volumes())
@@ -108,7 +110,17 @@ namespace MajorisFiles {
             entries.add(new Place("Network", File.new_for_uri("network:///")));
             entries.add_all(cloud.entries);
             entries.add(new Place("Trash", File.new_for_uri("trash:///")));
-            changed();
+            // Metadata also signals preference and operation-journal updates.
+            // Keep sidebar rows alive unless their actual inventory changed.
+            var signature = new StringBuilder();
+            foreach (var place in entries) {
+                signature.append_printf("%s\n%s\n%s\n%s\n%s\n", place.label, place.file.get_uri(), place.section,
+                    place.cloud == null ? "" : place.cloud.get_status_details(), place.bookmark ? "bookmark" : "");
+            }
+            if (signature.str != last_signature) {
+                last_signature = signature.str;
+                changed();
+            }
         }
         public async void add_bookmark(File file) throws Error
         {

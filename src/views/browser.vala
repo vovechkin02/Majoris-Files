@@ -33,6 +33,7 @@ namespace MajorisFiles {
         public string view_mode = "Grid";
         public MetadataStore metadata;
         public Places places;
+        public Gtk.MenuButton share_button = new Gtk.MenuButton();
         public PreviewPane preview = new PreviewPane();
         public Gtk.Entry path = new Gtk.Entry();
         public Gtk.SearchEntry search_entry = new Gtk.SearchEntry();
@@ -52,7 +53,7 @@ namespace MajorisFiles {
         Variant? column_restore;
         bool applying_column_restore;
         string[] group_modes = {
-            "None", "Type", "Modified Date", "Size", "Tags"
+            "None", "Type", "Modified Date", "Size", "Tags", "Recent Date"
         };
         Gtk.FilterListModel filtered;
         Gtk.SortListModel sorted;
@@ -61,7 +62,6 @@ namespace MajorisFiles {
         GridRows grid_rows;
         Gtk.ListView grouped_grid;
         uint grid_anchor = uint.MAX;
-        HomeView home;
         Gtk.ListBox sidebar = new Gtk.ListBox();
         Gtk.Label status = new Gtk.Label("");
         Adw.Banner location_error = new Adw.Banner("");
@@ -76,6 +76,7 @@ namespace MajorisFiles {
         Gee.HashMap<Gtk.Widget, DirectoryModel> loaded_columns = new Gee.HashMap<Gtk.Widget, DirectoryModel>();
         PreviewPane gallery_preview = new PreviewPane();
         Gtk.Stack location_bar = new Gtk.Stack();
+        Gtk.Widget? breadcrumb_space;
         Gtk.Box breadcrumbs = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
         Gtk.Box searches;
         Gtk.Paned sidebar_pane;
@@ -95,6 +96,7 @@ namespace MajorisFiles {
             }
         }
         Gtk.DropDown modes;
+        Gee.HashMap<string, Gtk.ToggleButton> view_controls = new Gee.HashMap<string, Gtk.ToggleButton>();
         bool chooser_mode;
         public signal void open_in_tab(File file);
         bool recursive;
@@ -134,6 +136,7 @@ namespace MajorisFiles {
         public Browser(MetadataStore metadata, Places places, bool chooser_mode = false)
         {
             Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
+            FilesTheme.ensure();
             this.metadata = metadata;
             CloudFiles.get_default().configure(metadata);
             notify["root"].connect(() => {
@@ -153,7 +156,11 @@ namespace MajorisFiles {
             click_preference = metadata.state("single-click", "false") == "true";
             preview = new PreviewPane(metadata);
             gallery_preview = new PreviewPane(metadata);
+            Gtk.RecentManager.get_default().changed.connect(() => {
+                if (directory.location.has_uri_scheme("recent")) refresh_collection();
+            });
             metadata.changed.connect(() => {
+                if (directory.location.get_uri() == "majoris:///favorites") refresh_collection();
                 bool hidden = metadata.state("show-hidden", "false") == "true";
                 if(hidden != hidden_preference)
                 {
@@ -178,9 +185,6 @@ namespace MajorisFiles {
                         });
             });
             location_suggestions = new LocationSuggestions(metadata);
-            home = new HomeView(metadata);
-            views.add_named(home, "Home");
-            home.activated.connect((item) => activate_item.begin(item));
             directory.items.items_changed.connect((position, removed, added) => {
                 column_model_revision++;
                 for(uint i = position; i < position + added; i++)
@@ -200,10 +204,13 @@ namespace MajorisFiles {
             toolbar.margin_end = 8;
             toolbar.margin_top = 6;
             toolbar.margin_bottom = 6;
+            toolbar.add_css_class("files-navigation");
+            if (chooser_mode) {
             toolbar.append(button("sidebar-show-symbolic", _("Show or Hide Locations"), () => { if (narrow)
                                                                                               sidebar_overlay.show_sidebar = !sidebar_overlay.show_sidebar;
                                                                                           else sidebar_pane.start_child.visible = !sidebar_pane.start_child.visible;
                 }));
+            }
             toolbar.append(button("go-previous-symbolic", _("Back"), () => { var file = history.back();
                                                                           if (file != null)
                                                                               navigate(file, false);
@@ -216,11 +223,16 @@ namespace MajorisFiles {
                                                                              if (parent != null)
                                                                                  navigate(parent);
                 }));
+            toolbar.append(button("view-refresh-symbolic", _("Refresh"), () => navigate(directory.location, false)));
             path.hexpand = true;
             path.placeholder_text = _("Location or URI");
             path.tooltip_text = _("Location (Ctrl+L)");
             path.activate.connect(() => { completion_popup.popdown();
-                                          navigate(Paths.parse(path.text));
+                                          var text = path.text.strip();
+                                          if (text == "") return;
+                                          var target = Uri.parse_scheme(text) == null && !Path.is_absolute(text) && !text.has_prefix("~") && accepts_destination
+                                              ? location.resolve_relative_path(text) : Paths.parse(text);
+                                          navigate(target);
                 });
             completion_popup.set_parent(path);
             completion_popup.autohide = false;
@@ -243,8 +255,13 @@ namespace MajorisFiles {
                         return true;
                     }
                 }
-                if(key == Gdk.Key.Escape)
+                if(key == Gdk.Key.Escape) {
                     completion_popup.popdown();
+                    path.text = directory.location.get_parse_name();
+                    location_bar.visible_child_name = "breadcrumbs";
+                    views.grab_focus();
+                    return true;
+                }
                 return false;
             });
             path.add_controller(completion_keys);
@@ -269,22 +286,86 @@ namespace MajorisFiles {
             location_bar.add_named(crumbs_scroll, "breadcrumbs");
             location_bar.visible_child_name = "breadcrumbs";
             toolbar.append(location_bar);
-            var edit_location_button = button("document-edit-symbolic", _("Edit Location"), () => edit_location());
-            toolbar.append(edit_location_button);
-            var reload_button = button("view-refresh-symbolic", _("Reload"), () => navigate(location, false));
-            toolbar.append(reload_button);
-            toolbar.append(button("system-search-symbolic", _("Search"), () => { searches.visible = !searches.visible;
-                                                                              if (searches.visible)
-                                                                                  search_entry.grab_focus();
-                }));
+            location_bar.add_css_class("files-location");
+            var empty_space = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+            empty_space.hexpand = true;
+            empty_space.width_request = 32;
+            var edit_click = new Gtk.GestureClick();
+            edit_click.released.connect(() => edit_location());
+            empty_space.add_controller(edit_click);
+            // Reattached after each breadcrumb rebuild.
+            breadcrumb_space = empty_space;
+            search_entry.width_request = 200;
+            search_entry.placeholder_text = _("Search files");
+            toolbar.append(search_entry);
+            append(toolbar);
+            var commands = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
+            commands.add_css_class("files-commands");
+            Gtk.MenuButton? sort_control = null;
+            if (!chooser_mode) {
+                string[] labels = {"New Folder", "Cut", "Copy", "Paste", "Rename", "Share", "Move to Trash"};
+                string[] icons = {"folder-new-symbolic", "edit-cut-symbolic", "edit-copy-symbolic", "edit-paste-symbolic", "document-edit-symbolic", "emblem-shared-symbolic", "user-trash-symbolic"};
+                string[] actions = {"new-folder", "cut", "copy", "paste", "rename", "share-folder", "trash"};
+                for (int i = 0; i < actions.length; i++) {
+                    var control = new Gtk.Button();
+                    var face = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
+                    face.append(new Gtk.Image.from_icon_name(icons[i]));
+                    if (i == 0) face.append(new Gtk.Label(_(labels[i])));
+                    control.child = face;
+                    control.tooltip_text = _(labels[i]);
+                    control.update_property(Gtk.AccessibleProperty.LABEL, _(labels[i]), -1);
+                    control.action_name = "win." + actions[i];
+                    if (actions[i] == "share-folder") {
+                        share_button.icon_name = "emblem-shared-symbolic";
+                        share_button.tooltip_text = _("Share");
+                        share_button.update_property(Gtk.AccessibleProperty.LABEL, _("Share"), -1);
+                        commands.append(share_button);
+                    } else commands.append(control);
+                }
+                var sort = new Gtk.MenuButton();
+                sort.label = _("Sort");
+                var sort_menu = new Menu();
+                sort_menu.append(_("Name"), "win.sort-name");
+                sort_menu.append(_("Size"), "win.sort-size");
+                sort_menu.append(_("Modified"), "win.sort-modified");
+                sort_menu.append(_("Descending Order"), "win.descending");
+                sort.menu_model = sort_menu;
+                sort_control = sort;
+            }
+            var spacer = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+            spacer.hexpand = true;
+            commands.append(spacer);
+            if (sort_control != null) commands.append(sort_control);
             modes = new Gtk.DropDown.from_strings(chooser_mode ? new string[] {"Grid", "List"}
                                                                                              : new string[] {"Grid", "List", "Columns", "Gallery"});
             modes.tooltip_text = _("View");
             modes.notify["selected"].connect(() => set_view(new string[] {"Grid", "List", "Columns", "Gallery"}
                 [modes.selected]));
-            toolbar.append(modes);
-            toolbar.append(button("preferences-system-symbolic", _("View Settings"), () => show_view_settings()));
-            append(toolbar);
+            if (chooser_mode) commands.append(modes);
+            else {
+                string[] names = {"Grid", "List", "Columns", "Gallery"};
+                string[] icons = {"view-grid-symbolic", "view-list-symbolic", "view-dual-symbolic", "view-paged-symbolic"};
+                for (int i = 0; i < names.length; i++) {
+                    string name = names[i];
+                    var control = new Gtk.ToggleButton();
+                    control.icon_name = icons[i];
+                    control.tooltip_text = _(name);
+                    control.update_property(Gtk.AccessibleProperty.LABEL, _(name), -1);
+                    if (name != "Grid") control.set_group(view_controls["Grid"]);
+                    control.active = name == view_mode;
+                    view_controls[name] = control;
+                    control.toggled.connect(() => { if (control.active) set_view(name); });
+                    commands.append(control);
+                }
+            }
+            commands.append(button("preferences-system-symbolic", _("View Settings"), () => show_view_settings()));
+            if (!chooser_mode) {
+                var preview_button = new Gtk.Button.from_icon_name("view-reveal-symbolic");
+                preview_button.tooltip_text = _("Preview");
+                preview_button.action_name = "win.preview";
+                commands.append(preview_button);
+            }
+            append(commands);
             location_error.button_label = "Retry";
             location_error.button_clicked.connect(() => navigate(directory.location, false));
             append(location_error);
@@ -302,7 +383,7 @@ namespace MajorisFiles {
             searches.margin_start = 8;
             searches.margin_end = 8;
             searches.margin_bottom = 6;
-            searches.append(search_entry);
+
             recursive_button = new Gtk.ToggleButton.with_label("Include Subfolders");
             recursive_button.toggled.connect(() => { recursive = recursive_button.active;
                                                      run_search();
@@ -337,7 +418,15 @@ namespace MajorisFiles {
                     });
                 dialog.present(this);
             }));
-            append(searches);
+            var search_options = new Gtk.MenuButton();
+            search_options.icon_name = "view-filter-symbolic";
+            search_options.tooltip_text = _("Search Options");
+            var search_popover = new Gtk.Popover();
+            searches.visible = true;
+            searches.orientation = Gtk.Orientation.VERTICAL;
+            search_popover.child = searches;
+            search_options.popover = search_popover;
+            toolbar.append(search_options);
             search_entry.search_changed.connect(run_search);
             var body = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
             sidebar_pane = body;
@@ -346,8 +435,15 @@ namespace MajorisFiles {
             body.shrink_start_child = true;
             var side_scroll = new Gtk.ScrolledWindow();
             side_scroll.set_child(sidebar);
-            sidebar.selection_mode = Gtk.SelectionMode.NONE;
+            sidebar.selection_mode = Gtk.SelectionMode.SINGLE;
             sidebar.add_css_class("navigation-sidebar");
+            sidebar.add_css_class("files-sidebar");
+            sidebar.set_header_func((row, before) => {
+                var place = places.entries[row.get_index()];
+                string? section = place.section != "" && (before == null || places.entries[before.get_index()].section != place.section) ? _(place.section) : null;
+                if (section != null) { var heading = new Gtk.Label(section); heading.halign = Gtk.Align.START; heading.add_css_class("files-section"); row.set_header(heading); }
+                else row.set_header(null);
+            });
             body.start_child = side_scroll;
             sidebar.row_activated.connect((row) => { if (row.get_index() < places.entries.size)
                                                          open_place.begin(places.entries[row.get_index()]);
@@ -395,10 +491,8 @@ namespace MajorisFiles {
                 side_scroll.visible = true;
             });
             breakpoint.add_setter(preview, "visible", false);
-            breakpoint.add_setter(edit_location_button, "visible", false);
-            breakpoint.add_setter(reload_button, "visible", false);
             breakpoint.add_setter(modes, "visible", false);
-            adaptive.add_breakpoint(breakpoint);
+            if (chooser_mode) adaptive.add_breakpoint(breakpoint);
             append(adaptive);
             var grid = new Gtk.GridView(selection, factory(true));
             grid.min_columns = 1;
@@ -490,8 +584,8 @@ namespace MajorisFiles {
                 scroll.hadjustment.value_changed.connect(() => session_changed());
             }
             strip_scroll.vadjustment.value_changed.connect(() => session_changed());
-            status.halign = Gtk.Align.START;
-            status.margin_start = 12;
+            status.halign = Gtk.Align.FILL;
+            status.xalign = 0;
             append(status);
             selection.selection_changed.connect(() => { selection_changed();
                                                         session_changed();
@@ -528,8 +622,11 @@ namespace MajorisFiles {
             });
             var keys = new Gtk.EventControllerKey();
             keys.key_pressed.connect((key, code, mods) => {
+                if (key == Gdk.Key.F5) { navigate(directory.location, false); return true; }
                 if(key == Gdk.Key.Escape && location_bar.visible_child_name == "entry")
                 {
+                    completion_popup.popdown();
+                    path.text = directory.location.get_parse_name();
                     location_bar.visible_child_name = "breadcrumbs";
                     return true;
                 }
@@ -560,6 +657,7 @@ namespace MajorisFiles {
                 }
                 if ((mods & Gdk.ModifierType.ALT_MASK) != 0)
                 {
+                    if (key == Gdk.Key.d) { edit_location(); return true; }
                     if (key == Gdk.Key.Left)
                     {
                         var file = history.back();
@@ -754,11 +852,12 @@ namespace MajorisFiles {
         {
             while(breadcrumbs.get_first_child() != null)
                 breadcrumbs.remove(breadcrumbs.get_first_child());
-            if(file.get_uri() == "majoris:///home")
-            {
-                var label = new Gtk.Label(_("Home"));
-                label.add_css_class("heading");
-                breadcrumbs.append(label);
+            if(file.has_uri_scheme("recent") || file.get_uri() == "majoris:///favorites") {
+                var crumb = new Gtk.Button.with_label(file.has_uri_scheme("recent") ? _("Recent") : _("Favorites"));
+                crumb.add_css_class("heading");
+                crumb.clicked.connect(() => navigate(file));
+                breadcrumbs.append(crumb);
+                if (breadcrumb_space != null) breadcrumbs.append(breadcrumb_space);
                 location_bar.visible_child_name = "breadcrumbs";
                 return;
             }
@@ -773,6 +872,7 @@ namespace MajorisFiles {
             {
                 var crumb = new Gtk.Button.with_label(parent.equal(File.new_for_path(Environment.get_home_dir())) ? "Home" : parent.get_basename() ?? parent.get_parse_name());
                 crumb.add_css_class("flat");
+                if (parent.equal(file)) crumb.add_css_class("heading");
                 crumb.tooltip_text = parent.get_parse_name();
                 crumb.clicked.connect(() => navigate(parent));
                 var middle = new Gtk.GestureClick();
@@ -781,6 +881,7 @@ namespace MajorisFiles {
                 crumb.add_controller(middle);
                 breadcrumbs.append(crumb);
             }
+            if (breadcrumb_space != null) breadcrumbs.append(breadcrumb_space);
             location_bar.visible_child_name = "breadcrumbs";
         }
         Gtk.ScrolledWindow? current_scroll()
@@ -864,7 +965,7 @@ namespace MajorisFiles {
             recursive = value.get_child_value(1).get_boolean();
             everywhere = value.get_child_value(2).get_boolean();
             search_entry.text = query.text;
-            searches.visible = query.active;
+            searches.visible = true;
             recursive_button.active = recursive;
             if(query.active)
                 run_search();
@@ -931,6 +1032,10 @@ namespace MajorisFiles {
                 result = column_providers[sort_key].compare(x, y, metadata);
             else if(sort_key == "Size")
                 result = x.bytes < y.bytes ? -1 : x.bytes == y.bytes ? 0 : 1;
+            else if(sort_key == "Recent Date") {
+                uint64 a = x.info.get_attribute_uint64("majoris::recent"), b = y.info.get_attribute_uint64("majoris::recent");
+                result = a < b ? -1 : a == b ? 0 : 1;
+            }
             else if(sort_key == "Modified" || sort_key == "Created" || sort_key == "Accessed")
             {
                 var attribute = sort_key == "Created" ? "time::created" : sort_key == "Accessed" ? "time::access" : "time::modified";
@@ -1008,8 +1113,11 @@ namespace MajorisFiles {
                         var column = detail_columns[title];
                         column.visible = title == "Name" || entry.get_child_value(1).get_boolean();
                         column.fixed_width = entry.get_child_value(2).get_int32().clamp(-1, 2000);
-                        details.remove_column(column);
-                        details.insert_column((uint)seen.size - 1, column);
+                        uint position = (uint)seen.size - 1;
+                        if (details.columns.get_item(position) != column) {
+                            details.remove_column(column);
+                            details.insert_column(position, column);
+                        }
                     }
                 }
                 catch(Error e) {   /* Invalid preferences fall back to the defaults. */
@@ -1246,13 +1354,14 @@ namespace MajorisFiles {
             if(view_mode == mode)
                 return;
             view_mode = mode;
+            foreach (var name in view_controls.keys) view_controls[name].active = name == mode;
             grouped_grid.model = group_key == "None" || mode!="Grid" ? null : new Gtk.NoSelection(grid_rows);
-            views.visible_child_name = directory.location.get_uri() == "majoris:///home" ? "Home" : mode;
+            views.visible_child_name = mode == "Columns" && virtual_collection ? "List" : mode;
             if(remember && metadata.state("remember-folder-settings", "true") == "true")
                 metadata.set_state("view:" + location.get_uri(), mode);
             modes.selected = mode == "Grid" ? 0 : mode == "List" ? 1 : mode == "Columns" ? 2 : 3;
             session_changed();
-            if (mode == "Columns" && directory.location.get_uri() != "majoris:///home")
+            if (mode == "Columns" && !virtual_collection)
                 build_columns();
         }
         void rebuild_sidebar()
@@ -1270,16 +1379,22 @@ namespace MajorisFiles {
                 label.margin_end = 10;
                 label.margin_top = 8;
                 label.margin_bottom = 8;
-                if(place.cloud != null && place.cloud.get_icon() != null)
-                {
-                    var cloud_row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
-                    var cloud_icon = new Gtk.Image.from_gicon(place.cloud.get_icon());
-                    cloud_icon.margin_start = 8;
-                    cloud_row.append(cloud_icon);
-                    cloud_row.append(label);
-                    sidebar.append(cloud_row);
-                }
-                else sidebar.append(label);
+                var place_row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
+                string icon_name = place.file.has_uri_scheme("recent") ? "document-open-recent-symbolic"
+                    : place.file.get_uri() == "majoris:///favorites" ? "starred-symbolic"
+                    : place.file.has_uri_scheme("trash") ? "user-trash-symbolic"
+                    : place.file.has_uri_scheme("network") ? "network-workgroup-symbolic"
+                    : place.mount != null || place.volume != null ? "drive-harddisk-symbolic"
+                    : place.label == "Home" ? "user-home-symbolic" : "folder-symbolic";
+                var icon = place.cloud != null && place.cloud.get_icon() != null
+                    ? new Gtk.Image.from_gicon(place.cloud.get_icon()) : new Gtk.Image.from_icon_name(icon_name);
+                icon.margin_start = 10;
+                place_row.append(icon);
+                label.hexpand = true;
+                label.ellipsize = Pango.EllipsizeMode.END;
+                place_row.append(label);
+                sidebar.append(place_row);
+                if (place.file.equal(directory.location)) sidebar.select_row(sidebar.get_row_at_index(places.entries.index_of(place)));
                 if(!chooser_mode)
                     add_drop(label, () => place.file);
                 if(place.bookmark)
@@ -1311,8 +1426,16 @@ namespace MajorisFiles {
             });
             widget.add_controller(drop);
         }
+        public bool accepts_destination {
+            get { return !location.has_uri_scheme("majoris") && !location.has_uri_scheme("recent") && !location.has_uri_scheme("trash"); }
+        }
+        public bool virtual_collection {
+            get { return directory.location.has_uri_scheme("recent") || directory.location.get_uri() == "majoris:///favorites"; }
+        }
         public void navigate(File file, bool record = true)
         {
+            // Migrate old saved Home Overview tabs into the new default collection.
+            if (file.get_uri() == "majoris:///home") { navigate(File.new_for_uri("recent:///"), record); return; }
             column_sort_token.cancel();column_sort_pending=false;
             if(narrow)
                 sidebar_overlay.show_sidebar = false;
@@ -1337,12 +1460,24 @@ namespace MajorisFiles {
             everywhere = false;
             string recursive_policy = metadata.state("recursive-search", "Never");
             recursive = recursive_policy == "Always" || (recursive_policy == "Local" && file.is_native());
+            if (file.has_uri_scheme("recent") || file.has_uri_scheme("majoris")) recursive = false;
             recursive_button.active = recursive;
             search.cancellable.cancel();
             search_query = new SearchQuery();
             search_entry.text = "";
             path.text = file.get_parse_name();
+            if (file.has_uri_scheme("recent") || file.has_uri_scheme("majoris")) directory.virtual_location(file);
             load_display(file);
+            if (file.has_uri_scheme("recent")) {
+                set_group("Recent Date");
+                sort_key = "Recent Date"; ascending = false;
+                sorter.changed(Gtk.SorterChange.DIFFERENT);
+            }
+            if (file.has_uri_scheme("recent") || file.get_uri() == "majoris:///favorites") {
+                caption_key = "Location";
+                detail_columns["Location"].visible = true;
+            }
+            display_changed();
             if (record)
                 history.visit(file);
             initial_selection = null;
@@ -1350,16 +1485,8 @@ namespace MajorisFiles {
             string default_view = metadata.state("default-view", "Grid");
             set_view(metadata.state("remember-folder-settings", "true") == "true" ? metadata.state("view:" + file.get_uri(), default_view) : default_view, false);
             modes.sensitive = file.get_uri() != "majoris:///home";
-            if(file.get_uri() != "majoris:///home")
-                views.visible_child_name = view_mode;
-            home.cancel();
-            if(file.get_uri() == "majoris:///home")
-            {
-                directory.virtual_location(file);
-                views.visible_child_name = "Home";
-                home.reload.begin();
-            }
-            else if (file.get_uri() == "majoris:///favorites")
+            views.visible_child_name = view_mode == "Columns" && virtual_collection ? "List" : view_mode;
+            if (file.get_uri() == "majoris:///favorites")
             {
                 directory.virtual_location(file);
                 load_virtual.begin(metadata.favorites(), navigation_generation);
@@ -1395,24 +1522,46 @@ namespace MajorisFiles {
             else if (file.get_uri() == "recent:///")
             {
                 directory.virtual_location(file);
-                var files = new Gee.ArrayList<File>();
-                foreach (var recent in Gtk.RecentManager.get_default().get_items())
-                    files.add(File.new_for_uri(recent.get_uri()));
+                var files = ActivityFiles.recent();
                 load_virtual.begin(files, navigation_generation);
             }
             else directory.open.begin(file, get_root() as Gtk.Window);
             update_status();
+            for (int i = 0; i < places.entries.size; i++)
+                if (places.entries[i].file.equal(file)) sidebar.select_row(sidebar.get_row_at_index(i));
             location_changed(file);
             session_changed();
         }
+        uint collection_refresh;
+        void refresh_collection() {
+            if (collection_refresh != 0) return;
+            collection_refresh = Idle.add(() => {
+                collection_refresh = 0;
+                if (!virtual_collection) return Source.REMOVE;
+                var selected = selection_uris();
+                navigation_generation++;
+                directory.items.remove_all();
+                var files = new Gee.ArrayList<File>();
+                if (directory.location.has_uri_scheme("recent")) {
+                    files.add_all(ActivityFiles.recent());
+                } else files.add_all(metadata.favorites());
+                load_virtual.begin(files, navigation_generation, (obj, res) => { load_virtual.end(res); restore_reordered(selected); });
+                return Source.REMOVE;
+            });
+        }
         async void load_virtual(Gee.List<File> files, uint epoch)
         {
+            var dates = new Gee.HashMap<string, int64?>();
+            if (directory.location.has_uri_scheme("recent"))
+                foreach (var recent in Gtk.RecentManager.get_default().get_items()) dates[recent.get_uri()] = recent.get_modified().to_unix();
             foreach (var file in files)
             {
+                if (epoch != navigation_generation) return;
                 try {
                     var info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.LOW, null);
                     if (epoch != navigation_generation)
                         return;
+                    if (dates.has_key(file.get_uri())) info.set_attribute_uint64("majoris::recent", (uint64)dates[file.get_uri()]);
                     directory.items.append(new FileItem(file, info));
                 }
                 catch (Error e) {}
@@ -1502,16 +1651,12 @@ namespace MajorisFiles {
         }
         void update_status()
         {
-            if(directory.location.get_uri() == "majoris:///home")
-            {
-                status.label = _("Local activity · nothing is uploaded");
-                return;
-            }
             var chosen = selected();
             uint64 bytes = 0;
             foreach(var item in chosen)
                 if(!item.directory)
                     bytes += item.bytes;
+            status.add_css_class("files-status");
             status.label = _("%u items · %d selected").printf(sorted.get_n_items(), chosen.size) + (chosen.size > 0 ? " · " + Paths.size(bytes) : "") + (search_results ? " · %u folders scanned · %u unavailable".printf(search.scanned, search.unreadable) : "");
         }
         void run_search()
@@ -1520,7 +1665,7 @@ namespace MajorisFiles {
             search.cancellable.cancel();
             search_query.text = search_entry.text;
             search_query.scope = everywhere ? "everywhere" : recursive ? "recursive" : "folder";
-            if ((recursive || everywhere || search_query.content != "") && search_query.active)
+            if (!virtual_collection && (recursive || everywhere || search_query.content != "") && search_query.active)
             {
                 search_results = true;
                 directory.cancel();
@@ -1536,7 +1681,7 @@ namespace MajorisFiles {
                                                                                                                   }
                     });
             }
-            else if (search_results)
+            else if (search_results && !virtual_collection)
             {
                 search_results = false;
                 directory.open.begin(location, get_root() as Gtk.Window);
@@ -1754,7 +1899,7 @@ namespace MajorisFiles {
                                        caption.add_css_class("dim-label");
                                        caption.ellipsize = Pango.EllipsizeMode.END;
                                        caption.max_width_chars = 18;
-                                       caption.visible = grid && caption_key != "None";
+                                       caption.visible = grid && (caption_key != "None" || virtual_collection);
                                        if(grid)
                                            box.append(caption);
                                        var checkbox = new Gtk.CheckButton();
@@ -1776,7 +1921,7 @@ namespace MajorisFiles {
                     box.margin_top = spacing;
                     box.margin_bottom = spacing;
                     checkbox.visible = selection_checkboxes;
-                    caption.visible = grid && caption_key != "None";
+                    caption.visible = grid && (caption_key != "None" || virtual_collection);
                     if(grid && li.item != null)
                         caption.label = column_text((FileItem)li.item, caption_key);
                     if(li.item != null)
@@ -1897,6 +2042,7 @@ namespace MajorisFiles {
         public void cancel()
         {
             column_sort_token.cancel();column_sort_pending=false;
+            if (collection_refresh != 0) { Source.remove(collection_refresh); collection_refresh = 0; }
             grouped_grid.model=null;
             if(group_refresh != 0)
             {
@@ -1926,7 +2072,6 @@ namespace MajorisFiles {
             directory.cancel();
             search.cancellable.cancel();
             preview.cancel();
-            home.cancel();
             gallery_preview.cancel();
         }
         void refresh_thumbnail(Gtk.ListItem li, Gtk.Image image, FileItem item)

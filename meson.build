@@ -34,7 +34,8 @@ core += files('src/cloud/files.vala')
 ui += files('src/search/filters.vala')
 ui += files('src/metadata/tags-dialog.vala')
 ui += files('src/metadata/details.vala')
-ui += files('src/views/home.vala')
+ui += files('src/views/home.vala', 'src/window/theme.vala')
+ui += gnome.compile_resources('files-resources', 'data/files.gresource.xml', source_dir: 'data', c_name: 'majoris_files')
 ui += files('src/application/launcher.vala')
 ui += files('src/application/shell-search.vala')
 ui += files('src/preview/archive.vala')
@@ -128,3 +129,8 @@ endif
 executable('visibility-check', 'tests/visibility.vala', 'sharing-service/visibility.vala', dependencies: [dependency('gio-2.0'), dependency('json-glib-1.0'), dependency('gee-0.8')])
 
 install_data('data/majoris-samba-foundation.conf', install_dir: get_option('datadir') / 'majoris-files')
+
+redesign_tests = executable('redesign-tests', 'tests/redesign.vala', core, ui, dependencies: deps)
+if xvfb.found()
+  test('redesign', find_program('dbus-run-session'), args: ['--', xvfb, '-a', redesign_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 45)
+endif

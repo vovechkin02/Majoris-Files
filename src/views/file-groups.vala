@@ -18,13 +18,14 @@ namespace MajorisFiles {
                     return "Large · 100 MiB–1 GiB";
                 return "Very Large · 1 GiB or More";
             }
-            if(mode == "Modified Date")
+            if(mode == "Modified Date" || mode == "Recent Date")
             {
-                if(!item.info.has_attribute("time::modified"))
+                string attribute = mode == "Recent Date" ? "majoris::recent" : "time::modified";
+                if(!item.info.has_attribute(attribute))
                     return "Unknown Date";
                 var now = new DateTime.now_local();
                 var today = new DateTime.local(now.get_year(), now.get_month(), now.get_day_of_month(), 0, 0, 0);
-                int64 timestamp = (int64)item.info.get_attribute_uint64("time::modified");
+                int64 timestamp = (int64)item.info.get_attribute_uint64(attribute);
                 if(timestamp >= today.add_days(1).to_unix())
                     return "Future";
                 if(timestamp >= today.to_unix())
@@ -52,7 +53,7 @@ namespace MajorisFiles {
         {
             var a = label(first, mode, metadata);
             var b = label(second, mode, metadata);
-            if(mode == "Modified Date")
+            if(mode == "Modified Date" || mode == "Recent Date")
             {
                 string[] order = {
                     "Future", "Today", "Yesterday", "Previous 7 Days", "Previous 30 Days", "Older", "Unknown Date"

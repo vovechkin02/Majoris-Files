@@ -15,6 +15,7 @@ int main(string[] args)
         Environment.set_prgname("majoris-files-visual-check");
         Environment.set_application_name("Majoris Files Visual Check");
         Adw.init();
+        if (Environment.get_variable("MAJORIS_VISUAL_DARK") == "1") Adw.StyleManager.get_default().color_scheme = Adw.ColorScheme.FORCE_DARK;
         var app = new Adw.Application("com.majoris.files.visualtest", ApplicationFlags.NON_UNIQUE);
         app.register(null);
         var metadata = new MetadataStore(Path.build_filename(root, "metadata.db"));
@@ -44,7 +45,7 @@ int main(string[] args)
                                  }
                                  if(stage == 2)
                                  {
-                                     screenshot(window, "files-home.png");
+                                     screenshot(window, "files-recent.png");
                                      var filters = new SearchFilters(new SearchQuery());
                                      filters.present(window);
                                      Timeout.add(500, () => { screenshot(window, "search-filters.png");
@@ -113,7 +114,7 @@ int main(string[] args)
                                  }
                                  if(stage == 8)
                                  {
-                                     assert(window.current.narrow);
+                                     assert(!window.current.narrow);
                                      screenshot(window, "files-narrow.png");
                                      stage++;
                                      return Source.CONTINUE;
