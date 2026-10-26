@@ -1,5 +1,15 @@
 # Implementation and release status
 
+Sidebar update, 26 October 2026: the shared Files/chooser sidebar now uses one Home
+and Favorites destination, deduplicated XDG Folders, persistent System Drive first
+under Devices, then Network and Trash. GTK bookmark UI/storage access was removed;
+collections and cloud accounts remain available through the locations menu. The
+Meson suite passes 13/13 groups. See [sidebar.md](sidebar.md) for identity mechanisms,
+modified files, screenshots/tests and the physical-device verification limits.
+
+The release/package assessment below describes the 22 October build; the existing
+package artifact has not been rebuilt for this sidebar-only source update.
+
 Assessment: 22 October 2026. The supplied final feature-gap instructions have been
 implemented in the existing Vala/GTK4/libadwaita architecture. Automated and isolated
 real-service checks are recorded below. Production approval still requires the

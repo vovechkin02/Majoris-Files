@@ -1,221 +1,202 @@
 namespace MajorisFiles {
     public class Place : Object {
         public string label;
-        public string section = "Locations";
+        public string section = "";
+        public string icon_name = "folder-symbolic";
+        public Icon? icon;
         public File file;
         public Mount? mount;
         public Volume? volume;
-        public bool bookmark;
+        public Drive? drive;
+        public bool system;
         public CloudProviders.Account? cloud;
-        public Place(string label, File file, Mount? mount = null)
-        {
-            this.label = label;
-            this.file = file;
-            this.mount = mount;
+        public Place(string label, File file, Mount? mount = null) {
+            this.label=label; this.file=file; this.mount=mount;
+        }
+    }
+    // GIO inventory projected into testable filesystem identities. Different
+    // volumes of one drive remain separate; display labels are never identities.
+    public class SidebarDevice : Object {
+        public Place place;
+        public string identity;
+        public int order;
+        public bool visible = true;
+        public SidebarDevice(Place place, string identity, int order) {
+            this.place=place;this.identity=identity;this.order=order;
         }
     }
     public class Places : Object {
         public Gee.ArrayList<Place> entries = new Gee.ArrayList<Place>();
         public signal void changed();
         VolumeMonitor volumes;
-        File bookmarks;
         FileMonitor? watcher;
-        MetadataStore? metadata;
+        ulong[] volume_handlers;
+        uint config_refresh;
         CloudAccounts cloud = new CloudAccounts();
         string last_signature = "";
-        public Places(MetadataStore? metadata = null)
-        {
-            this.metadata = metadata;
-            cloud.changed.connect(reload);
-            if(metadata != null)
-                metadata.changed.connect(reload);
-            volumes = VolumeMonitor.get();
-            volumes.mount_added.connect(reload);
-            volumes.mount_removed.connect(reload);
-            volumes.mount_changed.connect(reload);
-            volumes.volume_added.connect(reload);
-            volumes.volume_removed.connect(reload);
-            volumes.volume_changed.connect(reload);
-            bookmarks = File.new_for_path(Path.build_filename(Environment.get_user_config_dir(), "gtk-3.0", "bookmarks"));
+        public string root_filesystem { get; private set; default = ""; }
+        [CCode (cname = "g_reload_user_special_dirs_cache", cheader_filename = "glib.h")]
+        static extern void reload_special_dirs();
+        public Places(MetadataStore? metadata = null) {
+            volumes=VolumeMonitor.get();
+            weak Places self=this;
+            volume_handlers={
+                volumes.mount_added.connect(()=>{if(self!=null)self.reload();}),
+                volumes.mount_removed.connect(()=>{if(self!=null)self.reload();}),
+                volumes.mount_changed.connect(()=>{if(self!=null)self.reload();}),
+                volumes.volume_added.connect(()=>{if(self!=null)self.reload();}),
+                volumes.volume_removed.connect(()=>{if(self!=null)self.reload();}),
+                volumes.volume_changed.connect(()=>{if(self!=null)self.reload();}),
+                volumes.drive_connected.connect(()=>{if(self!=null)self.reload();}),
+                volumes.drive_disconnected.connect(()=>{if(self!=null)self.reload();}),
+                volumes.drive_changed.connect(()=>{if(self!=null)self.reload();})
+            };
+            // GTK bookmarks are never read into the navigation model or Favorites.
+            var configuration=File.new_for_path(Path.build_filename(Environment.get_user_config_dir(),"user-dirs.dirs"));
             try {
-                watcher = bookmarks.monitor_file(FileMonitorFlags.NONE);
-                watcher.changed.connect(reload);
-            }
-            catch (Error e) {}
+                watcher=configuration.monitor_file(FileMonitorFlags.NONE);
+                watcher.changed.connect(()=>{
+                    if(self==null)return;
+                    if(self.config_refresh!=0)Source.remove(self.config_refresh);
+                    self.config_refresh=Timeout.add(100,()=>{if(self!=null){self.config_refresh=0;reload_special_dirs();self.reload();}return Source.REMOVE;});
+                });
+            } catch(Error e) {}
             reload();
         }
-        public Gee.ArrayList<File> search_roots()
-        {
-            var roots = new Gee.ArrayList<File>();
-            roots.add(File.new_for_path(Environment.get_home_dir()));
-            foreach(var mount in volumes.get_mounts())
-            {
-                var root = mount.get_root();
-                bool covered = false;
-                foreach(var existing in roots)
-                    if(root.equal(existing) || root.has_prefix(existing))
-                        covered = true;
-                if(!covered)
-                    roots.add(root);
+        protected override void dispose() {
+            if(config_refresh!=0){Source.remove(config_refresh);config_refresh=0;}
+            if(watcher!=null){watcher.cancel();watcher=null;}
+            foreach(var handler in volume_handlers)volumes.disconnect(handler);
+            volume_handlers={};base.dispose();
+        }
+        public Gee.ArrayList<Place> cloud_locations() { return cloud.entries; }
+        public Gee.ArrayList<File> search_roots() {
+            var roots=new Gee.ArrayList<File>();roots.add(File.new_for_path(Environment.get_home_dir()));
+            foreach(var mount in volumes.get_mounts()) {
+                var root=mount.get_root();bool covered=false;
+                foreach(var existing in roots)if(root.equal(existing)||root.has_prefix(existing))covered=true;
+                if(!covered)roots.add(root);
             }
             return roots;
         }
-        public void reload()
-        {
-            entries.clear();
-            var recent = new Place("Recent", File.new_for_uri("recent:///")); recent.section = ""; entries.add(recent);
-            var favorites = new Place("Favorites", File.new_for_uri("majoris:///favorites")); favorites.section = ""; entries.add(favorites);
-            var home = new Place("Home", File.new_for_path(Environment.get_home_dir())); home.section = "Folders"; entries.add(home);
-            UserDirectory[] dirs = {
-                UserDirectory.DESKTOP, UserDirectory.DOCUMENTS, UserDirectory.DOWNLOAD, UserDirectory.MUSIC, UserDirectory.PICTURES, UserDirectory.VIDEOS
-            };
-            foreach (var dir in dirs)
-            {
-                var path = Environment.get_user_special_dir(dir);
-                if (path != null && path != Environment.get_home_dir())
-                { var folder = new Place(Path.get_basename(path), File.new_for_path(path)); folder.section = "Folders"; entries.add(folder); }
+        public static Gee.ArrayList<Place> standard_folders(string?[] paths) {
+            string[] names={_("Desktop"),_("Documents"),_("Downloads"),_("Pictures"),_("Music"),_("Videos")};
+            string[] icons={"user-desktop-symbolic","folder-documents-symbolic","folder-download-symbolic","folder-pictures-symbolic","folder-music-symbolic","folder-videos-symbolic"};
+            var result=new Gee.ArrayList<Place>();var home=File.new_for_path(Environment.get_home_dir());
+            for(int i=0;i<int.min(paths.length,names.length);i++) {
+                if(paths[i]==null||!Path.is_absolute(paths[i]))continue;
+                var file=File.new_for_path(paths[i]);if(file.equal(home))continue;
+                bool duplicate=false;foreach(var existing in result)if(file.equal(existing.file))duplicate=true;
+                if(duplicate)continue;
+                var folder=new Place(names[i],file);folder.section="Folders";folder.icon_name=icons[i];result.add(folder);
             }
-            string content;
+            return result;
+        }
+        public static Gee.ArrayList<Place> compose(Gee.List<Place> folders, Gee.List<SidebarDevice> devices, string root_identity="") {
+            var result=new Gee.ArrayList<Place>();
+            var home=new Place(_("Home"),File.new_for_uri("recent:///"));home.icon_name="user-home-symbolic";result.add(home);
+            var favorites=new Place(_("Favorites"),File.new_for_uri("majoris:///favorites"));favorites.icon_name="starred-symbolic";result.add(favorites);
+            result.add_all(folders);
+            var system=new Place(_("System Drive"),File.new_for_path("/"));system.section="Devices";system.system=true;system.icon_name="drive-harddisk-system-symbolic";result.add(system);
+            var ordered=new Gee.ArrayList<SidebarDevice>();ordered.add_all(devices);
+            ordered.sort((a,b)=>{int order=a.order-b.order;if(order!=0)return order;order=a.place.label.collate(b.place.label);return order!=0?order:strcmp(a.identity,b.identity);});
+            var identities=new Gee.HashSet<string>();if(root_identity!="")identities.add(root_identity);
+            foreach(var device in ordered) {
+                if(!device.visible)continue;
+                if(device.identity!=""&&identities.contains(device.identity))continue;
+                bool duplicate=false;foreach(var existing in result)if(existing.section=="Devices"&&existing.file.equal(device.place.file))duplicate=true;
+                if(duplicate)continue;
+                if(device.identity!="")identities.add(device.identity);
+                device.place.section="Devices";result.add(device.place);
+            }
+            var network=new Place(_("Network"),File.new_for_uri("network:///"));network.icon_name="network-workgroup-symbolic";result.add(network);
+            var trash=new Place(_("Trash"),File.new_for_uri("trash:///"));trash.icon_name="user-trash-symbolic";result.add(trash);
+            return result;
+        }
+        static Gee.HashMap<string,string> mount_identities() {
+            // GUnixMountEntry identifies the enclosing mount. Kernel filesystem
+            // numbers distinguish anonymous tmpfs/overlay instances whose source
+            // labels can be identical. This is a snapshot on GIO events, no poll.
             try {
-                FileUtils.get_contents(bookmarks.get_path(), out content);
-                foreach (var line in content.split("\n"))
-                {
-                    if (line.strip() == "")
-                        continue;
-                    var parts = line.split(" ", 2);
-                    var file = File.new_for_uri(parts[0]);
-                    var place = new Place(parts.length > 1 ? parts[1] : file.get_basename(), file);
-                    place.bookmark = true;
-                    place.section = "Folders";
-                    entries.add(place);
-                }
-            }
-            catch (Error e) {}
-            if(metadata != null)
-            {
-                foreach(var tag in metadata.all_tags())
-                    entries.add(new Place("Tag: " + tag, File.new_for_uri("majoris:///tag/" + Uri.escape_string(tag))));
-                foreach(var saved in metadata.saved_searches())
-                    entries.add(new Place(saved.name, File.new_for_uri("majoris:///search/" + Uri.escape_string(saved.name))));
-            }
-            foreach (var mount in volumes.get_mounts())
-                entries.add(new Place(mount.get_name(), mount.get_root(), mount));
-            foreach(var volume in volumes.get_volumes())
-                if(volume.get_mount() == null)
-                {
-                    var place = new Place(volume.get_name(), volume.get_activation_root() ?? File.new_for_uri("majoris:///device/" + Uri.escape_string(volume.get_uuid() ?? volume.get_name())));
-                    place.volume = volume;
-                    entries.add(place);
-                }
-            entries.add(new Place("Network", File.new_for_uri("network:///")));
-            entries.add_all(cloud.entries);
-            entries.add(new Place("Trash", File.new_for_uri("trash:///")));
-            // Metadata also signals preference and operation-journal updates.
-            // Keep sidebar rows alive unless their actual inventory changed.
-            var signature = new StringBuilder();
-            foreach (var place in entries) {
-                signature.append_printf("%s\n%s\n%s\n%s\n%s\n", place.label, place.file.get_uri(), place.section,
-                    place.cloud == null ? "" : place.cloud.get_status_details(), place.bookmark ? "bookmark" : "");
-            }
-            if (signature.str != last_signature) {
-                last_signature = signature.str;
-                changed();
-            }
+                string contents;FileUtils.get_contents("/proc/self/mountinfo",out contents);
+                return parse_mount_identities(contents);
+            }catch(Error e){}
+            return new Gee.HashMap<string,string>();
         }
-        public async void add_bookmark(File file) throws Error
-        {
-            string content = "";
-            string? etag = null;
-            try {
-                uint8[] bytes;
-                yield bookmarks.load_contents_async(null, out bytes, out etag);
-                content = (string)bytes;
+        internal static Gee.HashMap<string,string> parse_mount_identities(string contents) {
+            var result=new Gee.HashMap<string,string>();
+            if(contents.length>8*1024*1024)return result;
+            foreach(var line in contents.split("\n")) {
+                var fields=line.split(" ");if(fields.length<7)continue;
+                result[fields[4].compress()]=fields[2]+"\n"+fields[3];
             }
-            catch (IOError.NOT_FOUND e) {
-                content = "";
-            }
-            foreach (var line in content.split("\n"))
-                if (line.split(" ", 2)[0] == file.get_uri())
-                    return;
-            DirUtils.create_with_parents(bookmarks.get_parent().get_path(), 0700);
-            if(content != "" && !content.has_suffix("\n"))
-                content += "\n";
-            uint8[] bytes = (content + file.get_uri() + "\n").data;
-            yield bookmarks.replace_contents_async(bytes, etag, false, FileCreateFlags.PRIVATE, null, null);
-            reload();
+            return result;
         }
-        public async void edit_bookmark(File file, string? label, bool remove = false, int move = 0) throws Error
-        {
-            uint8[] content;
-            string? etag;
-            yield bookmarks.load_contents_async(null, out content, out etag);
-            var lines = new Gee.ArrayList<string>();
-            foreach(var line in ((string)content).split("\n"))
-                if(line.strip() != "")
-                    lines.add(line);
-            int index = -1;
-            for(int i = 0; i < lines.size; i++)
-                if(lines[i].split(" ", 2)[0] == file.get_uri())
-                {
-                    index = i;
-                    break;
-                }
-            if(index < 0)
-                return;
-            if(remove)
-                lines.remove_at(index);
-            else if(move != 0)
-            {
-                int position = int.max(0, int.min(lines.size - 1, index + move));
-                var value = lines.remove_at(index);
-                lines.insert(position, value);
-            }
-            else if(label != null)
-            {
-                if(label.contains("\n") || label.contains("\r"))
-                    throw new FileError.INVALID("Invalid bookmark label");
-                lines[index] = file.get_uri() + " " + label.strip();
-            }
-            var output = new StringBuilder();
-            foreach(var line in lines)
-                output.append(line + "\n");
-            yield bookmarks.replace_contents_async(output.str.data, etag, false, FileCreateFlags.PRIVATE, null, null);
-            reload();
+        static string filesystem_identity(UnixMountEntry entry, Gee.Map<string,string> identities) {
+            // Include the filesystem root so independent Btrfs subvolumes are
+            // not mistaken for aliases of /. No physical-device assumptions.
+            if(identities.has_key(entry.get_mount_path()))return identities[entry.get_mount_path()];
+            string source=entry.get_device_path();
+            // Fail conservatively if mountinfo is unavailable: never merge
+            // different anonymous filesystems just because both say "tmpfs".
+            if(!Path.is_absolute(source)&&!source.contains(":"))return "mount:"+entry.get_mount_path();
+            return source+"\n"+entry.get_fs_type()+"\n"+entry.get_root_path();
         }
-        public async void reorder_bookmark(File source, File target, bool after) throws Error
-        {
-            if(source.equal(target))
-                return;
-            uint8[] content;
-            string? etag;
-            yield bookmarks.load_contents_async(null, out content, out etag);
-            var lines = new Gee.ArrayList<string>();
-            string? moved = null;
-            foreach(var line in ((string)content).split("\n"))
-            {
-                if(line.strip() == "")
-                    continue;
-                if(line.split(" ", 2)[0] == source.get_uri())
-                    moved = line;
-                else lines.add(line);
+        static string volume_identity(Volume volume) {
+            var uuid=volume.get_uuid();if(uuid!=null&&uuid!="")return "uuid:"+uuid;
+            var device=volume.get_identifier(VolumeIdentifier.UNIX_DEVICE);if(device!=null&&device!="")return "device:"+device;
+            return "volume:%u".printf(direct_hash(volume));
+        }
+        static int device_order(File? file, Drive? drive, Icon icon) {
+            string scheme=file==null?"":file.get_uri_scheme();string description=icon.to_string()??"";
+            if(scheme=="mtp"||scheme=="gphoto2"||description.contains("phone")||description.contains("camera"))return 4;
+            if(scheme=="cdda"||description.contains("optical"))return 3;
+            if(drive!=null&&(drive.is_removable()||drive.is_media_removable()))return 2;
+            return file==null||file.is_native()?1:5;
+        }
+        public void reload() {
+            string?[] paths={Environment.get_user_special_dir(UserDirectory.DESKTOP),Environment.get_user_special_dir(UserDirectory.DOCUMENTS),Environment.get_user_special_dir(UserDirectory.DOWNLOAD),Environment.get_user_special_dir(UserDirectory.PICTURES),Environment.get_user_special_dir(UserDirectory.MUSIC),Environment.get_user_special_dir(UserDirectory.VIDEOS)};
+            var candidates=new Gee.ArrayList<SidebarDevice>();
+            var identities=mount_identities();
+            var root_entry=new UnixMountEntry.for("/");root_filesystem=root_entry==null?"":filesystem_identity(root_entry,identities);
+            var root_volumes=new Gee.HashSet<string>();
+            foreach(var mount in volumes.get_mounts()) {
+                var file=mount.get_root();var volume=mount.get_volume();
+                UnixMountEntry? entry=null;if(file.is_native())entry=new UnixMountEntry.for(file.get_path());
+                bool root=file.equal(File.new_for_path("/"))||(entry!=null&&root_filesystem!=""&&filesystem_identity(entry,identities)==root_filesystem);
+                if(root){if(volume!=null)root_volumes.add(volume_identity(volume));continue;}
+                if(mount.is_shadowed())continue;
+                // GVolumeMonitor already applies UDisks visibility hints. Also
+                // reject incidental native system mounts, never scan raw blocks.
+                if(entry!=null&&entry.is_system_internal()&&!entry.guess_should_display())continue;
+                var place=new Place(mount.get_name(),file,mount);place.icon=mount.get_symbolic_icon();
+                var drive=mount.get_drive();
+                string identity="mount:"+file.get_uri();
+                if(entry!=null)identity="filesystem:"+filesystem_identity(entry,identities);
+                else if(volume!=null)identity=volume_identity(volume);
+                candidates.add(new SidebarDevice(place,identity,device_order(file,drive,place.icon)));
             }
-            if(moved == null)
-                throw new FileError.INVALID("The dragged bookmark no longer exists");
-            int position = -1;
-            for(int i = 0; i < lines.size; i++)
-                if(lines[i].split(" ", 2)[0] == target.get_uri())
-                {
-                    position = i;
-                    break;
-                }
-            if(position < 0)
-                throw new FileError.INVALID("The destination bookmark no longer exists");
-            lines.insert(position + (after ? 1 : 0), moved);
-            var output = new StringBuilder();
-            foreach(var line in lines)
-                output.append(line + "\n");
-            yield bookmarks.replace_contents_async(output.str.data, etag, false, FileCreateFlags.PRIVATE, null, null);
-            reload();
+            foreach(var volume in volumes.get_volumes()) {
+                if(volume.get_mount()!=null||!volume.can_mount()||root_volumes.contains(volume_identity(volume)))continue;
+                if(root_entry!=null&&volume.get_identifier(VolumeIdentifier.UNIX_DEVICE)==root_entry.get_device_path())continue;
+                var place=new Place(volume.get_name(),volume.get_activation_root()??File.new_for_uri("majoris:///device/"+Uri.escape_string(volume_identity(volume))));
+                place.volume=volume;place.icon=volume.get_symbolic_icon();
+                candidates.add(new SidebarDevice(place,volume_identity(volume),device_order(volume.get_activation_root(),volume.get_drive(),place.icon)));
+            }
+            foreach(var drive in volumes.get_connected_drives()) {
+                var icon=drive.get_symbolic_icon();
+                if(drive.has_volumes()||!drive.is_media_removable()||!(icon.to_string()??"").contains("optical"))continue;
+                var identity=drive.get_identifier(VolumeIdentifier.UNIX_DEVICE)??"drive:%u".printf(direct_hash(drive));
+                var place=new Place(drive.get_name(),File.new_for_uri("majoris:///device/"+Uri.escape_string(identity)));place.drive=drive;place.icon=icon;
+                candidates.add(new SidebarDevice(place,identity,3));
+            }
+            var next=compose(standard_folders(paths),candidates,root_filesystem);
+            var signature=new StringBuilder();
+            foreach(var place in next){
+                string icon=place.icon_name;if(place.icon!=null)icon=place.icon.to_string();
+                signature.append_printf("%s\n%s\n%s\n%s\n%u:%u:%u\n",place.label,place.file.get_uri(),place.section,icon,place.mount==null?0:direct_hash(place.mount),place.volume==null?0:direct_hash(place.volume),place.drive==null?0:direct_hash(place.drive));
+            }
+            if(signature.str!=last_signature){entries=next;last_signature=signature.str;changed();}
         }
     }
 }

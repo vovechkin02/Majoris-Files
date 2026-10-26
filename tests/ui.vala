@@ -55,6 +55,19 @@ int main(string[] args)
         catch (Error e) { error("%s", e.message); }
     });
     Test.add_func("/ui/open-single", () => chooser_flow(false, false, false));
+    Test.add_func("/ui/system-drive-navigation",()=>{
+        try {
+            string root=DirUtils.make_tmp("majoris-root-navigation-XXXXXX");
+            var browser=new Browser(new MetadataStore(Path.build_filename(root,"metadata.db")),new Places());
+            assert_sidebar_structure(browser);
+            var sidebar=sidebar_widget(browser);Gtk.ListBoxRow? target=null;
+            for(int i=0;i<browser.places.entries.size;i++)if(browser.places.entries[i].system)target=sidebar.get_row_at_index(i);
+            assert(target!=null);sidebar.row_activated(target);
+            assert(browser.location.equal(File.new_for_path("/")));
+            assert(!browser.location.equal(File.new_for_path(Environment.get_home_dir())));
+            browser.cancel();
+        }catch(Error e){error("%s",e.message);}
+    });
     Test.add_func("/preview/persistent-rotation", () => {
         var loop = new MainLoop();
         rotation_case.begin((obj, res) => { try { rotation_case.end(res); } catch (Error e) { error("%s", e.message); } loop.quit(); });
@@ -148,7 +161,7 @@ int main(string[] args)
     Test.add_func("/ui/disk-image-inventory", () => disk_image_inventory_test());
     Test.add_func("/ui/nearby-confirm", () => nearby_test(true));
     Test.add_func("/ui/nearby-cancel", () => nearby_test(false));
-    Test.add_func("/ui/bookmark-reorder-and-drop-policy", () => bookmark_drop_test());
+    Test.add_func("/ui/drop-policy", () => drop_policy_test());
     Test.add_func("/ui/transferred-tab-routing", () => {
         try {
             var temp = DirUtils.make_tmp("majoris-tabs-XXXXXX");
@@ -676,6 +689,7 @@ void chooser_flow(bool save, bool multiple, bool directory, bool symlink = false
         options.multiple = multiple;
         options.directory = directory;
         var window = new ChooserWindow(options, metadata, new Places());
+        assert_sidebar_structure(window.browser);
         var loop = new MainLoop();
         bool success = false;
         uint watchdog = Timeout.add_seconds(10, () => { error("Chooser test timed out");
@@ -885,15 +899,15 @@ class FixtureColumn : Object, ColumnProvider {
     }
 }
 
-void bookmark_drop_test()
+void drop_policy_test()
 {
     var loop = new MainLoop();
-    bookmark_drop_flow.begin((obj, res) => { bookmark_drop_flow.end(res);
+    drop_policy_flow.begin((obj, res) => { drop_policy_flow.end(res);
                                              loop.quit();
         });
     loop.run();
 }
-async void bookmark_drop_flow()
+async void drop_policy_flow()
 {
     try {
         var root = DirUtils.make_tmp("majoris-drop-XXXXXX");
@@ -903,37 +917,12 @@ async void bookmark_drop_flow()
         a.make_directory();
         b.make_directory();
         c.make_directory();
-        var places = new Places();
-        yield places.add_bookmark(a);
-        yield places.add_bookmark(b);
-        yield places.add_bookmark(c);
-        yield places.edit_bookmark(a, "A label with spaces");
-        yield places.reorder_bookmark(c, a, false);
-        yield places.reorder_bookmark(a, b, true);
-        var ordered = new Gee.ArrayList<Place>();
-        foreach(var place in places.entries)
-            if(place.bookmark)
-                ordered.add(place);
-        assert(ordered.size == 3);
-        assert(ordered[0].file.equal(c) && ordered[1].file.equal(b) && ordered[2].file.equal(a));
-        assert(ordered[2].label == "A label with spaces");
-        bool rejected = false;
-        try {
-            yield places.reorder_bookmark(a, File.new_for_path(root).get_child("missing"), false);
-        }
-        catch(MajorisFiles.FileError.INVALID e) {
-            rejected = true;
-        }
-        assert(rejected);
         var sources = new Gee.ArrayList<File>();
         sources.add(a);
         sources.add(b);
         assert(yield DropPolicy.same_filesystem(sources, c));
         sources.add(File.new_for_uri("sftp://example.invalid/file"));
         assert(!(yield DropPolicy.same_filesystem(sources, c)));
-        yield places.edit_bookmark(a, null, true);
-        yield places.edit_bookmark(b, null, true);
-        yield places.edit_bookmark(c, null, true);
     }
     catch(Error e) {
         error("%s", e.message);
@@ -1116,4 +1105,24 @@ async void grouped_grid_case() throws Error {
     Signal.emit_by_name(keys,"key-pressed",Gdk.Key.Home,0u,(Gdk.ModifierType)0,out handled);assert(handled&&browser.selected().size==1&&browser.active_selection.is_selected(0));
     File selected=browser.selected()[0].file;browser.set_group("Size");assert(browser.selected().size==1&&browser.selected()[0].file.equal(selected));
     browser.cancel();window.destroy();yield OperationManager.remove_tree(temporary,new Cancellable());
+}
+Gtk.ListBox? sidebar_widget(Gtk.Widget widget) {
+    if(widget is Gtk.ListBox && widget.has_css_class("files-sidebar"))return (Gtk.ListBox)widget;
+    for(var child=widget.get_first_child();child!=null;child=child.get_next_sibling()){var found=sidebar_widget(child);if(found!=null)return found;}
+    return null;
+}
+void assert_sidebar_structure(Browser browser) {
+    var sidebar=sidebar_widget(browser);assert(sidebar!=null);
+    var entries=browser.places.entries;
+    assert(entries[0].label=="Home"&&entries[0].file.get_uri()=="recent:///");
+    assert(entries[1].label=="Favorites"&&entries[1].section=="");
+    bool devices=false;int roots=0;
+    for(int i=0;i<entries.size;i++) {
+        var place=entries[i];var row=sidebar.get_row_at_index(i);assert(row!=null&&row.get_data<Place>("majoris-place")==place);
+        if(place.system){roots++;assert(place.file.equal(File.new_for_path("/")));assert(row.get_header() is Gtk.Label);assert(((Gtk.Label)row.get_header()).label=="Devices");devices=true;}
+        if(place.section=="Folders")for(int j=0;j<i;j++)assert(!entries[j].file.equal(place.file));
+        assert(place.section==""||place.section=="Folders"||place.section=="Devices");
+    }
+    assert(devices&&roots==1&&sidebar.get_row_at_index(entries.size)==null);
+    assert(entries[entries.size-2].file.get_uri()=="network:///"&&entries[entries.size-1].file.get_uri()=="trash:///");
 }

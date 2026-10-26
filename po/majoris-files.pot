@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: majoris-files\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 13:16+1100\n"
+"POT-Creation-Date: 2026-10-26 12:21+1100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgstr ""
 #: src/dialogs/dialogs.vala:29 src/dialogs/dialogs.vala:50
 #: src/dialogs/permissions.vala:179 src/operations/manager.vala:546
 #: src/operations/manager.vala:731 src/operations/manager.vala:813
-#: src/operations/manager.vala:1186 src/window/extra-actions.vala:456
+#: src/operations/manager.vala:1186 src/window/extra-actions.vala:460
 #: src/window/window.vala:63
 msgid "Cancel"
 msgstr ""
@@ -39,11 +39,11 @@ msgstr ""
 msgid "Send"
 msgstr ""
 
-#: src/actions/rotation.vala:12 src/window/window.vala:371
+#: src/actions/rotation.vala:12 src/window/window.vala:402
 msgid "Rotate Image Clockwise"
 msgstr ""
 
-#: src/actions/rotation.vala:12 src/window/window.vala:372
+#: src/actions/rotation.vala:12 src/window/window.vala:403
 msgid "Rotate Image Counterclockwise"
 msgstr ""
 
@@ -824,172 +824,254 @@ msgstr ""
 msgid "Could not read Samba configuration: "
 msgstr ""
 
-#: src/views/browser.vala:203
-msgid "Show or Hide Locations"
+#: src/sidebar/places.vala:83
+msgid "Desktop"
 msgstr ""
 
-#: src/views/browser.vala:207
-msgid "Back"
+#: src/sidebar/places.vala:83
+msgid "Documents"
 msgstr ""
 
-#: src/views/browser.vala:211
-msgid "Forward"
+#: src/sidebar/places.vala:83
+msgid "Downloads"
 msgstr ""
 
-#: src/views/browser.vala:215
-msgid "Parent Folder"
+#: src/sidebar/places.vala:83
+msgid "Pictures"
 msgstr ""
 
-#: src/views/browser.vala:220
-msgid "Location or URI"
+#: src/sidebar/places.vala:83
+msgid "Music"
 msgstr ""
 
-#: src/views/browser.vala:221
-msgid "Location (Ctrl+L)"
+#: src/sidebar/places.vala:83
+msgid "Videos"
 msgstr ""
 
-#: src/views/browser.vala:272
-msgid "Edit Location"
-msgstr ""
-
-#: src/views/browser.vala:274
-msgid "Reload"
-msgstr ""
-
-#: src/views/browser.vala:276
-msgid "Search"
-msgstr ""
-
-#: src/views/browser.vala:282 src/views/browser.vala:1033
-msgid "View"
-msgstr ""
-
-#: src/views/browser.vala:286 src/views/browser.vala:1026
-msgid "View Settings"
-msgstr ""
-
-#: src/views/browser.vala:311
-msgid "Search Home"
-msgstr ""
-
-#: src/views/browser.vala:321
-msgid "Search Everywhere (Home and mounted locations)"
-msgstr ""
-
-#: src/views/browser.vala:332
-msgid "Search Filters"
-msgstr ""
-
-#: src/views/browser.vala:515
-msgid "Cannot load "
-msgstr ""
-
-#: src/views/browser.vala:527
-msgid "%u results · %u folders scanned · %u unavailable"
-msgstr ""
-
-#: src/views/browser.vala:631
-msgid "Cloud Account Actions"
-msgstr ""
-
-#: src/views/browser.vala:640
-msgid "Open in New Tab"
-msgstr ""
-
-#: src/views/browser.vala:647
-msgid "Rename Bookmark"
-msgstr ""
-
-#: src/views/browser.vala:652
-msgid "Remove Bookmark"
-msgstr ""
-
-#: src/views/browser.vala:684
-msgid "Mount"
-msgstr ""
-
-#: src/views/browser.vala:759 src/views/home.vala:32
+#: src/sidebar/places.vala:97 src/window/window.vala:303
 msgid "Home"
 msgstr ""
 
-#: src/views/browser.vala:1030
-msgid "This Folder"
+#: src/sidebar/places.vala:98 src/views/browser.vala:870
+#: src/window/window.vala:302
+msgid "Favorites"
 msgstr ""
 
-#: src/views/browser.vala:1047
-msgid "Icon Density"
+#: src/sidebar/places.vala:100
+msgid "System Drive"
 msgstr ""
 
-#: src/views/browser.vala:1052
-msgid "Group By"
+#: src/sidebar/places.vala:112
+msgid "Network"
 msgstr ""
 
-#: src/views/browser.vala:1060
-msgid "Grid Metadata Caption"
+#: src/sidebar/places.vala:113
+msgid "Trash"
 msgstr ""
 
-#: src/views/browser.vala:1081
-msgid "Selection Checkboxes"
+#: src/views/browser.vala:205
+msgid "Show or Hide Locations"
 msgstr ""
 
-#: src/views/browser.vala:1089
-msgid "Folders First"
+#: src/views/browser.vala:210
+msgid "Back"
 msgstr ""
 
-#: src/views/browser.vala:1097
-msgid "Sort By"
+#: src/views/browser.vala:214
+msgid "Forward"
 msgstr ""
 
-#: src/views/browser.vala:1105
+#: src/views/browser.vala:218
+msgid "Parent Folder"
+msgstr ""
+
+#: src/views/browser.vala:224
+msgid "Other Locations and Collections"
+msgstr ""
+
+#: src/views/browser.vala:233
+msgid "Refresh"
+msgstr ""
+
+#: src/views/browser.vala:235
+msgid "Location or URI"
+msgstr ""
+
+#: src/views/browser.vala:236
+msgid "Location (Ctrl+L)"
+msgstr ""
+
+#: src/views/browser.vala:313
+msgid "Search files"
+msgstr ""
+
+#: src/views/browser.vala:334 src/views/browser.vala:335
+msgid "Share"
+msgstr ""
+
+#: src/views/browser.vala:340
+msgid "Sort"
+msgstr ""
+
+#: src/views/browser.vala:342
+msgid "Name"
+msgstr ""
+
+#: src/views/browser.vala:343
+msgid "Size"
+msgstr ""
+
+#: src/views/browser.vala:344
+msgid "Modified"
+msgstr ""
+
+#: src/views/browser.vala:345 src/views/browser.vala:1233
 msgid "Descending Order"
 msgstr ""
 
-#: src/views/browser.vala:1110
+#: src/views/browser.vala:355 src/views/browser.vala:1161
+msgid "View"
+msgstr ""
+
+#: src/views/browser.vala:375 src/views/browser.vala:1154
+msgid "View Settings"
+msgstr ""
+
+#: src/views/browser.vala:378
+msgid "Preview"
+msgstr ""
+
+#: src/views/browser.vala:406
+msgid "Search Home"
+msgstr ""
+
+#: src/views/browser.vala:416
+msgid "Search Everywhere (Home and mounted locations)"
+msgstr ""
+
+#: src/views/browser.vala:427
+msgid "Search Filters"
+msgstr ""
+
+#: src/views/browser.vala:437
+msgid "Search Options"
+msgstr ""
+
+#: src/views/browser.vala:462
+msgid "Folders"
+msgstr ""
+
+#: src/views/browser.vala:462
+msgid "Devices"
+msgstr ""
+
+#: src/views/browser.vala:627
+msgid "Cannot load "
+msgstr ""
+
+#: src/views/browser.vala:639
+msgid "%u results · %u folders scanned · %u unavailable"
+msgstr ""
+
+#: src/views/browser.vala:727
+msgid "Insert a disc to open this drive."
+msgstr ""
+
+#: src/views/browser.vala:753 src/views/browser.vala:775
+msgid "Cloud Account Actions"
+msgstr ""
+
+#: src/views/browser.vala:759
+msgid "Home Folder"
+msgstr ""
+
+#: src/views/browser.vala:760 src/views/browser.vala:870
+#: src/window/window.vala:301
+msgid "Recent"
+msgstr ""
+
+#: src/views/browser.vala:761
+msgid "Tag: "
+msgstr ""
+
+#: src/views/browser.vala:784
+msgid "Open in New Tab"
+msgstr ""
+
+#: src/views/browser.vala:791
+msgid "Eject"
+msgstr ""
+
+#: src/views/browser.vala:804
+msgid "Mount"
+msgstr ""
+
+#: src/views/browser.vala:1158
+msgid "This Folder"
+msgstr ""
+
+#: src/views/browser.vala:1175
+msgid "Icon Density"
+msgstr ""
+
+#: src/views/browser.vala:1180
+msgid "Group By"
+msgstr ""
+
+#: src/views/browser.vala:1188
+msgid "Grid Metadata Caption"
+msgstr ""
+
+#: src/views/browser.vala:1209
+msgid "Selection Checkboxes"
+msgstr ""
+
+#: src/views/browser.vala:1217
+msgid "Folders First"
+msgstr ""
+
+#: src/views/browser.vala:1225
+msgid "Sort By"
+msgstr ""
+
+#: src/views/browser.vala:1238
 msgid "List Columns"
 msgstr ""
 
-#: src/views/browser.vala:1128
+#: src/views/browser.vala:1256
 msgid "Column Width (pixels)"
 msgstr ""
 
-#: src/views/browser.vala:1135
+#: src/views/browser.vala:1263
 msgid "Move Column Left"
 msgstr ""
 
-#: src/views/browser.vala:1166
+#: src/views/browser.vala:1294
 msgid "Preparing extension sort…"
 msgstr ""
 
-#: src/views/browser.vala:1507
-msgid "Local activity · nothing is uploaded"
-msgstr ""
-
-#: src/views/browser.vala:1515
+#: src/views/browser.vala:1649
 msgid "%u items · %d selected"
 msgstr ""
 
-#: src/views/browser.vala:1761
+#: src/views/browser.vala:1895
 msgid "Select Item"
 msgstr ""
 
-#: src/views/browser.vala:1987
+#: src/views/browser.vala:2122
 msgid ""
 "A fresh metadata database is ready. The previous database is preserved at "
 msgstr ""
 
-#: src/views/home.vala:135
-msgid "No items yet"
-msgstr ""
-
-#: src/window/extra-actions.vala:73 src/window/window.vala:400
+#: src/window/extra-actions.vala:73 src/window/window.vala:431
 msgid "Make Available Offline"
 msgstr ""
 
-#: src/window/extra-actions.vala:73 src/window/window.vala:401
+#: src/window/extra-actions.vala:73 src/window/window.vala:432
 msgid "Free Local Space"
 msgstr ""
 
-#: src/window/extra-actions.vala:73 src/window/window.vala:402
+#: src/window/extra-actions.vala:73 src/window/window.vala:433
 msgid "Retry Cloud Sync"
 msgstr ""
 
@@ -1001,39 +1083,39 @@ msgstr ""
 msgid "There is no interrupted batch rename to recover."
 msgstr ""
 
-#: src/window/extra-actions.vala:217
+#: src/window/extra-actions.vala:221
 msgid "Choose a supported archive extension"
 msgstr ""
 
-#: src/window/extra-actions.vala:225
+#: src/window/extra-actions.vala:229
 msgid "Encrypted creation currently requires a .zip filename"
 msgstr ""
 
-#: src/window/extra-actions.vala:255
+#: src/window/extra-actions.vala:259
 msgid "Invalid folder name"
 msgstr ""
 
-#: src/window/extra-actions.vala:339
+#: src/window/extra-actions.vala:343
 msgid "The configured Majoris terminal could not be opened: "
 msgstr ""
 
-#: src/window/extra-actions.vala:386
+#: src/window/extra-actions.vala:390
 msgid "Choose Custom Icon"
 msgstr ""
 
-#: src/window/extra-actions.vala:431
+#: src/window/extra-actions.vala:435
 msgid "New Document from Template"
 msgstr ""
 
-#: src/window/extra-actions.vala:453
+#: src/window/extra-actions.vala:457
 msgid "SMB Account Password"
 msgstr ""
 
-#: src/window/extra-actions.vala:457
+#: src/window/extra-actions.vala:461
 msgid "Set Password"
 msgstr ""
 
-#: src/window/extra-actions.vala:478
+#: src/window/extra-actions.vala:482
 msgid "Enter a server URI"
 msgstr ""
 
@@ -1057,6 +1139,14 @@ msgstr ""
 msgid "Cancelled · "
 msgstr ""
 
-#: src/window/window.vala:168
+#: src/window/window.vala:171
 msgid "Tab Overview"
+msgstr ""
+
+#: src/window/window.vala:289
+msgid "Share Folder…"
+msgstr ""
+
+#: src/window/window.vala:440 src/window/window.vala:446
+msgid "Open Source Folder"
 msgstr ""

@@ -61,7 +61,7 @@ void layout_case() {
         assert(find_class(window, "files-commands") != null);
         assert(find_class(window, "majoris-document-tabs") != null);
         var places = new Places(metadata);
-        assert(places.entries[0].label == "Recent");
+        assert(places.entries[0].label == "Home");
         assert(places.entries[1].label == "Favorites");
         foreach (var place in places.entries) assert(place.label != "Home Overview");
         var navigation = (Gtk.Box)find_class(window, "files-navigation");
@@ -88,6 +88,17 @@ async void collections_case() throws Error {
     var beta = File.new_for_path(Path.build_filename(root, "beta.txt"));
     FileUtils.set_contents(alpha.get_path(), "alpha"); FileUtils.set_contents(beta.get_path(), "beta");
     metadata.set_favorite(alpha, true); metadata.set_favorite(beta, true);
+    metadata.set_tags(alpha,"Sidebar regression");
+    metadata.save_search("Sidebar saved search",alpha.get_parent(),new SearchQuery().serialize());
+    File? tag_target=null;File? saved_target=null;
+    foreach(var place in browser.collection_locations()){
+        if(place.file.get_uri().has_prefix("majoris:///tag/"))tag_target=place.file;
+        if(place.file.get_uri().has_prefix("majoris:///search/"))saved_target=place.file;
+    }
+    assert(tag_target!=null&&saved_target!=null);
+    browser.navigate(tag_target);yield settle();assert(browser.active_selection.get_n_items()==1);
+    browser.navigate(saved_target);yield settle();assert(browser.location.equal(alpha.get_parent()));
+    assert(window.lookup_action("bookmark")==null);
     browser.navigate(File.new_for_uri("majoris:///favorites"));
     yield settle();
     assert(browser.active_selection.get_n_items() == 2);

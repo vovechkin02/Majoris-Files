@@ -10,6 +10,14 @@ int main(string[] args)
         FileUtils.set_contents(Path.build_filename(root, "notes.txt"), "Majoris Files preview\nA local document.");
         DirUtils.create(Path.build_filename(root, "Documents"), 0700);
         DirUtils.create(Path.build_filename(root, "Pictures"), 0700);
+        string configuration="";
+        string[] kinds={"DESKTOP","DOCUMENTS","DOWNLOAD","PICTURES","MUSIC","VIDEOS"};
+        string[] names={"Desktop","Documents","Downloads","Pictures","Music","Videos"};
+        for(int i=0;i<kinds.length;i++){
+            DirUtils.create(Path.build_filename(root,names[i]),0700);
+            configuration+="XDG_"+kinds[i]+"_DIR=\"$HOME/"+names[i]+"\"\n";
+        }
+        FileUtils.set_contents(Path.build_filename(root,"user-dirs.dirs"),configuration);
         Environment.set_variable("GDK_BACKEND","x11",true);Environment.set_variable("GSK_RENDERER","cairo",true);Gtk.init();
         Gtk.Settings.get_default().gtk_enable_animations=false;
         Environment.set_prgname("majoris-files-visual-check");
@@ -125,6 +133,7 @@ int main(string[] args)
                                          var options = new ChooserOptions(false, new VariantBuilder(VariantType.VARDICT).end());
                                          options.initial = File.new_for_path(root);
                                          var chooser = new ChooserWindow(options, metadata, places);
+                                         chooser.set_default_size(1040, 820);
                                          chooser.present();
                                          Timeout.add(500, () => { screenshot(chooser, "file-chooser.png");
                                                                   chooser.cancel_request();

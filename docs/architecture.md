@@ -7,8 +7,10 @@ classes live in the `MajorisFiles` namespace.
 `DirectoryModel` incrementally enumerates batches of 128 entries, owns its
 cancellable and GFileMonitor, and coalesces monitor events. Each `Browser` owns
 its history, filters, selection, search and preview lifecycle. Files tabs and
-`ChooserWindow` use this same browser. `Places` shares GTK bookmark storage and
-uses GVolumeMonitor for attached devices; network navigation uses GVfs and
+`ChooserWindow` use this same browser and `Places` composition. The sidebar uses
+XDG standard folders, one root filesystem entry and GVolumeMonitor device events;
+GTK bookmarks never populate it. Collections and cloud accounts remain accessible
+in the shared locations menu. Network navigation uses GVfs and
 GtkMountOperation instead of handling credentials itself.
 
 `MetadataStore` uses parameterized SQLite queries for favorites, multiple tags,

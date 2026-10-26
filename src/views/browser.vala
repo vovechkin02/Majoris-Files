@@ -219,6 +219,17 @@ namespace MajorisFiles {
                                                                              if (parent != null)
                                                                                  navigate(parent);
                 }));
+            var locations = new Gtk.MenuButton();
+            locations.icon_name="folder-open-symbolic";
+            locations.tooltip_text=_("Other Locations and Collections");
+            locations.update_property(Gtk.AccessibleProperty.LABEL,locations.tooltip_text,-1);
+            var locations_popup=new Gtk.Popover();
+            var locations_scroll=new Gtk.ScrolledWindow();
+            locations_scroll.max_content_height=420;locations_scroll.propagate_natural_height=true;
+            var locations_box=new Gtk.Box(Gtk.Orientation.VERTICAL,2);
+            locations_scroll.child=locations_box;locations_popup.child=locations_scroll;locations.popover=locations_popup;
+            locations_popup.notify["visible"].connect(()=>{if(locations_popup.visible)populate_locations(locations_box,locations_popup);});
+            toolbar.append(locations);
             toolbar.append(button("view-refresh-symbolic", _("Refresh"), () => navigate(directory.location, false)));
             path.hexpand = true;
             path.placeholder_text = _("Location or URI");
@@ -435,27 +446,31 @@ namespace MajorisFiles {
             sidebar_pane = body;
             body.vexpand = true;
             body.position = 180;
-            body.shrink_start_child = true;
+            body.shrink_start_child = false;
+            body.resize_start_child = false;
             var side_scroll = new Gtk.ScrolledWindow();
+            side_scroll.width_request = 180;
             side_scroll.set_child(sidebar);
             sidebar.selection_mode = Gtk.SelectionMode.SINGLE;
             sidebar.add_css_class("navigation-sidebar");
             sidebar.add_css_class("files-sidebar");
             sidebar.set_header_func((row, before) => {
-                var place = places.entries[row.get_index()];
-                string? section = place.section != "" && (before == null || places.entries[before.get_index()].section != place.section) ? _(place.section) : null;
-                if (section != null) { var heading = new Gtk.Label(section); heading.halign = Gtk.Align.START; heading.add_css_class("files-section"); row.set_header(heading); }
+                var place = row.get_data<Place>("majoris-place");
+                var previous = before == null ? null : before.get_data<Place>("majoris-place");
+                string? section = null;
+                if(place != null && place.section != "" && (previous == null || previous.section != place.section))
+                    section=place.section=="Folders"?_("Folders"):_("Devices");
+                if (section != null) { var heading = new Gtk.Label(section); heading.halign = Gtk.Align.START; heading.add_css_class("files-section"); heading.add_css_class("heading"); row.set_header(heading); }
                 else row.set_header(null);
             });
             body.start_child = side_scroll;
-            sidebar.row_activated.connect((row) => { if (row.get_index() < places.entries.size)
-                                                         open_place.begin(places.entries[row.get_index()]);
+            sidebar.row_activated.connect((row) => { var place=row.get_data<Place>("majoris-place");if(place!=null)
+                                                         open_place.begin(place);
                 });
             var side_menu = new Gtk.GestureClick();
             side_menu.button = 3;
             side_menu.pressed.connect((n, x, y) => { var row = sidebar.get_row_at_y((int)y);
-                                                     if(row != null && row.get_index() < places.entries.size)
-                                                         place_menu(places.entries[row.get_index()], x, y);
+                                                     if(row != null) {var place=row.get_data<Place>("majoris-place");if(place!=null)place_menu(place, x, y);}
                 });
             sidebar.add_controller(side_menu);
             places.changed.connect(rebuild_sidebar);
@@ -705,10 +720,20 @@ namespace MajorisFiles {
         }
         async void open_place(Place place)
         {
-            if(place.volume != null)
+            if(place.drive != null) {
+                try {
+                    if(place.drive.can_poll_for_media())yield place.drive.poll_for_media(null);
+                    var media=place.drive.get_volumes();
+                    if(media.length()==0)error(_("Insert a disc to open this drive."));
+                    else {var volume=media.data;var mount=volume.get_mount();if(mount!=null)navigate(mount.get_root());else {var target=new Place(volume.get_name(),place.file);target.volume=volume;yield open_place(target);}}
+                }catch(Error e){error(e.message);}
+                return;
+            }
+            if(place.volume != null && place.volume.can_mount())
             {
                 try {
-                    yield place.volume.mount(MountMountFlags.NONE, new Gtk.MountOperation(get_root() as Gtk.Window), null);
+                    if(place.volume.get_mount()==null)
+                        yield place.volume.mount(MountMountFlags.NONE, new Gtk.MountOperation(get_root() as Gtk.Window), null);
                     var mount = place.volume.get_mount();
                     if(mount != null)
                         navigate(mount.get_root());
@@ -718,6 +743,24 @@ namespace MajorisFiles {
                 }
             }
             else navigate(place.file);
+        }
+        void populate_locations(Gtk.Box box, Gtk.Popover popup) {
+            while(box.get_first_child()!=null)box.remove(box.get_first_child());
+            foreach(var place in collection_locations()) {
+                var button=new Gtk.Button.with_label(place.label);button.add_css_class("flat");
+                button.clicked.connect(()=>{popup.popdown();navigate(place.file);});box.append(button);
+                if(place.cloud!=null&&place.cloud.get_menu_model()!=null&&place.cloud.get_action_group()!=null){
+                    var actions=new Gtk.MenuButton();actions.label=_("Cloud Account Actions");actions.insert_action_group("cloudprovider",place.cloud.get_action_group());actions.menu_model=place.cloud.get_menu_model();box.append(actions);
+                }
+            }
+        }
+        public Gee.ArrayList<Place> collection_locations() {
+            var result=new Gee.ArrayList<Place>();
+            result.add(new Place(_("Home Folder"),File.new_for_path(Environment.get_home_dir())));
+            result.add(new Place(_("Recent"),File.new_for_uri("recent:///")));
+            foreach(var tag in metadata.all_tags())result.add(new Place(_("Tag: ")+tag,File.new_for_uri("majoris:///tag/"+Uri.escape_string(tag))));
+            foreach(var saved in metadata.saved_searches())result.add(new Place(saved.name,File.new_for_uri("majoris:///search/"+Uri.escape_string(saved.name))));
+            result.add_all(places.cloud_locations());return result;
         }
         void place_menu(Place place, double x, double y)
         {
@@ -743,36 +786,12 @@ namespace MajorisFiles {
                                         menu.popdown();
                 });
             box.append(tab);
-            if(place.bookmark)
-            {
-                var rename = new Gtk.Button.with_label(_("Rename Bookmark"));
-                rename.clicked.connect(() => { menu.popdown();
-                                               rename_bookmark.begin(place);
-                    });
-                box.append(rename);
-                var remove = new Gtk.Button.with_label(_("Remove Bookmark"));
-                remove.clicked.connect(() => { menu.popdown();
-                                               places.edit_bookmark.begin(place.file, null, true, 0, (obj, res) => { try { places.edit_bookmark.end(res);
-                                                                                                                     }
-                                                                                                                     catch(Error e) { error(e.message);
-                                                                                                                     }
-                                                   });
-                    });
-                box.append(remove);
-                foreach(int direction in new int[] {-1, 1})
-                {
-                    var move = new Gtk.Button.with_label(direction < 0 ? "Move Bookmark Up" : "Move Bookmark Down");
-                    move.clicked.connect(() => { menu.popdown();
-                                                 places.edit_bookmark.begin(place.file, null, false, direction, (obj, res) => { try { places.edit_bookmark.end(res);
-                                                                                                                                }
-                                                                                                                                catch(Error e) { error(e.message);
-                                                                                                                                }
-                                                     });
-                        });
-                    box.append(move);
-                }
+            tab.sensitive = place.volume == null && place.drive == null;
+            if(place.drive != null && place.drive.can_eject()) {
+                var eject=new Gtk.Button.with_label(_("Eject"));
+                eject.clicked.connect(()=>{menu.popdown();eject_drive.begin(place.drive);});box.append(eject);
             }
-            if(place.mount != null)
+            if(!place.system && place.mount != null && (place.mount.can_eject() || place.mount.can_unmount()))
             {
                 var eject = new Gtk.Button.with_label(place.mount.can_eject() ? "Eject" : "Unmount");
                 eject.clicked.connect(() => { menu.popdown();
@@ -780,7 +799,7 @@ namespace MajorisFiles {
                     });
                 box.append(eject);
             }
-            if(place.volume != null)
+            if(place.volume != null && place.volume.can_mount())
             {
                 var mount = new Gtk.Button.with_label(_("Mount"));
                 mount.clicked.connect(() => { menu.popdown();
@@ -789,18 +808,6 @@ namespace MajorisFiles {
                 box.append(mount);
             }
             menu.popup();
-        }
-        async void rename_bookmark(Place place)
-        {
-            var name = yield Dialogs.prompt(this, "Rename Bookmark", place.label);
-            if(name == null)
-                return;
-            try {
-                yield places.edit_bookmark(place.file, name);
-            }
-            catch(Error e) {
-                error(e.message);
-            }
         }
         async void unmount_place(Place place)
         {
@@ -813,6 +820,10 @@ namespace MajorisFiles {
             catch(Error e) {
                 error(e.message);
             }
+        }
+        async void eject_drive(Drive drive) {
+            try {yield drive.eject_with_operation(MountUnmountFlags.NONE,new Gtk.MountOperation(get_root() as Gtk.Window),null);}
+            catch(Error e){error(e.message);}
         }
         public void refilter()
         {
@@ -1381,6 +1392,7 @@ namespace MajorisFiles {
             foreach (var place in places.entries)
             {
                 var label = new Gtk.Label(place.label);
+                label.tooltip_text = place.label;
                 if(place.cloud != null)
                     label.tooltip_text = place.cloud.get_status_details();
                 label.halign = Gtk.Align.START;
@@ -1389,51 +1401,18 @@ namespace MajorisFiles {
                 label.margin_top = 8;
                 label.margin_bottom = 8;
                 var place_row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
-                string icon_name = place.file.has_uri_scheme("recent") ? "document-open-recent-symbolic"
-                    : place.file.get_uri() == "majoris:///favorites" ? "starred-symbolic"
-                    : place.file.has_uri_scheme("trash") ? "user-trash-symbolic"
-                    : place.file.has_uri_scheme("network") ? "network-workgroup-symbolic"
-                    : place.mount != null || place.volume != null ? "drive-harddisk-symbolic"
-                    : place.label == "Home" ? "user-home-symbolic" : "folder-symbolic";
-                var icon = place.cloud != null && place.cloud.get_icon() != null
-                    ? new Gtk.Image.from_gicon(place.cloud.get_icon()) : new Gtk.Image.from_icon_name(icon_name);
+                var icon = place.icon != null ? new Gtk.Image.from_gicon(place.icon) : new Gtk.Image.from_icon_name(place.icon_name);
                 icon.margin_start = 10;
                 place_row.append(icon);
                 label.hexpand = true;
                 label.ellipsize = Pango.EllipsizeMode.END;
                 place_row.append(label);
-                sidebar.append(place_row);
+                var row=new Gtk.ListBoxRow();row.child=place_row;row.set_data<Place>("majoris-place",place);
+                sidebar.append(row);
                 if (place.file.equal(directory.location)) sidebar.select_row(sidebar.get_row_at_index(places.entries.index_of(place)));
-                if(!chooser_mode)
+                if(!chooser_mode && place.volume == null && place.drive == null)
                     add_drop(label, () => place.file);
-                if(place.bookmark)
-                    add_bookmark_drag(label, place);
             }
-        }
-        void add_bookmark_drag(Gtk.Widget widget, Place place)
-        {
-            var drag = new Gtk.DragSource();
-            drag.actions = Gdk.DragAction.MOVE;
-            drag.prepare.connect(() => {
-                var value = Value(typeof(Place));
-                value.set_object(place);
-                return new Gdk.ContentProvider.for_value(value);
-            });
-            widget.add_controller(drag);
-            var drop = new Gtk.DropTarget(typeof(Place), Gdk.DragAction.MOVE);
-            drop.drop.connect((value, x, y) => {
-                var source = value.get_object() as Place;
-                if(source == null || !source.bookmark)
-                    return false;
-                places.reorder_bookmark.begin(source.file, place.file, y >= widget.get_height() / 2.0, (obj, res) => {
-                    try { places.reorder_bookmark.end(res);
-                    }
-                    catch(Error e) { error(e.message);
-                    }
-                });
-                return true;
-            });
-            widget.add_controller(drop);
         }
         public bool accepts_destination {
             get { return !location.has_uri_scheme("majoris") && !location.has_uri_scheme("recent") && !location.has_uri_scheme("trash"); }

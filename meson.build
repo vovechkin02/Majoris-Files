@@ -137,3 +137,5 @@ endif
 
 # Theme ownership checks also run without a graphical display.
 test('theme-layout', find_program('python3'), args: [meson.project_source_root() / 'tests/theme-layout.py'])
+sidebar_tests = executable('sidebar-tests', 'tests/places.vala', core, dependencies: deps)
+test('sidebar', find_program('dbus-run-session'), args: ['--', sidebar_tests], timeout: 15)

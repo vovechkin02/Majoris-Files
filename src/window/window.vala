@@ -92,7 +92,7 @@ namespace MajorisFiles {
             menu.append("Shared Folders", "win.shared-folders");
             menu.append("Recover Previous Replaced Files…", "win.recover-replacements");
             menu.append("Recover Interrupted Batch Rename…", "win.recover-rename");
-            foreach (var entry in new string[] {"New Window|app.new-window", "New Tab|win.new-tab", "Reopen Closed Tab|win.reopen", "Duplicate Tab|win.duplicate-tab", "New Folder|win.new-folder", "New Empty File|win.new-file", "Show Hidden Files|win.hidden", "Preview Pane|win.preview", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified", "Descending Order|win.descending", "Bookmarks: Add Current Folder|win.bookmark", "Save Search|win.save-search", "Preferences|win.preferences", "Keyboard Shortcuts|win.shortcuts"})
+            foreach (var entry in new string[] {"New Window|app.new-window", "New Tab|win.new-tab", "Reopen Closed Tab|win.reopen", "Duplicate Tab|win.duplicate-tab", "New Folder|win.new-folder", "New Empty File|win.new-file", "Show Hidden Files|win.hidden", "Preview Pane|win.preview", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified", "Descending Order|win.descending", "Save Search|win.save-search", "Preferences|win.preferences", "Keyboard Shortcuts|win.shortcuts"})
             {
                 var parts = entry.split("|", 2);
                 menu.append(parts[0], parts[1]);
@@ -236,11 +236,6 @@ namespace MajorisFiles {
                 });
             action("tags", () => set_tags.begin());
             action("quick-preview", () => quick_preview());
-            action("bookmark", () => places.add_bookmark.begin(current.location, (obj, res) => { try { places.add_bookmark.end(res);
-                                                                                                 }
-                                                                                                 catch (Error e) { Dialogs.error(this, e.message);
-                                                                                                 }
-                }));
             action("save-search", () => save_search.begin());
             action("sort-name", () => current.set_sort("Name", true));
             action("sort-size", () => current.set_sort("Size", true));
@@ -280,7 +275,7 @@ namespace MajorisFiles {
         }
         public bool command_available(string name) {
             if (current == null) return false;
-            if (name in new string[] {"new-folder", "new-file", "paste", "bookmark", "split", "join", "duplicate-items", "folder-with-selection", "paste-link", "compress", "compress-sevenzip", "compress-encrypted", "extract", "extract-encrypted", "link", "templates"})
+            if (name in new string[] {"new-folder", "new-file", "paste", "split", "join", "duplicate-items", "folder-with-selection", "paste-link", "compress", "compress-sevenzip", "compress-encrypted", "extract", "extract-encrypted", "link", "templates"})
                 return current.accepts_destination;
             int count = current.selected().size;
             if (name == "rename") return count == 1;
@@ -297,7 +292,7 @@ namespace MajorisFiles {
                 current.share_button.menu_model = share_menu;
                 current.share_button.sensitive = share_menu.get_n_items() > 0 && current.selected().size > 0;
             }
-            foreach (var name in new string[] {"new-folder", "new-file", "paste", "bookmark", "split", "join", "rename", "share-folder", "cut", "copy", "trash", "delete", "favorite", "properties"}) {
+            foreach (var name in new string[] {"new-folder", "new-file", "paste", "split", "join", "rename", "share-folder", "cut", "copy", "trash", "delete", "favorite", "properties"}) {
                 var command = lookup_action(name) as SimpleAction;
                 if (command != null) command.set_enabled(command_available(name));
             }
