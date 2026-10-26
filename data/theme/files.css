@@ -1,9 +1,3 @@
-.files-navigation, .files-commands { padding: 6px 12px; background: @surface; border-bottom: 1px solid @border_soft; }
-.files-location { border: 1px solid @border; border-radius: 9px; background: @background; padding: 0 4px; }
-.files-location button { border-radius: 7px; border-color: transparent; background: transparent; box-shadow: none; padding: 0 8px; }
-.files-location button:hover { background: @hover; }
-.files-location entry { border: none; box-shadow: none; background: transparent; }
-.files-location:focus-within { border-color: @primary_500; box-shadow: 0 0 0 2px alpha(@primary_500,.24); }
-.files-status { padding: 6px 12px; border-top: 1px solid @border_soft; background: @surface; color: @text_secondary; }
-.files-sidebar { background: @background; }
-.files-section { color: @text_secondary; font-weight: 600; padding: 12px 10px 4px; }
+.files-navigation, .files-commands { padding: 6px 12px; }
+.files-status { padding: 6px 12px; }
+.files-section { padding: 12px 10px 4px; }

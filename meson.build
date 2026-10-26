@@ -134,3 +134,6 @@ redesign_tests = executable('redesign-tests', 'tests/redesign.vala', core, ui, d
 if xvfb.found()
   test('redesign', find_program('dbus-run-session'), args: ['--', xvfb, '-a', redesign_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 45)
 endif
+
+# Theme ownership checks also run without a graphical display.
+test('theme-layout', find_program('python3'), args: [meson.project_source_root() / 'tests/theme-layout.py'])

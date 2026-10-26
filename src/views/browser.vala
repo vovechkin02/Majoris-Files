@@ -200,10 +200,6 @@ namespace MajorisFiles {
             sorted.items_changed.connect(() => update_status());
             selection = new Gtk.MultiSelection(sorted);
             var toolbar = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
-            toolbar.margin_start = 8;
-            toolbar.margin_end = 8;
-            toolbar.margin_top = 6;
-            toolbar.margin_bottom = 6;
             toolbar.add_css_class("files-navigation");
             if (chooser_mode) {
             toolbar.append(button("sidebar-show-symbolic", _("Show or Hide Locations"), () => { if (narrow)
@@ -286,7 +282,14 @@ namespace MajorisFiles {
             location_bar.add_named(crumbs_scroll, "breadcrumbs");
             location_bar.visible_child_name = "breadcrumbs";
             toolbar.append(location_bar);
-            location_bar.add_css_class("files-location");
+            location_bar.add_css_class("majoris-location-bar");
+            path.add_css_class("majoris-location-entry");
+            location_bar.notify["visible-child-name"].connect(() => {
+                if (location_bar.visible_child_name == "entry")
+                    location_bar.add_css_class("majoris-location-editing");
+                else
+                    location_bar.remove_css_class("majoris-location-editing");
+            });
             var empty_space = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
             empty_space.hexpand = true;
             empty_space.width_request = 32;
@@ -854,7 +857,8 @@ namespace MajorisFiles {
                 breadcrumbs.remove(breadcrumbs.get_first_child());
             if(file.has_uri_scheme("recent") || file.get_uri() == "majoris:///favorites") {
                 var crumb = new Gtk.Button.with_label(file.has_uri_scheme("recent") ? _("Recent") : _("Favorites"));
-                crumb.add_css_class("heading");
+                crumb.add_css_class("majoris-location-crumb");
+                crumb.add_css_class("majoris-location-current");
                 crumb.clicked.connect(() => navigate(file));
                 breadcrumbs.append(crumb);
                 if (breadcrumb_space != null) breadcrumbs.append(breadcrumb_space);
@@ -871,14 +875,19 @@ namespace MajorisFiles {
             foreach(var parent in parents)
             {
                 var crumb = new Gtk.Button.with_label(parent.equal(File.new_for_path(Environment.get_home_dir())) ? "Home" : parent.get_basename() ?? parent.get_parse_name());
-                crumb.add_css_class("flat");
-                if (parent.equal(file)) crumb.add_css_class("heading");
+                crumb.add_css_class("majoris-location-crumb");
+                if (parent.equal(file)) crumb.add_css_class("majoris-location-current");
                 crumb.tooltip_text = parent.get_parse_name();
                 crumb.clicked.connect(() => navigate(parent));
                 var middle = new Gtk.GestureClick();
                 middle.button = 2;
                 middle.pressed.connect(() => open_in_tab(parent));
                 crumb.add_controller(middle);
+                if (breadcrumbs.get_first_child() != null) {
+                    var separator = new Gtk.Label("›");
+                    separator.add_css_class("majoris-location-separator");
+                    breadcrumbs.append(separator);
+                }
                 breadcrumbs.append(crumb);
             }
             if (breadcrumb_space != null) breadcrumbs.append(breadcrumb_space);
@@ -1436,6 +1445,7 @@ namespace MajorisFiles {
         {
             // Migrate old saved Home Overview tabs into the new default collection.
             if (file.get_uri() == "majoris:///home") { navigate(File.new_for_uri("recent:///"), record); return; }
+            location_bar.visible_child_name = "breadcrumbs";
             column_sort_token.cancel();column_sort_pending=false;
             if(narrow)
                 sidebar_overlay.show_sidebar = false;
@@ -2041,6 +2051,7 @@ namespace MajorisFiles {
         }
         public void cancel()
         {
+            location_bar.visible_child_name = "breadcrumbs";
             column_sort_token.cancel();column_sort_pending=false;
             if (collection_refresh != 0) { Source.remove(collection_refresh); collection_refresh = 0; }
             grouped_grid.model=null;

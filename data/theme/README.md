@@ -1,1 +1,0 @@
-Official Majoris GTK4 styles copied unchanged from the supplied Majoris-Theme.zip (theme/Majoris/gtk-4.0). Application geometry is in files.css. Loaded at application priority; StyleManager selects the light or dark variant. Window control assets and geometry remain owned by the official theme.

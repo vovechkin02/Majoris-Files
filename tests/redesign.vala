@@ -64,14 +64,18 @@ void layout_case() {
         assert(places.entries[0].label == "Recent");
         assert(places.entries[1].label == "Favorites");
         foreach (var place in places.entries) assert(place.label != "Home Overview");
-        foreach (var scheme in new Adw.ColorScheme[] {Adw.ColorScheme.FORCE_LIGHT, Adw.ColorScheme.FORCE_DARK}) {
-            Adw.StyleManager.get_default().color_scheme = scheme;
-            var provider = new Gtk.CssProvider();
-            bool valid = true;
-            provider.parsing_error.connect(() => valid = false);
-            provider.load_from_resource(scheme == Adw.ColorScheme.FORCE_DARK ? "/com/majoris/files/theme/gtk-dark.css" : "/com/majoris/files/theme/gtk.css");
-            assert(valid);
-        }
+        var navigation = (Gtk.Box)find_class(window, "files-navigation");
+        assert(navigation.spacing == 4);
+        assert(navigation.margin_start == 0 && navigation.margin_end == 0);
+        assert(navigation.margin_top == 0 && navigation.margin_bottom == 0);
+        assert(find_class(window, "majoris-location-bar") != null);
+        assert(window.current.path.has_css_class("majoris-location-entry"));
+        var current = find_class(window, "majoris-location-current");
+        assert(current != null && current.has_css_class("majoris-location-crumb"));
+        var resources = resources_enumerate_children("/com/majoris/files/theme", ResourceLookupFlags.NONE);
+        assert(resources.length == 1 && resources[0] == "files.css");
+        var css = resources_lookup_data("/com/majoris/files/theme/files.css", ResourceLookupFlags.NONE);
+        assert(((string)css.get_data()).contains(".files-navigation, .files-commands { padding: 6px 12px; }"));
         window.current.cancel(); window.destroy();
     } catch (Error e) { error("%s", e.message); }
 }
@@ -132,12 +136,27 @@ async void navigation_case() throws Error {
     browser.navigate(File.new_for_path(root)); yield settle();
     assert(press(browser, Gdk.Key.l, Gdk.ModifierType.CONTROL_MASK));
     assert(browser.path.get_parent().visible);
+    var bar = find_class(browser, "majoris-location-bar");
+    assert(bar.has_css_class("majoris-location-editing"));
     browser.path.text = "child"; browser.path.activate(); yield settle();
     assert(browser.location.equal(File.new_for_path(Path.build_filename(root, "child"))));
+    assert(!bar.has_css_class("majoris-location-editing"));
+    assert(find_class(browser, "majoris-location-separator") != null);
     assert(press(browser, Gdk.Key.d, Gdk.ModifierType.ALT_MASK));
     browser.path.text = "/unsubmitted";
     assert(press(browser.path, Gdk.Key.Escape));
     assert(browser.path.text == browser.location.get_parse_name());
+    assert(!bar.has_css_class("majoris-location-editing"));
+    browser.edit_location();
+    assert(press(browser, Gdk.Key.Escape));
+    assert(!bar.has_css_class("majoris-location-editing"));
+    var current = (Gtk.Button)find_class(browser, "majoris-location-current");
+    current.clicked(); yield settle();
+    assert(browser.location.get_basename() == "child");
+    browser.edit_location();
+    browser.navigate(File.new_for_path(root)); yield settle();
+    assert(!bar.has_css_class("majoris-location-editing"));
+    browser.navigate(File.new_for_path(Path.build_filename(root, "child"))); yield settle();
     assert(press(browser, Gdk.Key.Left, Gdk.ModifierType.ALT_MASK)); yield settle();
     assert(browser.location.equal(File.new_for_path(root)));
     assert(press(browser, Gdk.Key.Right, Gdk.ModifierType.ALT_MASK)); yield settle();

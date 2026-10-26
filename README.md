@@ -2,6 +2,10 @@
 
 Vala / GTK4 / libadwaita file manager and shared system file chooser for Majoris.
 
+Majoris Theme is installed and activated by GNOME for both light and dark
+appearances. Files loads only its own layout CSS and uses the installed theme’s
+shared location-bar classes; it does not bundle or select a GTK theme.
+
 ```sh
 meson setup build --prefix=/usr
 meson compile -C build
