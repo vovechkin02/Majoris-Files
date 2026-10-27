@@ -1,0 +1,2 @@
+Plus Jakarta Sans
+/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/theme-integration-runtime/light/data/fonts/PlusJakartaSans.ttf

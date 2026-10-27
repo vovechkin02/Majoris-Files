@@ -4,9 +4,9 @@ int main(string[] args)
     try {
         var root = DirUtils.make_tmp("majoris-visual-XXXXXX");
         Environment.set_variable("HOME", root, true);
-        Environment.set_variable("XDG_DATA_HOME", root, true);
+        Environment.set_variable("XDG_DATA_HOME", Environment.get_variable("MAJORIS_VISUAL_THEME_DATA") ?? root, true);
         Environment.set_variable("XDG_CACHE_HOME", root, true);
-        Environment.set_variable("XDG_CONFIG_HOME", root, true);
+        Environment.set_variable("XDG_CONFIG_HOME", Environment.get_variable("MAJORIS_VISUAL_THEME_CONFIG") ?? root, true);
         FileUtils.set_contents(Path.build_filename(root, "notes.txt"), "Majoris Files preview\nA local document.");
         DirUtils.create(Path.build_filename(root, "Documents"), 0700);
         DirUtils.create(Path.build_filename(root, "Pictures"), 0700);
@@ -122,7 +122,7 @@ int main(string[] args)
                                  }
                                  if(stage == 8)
                                  {
-                                     assert(!window.current.narrow);
+                                     assert(window.current.narrow);
                                      screenshot(window, "files-narrow.png");
                                      stage++;
                                      return Source.CONTINUE;

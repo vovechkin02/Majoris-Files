@@ -1,68 +1,11 @@
 using MajorisFiles;
 
-async void pause_layout() {
-    Timeout.add(500, () => { pause_layout.callback(); return Source.REMOVE; });
-    yield;
-}
-Gtk.Widget? find_component(Gtk.Widget widget, string name) {
-    if(widget.has_css_class(name)) return widget;
-    for(var c=widget.get_first_child();c!=null;c=c.get_next_sibling()) {
-        var found=find_component(c,name);if(found!=null)return found;
-    }
-    return null;
-}
-void record_tree(Gtk.Widget widget, Json.Builder json) {
-    if(!widget.get_mapped())return;
-    Gtk.Allocation allocation;widget.get_allocation(out allocation);
-    json.begin_object();
-    json.set_member_name("x");json.add_int_value(allocation.x);
-    json.set_member_name("y");json.add_int_value(allocation.y);
-    json.set_member_name("node");json.add_string_value(widget.get_css_name());
-    json.set_member_name("classes");json.begin_array();foreach(var name in widget.get_css_classes())json.add_string_value(name);json.end_array();
-    json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
-    json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
-    json.set_member_name("width");json.add_int_value(widget.get_width());
-    json.set_member_name("height");json.add_int_value(widget.get_height());
-    json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
-    if(widget is Gtk.Image){json.set_member_name("icon_size");json.add_int_value(((Gtk.Image)widget).pixel_size);}
-    if(widget is Gtk.Label) {
-        var label=(Gtk.Label)widget;Pango.Rectangle ink,logical;
-        label.get_layout().get_pixel_extents(out ink,out logical);
-        json.set_member_name("text");json.add_string_value(label.label);
-        json.set_member_name("ink_height");json.add_int_value(ink.height);
-        json.set_member_name("logical_height");json.add_int_value(logical.height);
-        json.set_member_name("ink_y");json.add_int_value(ink.y);
-        json.set_member_name("logical_y");json.add_int_value(logical.y);
-        json.set_member_name("font");json.add_string_value(label.get_layout().get_context().get_font_description().to_string());
-    }
-    json.set_member_name("children");json.begin_array();
-    for(var c=widget.get_first_child();c!=null;c=c.get_next_sibling())record_tree(c,json);
-    json.end_array();json.end_object();
-}
-void reset_scroll(Gtk.Widget widget) {
-    if(widget is Gtk.ScrolledWindow) ((Gtk.ScrolledWindow)widget).vadjustment.value=0;
-    for(var child=widget.get_first_child();child!=null;child=child.get_next_sibling())reset_scroll(child);
-}
 Gtk.Button? sidebar_control(Gtk.Widget widget) {
     if(widget is Gtk.Button && widget.tooltip_text=="Show or Hide Locations")return (Gtk.Button)widget;
     for(var child=widget.get_first_child();child!=null;child=child.get_next_sibling()) {
         var button=sidebar_control(child);if(button!=null)return button;
     }
     return null;
-}
-async void capture(Gtk.Window window,string output,string name) throws Error {
-    reset_scroll(window);
-    Gsk.RenderNode? node=null;
-    for(int attempt=0;attempt<6 && node==null;attempt++) {
-        yield pause_layout();
-        var paintable=new Gtk.WidgetPaintable(window);var snapshot=new Gtk.Snapshot();
-        paintable.snapshot(snapshot,window.get_width(),window.get_height());node=snapshot.to_node();
-    }
-    assert(node!=null);
-    var renderer=Gsk.Renderer.for_surface(window.get_surface());var texture=renderer.render_texture(node,null);
-    assert(texture.save_to_png(Path.build_filename(output,name+".png")));renderer.unrealize();
-    var json=new Json.Builder();record_tree(window,json);var generator=new Json.Generator();generator.set_root(json.get_root());generator.pretty=true;
-    FileUtils.set_contents(Path.build_filename(output,name+".json"),generator.to_data(null));
 }
 async void run_fixture(string output,MainLoop loop) throws Error {
     string root=DirUtils.make_tmp("majoris-integration-XXXXXX");

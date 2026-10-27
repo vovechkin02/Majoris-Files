@@ -1,0 +1,59 @@
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=382238 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=382238 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.2' (uid=1000 pid=382286 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.2' (uid=1000 pid=382286 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.455: Choosing gtk.portal for org.freedesktop.impl.portal.Lockdown as a last-resort fallback
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.2' (uid=1000 pid=382286 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.5' (uid=1000 pid=382309 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[382316]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=382309 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[382316]: Successfully activated service 'org.a11y.atspi.Registry'
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.538: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.539: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.540: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.541: Choosing gtk.portal for org.freedesktop.impl.portal.Settings as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.542: Choosing gtk.portal for org.freedesktop.impl.portal.FileChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.544: Choosing gtk.portal for org.freedesktop.impl.portal.AppChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.545: Choosing gtk.portal for org.freedesktop.impl.portal.Print as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.546: Choosing gtk.portal for org.freedesktop.impl.portal.Notification as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.548: Choosing gtk.portal for org.freedesktop.impl.portal.Inhibit as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.549: Choosing gtk.portal for org.freedesktop.impl.portal.Access as a last-resort fallback
+[W][14:20:18.552393] pw.conf      | [          conf.c: 1182 try_load_conf()] can't load config client.conf: No such file or directory
+[E][14:20:18.552742] pw.conf      | [          conf.c: 1215 pw_conf_load_conf_for_context()] can't load config client.conf: No such file or directory
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.553: Failed connect to PipeWire: Couldn't create PipeWire context
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.554: Choosing gtk.portal for org.freedesktop.impl.portal.Account as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.556: Choosing gtk.portal for org.freedesktop.impl.portal.Email as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:382286): xdg-desktop-portal-WARNING **: 14:20:18.557: Choosing gtk.portal for org.freedesktop.impl.portal.DynamicLauncher as a last-resort fallback
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=382238 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=382238 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=382238 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=382238 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=382238 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[382224]: [session uid=1000 pid=382224 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+A connection to the bus can't be made

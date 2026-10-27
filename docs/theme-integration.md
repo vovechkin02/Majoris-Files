@@ -126,7 +126,7 @@ For the reproducible baseline, run `python3 tools/build-theme-baseline.py`, then
 
 ```sh
 MAJORIS_CAPTURE_QUICK=1 \
-MAJORIS_CAPTURE_BINARY="$PWD/build/theme-baseline-source/build/theme-integration" \
+MAJORIS_CAPTURE_BINARY="$PWD/build/theme-baseline-source/build/baseline-theme-integration" \
 MAJORIS_CAPTURE_OUTPUT="$PWD/artifacts/theme-integration/before" \
 python3 tools/capture-theme-integration.py /path/to/Majoris-Theme
 ```

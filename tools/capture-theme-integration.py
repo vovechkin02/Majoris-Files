@@ -23,6 +23,17 @@ for variant in ('light', 'dark'):
     fonts.mkdir(parents=True, exist_ok=True)
     if (theme / 'fonts/PlusJakartaSans').is_dir():
         shutil.copytree(theme / 'fonts/PlusJakartaSans', fonts / 'PlusJakartaSans', dirs_exist_ok=True)
+    else:
+        # XDG_DATA_HOME isolation hides the user's fonts. Copy the already
+        # installed licensed font files when the theme does not bundle them.
+        installed = subprocess.check_output(['fc-list', '-f', '%{file}\t%{family}\n'], text=True)
+        for line in installed.splitlines():
+            filename, family = line.split('\t', 1)
+            if 'Plus Jakarta Sans' in family:
+                shutil.copyfile(filename, fonts / Path(filename).name)
+    aliases = config / 'fontconfig/conf.d'
+    aliases.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(theme / 'fonts/fontconfig/65-majoris-fonts.conf', aliases / '65-majoris-fonts.conf')
     env = dict(os.environ, XDG_CONFIG_HOME=str(config), XDG_DATA_HOME=str(fonts.parent),
                GDK_BACKEND='x11', GSK_RENDERER='cairo', GSETTINGS_BACKEND='memory',
                MAJORIS_VISUAL_DARK='1' if variant == 'dark' else '0')
@@ -34,6 +45,7 @@ for variant in ('light', 'dark'):
         settings.write_text('[Settings]\n' + (f'gtk-font-name={font}\n' if font else ''))
         target = out / (variant + suffix)
         target.mkdir(parents=True, exist_ok=True)
+        (target / 'font-resolution.txt').write_text(subprocess.check_output(['fc-match', '-f', '%{family}\n%{file}\n', 'Plus Jakarta Sans'], env=runenv, text=True))
         with (target / 'native.log').open('w') as log:
             subprocess.run(['dbus-run-session', '--', 'xvfb-run', '-a', '-s', '-screen 0 2560x2048x24',
                             str(binary), str(target)],

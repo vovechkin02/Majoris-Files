@@ -119,6 +119,8 @@ namespace MajorisFiles {
         bool loading_display;
         public signal void display_changed();
         Gtk.ColumnView details;
+        Gtk.ListView gallery_strip;
+        Gtk.SignalListItemFactory section_headers;
         Gee.HashMap<string, Gtk.ColumnViewColumn> detail_columns = new Gee.HashMap<string, Gtk.ColumnViewColumn>();
         string[] column_titles = {
             "Name", "Size", "Type", "Modified", "Created", "Accessed", "Owner", "Group", "Permissions", "MIME Type", "Location", "Tags", "Favorite", "Trash Date"
@@ -571,7 +573,7 @@ namespace MajorisFiles {
             views.add_named(scrolled(grid_views), "Grid");
             var list = new Gtk.ColumnView(selection);
             style_data_view(list, "majoris-data-column");
-            list.header_factory = group_headers();
+            section_headers = group_headers();
             list.show_column_separators = false;
             list.enable_rubberband = true;
             list.single_click_activate = metadata.state("single-click", "false") == "true";
@@ -603,7 +605,7 @@ namespace MajorisFiles {
             var strip = new Gtk.ListView(selection, factory(false));
             style_data_view(strip, "majoris-data-list");
             strip.single_click_activate = metadata.state("single-click", "false") == "true";
-            strip.header_factory = group_headers();
+            gallery_strip = strip;
             strip.activate.connect(activate_position);
             var strip_scroll = scrolled(strip);
             strip_scroll.height_request = 160;
@@ -1110,6 +1112,7 @@ namespace MajorisFiles {
                 group_key = "None";
             grid_rows.mode = group_key;
             sorted.section_sorter = group_key == "None" ? null : group_sorter;
+            update_group_headers();
             grid_views.visible_child_name = group_key == "None" ? "plain" : "grouped";
             grouped_grid.model = group_key == "None" || view_mode!="Grid" ? null : new Gtk.NoSelection(grid_rows);
             group_sorter.changed(Gtk.SorterChange.DIFFERENT);
@@ -1327,6 +1330,7 @@ namespace MajorisFiles {
             group_key = mode;
             grid_rows.mode = mode;
             sorted.section_sorter = mode == "None" ? null : group_sorter;
+            update_group_headers();
             grid_views.visible_child_name = mode == "None" ? "plain" : "grouped";
             grouped_grid.model = mode == "None" || view_mode!="Grid" ? null : new Gtk.NoSelection(grid_rows);
             group_sorter.changed(Gtk.SorterChange.DIFFERENT);
@@ -1342,6 +1346,14 @@ namespace MajorisFiles {
             var selected=new Gtk.Bitset.empty();var mask=new Gtk.Bitset.empty();mask.add_range(0,selection.get_n_items());
             for(uint i=0;i<selection.get_n_items();i++){var item=selection.get_item(i) as FileItem;if(item!=null&&uris.contains(item.file.get_uri()))selected.add(i);}
             selection.set_selection(selected,mask);grid_anchor=uint.MAX;
+        }
+        void update_group_headers()
+        {
+            // A hidden label still leaves GTK's section-header allocation.
+            // Remove the factory itself for ungrouped models, in both consumers.
+            var headers = group_key == "None" ? null : section_headers;
+            if(details.header_factory != headers) details.header_factory = headers;
+            if(gallery_strip.header_factory != headers) gallery_strip.header_factory = headers;
         }
         Gtk.SignalListItemFactory group_headers()
         {
@@ -1359,7 +1371,6 @@ namespace MajorisFiles {
                 var header = (Gtk.ListHeader)obj;
                 var label = (Gtk.Label)header.child;
                 label.label = FileGroups.label((FileItem)header.item, group_key, metadata);
-                label.visible = group_key != "None";
             });
             return headers;
         }
@@ -1766,6 +1777,9 @@ namespace MajorisFiles {
             list.enable_rubberband = true;
             list.width_request = 220;
             var scroll = scrolled(list);
+            // The scroller otherwise discards the list's minimum width, leaving
+            // only its scrollbar allocation available for pointer/focus input.
+            scroll.min_content_width = 220;
             scroll.hexpand = false;
             columns.append(scroll);
             column_selections[scroll] = selected;

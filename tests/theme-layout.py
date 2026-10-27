@@ -33,3 +33,14 @@ assert "body.position = 224" in browser
 assert "icon.pixel_size = grid ? icon_size : 16" in browser
 assert "box.margin_" not in browser
 assert "list.show_column_separators = false" in browser
+
+# Ungrouped native views must not create even an invisible section header.
+assert 'list.header_factory = group_headers()' not in browser
+assert 'strip.header_factory = group_headers()' not in browser
+assert 'label.visible = group_key != "None"' not in browser
+assert browser.count('update_group_headers();') == 2
+assert 'var headers = group_key == "None" ? null : section_headers;' in browser
+
+assert 'set_state_flags' not in browser
+assert 'add_css_class("selected")' not in browser
+assert 'add_css_class("focused")' not in browser

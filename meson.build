@@ -141,8 +141,14 @@ sidebar_tests = executable('sidebar-tests', 'tests/places.vala', core, dependenc
 test('sidebar', find_program('dbus-run-session'), args: ['--', sidebar_tests], timeout: 15)
 
 # Native Files windows and allocation evidence; run with the installed GTK4 theme.
-theme_integration = executable('theme-integration', 'tests/theme-integration.vala', core, ui, dependencies: deps)
+theme_integration = executable('theme-integration', 'tests/theme-integration.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
 
 if xvfb.found()
   test('theme-integration-fallback', find_program('dbus-run-session'), args: ['--', xvfb, '-a', theme_integration, meson.project_build_root() / 'theme-integration-fallback'], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 90)
+endif
+
+# Section lifecycle, metadata metrics and real X11 pointer/keyboard input.
+details_corrections = executable('details-corrections', 'tests/details-corrections.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
+if xvfb.found() and find_program('xdotool', required: false).found()
+  test('details-corrections', find_program('dbus-run-session'), args: ['--', xvfb, '-a', details_corrections, meson.project_build_root() / 'details-corrections-fallback'], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 90)
 endif

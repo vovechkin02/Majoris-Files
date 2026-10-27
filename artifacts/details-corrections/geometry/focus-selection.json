@@ -1,0 +1,662 @@
+{
+  "light": {
+    "details": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "grid": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "columns": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "gallery": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    }
+  },
+  "dark": {
+    "details": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "grid": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "columns": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "gallery": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    }
+  },
+  "light-2x": {
+    "details": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "grid": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "columns": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "gallery": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    }
+  },
+  "dark-2x": {
+    "details": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "grid": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "columns": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "gallery": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    }
+  },
+  "light-large-text": {
+    "details": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "grid": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "columns": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "gallery": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    }
+  },
+  "dark-large-text": {
+    "details": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "grid": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "columns": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    },
+    "gallery": {
+      "mouse-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 16550
+          }
+        ]
+      },
+      "keyboard-focused": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": true,
+        "focused_widgets": [
+          {
+            "node": "row",
+            "state_flags": 24740
+          }
+        ]
+      },
+      "unfocused-selected": {
+        "selected_rows": 1,
+        "keyboard_focus_visible": false,
+        "focused_widgets": []
+      }
+    }
+  }
+}

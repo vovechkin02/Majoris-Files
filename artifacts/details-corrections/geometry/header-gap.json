@@ -1,0 +1,588 @@
+{
+  "light": {
+    "details-ungrouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-compact": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        32
+      ],
+      "section_heading_labels": []
+    },
+    "details-regrouped-none": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-restored-none": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-grouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 272.0,
+      "gap": 66.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    },
+    "details-restored-grouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 272.0,
+      "gap": 66.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    },
+    "gallery-ungrouped": {
+      "section_heading_labels": [],
+      "first_row_offset": 0.0
+    },
+    "gallery-grouped": {
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ],
+      "first_row_offset": 66.0
+    },
+    "grid-ungrouped": {
+      "section_heading_labels": []
+    },
+    "grid-grouped": {
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    }
+  },
+  "dark": {
+    "details-ungrouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-compact": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        32
+      ],
+      "section_heading_labels": []
+    },
+    "details-regrouped-none": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-restored-none": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-grouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 272.0,
+      "gap": 66.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    },
+    "details-restored-grouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 272.0,
+      "gap": 66.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    },
+    "gallery-ungrouped": {
+      "section_heading_labels": [],
+      "first_row_offset": 0.0
+    },
+    "gallery-grouped": {
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ],
+      "first_row_offset": 66.0
+    },
+    "grid-ungrouped": {
+      "section_heading_labels": []
+    },
+    "grid-grouped": {
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    }
+  },
+  "light-2x": {
+    "details-ungrouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-compact": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        32
+      ],
+      "section_heading_labels": []
+    },
+    "details-regrouped-none": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-restored-none": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-grouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 272.0,
+      "gap": 66.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    },
+    "details-restored-grouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 272.0,
+      "gap": 66.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    },
+    "gallery-ungrouped": {
+      "section_heading_labels": [],
+      "first_row_offset": 0.0
+    },
+    "gallery-grouped": {
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ],
+      "first_row_offset": 66.0
+    },
+    "grid-ungrouped": {
+      "section_heading_labels": []
+    },
+    "grid-grouped": {
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    }
+  },
+  "dark-2x": {
+    "details-ungrouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-compact": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        32
+      ],
+      "section_heading_labels": []
+    },
+    "details-regrouped-none": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-restored-none": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-grouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 272.0,
+      "gap": 66.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    },
+    "details-restored-grouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 272.0,
+      "gap": 66.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    },
+    "gallery-ungrouped": {
+      "section_heading_labels": [],
+      "first_row_offset": 0.0
+    },
+    "gallery-grouped": {
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ],
+      "first_row_offset": 66.0
+    },
+    "grid-ungrouped": {
+      "section_heading_labels": []
+    },
+    "grid-grouped": {
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    }
+  },
+  "light-large-text": {
+    "details-ungrouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-compact": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        32
+      ],
+      "section_heading_labels": []
+    },
+    "details-regrouped-none": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-restored-none": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-grouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 272.0,
+      "gap": 66.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    },
+    "details-restored-grouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 272.0,
+      "gap": 66.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    },
+    "gallery-ungrouped": {
+      "section_heading_labels": [],
+      "first_row_offset": 0.0
+    },
+    "gallery-grouped": {
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ],
+      "first_row_offset": 66.0
+    },
+    "grid-ungrouped": {
+      "section_heading_labels": []
+    },
+    "grid-grouped": {
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    }
+  },
+  "dark-large-text": {
+    "details-ungrouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-compact": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        32
+      ],
+      "section_heading_labels": []
+    },
+    "details-regrouped-none": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-restored-none": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 206.0,
+      "gap": 0.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": []
+    },
+    "details-grouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 272.0,
+      "gap": 66.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    },
+    "details-restored-grouped": {
+      "header_top": 174.0,
+      "header_height": 32.0,
+      "header_bottom": 206.0,
+      "first_row_top": 272.0,
+      "gap": 66.0,
+      "row_heights": [
+        40
+      ],
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    },
+    "gallery-ungrouped": {
+      "section_heading_labels": [],
+      "first_row_offset": 0.0
+    },
+    "gallery-grouped": {
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ],
+      "first_row_offset": 66.0
+    },
+    "grid-ungrouped": {
+      "section_heading_labels": []
+    },
+    "grid-grouped": {
+      "section_heading_labels": [
+        "Folders",
+        "Plain text document"
+      ]
+    }
+  },
+  "before-light": {
+    "header_top": 174.0,
+    "header_height": 32.0,
+    "header_bottom": 206.0,
+    "first_row_top": 230.0,
+    "gap": 24.0,
+    "row_heights": [
+      40
+    ],
+    "section_heading_labels": []
+  },
+  "before-dark": {
+    "header_top": 174.0,
+    "header_height": 32.0,
+    "header_bottom": 206.0,
+    "first_row_top": 230.0,
+    "gap": 24.0,
+    "row_heights": [
+      40
+    ],
+    "section_heading_labels": []
+  }
+}

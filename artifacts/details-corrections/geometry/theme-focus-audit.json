@@ -1,0 +1,10 @@
+{
+  "light": {
+    "css_sha256": "7da4541d76fec09becbe0cc03941a99a9ea5042318289bb1d3bbe9de768fd17e",
+    "unconditional_details_focus_within_rules": []
+  },
+  "dark": {
+    "css_sha256": "7ee93635e74ee8a21a468ad534bf9c10b63a8751cc3146c5e2b92fa532c22e05",
+    "unconditional_details_focus_within_rules": []
+  }
+}

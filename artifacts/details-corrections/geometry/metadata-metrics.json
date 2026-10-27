@@ -1,0 +1,5918 @@
+{
+  "light": {
+    "standard": [
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "24 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Folder",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Plain text document",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Modified",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Favorites",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Files",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Format",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/2026 02:41:48 AM",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/26",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "A long metadata value with uppercase ABCDEFGHIJKLMNOPQRSTUVWXYZ and descenders gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      }
+    ],
+    "compact": [
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "24 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Folder",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Plain text document",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Modified",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Favorites",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Files",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Format",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/2026 02:41:48 AM",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/26",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "A long metadata value with uppercase ABCDEFGHIJKLMNOPQRSTUVWXYZ and descenders gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      }
+    ]
+  },
+  "dark": {
+    "standard": [
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "24 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Folder",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Plain text document",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Modified",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Favorites",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Files",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Format",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/2026 02:41:48 AM",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/26",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "A long metadata value with uppercase ABCDEFGHIJKLMNOPQRSTUVWXYZ and descenders gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      }
+    ],
+    "compact": [
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "24 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Folder",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Plain text document",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Modified",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Favorites",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Files",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Format",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/2026 02:41:48 AM",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/26",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "A long metadata value with uppercase ABCDEFGHIJKLMNOPQRSTUVWXYZ and descenders gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      }
+    ]
+  },
+  "light-2x": {
+    "standard": [
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "24 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Folder",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Plain text document",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Modified",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Favorites",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Files",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Format",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/2026 02:41:48 AM",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/26",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "A long metadata value with uppercase ABCDEFGHIJKLMNOPQRSTUVWXYZ and descenders gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      }
+    ],
+    "compact": [
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "24 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Folder",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Plain text document",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Modified",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Favorites",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Files",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Format",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/2026 02:41:48 AM",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/26",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "A long metadata value with uppercase ABCDEFGHIJKLMNOPQRSTUVWXYZ and descenders gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      }
+    ]
+  },
+  "dark-2x": {
+    "standard": [
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "24 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Folder",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Plain text document",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Modified",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Favorites",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Files",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Format",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/2026 02:41:48 AM",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/26",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "A long metadata value with uppercase ABCDEFGHIJKLMNOPQRSTUVWXYZ and descenders gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      }
+    ],
+    "compact": [
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "24 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Folder",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Plain text document",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Modified",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Favorites",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Files",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Format",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/2026 02:41:48 AM",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/26",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "A long metadata value with uppercase ABCDEFGHIJKLMNOPQRSTUVWXYZ and descenders gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      }
+    ]
+  },
+  "light-large-text": {
+    "standard": [
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "24 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Folder",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Plain text document",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Modified",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Favorites",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Files",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Format",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/2026 02:41:48 AM",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/26",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "A long metadata value with uppercase ABCDEFGHIJKLMNOPQRSTUVWXYZ and descenders gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      }
+    ],
+    "compact": [
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "24 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Folder",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Plain text document",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Modified",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Favorites",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Files",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Format",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/2026 02:41:48 AM",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/26",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "A long metadata value with uppercase ABCDEFGHIJKLMNOPQRSTUVWXYZ and descenders gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      }
+    ]
+  },
+  "dark-large-text": {
+    "standard": [
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "24 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Folder",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Plain text document",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Modified",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Favorites",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Files",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Format",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/2026 02:41:48 AM",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/26",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "A long metadata value with uppercase ABCDEFGHIJKLMNOPQRSTUVWXYZ and descenders gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 39.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      }
+    ],
+    "compact": [
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "18 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "24 bytes",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Folder",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Plain text document",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Modified",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Favorites",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Files",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "Format",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 10,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          16
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/2026 02:41:48 AM",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "10/27/26",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 11,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          17
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      },
+      {
+        "text": "A long metadata value with uppercase ABCDEFGHIJKLMNOPQRSTUVWXYZ and descenders gjpqy",
+        "font": "Plus Jakarta Sans,Noto Sans,Cantarell,sans-serif 12px",
+        "resolved_font": "Plus Jakarta Sans 9",
+        "font_resolution": 96.0,
+        "height": 23,
+        "baseline": -1,
+        "pango_baseline": 12.4560546875,
+        "rendered_baseline": 15.4560546875,
+        "layout_y": 3,
+        "ink_y": 3,
+        "ink_height": 13,
+        "logical_y": 0,
+        "logical_height": 16,
+        "overflow": "GTK_OVERFLOW_VISIBLE",
+        "parent_cell_height": 31.0,
+        "vertical_ink_with_layout_offset": [
+          6,
+          19
+        ],
+        "clipping_ancestors": [
+          {
+            "node": "columnview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "listview",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          },
+          {
+            "node": "cell",
+            "overflow": "GTK_OVERFLOW_HIDDEN"
+          }
+        ]
+      }
+    ]
+  }
+}
