@@ -22,3 +22,5 @@ The implemented feature set has automated regression and isolated real-service
 coverage. [Majoris VM acceptance](docs/vm-acceptance.md) and hardware/provider
 verification remain production release gates. Build an unsigned Debian package
 without installing it using `python3 tools/build-debian.py`.
+
+The shared GTK component requirements, measured dimensions and native validation evidence are documented in [Theme integration](docs/theme-integration.md).

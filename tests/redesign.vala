@@ -75,7 +75,7 @@ void layout_case() {
         var resources = resources_enumerate_children("/com/majoris/files/theme", ResourceLookupFlags.NONE);
         assert(resources.length == 1 && resources[0] == "files.css");
         var css = resources_lookup_data("/com/majoris/files/theme/files.css", ResourceLookupFlags.NONE);
-        assert(((string)css.get_data()).contains(".files-navigation, .files-commands { padding: 6px 12px; }"));
+        assert(((string)css.get_data()).contains(".files-navigation, .files-commands { padding: 4px 16px; }"));
         window.current.cancel(); window.destroy();
     } catch (Error e) { error("%s", e.message); }
 }

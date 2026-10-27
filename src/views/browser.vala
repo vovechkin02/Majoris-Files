@@ -79,6 +79,7 @@ namespace MajorisFiles {
         Gtk.Widget? breadcrumb_space;
         Gtk.Box breadcrumbs = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
         Gtk.Box searches;
+        int preferred_sidebar_width = 224;
         Gtk.Paned sidebar_pane;
         Adw.OverlaySplitView sidebar_overlay = new Adw.OverlaySplitView();
         Adw.BreakpointBin adaptive = new Adw.BreakpointBin();
@@ -89,10 +90,11 @@ namespace MajorisFiles {
         }
         public int sidebar_width {
             get {
-                return sidebar_pane.position;
+                return narrow ? preferred_sidebar_width : sidebar_pane.position;
             }
             set {
-                sidebar_pane.position = value.clamp(120, 420);
+                preferred_sidebar_width = value.clamp(120, 420);
+                sidebar_pane.position = preferred_sidebar_width;
             }
         }
         Gtk.DropDown modes;
@@ -201,12 +203,11 @@ namespace MajorisFiles {
             selection = new Gtk.MultiSelection(sorted);
             var toolbar = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
             toolbar.add_css_class("files-navigation");
-            if (chooser_mode) {
-            toolbar.append(button("sidebar-show-symbolic", _("Show or Hide Locations"), () => { if (narrow)
+            var navigation = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+            navigation.append(button("sidebar-show-symbolic", _("Show or Hide Locations"), () => { if (narrow)
                                                                                               sidebar_overlay.show_sidebar = !sidebar_overlay.show_sidebar;
                                                                                           else sidebar_pane.start_child.visible = !sidebar_pane.start_child.visible;
                 }));
-            }
             toolbar.append(button("go-previous-symbolic", _("Back"), () => { var file = history.back();
                                                                           if (file != null)
                                                                               navigate(file, false);
@@ -312,7 +313,12 @@ namespace MajorisFiles {
             search_entry.width_request = 200;
             search_entry.placeholder_text = _("Search files");
             toolbar.append(search_entry);
-            append(toolbar);
+            var navigation_scroll = new Gtk.ScrolledWindow();
+            navigation_scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER);
+            navigation_scroll.hexpand = true;
+            navigation_scroll.child = toolbar;
+            navigation.append(navigation_scroll);
+            append(navigation);
             var commands = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
             commands.add_css_class("files-commands");
             Gtk.MenuButton? sort_control = null;
@@ -379,7 +385,10 @@ namespace MajorisFiles {
                 preview_button.action_name = "win.preview";
                 commands.append(preview_button);
             }
-            append(commands);
+            var command_scroll = new Gtk.ScrolledWindow();
+            command_scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER);
+            command_scroll.child = commands;
+            append(command_scroll);
             location_error.button_label = "Retry";
             location_error.button_clicked.connect(() => navigate(directory.location, false));
             append(location_error);
@@ -445,11 +454,11 @@ namespace MajorisFiles {
             var body = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
             sidebar_pane = body;
             body.vexpand = true;
-            body.position = 180;
+            body.position = 224;
             body.shrink_start_child = false;
             body.resize_start_child = false;
             var side_scroll = new Gtk.ScrolledWindow();
-            side_scroll.width_request = 180;
+            side_scroll.width_request = 120;
             side_scroll.set_child(sidebar);
             sidebar.selection_mode = Gtk.SelectionMode.SINGLE;
             sidebar.add_css_class("navigation-sidebar");
@@ -460,7 +469,7 @@ namespace MajorisFiles {
                 string? section = null;
                 if(place != null && place.section != "" && (previous == null || previous.section != place.section))
                     section=place.section=="Folders"?_("Folders"):_("Devices");
-                if (section != null) { var heading = new Gtk.Label(section); heading.halign = Gtk.Align.START; heading.add_css_class("files-section"); heading.add_css_class("heading"); row.set_header(heading); }
+                if (section != null) { var heading = new Gtk.Label(section); heading.halign = Gtk.Align.START; heading.add_css_class("majoris-sidebar-heading"); if (before == null) heading.add_css_class("majoris-sidebar-heading-first"); row.set_header(heading); }
                 else row.set_header(null);
             });
             body.start_child = side_scroll;
@@ -495,6 +504,7 @@ namespace MajorisFiles {
             adaptive.height_request = 240;
             var breakpoint = new Adw.Breakpoint(Adw.BreakpointCondition.parse("max-width: 650px"));
             breakpoint.apply.connect(() => {
+                preferred_sidebar_width = body.position;
                 body.start_child = null;
                 sidebar_overlay.sidebar = side_scroll;
                 side_scroll.visible = true;
@@ -506,13 +516,16 @@ namespace MajorisFiles {
                 sidebar_overlay.sidebar = null;
                 sidebar_overlay.collapsed = true;
                 body.start_child = side_scroll;
+                body.position = preferred_sidebar_width;
                 side_scroll.visible = true;
             });
             breakpoint.add_setter(preview, "visible", false);
             breakpoint.add_setter(modes, "visible", false);
-            if (chooser_mode) adaptive.add_breakpoint(breakpoint);
+            adaptive.add_breakpoint(breakpoint);
             append(adaptive);
+            display_changed.connect(() => refresh_density(views));
             var grid = new Gtk.GridView(selection, factory(true));
+            style_data_view(grid, "majoris-data-grid");
             grid.min_columns = 1;
             grid.max_columns = 16;
             grid.enable_rubberband = true;
@@ -526,12 +539,13 @@ namespace MajorisFiles {
                 li.selectable=false;li.activatable=false;
                 if(row.heading){
                     var label=new Gtk.Label(row.label);
-                    label.halign=Gtk.Align.START;label.margin_start=16;label.margin_top=12;label.margin_bottom=6;
+                    label.halign=Gtk.Align.START;label.margin_start=16;label.margin_top=li.position == 0 ? 8 : 16;label.margin_bottom=8;
                     label.add_css_class("heading");label.update_property(Gtk.AccessibleProperty.LABEL,label.label,-1);
                     li.child=label;
                 }else{
                     var slice=new GridSlice(selection,row.start,row.count);
                     var cells=new Gtk.GridView(slice,factory(true,slice));
+                    style_data_view(cells, "majoris-data-grid");
                     cells.min_columns=grid_rows.columns;cells.max_columns=grid_rows.columns;
                     cells.single_click_activate=metadata.state("single-click","false")=="true";
                     cells.enable_rubberband=true;
@@ -548,18 +562,17 @@ namespace MajorisFiles {
                 if(grid_views.visible_child_name=="grouped"){
                     // Measure against the viewport, not the child's forced
                     // minimum width (which otherwise feeds back into columns).
-                    var context=get_pango_context();var metrics=context.get_metrics(null,context.get_language());
-                    int text_width=(int)(18L*metrics.get_approximate_char_width()/Pango.SCALE);
-                    int cell_width=int.max(icon_size,text_width)+64;
-                    int available=get_width()-(sidebar_pane.start_child==null?0:sidebar_pane.position)-(preview.visible?preview.get_width():0)-24;
+                    int cell_width = icon_size < 64 ? 104 : icon_size > 64 ? 208 : 144;
+                    int available = grid_views.get_width() - (icon_size < 64 ? 8 : 16);
                     grid_rows.resize((uint)int.max(1,available/cell_width));
                 }
                 return Source.CONTINUE;
             });
             views.add_named(scrolled(grid_views), "Grid");
             var list = new Gtk.ColumnView(selection);
+            style_data_view(list, "majoris-data-column");
             list.header_factory = group_headers();
-            list.show_column_separators = true;
+            list.show_column_separators = false;
             list.enable_rubberband = true;
             list.single_click_activate = metadata.state("single-click", "false") == "true";
             var name_column = new Gtk.ColumnViewColumn("Name", factory(false));
@@ -588,6 +601,7 @@ namespace MajorisFiles {
             gallery_preview.vexpand = true;
             gallery.append(gallery_preview);
             var strip = new Gtk.ListView(selection, factory(false));
+            style_data_view(strip, "majoris-data-list");
             strip.single_click_activate = metadata.state("single-click", "false") == "true";
             strip.header_factory = group_headers();
             strip.activate.connect(activate_position);
@@ -1148,6 +1162,11 @@ namespace MajorisFiles {
             loading_display = false;
             if(column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn){string key=sort_key;sort_key="Name";column_sort_token.cancel();column_sort_token=new Cancellable();column_sort_pending=true;prepare_external_sort.begin(key,ascending,location,column_sort_token);}
         }
+        public void set_density(string density) {
+            icon_size = density == "Compact" ? 32 : density == "Large" ? 128 : 64;
+            display_changed();
+            save_display();
+        }
         public void show_view_settings()
         {
             var dialog = new Adw.PreferencesDialog();
@@ -1201,9 +1220,7 @@ namespace MajorisFiles {
                                                        display_changed();
                                                        save_display();
                 });
-            size.notify["selected"].connect(() => { icon_size = size.selected == 0 ? 32 : size.selected == 1 ? 64 : 128;
-                                                    display_changed();
-                                                    save_display();
+            size.notify["selected"].connect(() => { set_density(size.selected == 0 ? "Compact" : size.selected == 1 ? "Standard" : "Large");
                 });
             var checkboxes = new Adw.SwitchRow();
             checkboxes.title = _("Selection Checkboxes");
@@ -1332,9 +1349,9 @@ namespace MajorisFiles {
             headers.setup.connect((obj) => {
                 var label = new Gtk.Label("");
                 label.halign = Gtk.Align.START;
-                label.margin_start = 12;
-                label.margin_top = 12;
-                label.margin_bottom = 6;
+                label.margin_start = 16;
+                label.margin_top = 16;
+                label.margin_bottom = 8;
                 label.add_css_class("heading");
                 ((Gtk.ListHeader)obj).child = label;
             });
@@ -1395,14 +1412,11 @@ namespace MajorisFiles {
                 label.tooltip_text = place.label;
                 if(place.cloud != null)
                     label.tooltip_text = place.cloud.get_status_details();
-                label.halign = Gtk.Align.START;
-                label.margin_start = 10;
-                label.margin_end = 10;
-                label.margin_top = 8;
-                label.margin_bottom = 8;
-                var place_row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
+                label.halign = Gtk.Align.FILL;
+                label.xalign = 0;
+                var place_row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8);
                 var icon = place.icon != null ? new Gtk.Image.from_gicon(place.icon) : new Gtk.Image.from_icon_name(place.icon_name);
-                icon.margin_start = 10;
+                icon.pixel_size = 16;
                 place_row.append(icon);
                 label.hexpand = true;
                 label.ellipsize = Pango.EllipsizeMode.END;
@@ -1747,6 +1761,7 @@ namespace MajorisFiles {
         {
             var selected = items == sorted ? selection : new Gtk.MultiSelection(items);
             var list = new Gtk.ListView(selected, factory(false, selected));
+            style_data_view(list, "majoris-data-list");
             list.single_click_activate = metadata.state("single-click", "false") == "true";
             list.enable_rubberband = true;
             list.width_request = 220;
@@ -1838,14 +1853,21 @@ namespace MajorisFiles {
             var handlers = new Gee.HashMap<Gtk.ListItem, ulong?>();
             factory.setup.connect((obj) => {
                 var li = (Gtk.ListItem)obj;
-                li.child = new Gtk.Label("");
+                var label = new Gtk.Label("");
+                label.add_css_class("majoris-data-metadata");
+                label.xalign = 0;
+                label.ellipsize = Pango.EllipsizeMode.END;
+                var cell = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+                cell.add_css_class("majoris-data-cell");
+                cell.append(label);
+                li.child = cell;
                 handlers[li] = metadata.changed.connect(() => {
                     if(li.item != null)
-                        ((Gtk.Label)li.child).label = text((FileItem)li.item);
+                        ((Gtk.Label)li.child.get_first_child()).label = text((FileItem)li.item);
                 });
             });
             factory.bind.connect((obj) => { var li = (Gtk.ListItem)obj;
-                                            ((Gtk.Label)li.child).label = text((FileItem)li.item);
+                                            ((Gtk.Label)li.child.get_first_child()).label = text((FileItem)li.item);
                 });
             factory.teardown.connect((obj) => {
                 var li = (Gtk.ListItem)obj;
@@ -1857,35 +1879,65 @@ namespace MajorisFiles {
             });
             return factory;
         }
+        void style_data_view(Gtk.Widget view, string family) {
+            view.add_css_class(family);
+            apply_density(view);
+        }
+        void refresh_density(Gtk.Widget widget) {
+            if(widget.has_css_class("majoris-data-grid") || widget.has_css_class("majoris-data-list") || widget.has_css_class("majoris-data-column")) apply_density(widget);
+            for(var child = widget.get_first_child(); child != null; child = child.get_next_sibling()) refresh_density(child);
+        }
+        void apply_density(Gtk.Widget view) {
+            if(icon_size < 64) view.add_css_class("majoris-density-compact");
+            else view.remove_css_class("majoris-density-compact");
+        }
+        void configure_tile(Gtk.Box box, Gtk.Overlay artwork, Gtk.Label label) {
+            bool large = icon_size > 64;
+            // Only Large is Files-owned: the shared theme defines the other sizes.
+            artwork.set_size_request(large ? 160 : -1, large ? 160 : -1);
+            label.width_request = icon_size < 64 ? 80 : large ? 176 : 112;
+            var layout = label.create_pango_layout("Agjpqy\nAgjpqy");
+            Pango.Rectangle ink, logical;
+            layout.get_pixel_extents(out ink, out logical);
+            label.height_request = logical.height;
+            box.set_size_request(large ? 192 : -1, large ? 224 : -1);
+        }
         Gtk.SignalListItemFactory factory(bool grid, Gtk.SelectionModel? row_selection = null)
         {
             var f = new Gtk.SignalListItemFactory();
             var display_handlers = new Gee.HashMap<Gtk.ListItem, ulong?>();
             f.setup.connect((obj) => { var li = (Gtk.ListItem)obj;
                                        var box = new Gtk.Box(grid ? Gtk.Orientation.VERTICAL : Gtk.Orientation.HORIZONTAL, 8);
-                                       box.margin_start = 8;
-                                       box.margin_end = 8;
-                                       box.margin_top = 8;
-                                       box.margin_bottom = 8;
+                                       box.add_css_class(grid ? "majoris-data-tile" : "majoris-data-cell");
+                                       box.halign = grid ? Gtk.Align.CENTER : Gtk.Align.FILL;
+                                       box.valign = grid ? Gtk.Align.START : Gtk.Align.CENTER;
                                        var icon = new Gtk.Image();
-                                       icon.pixel_size = grid ? 64 : 24;
+                                       icon.pixel_size = grid ? icon_size : 16;
+                                       icon.halign = Gtk.Align.CENTER;
+                                       icon.valign = Gtk.Align.CENTER;
+                                       if(grid) icon.add_css_class("majoris-data-thumbnail");
                                        var icon_area = new Gtk.Overlay(); icon_area.child = icon;
+                                       if(grid) { icon_area.add_css_class("majoris-data-artwork"); icon_area.halign = Gtk.Align.CENTER; }
                                        var cloud_badge = new Gtk.Image(); cloud_badge.pixel_size = 16;
                                        cloud_badge.halign = Gtk.Align.END; cloud_badge.valign = Gtk.Align.END;
                                        cloud_badge.can_target = false; cloud_badge.visible = false;
                                        icon_area.add_overlay(cloud_badge); box.append(icon_area);
                                        var label = new Gtk.Label("");
                                        label.ellipsize = Pango.EllipsizeMode.END;
-                                       label.max_width_chars = grid ? 18 : 50;
+                                       label.max_width_chars = grid ? 1 : 50;
+                                       label.xalign = grid ? 0.5f : 0;
+                                       label.hexpand = !grid;
                                        if (grid)
                                        {
                                            label.wrap = true;
+                                           label.wrap_mode = Pango.WrapMode.WORD_CHAR;
+                                           label.justify = Gtk.Justification.CENTER;
                                            label.lines = 2;
                                        }
                                        else label.halign = Gtk.Align.START;
                                        box.append(label);
                                        var caption = new Gtk.Label("");
-                                       caption.add_css_class("dim-label");
+                                       caption.add_css_class("majoris-data-metadata");
                                        caption.ellipsize = Pango.EllipsizeMode.END;
                                        caption.max_width_chars = 18;
                                        caption.visible = grid && (caption_key != "None" || virtual_collection);
@@ -1893,7 +1945,10 @@ namespace MajorisFiles {
                                            box.append(caption);
                                        var checkbox = new Gtk.CheckButton();
                                        checkbox.tooltip_text = _("Select Item");
-                                       box.append(checkbox);
+                                       if(grid) {
+                                           checkbox.halign = Gtk.Align.START; checkbox.valign = Gtk.Align.START;
+                                           icon_area.add_overlay(checkbox);
+                                       } else box.append(checkbox);
                                        checkbox.toggled.connect(() => {
                     if(li.item == null || checkbox.active == li.selected)
                         return;
@@ -1905,10 +1960,8 @@ namespace MajorisFiles {
                                        li.notify["selected"].connect(() => checkbox.active = li.selected);
                                        string thumbnail_settings = metadata.state("thumbnail-policy", "Local") + metadata.state("remote-thumbnail-limit", "8");
                                        display_handlers[li] = display_changed.connect(() => {
-                    icon.pixel_size = grid ? icon_size : (icon_size > 64 ? 32 : 24);
-                    int spacing = icon_size < 64 ? 4 : 8;
-                    box.margin_top = spacing;
-                    box.margin_bottom = spacing;
+                    icon.pixel_size = grid ? icon_size : 16;
+                    if(grid) configure_tile(box, icon_area, label);
                     checkbox.visible = selection_checkboxes;
                     caption.visible = grid && (caption_key != "None" || virtual_collection);
                     if(grid && li.item != null)
@@ -1925,8 +1978,9 @@ namespace MajorisFiles {
                         refresh_thumbnail(li, icon, (FileItem)li.item);
                     }
                 });
-                                       icon.pixel_size = grid ? icon_size : (icon_size > 64 ? 32 : 24);
+                                       icon.pixel_size = grid ? icon_size : 16;
                                        checkbox.visible = selection_checkboxes;
+                                       if(grid) configure_tile(box, icon_area, label);
                                        li.child = box;
                                        if(row_selection is GridSlice){
                                            var slice=(GridSlice)row_selection;
@@ -1999,7 +2053,7 @@ namespace MajorisFiles {
                                       ((Gtk.Label)area.get_next_sibling()).label = visible_name(item);
                                       if(grid)
                                           ((Gtk.Label)area.get_next_sibling().get_next_sibling()).label = caption_key == "None" ? "" : column_text(item, caption_key);
-                                      ((Gtk.CheckButton)box.get_last_child()).active = li.selected;
+                                      ((Gtk.CheckButton)(grid ? area.get_last_child() : box.get_last_child())).active = li.selected;
                                       box.tooltip_text = item.file.get_parse_name();
                                       refresh_thumbnail(li, image, item);
                 });

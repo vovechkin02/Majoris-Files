@@ -1,0 +1,16 @@
+{
+  "light": {
+    "css_target_width": 2,
+    "css_target_height": 16,
+    "fully_opaque_pixel_width": 1,
+    "fully_opaque_pixel_height": 15,
+    "note": "Partial edge pixels are excluded from this exact-colour count."
+  },
+  "dark": {
+    "css_target_width": 2,
+    "css_target_height": 16,
+    "fully_opaque_pixel_width": 1,
+    "fully_opaque_pixel_height": 15,
+    "note": "Partial edge pixels are excluded from this exact-colour count."
+  }
+}

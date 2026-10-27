@@ -139,3 +139,10 @@ endif
 test('theme-layout', find_program('python3'), args: [meson.project_source_root() / 'tests/theme-layout.py'])
 sidebar_tests = executable('sidebar-tests', 'tests/places.vala', core, dependencies: deps)
 test('sidebar', find_program('dbus-run-session'), args: ['--', sidebar_tests], timeout: 15)
+
+# Native Files windows and allocation evidence; run with the installed GTK4 theme.
+theme_integration = executable('theme-integration', 'tests/theme-integration.vala', core, ui, dependencies: deps)
+
+if xvfb.found()
+  test('theme-integration-fallback', find_program('dbus-run-session'), args: ['--', xvfb, '-a', theme_integration, meson.project_build_root() / 'theme-integration-fallback'], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 90)
+endif

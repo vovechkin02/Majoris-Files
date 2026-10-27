@@ -1,0 +1,134 @@
+{
+  "light": {
+    "grid-standard": {
+      "tile": [
+        128,
+        160
+      ],
+      "artwork": [
+        96,
+        96
+      ]
+    },
+    "grid-compact": {
+      "tile": [
+        96,
+        128
+      ],
+      "artwork": [
+        64,
+        64
+      ]
+    }
+  },
+  "dark": {
+    "grid-standard": {
+      "tile": [
+        128,
+        160
+      ],
+      "artwork": [
+        96,
+        96
+      ]
+    },
+    "grid-compact": {
+      "tile": [
+        96,
+        128
+      ],
+      "artwork": [
+        64,
+        64
+      ]
+    }
+  },
+  "light-2x": {
+    "grid-standard": {
+      "tile": [
+        128,
+        160
+      ],
+      "artwork": [
+        96,
+        96
+      ]
+    },
+    "grid-compact": {
+      "tile": [
+        96,
+        128
+      ],
+      "artwork": [
+        64,
+        64
+      ]
+    }
+  },
+  "dark-2x": {
+    "grid-standard": {
+      "tile": [
+        128,
+        160
+      ],
+      "artwork": [
+        96,
+        96
+      ]
+    },
+    "grid-compact": {
+      "tile": [
+        96,
+        128
+      ],
+      "artwork": [
+        64,
+        64
+      ]
+    }
+  },
+  "light-large-text": {
+    "grid-standard": {
+      "tile": [
+        128,
+        165
+      ],
+      "artwork": [
+        96,
+        96
+      ]
+    },
+    "grid-compact": {
+      "tile": [
+        96,
+        133
+      ],
+      "artwork": [
+        64,
+        64
+      ]
+    }
+  },
+  "dark-large-text": {
+    "grid-standard": {
+      "tile": [
+        128,
+        165
+      ],
+      "artwork": [
+        96,
+        96
+      ]
+    },
+    "grid-compact": {
+      "tile": [
+        96,
+        133
+      ],
+      "artwork": [
+        64,
+        64
+      ]
+    }
+  }
+}

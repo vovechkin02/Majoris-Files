@@ -1,0 +1,83 @@
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=348814 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=348814 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.2' (uid=1000 pid=348862 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.2' (uid=1000 pid=348862 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.791: Choosing gtk.portal for org.freedesktop.impl.portal.Lockdown as a last-resort fallback
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.2' (uid=1000 pid=348862 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.5' (uid=1000 pid=348885 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[348892]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=348885 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[348892]: Successfully activated service 'org.a11y.atspi.Registry'
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.855: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.856: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.857: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.858: Choosing gtk.portal for org.freedesktop.impl.portal.Settings as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.859: Choosing gtk.portal for org.freedesktop.impl.portal.FileChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.861: Choosing gtk.portal for org.freedesktop.impl.portal.AppChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.862: Choosing gtk.portal for org.freedesktop.impl.portal.Print as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.863: Choosing gtk.portal for org.freedesktop.impl.portal.Notification as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.865: Choosing gtk.portal for org.freedesktop.impl.portal.Inhibit as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.866: Choosing gtk.portal for org.freedesktop.impl.portal.Access as a last-resort fallback
+[W][12:39:13.869302] pw.conf      | [          conf.c: 1182 try_load_conf()] can't load config client.conf: No such file or directory
+[E][12:39:13.869578] pw.conf      | [          conf.c: 1215 pw_conf_load_conf_for_context()] can't load config client.conf: No such file or directory
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.869: Failed connect to PipeWire: Couldn't create PipeWire context
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.871: Choosing gtk.portal for org.freedesktop.impl.portal.Account as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.872: Choosing gtk.portal for org.freedesktop.impl.portal.Email as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:348862): xdg-desktop-portal-WARNING **: 12:39:13.873: Choosing gtk.portal for org.freedesktop.impl.portal.DynamicLauncher as a last-resort fallback
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=348814 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=348814 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=348814 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=348814 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=348814 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[348800]: [session uid=1000 pid=348800 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+A connection to the bus can't be made

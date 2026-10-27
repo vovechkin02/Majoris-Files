@@ -1,0 +1,320 @@
+{
+  "light": {
+    "grid-standard": {
+      "tile": [
+        128,
+        160
+      ],
+      "artwork": [
+        96,
+        96
+      ]
+    },
+    "details-standard": {
+      "row": 40,
+      "header_button": 31,
+      "header_with_bottom_border": 32
+    },
+    "columns-standard": {
+      "row": 40
+    },
+    "gallery-standard": {
+      "row": 40
+    },
+    "grid-compact": {
+      "tile": [
+        96,
+        128
+      ],
+      "artwork": [
+        64,
+        64
+      ]
+    },
+    "details-compact": {
+      "row": 32,
+      "header_button": 31,
+      "header_with_bottom_border": 32
+    },
+    "columns-compact": {
+      "row": 32
+    },
+    "gallery-compact": {
+      "row": 32
+    },
+    "sidebar": {
+      "painted_row": 32,
+      "row_with_gap": 36,
+      "icon": 16,
+      "icon_gap": 8,
+      "heading_top": 16,
+      "heading_bottom": 8
+    },
+    "glyph_labels_checked": 84
+  },
+  "dark": {
+    "grid-standard": {
+      "tile": [
+        128,
+        160
+      ],
+      "artwork": [
+        96,
+        96
+      ]
+    },
+    "details-standard": {
+      "row": 40,
+      "header_button": 31,
+      "header_with_bottom_border": 32
+    },
+    "columns-standard": {
+      "row": 40
+    },
+    "gallery-standard": {
+      "row": 40
+    },
+    "grid-compact": {
+      "tile": [
+        96,
+        128
+      ],
+      "artwork": [
+        64,
+        64
+      ]
+    },
+    "details-compact": {
+      "row": 32,
+      "header_button": 31,
+      "header_with_bottom_border": 32
+    },
+    "columns-compact": {
+      "row": 32
+    },
+    "gallery-compact": {
+      "row": 32
+    },
+    "sidebar": {
+      "painted_row": 32,
+      "row_with_gap": 36,
+      "icon": 16,
+      "icon_gap": 8,
+      "heading_top": 16,
+      "heading_bottom": 8
+    },
+    "glyph_labels_checked": 84
+  },
+  "light-2x": {
+    "grid-standard": {
+      "tile": [
+        128,
+        160
+      ],
+      "artwork": [
+        96,
+        96
+      ]
+    },
+    "details-standard": {
+      "row": 40,
+      "header_button": 31,
+      "header_with_bottom_border": 32
+    },
+    "columns-standard": {
+      "row": 40
+    },
+    "gallery-standard": {
+      "row": 40
+    },
+    "grid-compact": {
+      "tile": [
+        96,
+        128
+      ],
+      "artwork": [
+        64,
+        64
+      ]
+    },
+    "details-compact": {
+      "row": 32,
+      "header_button": 31,
+      "header_with_bottom_border": 32
+    },
+    "columns-compact": {
+      "row": 32
+    },
+    "gallery-compact": {
+      "row": 32
+    },
+    "sidebar": {
+      "painted_row": 32,
+      "row_with_gap": 36,
+      "icon": 16,
+      "icon_gap": 8,
+      "heading_top": 16,
+      "heading_bottom": 8
+    },
+    "glyph_labels_checked": 84
+  },
+  "dark-2x": {
+    "grid-standard": {
+      "tile": [
+        128,
+        160
+      ],
+      "artwork": [
+        96,
+        96
+      ]
+    },
+    "details-standard": {
+      "row": 40,
+      "header_button": 31,
+      "header_with_bottom_border": 32
+    },
+    "columns-standard": {
+      "row": 40
+    },
+    "gallery-standard": {
+      "row": 40
+    },
+    "grid-compact": {
+      "tile": [
+        96,
+        128
+      ],
+      "artwork": [
+        64,
+        64
+      ]
+    },
+    "details-compact": {
+      "row": 32,
+      "header_button": 31,
+      "header_with_bottom_border": 32
+    },
+    "columns-compact": {
+      "row": 32
+    },
+    "gallery-compact": {
+      "row": 32
+    },
+    "sidebar": {
+      "painted_row": 32,
+      "row_with_gap": 36,
+      "icon": 16,
+      "icon_gap": 8,
+      "heading_top": 16,
+      "heading_bottom": 8
+    },
+    "glyph_labels_checked": 84
+  },
+  "light-large-text": {
+    "grid-standard": {
+      "tile": [
+        128,
+        165
+      ],
+      "artwork": [
+        96,
+        96
+      ]
+    },
+    "details-standard": {
+      "row": 40,
+      "header_button": 31,
+      "header_with_bottom_border": 32
+    },
+    "columns-standard": {
+      "row": 40
+    },
+    "gallery-standard": {
+      "row": 40
+    },
+    "grid-compact": {
+      "tile": [
+        96,
+        133
+      ],
+      "artwork": [
+        64,
+        64
+      ]
+    },
+    "details-compact": {
+      "row": 32,
+      "header_button": 31,
+      "header_with_bottom_border": 32
+    },
+    "columns-compact": {
+      "row": 32
+    },
+    "gallery-compact": {
+      "row": 32
+    },
+    "sidebar": {
+      "painted_row": 32,
+      "row_with_gap": 36,
+      "icon": 16,
+      "icon_gap": 8,
+      "heading_top": 16,
+      "heading_bottom": 8
+    },
+    "glyph_labels_checked": 84
+  },
+  "dark-large-text": {
+    "grid-standard": {
+      "tile": [
+        128,
+        165
+      ],
+      "artwork": [
+        96,
+        96
+      ]
+    },
+    "details-standard": {
+      "row": 40,
+      "header_button": 31,
+      "header_with_bottom_border": 32
+    },
+    "columns-standard": {
+      "row": 40
+    },
+    "gallery-standard": {
+      "row": 40
+    },
+    "grid-compact": {
+      "tile": [
+        96,
+        133
+      ],
+      "artwork": [
+        64,
+        64
+      ]
+    },
+    "details-compact": {
+      "row": 32,
+      "header_button": 31,
+      "header_with_bottom_border": 32
+    },
+    "columns-compact": {
+      "row": 32
+    },
+    "gallery-compact": {
+      "row": 32
+    },
+    "sidebar": {
+      "painted_row": 32,
+      "row_with_gap": 36,
+      "icon": 16,
+      "icon_gap": 8,
+      "heading_top": 16,
+      "heading_bottom": 8
+    },
+    "glyph_labels_checked": 84
+  }
+}
