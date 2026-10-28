@@ -260,6 +260,12 @@ namespace MajorisFiles {
             for (int i = 0; i < names.length; i++)
                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
             extra = new ExtraActions(this, operations, metadata);
+            // Let native toolbar controls handle Space instead of the global
+            // file-preview accelerator. The existing action and shortcut remain.
+            notify["focus-widget"].connect(() => {
+                var preview_action = lookup_action("quick-preview") as SimpleAction;
+                if (preview_action != null) preview_action.set_enabled(command_available("quick-preview"));
+            });
             if (!blank)
                 new_tab(initial ?? File.new_for_uri("recent:///"));
             close_request.connect(() => { for (int i = 0; i < tabs.n_pages; i++)
@@ -275,6 +281,10 @@ namespace MajorisFiles {
         }
         public bool command_available(string name) {
             if (current == null) return false;
+            if (name == "quick-preview") {
+                for (var widget = get_focus(); widget != null; widget = widget.get_parent())
+                    if (widget is Majoris.Ui.Toolbar) return false;
+            }
             if (name in new string[] {"new-folder", "new-file", "paste", "split", "join", "duplicate-items", "folder-with-selection", "paste-link", "compress", "compress-sevenzip", "compress-encrypted", "extract", "extract-encrypted", "link", "templates"})
                 return current.accepts_destination;
             int count = current.selected().size;
@@ -292,7 +302,7 @@ namespace MajorisFiles {
                 current.share_button.menu_model = share_menu;
                 current.share_button.sensitive = share_menu.get_n_items() > 0 && current.selected().size > 0;
             }
-            foreach (var name in new string[] {"new-folder", "new-file", "paste", "split", "join", "rename", "share-folder", "cut", "copy", "trash", "delete", "favorite", "properties"}) {
+            foreach (var name in new string[] {"new-folder", "new-file", "paste", "split", "join", "rename", "share-folder", "cut", "copy", "trash", "delete", "favorite", "properties", "quick-preview"}) {
                 var command = lookup_action(name) as SimpleAction;
                 if (command != null) command.set_enabled(command_available(name));
             }

@@ -1,0 +1,23 @@
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=598368 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=598368 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=598368 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=598368 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=598368 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=598368 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.0' (uid=1000 pid=598368 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[598462]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=598368 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[598462]: Successfully activated service 'org.a11y.atspi.Registry'
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Activating service name='org.gtk.vfs.Metadata' requested by ':1.0' (uid=1000 pid=598368 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[598349]: [session uid=1000 pid=598349 pidfd=5] Successfully activated service 'org.gtk.vfs.Metadata'
+Native toolbar actions, composites, responsive routing, chooser, preview and mutation checks passed
+A connection to the bus can't be made
+A connection to the bus can't be made

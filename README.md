@@ -4,7 +4,12 @@ Vala / GTK4 / libadwaita file manager and shared system file chooser for Majoris
 
 Majoris Theme is installed and activated by GNOME for both light and dark
 appearances. Files loads only its own layout CSS and uses the installed theme’s
-shared location-bar classes; it does not bundle or select a GTK theme.
+shared location-bar classes and the installed `majoris-ui-gtk4` Toolbar library; it does not bundle or select a GTK theme.
+
+Build prerequisites include GTK4 **4.18+** and the Majoris Theme **0.1.0+**
+`majoris-ui-gtk4` package (SONAME 0, public VAPI/header and pkg-config metadata).
+Toolbar appearance belongs to the activated Theme; Files owns actions and overflow.
+See [Toolbar integration](docs/toolbar-integration.md) for the migration and checks.
 
 ```sh
 meson setup build --prefix=/usr

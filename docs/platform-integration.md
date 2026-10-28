@@ -1,9 +1,12 @@
 # Majoris platform integration
 
 Use a stable Debian 13-compatible toolchain. `debian/control` is authoritative for
-build/runtime dependencies. GTK >=4.12, libadwaita >=1.5, TinySPARQL >=3.8,
+build/runtime dependencies. GTK >=4.18, libadwaita >=1.5, TinySPARQL >=3.8,
 libportal >=0.7 and libheif >=1.19 are supported; timed AVIF additionally requires
-libheif >=1.23. No experimental GNOME library is required.
+libheif >=1.23. No experimental GNOME library is required. The supplied Majoris Theme universal
+Toolbar revision (27 October 2026, 23:55:59 snapshot or later) must provide the
+installed `majoris-ui-gtk4` 0.1.0+ package, including SONAME 0, VAPI/header and
+pkg-config metadata. See [Toolbar integration](toolbar-integration.md).
 
 ```sh
 meson setup build --prefix=/usr

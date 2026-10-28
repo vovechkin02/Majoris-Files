@@ -49,12 +49,14 @@ The normal application remains functional with an unstyled Majoris class set.
   unchanged. No proportional column-width callback was added.
 - The 650px breakpoint now applies to ordinary windows and choosers. Toolbars
   scroll horizontally when needed, allowing the window to actually reach the
-  breakpoint. The sidebar toggle stays outside that scrolling area. The same
+  breakpoint. The universal Toolbar follow-up places the sidebar toggle in its
+  navigation group and provides responsive action overflow. The same
   sidebar widget moves between parents, closes after navigation, and restores
   its desktop width. The original 180–300px overlay bounds remain unchanged.
-- Files CSS now contains only two bar-inset rules, using 4px vertical and 16px
-  horizontal padding. No local data-view colours, typography, radii, states or
-  theme-wide width rules were introduced.
+- Following the universal Toolbar migration, Files CSS contains only the status
+  row inset rule. Toolbar geometry comes entirely from Majoris-Theme. No local
+  data-view colours, typography, radii, states or theme-wide width rules were
+  introduced.
 
 ## Measured before and after
 
@@ -158,3 +160,10 @@ in both variants: the theme specifies 2px width and 8px vertical insets, while t
 WidgetPaintable exact-colour core measures 1×15px due to partial raster edge
 coverage. The pixel report records that distinction rather than claiming every
 edge pixel is fully opaque. No theme override was added for these observations.
+
+## Universal Toolbar follow-up — 28 October 2026
+
+Browser and preview action strips now consume the installed `Majoris.Ui.Toolbar`
+from the supplied 20261027-235559 Theme revision. Toolbar padding, geometry and
+segmented painting no longer live in Files CSS. See [Toolbar integration](toolbar-integration.md)
+for the component boundary, dependency/ABI, responsive behavior and native evidence.

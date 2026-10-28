@@ -57,15 +57,15 @@ void layout_case() {
         var window = fixture(out metadata);
         assert(window.current.location.get_uri() == "recent:///");
         assert(window.current.search_entry.visible);
-        assert(find_class(window, "files-navigation") != null);
-        assert(find_class(window, "files-commands") != null);
+        assert(find_class(window, "majoris-toolbar") != null);
+        assert(find_class(window, "majoris-toolbar-segmented") != null);
         assert(find_class(window, "majoris-document-tabs") != null);
         var places = new Places(metadata);
         assert(places.entries[0].label == "Home");
         assert(places.entries[1].label == "Favorites");
         foreach (var place in places.entries) assert(place.label != "Home Overview");
-        var navigation = (Gtk.Box)find_class(window, "files-navigation");
-        assert(navigation.spacing == 4);
+        var navigation = (Gtk.Box)find_class(window, "majoris-toolbar");
+        assert(navigation is Majoris.Ui.Toolbar && navigation.spacing == 0);
         assert(navigation.margin_start == 0 && navigation.margin_end == 0);
         assert(navigation.margin_top == 0 && navigation.margin_bottom == 0);
         assert(find_class(window, "majoris-location-bar") != null);
@@ -75,7 +75,7 @@ void layout_case() {
         var resources = resources_enumerate_children("/com/majoris/files/theme", ResourceLookupFlags.NONE);
         assert(resources.length == 1 && resources[0] == "files.css");
         var css = resources_lookup_data("/com/majoris/files/theme/files.css", ResourceLookupFlags.NONE);
-        assert(((string)css.get_data()).contains(".files-navigation, .files-commands { padding: 4px 16px; }"));
+        assert(!((string)css.get_data()).contains(".files-navigation"));
         window.current.cancel(); window.destroy();
     } catch (Error e) { error("%s", e.message); }
 }

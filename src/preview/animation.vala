@@ -29,12 +29,19 @@ namespace MajorisFiles {
                 frames.add(texture);
                 delays.add(((int)object.get_int_member("delay")).clamp(20, 10000));
             }
-            var controls = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
-            controls.append(Browser.button("media-playback-pause-symbolic", _("Play or Pause Animation"), () => playing = !playing));
-            controls.append(Browser.button("zoom-in-symbolic", _("Zoom In"), () => { fit = false; zoom = double.min(3, zoom * 1.25); update(); }));
-            controls.append(Browser.button("zoom-out-symbolic", _("Zoom Out"), () => { fit = false; zoom = double.max(0.1, zoom / 1.25); update(); }));
-            controls.append(Browser.button("zoom-fit-best-symbolic", _("Fit Image"), () => { fit = true; update(); }));
-            append(controls);
+            var controls = new Majoris.Ui.Toolbar();
+            controls.compact = true;
+            controls.divider = true;
+            var actions = controls.append_group();
+            actions.append_control(Browser.button("media-playback-pause-symbolic", _("Play or Pause Animation"), () => playing = !playing));
+            actions.append_control(Browser.button("zoom-in-symbolic", _("Zoom In"), () => { fit = false; zoom = double.min(3, zoom * 1.25); update(); }));
+            actions.append_control(Browser.button("zoom-out-symbolic", _("Zoom Out"), () => { fit = false; zoom = double.max(0.1, zoom / 1.25); update(); }));
+            actions.append_control(Browser.button("zoom-fit-best-symbolic", _("Fit Image"), () => { fit = true; update(); }));
+            var toolbar_scroll = new Gtk.ScrolledWindow();
+            toolbar_scroll.set_policy(Gtk.PolicyType.EXTERNAL, Gtk.PolicyType.NEVER);
+            toolbar_scroll.propagate_natural_height = true;
+            toolbar_scroll.child = controls;
+            append(toolbar_scroll);
             picture.content_fit = Gtk.ContentFit.CONTAIN;
             append(Browser.scrolled(picture));
             var note = new Gtk.Label(_("Animated preview · bounded to 240 frames / 24 MiB of encoded frames"));

@@ -1,7 +1,9 @@
 project('majoris-files', ['vala', 'c'], version: '0.1.0', license: 'GPL-3.0-or-later', meson_version: '>=1.6')
 gnome = import('gnome')
+majoris_ui = dependency('majoris-ui-gtk4', version: '>=0.1.0', required: true)
 add_project_arguments('-DGETTEXT_PACKAGE="majoris-files"', language: 'c')
-deps = [dependency('gtk4', version: '>=4.12'), dependency('libadwaita-1', version: '>=1.5'), dependency('gee-0.8'), dependency('gio-unix-2.0'), dependency('sqlite3'), dependency('json-glib-1.0')]
+deps = [dependency('gtk4', version: '>=4.18'), dependency('libadwaita-1', version: '>=1.5'), dependency('gee-0.8'), dependency('gio-unix-2.0'), dependency('sqlite3'), dependency('json-glib-1.0')]
+deps += majoris_ui
 deps += [dependency('poppler-glib'), dependency('libarchive'), dependency('gtk4-wayland'), dependency('gtk4-x11'), dependency('x11')]
 deps += dependency('libportal-gtk4', version: '>=0.7')
 deps += dependency('cloudproviders', version: '>=0.3')
@@ -151,4 +153,10 @@ endif
 details_corrections = executable('details-corrections', 'tests/details-corrections.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
 if xvfb.found() and find_program('xdotool', required: false).found()
   test('details-corrections', find_program('dbus-run-session'), args: ['--', xvfb, '-a', details_corrections, meson.project_build_root() / 'details-corrections-fallback'], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 90)
+endif
+
+# Consumers exercise the installed public Toolbar ABI; no reference source is compiled here.
+toolbar_tests = executable('toolbar-tests', 'tests/toolbars.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
+if xvfb.found()
+  test('toolbars', find_program('dbus-run-session'), args: ['--', xvfb, '-a', toolbar_tests], depends: preview_helper, env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 90)
 endif

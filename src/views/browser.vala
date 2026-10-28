@@ -97,6 +97,7 @@ namespace MajorisFiles {
                 sidebar_pane.position = preferred_sidebar_width;
             }
         }
+        Gtk.MenuButton? compact_search;
         Gtk.DropDown modes;
         Gee.HashMap<string, Gtk.ToggleButton> view_controls = new Gee.HashMap<string, Gtk.ToggleButton>();
         bool chooser_mode;
@@ -203,22 +204,23 @@ namespace MajorisFiles {
             group_sorter = new Gtk.CustomSorter((a, b) => FileGroups.compare((FileItem)a, (FileItem)b, group_key, metadata));
             sorted.items_changed.connect(() => update_status());
             selection = new Gtk.MultiSelection(sorted);
-            var toolbar = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
-            toolbar.add_css_class("files-navigation");
-            var navigation = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
-            navigation.append(button("sidebar-show-symbolic", _("Show or Hide Locations"), () => { if (narrow)
+            var toolbar = new Majoris.Ui.Toolbar();
+            toolbar.divider = true;
+            var history_controls = toolbar.append_group();
+            history_controls.append_control(button("sidebar-show-symbolic", _("Show or Hide Locations"), () => { if (narrow)
                                                                                               sidebar_overlay.show_sidebar = !sidebar_overlay.show_sidebar;
                                                                                           else sidebar_pane.start_child.visible = !sidebar_pane.start_child.visible;
                 }));
-            toolbar.append(button("go-previous-symbolic", _("Back"), () => { var file = history.back();
+            history_controls.append_control(button("go-previous-symbolic", _("Back"), () => { var file = history.back();
                                                                           if (file != null)
                                                                               navigate(file, false);
                 }));
-            toolbar.append(button("go-next-symbolic", _("Forward"), () => { var file = history.forward();
+            history_controls.append_control(button("go-next-symbolic", _("Forward"), () => { var file = history.forward();
                                                                          if (file != null)
                                                                              navigate(file, false);
                 }));
-            toolbar.append(button("go-up-symbolic", _("Parent Folder"), () => { var parent = location.get_parent();
+            var navigation_extras = toolbar.append_group();
+            navigation_extras.append_control(button("go-up-symbolic", _("Parent Folder"), () => { var parent = location.get_parent();
                                                                              if (parent != null)
                                                                                  navigate(parent);
                 }));
@@ -232,8 +234,10 @@ namespace MajorisFiles {
             var locations_box=new Gtk.Box(Gtk.Orientation.VERTICAL,2);
             locations_scroll.child=locations_box;locations_popup.child=locations_scroll;locations.popover=locations_popup;
             locations_popup.notify["visible"].connect(()=>{if(locations_popup.visible)populate_locations(locations_box,locations_popup);});
-            toolbar.append(locations);
-            toolbar.append(button("view-refresh-symbolic", _("Refresh"), () => navigate(directory.location, false)));
+            navigation_extras.append_control(locations);
+            navigation_extras.append_control(button("view-refresh-symbolic", _("Refresh"), () => navigate(directory.location, false)));
+            var up_control = navigation_extras.get_first_child();
+            var refresh_control = navigation_extras.get_last_child();
             path.hexpand = true;
             path.placeholder_text = _("Location or URI");
             path.tooltip_text = _("Location (Ctrl+L)");
@@ -289,13 +293,15 @@ namespace MajorisFiles {
                 });
             });
             location_bar.hexpand = true;
+            location_bar.valign = Gtk.Align.CENTER;
             location_bar.add_named(path, "entry");
             var crumbs_scroll = new Gtk.ScrolledWindow();
             crumbs_scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER);
             crumbs_scroll.set_child(breadcrumbs);
             location_bar.add_named(crumbs_scroll, "breadcrumbs");
             location_bar.visible_child_name = "breadcrumbs";
-            toolbar.append(location_bar);
+            toolbar.append_separator();
+            toolbar.append_widget(location_bar);
             location_bar.add_css_class("majoris-location-bar");
             path.add_css_class("majoris-location-entry");
             location_bar.notify["visible-child-name"].connect(() => {
@@ -314,26 +320,37 @@ namespace MajorisFiles {
             breadcrumb_space = empty_space;
             search_entry.width_request = 200;
             search_entry.placeholder_text = _("Search files");
-            toolbar.append(search_entry);
+            toolbar.append_control(search_entry);
             var navigation_scroll = new Gtk.ScrolledWindow();
-            navigation_scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER);
+            navigation_scroll.set_policy(Gtk.PolicyType.EXTERNAL, Gtk.PolicyType.NEVER);
+            navigation_scroll.propagate_natural_height = true;
             navigation_scroll.hexpand = true;
             navigation_scroll.child = toolbar;
-            navigation.append(navigation_scroll);
-            append(navigation);
-            var commands = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-            commands.add_css_class("files-commands");
+            append(navigation_scroll);
+            var commands = new Majoris.Ui.Toolbar();
+            commands.divider = true;
+            Majoris.Ui.ToolbarGroup? operations_group = null;
+            Majoris.Ui.ToolbarGroup? selection_group = null;
+            Gtk.Separator? operations_separator = null;
             Gtk.MenuButton? sort_control = null;
             if (!chooser_mode) {
+                operations_group = commands.append_group();
+                operations_separator = commands.append_separator();
+                selection_group = commands.append_group();
                 string[] labels = {"New Folder", "Cut", "Copy", "Paste", "Rename", "Share", "Move to Trash"};
                 string[] icons = {"folder-new-symbolic", "edit-cut-symbolic", "edit-copy-symbolic", "edit-paste-symbolic", "document-edit-symbolic", "emblem-shared-symbolic", "user-trash-symbolic"};
                 string[] actions = {"new-folder", "cut", "copy", "paste", "rename", "share-folder", "trash"};
                 for (int i = 0; i < actions.length; i++) {
                     var control = new Gtk.Button();
-                    var face = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
-                    face.append(new Gtk.Image.from_icon_name(icons[i]));
-                    if (i == 0) face.append(new Gtk.Label(_(labels[i])));
-                    control.child = face;
+                    if (i == 0) {
+                        var face = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8);
+                        var image = new Gtk.Image.from_icon_name(icons[i]);
+                        image.pixel_size = 16;
+                        face.append(image);
+                        face.append(new Gtk.Label(_(labels[i])));
+                        control.child = face;
+                        control.add_css_class("majoris-toolbar-action");
+                    } else control.icon_name = icons[i];
                     control.tooltip_text = _(labels[i]);
                     control.update_property(Gtk.AccessibleProperty.LABEL, _(labels[i]), -1);
                     control.action_name = "win." + actions[i];
@@ -341,11 +358,13 @@ namespace MajorisFiles {
                         share_button.icon_name = "emblem-shared-symbolic";
                         share_button.tooltip_text = _("Share");
                         share_button.update_property(Gtk.AccessibleProperty.LABEL, _("Share"), -1);
-                        commands.append(share_button);
-                    } else commands.append(control);
+                        selection_group.append_control(share_button);
+                    } else if (i < 4) operations_group.append_control(control);
+                    else selection_group.append_control(control);
                 }
                 var sort = new Gtk.MenuButton();
                 sort.label = _("Sort");
+                sort.tooltip_text = _("Sort");
                 var sort_menu = new Menu();
                 sort_menu.append(_("Name"), "win.sort-name");
                 sort_menu.append(_("Size"), "win.sort-size");
@@ -354,17 +373,19 @@ namespace MajorisFiles {
                 sort.menu_model = sort_menu;
                 sort_control = sort;
             }
-            var spacer = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
-            spacer.hexpand = true;
-            commands.append(spacer);
-            if (sort_control != null) commands.append(sort_control);
+            commands.append_spacer();
+            if (sort_control != null) commands.append_control(sort_control);
             modes = new Gtk.DropDown.from_strings(chooser_mode ? new string[] {"Grid", "List"}
                                                                                              : new string[] {"Grid", "List", "Columns", "Gallery"});
             modes.tooltip_text = _("View");
             modes.notify["selected"].connect(() => set_view(new string[] {"Grid", "List", "Columns", "Gallery"}
                 [modes.selected]));
-            if (chooser_mode) commands.append(modes);
+            if (chooser_mode) commands.append_control(modes);
             else {
+                var switcher = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+                switcher.add_css_class("majoris-toolbar-segmented");
+                switcher.valign = Gtk.Align.CENTER;
+                commands.append_widget(switcher);
                 string[] names = {"Grid", "List", "Columns", "Gallery"};
                 string[] icons = {"view-grid-symbolic", "view-list-symbolic", "view-dual-symbolic", "view-paged-symbolic"};
                 for (int i = 0; i < names.length; i++) {
@@ -377,18 +398,19 @@ namespace MajorisFiles {
                     control.active = name == view_mode;
                     view_controls[name] = control;
                     control.toggled.connect(() => { if (control.active) set_view(name); });
-                    commands.append(control);
+                    switcher.append(control);
                 }
             }
-            commands.append(button("preferences-system-symbolic", _("View Settings"), () => show_view_settings()));
+            commands.append_control(button("preferences-system-symbolic", _("View Settings"), () => show_view_settings()));
             if (!chooser_mode) {
                 var preview_button = new Gtk.Button.from_icon_name("view-reveal-symbolic");
                 preview_button.tooltip_text = _("Preview");
                 preview_button.action_name = "win.preview";
-                commands.append(preview_button);
+                commands.append_control(preview_button);
             }
             var command_scroll = new Gtk.ScrolledWindow();
-            command_scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER);
+            command_scroll.set_policy(Gtk.PolicyType.EXTERNAL, Gtk.PolicyType.NEVER);
+            command_scroll.propagate_natural_height = true;
             command_scroll.child = commands;
             append(command_scroll);
             location_error.button_label = "Retry";
@@ -451,7 +473,34 @@ namespace MajorisFiles {
             searches.orientation = Gtk.Orientation.VERTICAL;
             search_popover.child = searches;
             search_options.popover = search_popover;
-            toolbar.append(search_options);
+            toolbar.append_control(search_options);
+            compact_search = new Gtk.MenuButton();
+            compact_search.icon_name = "system-search-symbolic";
+            compact_search.tooltip_text = _("Search files (Ctrl+F)");
+            compact_search.update_property(Gtk.AccessibleProperty.LABEL, compact_search.tooltip_text, -1);
+            var compact_search_popup = new Gtk.Popover();
+            compact_search.popover = compact_search_popup;
+            toolbar.append_control(compact_search);
+            compact_search.visible = false;
+            var overflow = new Gtk.MenuButton();
+            overflow.icon_name = "view-more-symbolic";
+            overflow.tooltip_text = _("File Actions");
+            overflow.update_property(Gtk.AccessibleProperty.LABEL, overflow.tooltip_text, -1);
+            var overflow_menu = new Menu();
+            foreach (var entry in new string[] {"New Folder|win.new-folder", "Cut|win.cut", "Copy|win.copy", "Paste|win.paste", "Rename|win.rename", "Move to Trash|win.trash", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified"}) {
+                var parts = entry.split("|"); overflow_menu.append(_(parts[0]), parts[1]);
+            }
+            overflow.menu_model = overflow_menu;
+            // The Share model is selection-specific and supplied by FilesWindow.
+            var share_overflow = new Menu();
+            overflow_menu.append_section(null, share_overflow);
+            overflow.notify["active"].connect(() => {
+                share_overflow.remove_all();
+                if (share_button.menu_model != null && share_button.menu_model.get_n_items() > 0)
+                    share_overflow.append_submenu(_("Share"), share_button.menu_model);
+            });
+            if (!chooser_mode) commands.append_control(overflow);
+            overflow.visible = false;
             search_entry.search_changed.connect(run_search);
             var body = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
             sidebar_pane = body;
@@ -506,6 +555,16 @@ namespace MajorisFiles {
             adaptive.height_request = 240;
             var breakpoint = new Adw.Breakpoint(Adw.BreakpointCondition.parse("max-width: 650px"));
             breakpoint.apply.connect(() => {
+                up_control.visible = false;
+                refresh_control.visible = false;
+                toolbar.remove_control(search_entry);
+                compact_search_popup.child = search_entry;
+                compact_search.visible = true;
+                if (!chooser_mode) {
+                    operations_group.visible = false; selection_group.visible = false;
+                    operations_separator.visible = false; sort_control.visible = false;
+                    overflow.visible = true;
+                }
                 preferred_sidebar_width = body.position;
                 body.start_child = null;
                 sidebar_overlay.sidebar = side_scroll;
@@ -514,6 +573,19 @@ namespace MajorisFiles {
                 sidebar_overlay.show_sidebar = false;
             });
             breakpoint.unapply.connect(() => {
+                compact_search.popdown();
+                compact_search_popup.child = null;
+                uint position = 0;
+                for (var child = toolbar.get_first_child(); child != null && child != location_bar; child = child.get_next_sibling()) position++;
+                toolbar.insert_control(search_entry, position + 1);
+                up_control.visible = true;
+                refresh_control.visible = true;
+                compact_search.visible = false;
+                if (!chooser_mode) {
+                    operations_group.visible = true; selection_group.visible = true;
+                    operations_separator.visible = true; sort_control.visible = true;
+                    overflow.visible = false;
+                }
                 sidebar_overlay.show_sidebar = false;
                 sidebar_overlay.sidebar = null;
                 sidebar_overlay.collapsed = true;
@@ -522,7 +594,7 @@ namespace MajorisFiles {
                 side_scroll.visible = true;
             });
             breakpoint.add_setter(preview, "visible", false);
-            breakpoint.add_setter(modes, "visible", false);
+
             adaptive.add_breakpoint(breakpoint);
             append(adaptive);
             display_changed.connect(() => refresh_density(views));
@@ -674,7 +746,7 @@ namespace MajorisFiles {
                     if (key == Gdk.Key.f)
                     {
                         searches.visible = true;
-                        search_entry.grab_focus();
+                        focus_search();
                         return true;
                     }
                     if (key == Gdk.Key.h)
@@ -717,6 +789,10 @@ namespace MajorisFiles {
                 return false;
             });
             add_controller(keys);
+        }
+        void focus_search() {
+            if (compact_search != null && compact_search.visible) compact_search.popup();
+            search_entry.grab_focus();
         }
         public static Gtk.Button button(string icon, string tooltip, owned Callback callback)
         {
@@ -906,6 +982,7 @@ namespace MajorisFiles {
                 if (parent.equal(file)) crumb.add_css_class("majoris-location-current");
                 crumb.tooltip_text = parent.get_parse_name();
                 crumb.clicked.connect(() => navigate(parent));
+                if (!chooser_mode) add_drop(crumb, () => parent);
                 var middle = new Gtk.GestureClick();
                 middle.button = 2;
                 middle.pressed.connect(() => open_in_tab(parent));

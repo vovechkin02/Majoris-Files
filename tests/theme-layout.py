@@ -9,7 +9,6 @@ manifest = ET.parse(root / "data/files.gresource.xml")
 assert [node.text for node in manifest.iter("file")] == ["theme/files.css"]
 css = (theme / "files.css").read_text()
 assert css.strip().splitlines() == [
-    ".files-navigation, .files-commands { padding: 4px 16px; }",
     ".files-status { padding: 4px 16px; }",
 ]
 loader = (root / "src/window/theme.vala").read_text()
@@ -18,7 +17,23 @@ assert loader.count("load_from_resource(") == 1
 assert '"/com/majoris/files/theme/files.css"' in loader
 browser = (root / "src/views/browser.vala").read_text()
 assert "toolbar.margin_" not in browser
-assert "new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4)" in browser
+assert browser.count("new Majoris.Ui.Toolbar()") == 2
+assert "toolbar.append_widget(location_bar)" in browser
+assert "majoris-toolbar-segmented" in browser
+assert "commands.append_widget(switcher)" in browser
+assert "majoris-toolbar-view-switcher" not in browser
+assert "files-navigation" not in browser + css
+assert "files-commands" not in browser + css
+assert "majoris-toolbar" not in css
+build = (root / "meson.build").read_text()
+assert "dependency('majoris-ui-gtk4'" in build
+assert "dependency('gtk4', version: '>=4.18')" in build
+assert "ui/toolbar.vala" not in build
+for name in ("pdf", "sandbox", "animation"):
+    preview = (root / "src/preview" / (name + ".vala")).read_text()
+    assert "new Majoris.Ui.Toolbar()" in preview
+    assert "controls.compact = true" in preview
+assert not list((root / "src").rglob("toolbar.vala"))
 assert "files-location" not in browser
 print("Files layout and GNOME theme ownership checks passed")
 

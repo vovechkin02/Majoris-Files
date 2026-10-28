@@ -34,33 +34,41 @@ namespace MajorisFiles {
             this.item = item;
             this.pages = pages;
             this.token = token;
-            var controls = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-            controls.append(Browser.button("go-previous-symbolic", _("Previous Page"), () => { if(!busy && index > 0)
+            var controls = new Majoris.Ui.Toolbar();
+            controls.compact = true;
+            controls.divider = true;
+            var actions = controls.append_group();
+            actions.append_control(Browser.button("go-previous-symbolic", _("Previous Page"), () => { if(!busy && index > 0)
                                                                                             {
                                                                                                 index--;
                                                                                                 render_page.begin();
                                                                                             }
                 }));
-            controls.append(count);
-            controls.append(Browser.button("go-next-symbolic", _("Next Page"), () => { if(!busy && index + 1 < pages)
+            count.add_css_class("majoris-toolbar-metadata");
+            actions.append_widget(count);
+            actions.append_control(Browser.button("go-next-symbolic", _("Next Page"), () => { if(!busy && index + 1 < pages)
                                                                                     {
                                                                                         index++;
                                                                                         render_page.begin();
                                                                                     }
                 }));
-            controls.append(Browser.button("zoom-in-symbolic", _("Zoom In"), () => { if(!busy)
+            actions.append_control(Browser.button("zoom-in-symbolic", _("Zoom In"), () => { if(!busy)
                                                                                   {
                                                                                       zoom = double.min(zoom * 1.2, 3);
                                                                                       render_page.begin();
                                                                                   }
                 }));
-            controls.append(Browser.button("zoom-out-symbolic", _("Zoom Out"), () => { if(!busy)
+            actions.append_control(Browser.button("zoom-out-symbolic", _("Zoom Out"), () => { if(!busy)
                                                                                     {
                                                                                         zoom = double.max(zoom / 1.2, 0.25);
                                                                                         render_page.begin();
                                                                                     }
                 }));
-            append(controls);
+            var toolbar_scroll = new Gtk.ScrolledWindow();
+            toolbar_scroll.set_policy(Gtk.PolicyType.EXTERNAL, Gtk.PolicyType.NEVER);
+            toolbar_scroll.propagate_natural_height = true;
+            toolbar_scroll.child = controls;
+            append(toolbar_scroll);
             picture.content_fit = Gtk.ContentFit.CONTAIN;
             picture.can_shrink = true;
             append(Browser.scrolled(picture));

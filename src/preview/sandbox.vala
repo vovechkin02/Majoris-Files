@@ -120,25 +120,32 @@ namespace MajorisFiles {
             this.item = item;
             this.texture = texture;
             this.token = token;
-            var controls = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
-            controls.append(Browser.button("zoom-in-symbolic", _("Zoom In"), () => { fit = false;
+            var controls = new Majoris.Ui.Toolbar();
+            controls.compact = true;
+            controls.divider = true;
+            var actions = controls.append_group();
+            actions.append_control(Browser.button("zoom-in-symbolic", _("Zoom In"), () => { fit = false;
                                                                                   zoom = double.min(zoom * 1.25, 3);
                                                                                   update();
                 }));
-            controls.append(Browser.button("zoom-out-symbolic", _("Zoom Out"), () => { fit = false;
+            actions.append_control(Browser.button("zoom-out-symbolic", _("Zoom Out"), () => { fit = false;
                                                                                     zoom = double.max(zoom / 1.25, 0.1);
                                                                                     update();
                 }));
-            controls.append(Browser.button("zoom-fit-best-symbolic", _("Fit Image"), () => { fit = true;
+            actions.append_control(Browser.button("zoom-fit-best-symbolic", _("Fit Image"), () => { fit = true;
                                                                                           update();
                 }));
-            controls.append(Browser.button("object-rotate-right-symbolic", _("Rotate Preview Clockwise"), () => { if(!busy)
+            actions.append_control(Browser.button("object-rotate-right-symbolic", _("Rotate Preview Clockwise"), () => { if(!busy)
                                                                                                                {
                                                                                                                    angle = (angle + 90) % 360;
                                                                                                                    rotate.begin();
                                                                                                                }
                 }));
-            append(controls);
+            var toolbar_scroll = new Gtk.ScrolledWindow();
+            toolbar_scroll.set_policy(Gtk.PolicyType.EXTERNAL, Gtk.PolicyType.NEVER);
+            toolbar_scroll.propagate_natural_height = true;
+            toolbar_scroll.child = controls;
+            append(toolbar_scroll);
             picture.content_fit = Gtk.ContentFit.CONTAIN;
             append(Browser.scrolled(picture));
             description.wrap = true;
