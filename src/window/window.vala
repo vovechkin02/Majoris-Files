@@ -360,18 +360,19 @@ namespace MajorisFiles {
                 });
             var context = new Menu();
             var popup = new Gtk.PopoverMenu.from_model(context);
-            popup.set_parent(browser);
+            popup.set_parent(browser.file_surface);
             extension_manager.columns.begin(browser);
             var click = new Gtk.GestureClick();
             click.button = 3;
             click.pressed.connect((n, x, y) => {
+                click.set_state(Gtk.EventSequenceState.CLAIMED);
                 Gdk.Rectangle rect = {(int)x, (int)y, 1, 1};
                 var root = browser.get_root() as FilesWindow;
                 context.remove_all();
                 popup.pointing_to = rect;
                 if (root != null) root.open_context.begin(context, browser, popup);
             });
-            browser.add_controller(click);
+            browser.file_surface.add_controller(click);
             var context_keys = new Gtk.EventControllerKey();
             context_keys.key_pressed.connect((key, code, modifiers) => {
                 if (key != Gdk.Key.Menu && !(key == Gdk.Key.F10 && (modifiers & Gdk.ModifierType.SHIFT_MASK) != 0))
@@ -379,12 +380,12 @@ namespace MajorisFiles {
                 var root = browser.get_root() as FilesWindow;
                 if (root == null || root.get_focus() is Gtk.Editable || root.get_focus() is Gtk.TextView)
                     return false;
-                Gdk.Rectangle rect = {browser.get_width() / 2, browser.get_height() / 3, 1, 1};
+                Gdk.Rectangle rect = {browser.file_surface.get_width() / 2, browser.file_surface.get_height() / 3, 1, 1};
                 popup.pointing_to = rect;
                 root.open_context.begin(context, browser, popup);
                 return true;
             });
-            browser.add_controller(context_keys);
+            browser.file_surface.add_controller(context_keys);
         }
         void populate_context(Menu menu, Browser browser)
         {

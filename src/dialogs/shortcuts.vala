@@ -10,7 +10,7 @@ namespace MajorisFiles {
             page.add(browsing);
             foreach(var entry in new string[] {
                 "New Window|<Control>n", "New Tab|<Control>t", "Close Tab|<Control>w", "Reopen Closed Tab|<Control><Shift>t",
-                "Back|<Alt>Left", "Forward|<Alt>Right", "Parent Folder|<Alt>Up", "Edit Location|<Control>l", "Search|<Control>f", "Show Hidden Files|<Control>h"
+                "Back|<Alt>Left", "Forward|<Alt>Right", "Parent Folder|<Alt>Up", "Edit Location|<Control>l", "Search|<Control>f", "Show or Hide Locations|F9", "Show Hidden Files|<Control>h"
             })
                 add_shortcut(browsing, entry);
             var files = new Adw.PreferencesGroup();

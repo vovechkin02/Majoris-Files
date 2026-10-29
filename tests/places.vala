@@ -26,7 +26,7 @@ int main(string[] args) {
     executable_path=args[0];
     Test.init(ref args);
     Test.add_func("/sidebar/xdg-and-bookmarks",()=>{
-        var places=new Places();assert(places.entries[0].label=="Home"&&places.entries[0].file.get_uri()=="recent:///");
+        var places=new Places();assert(places.entries[0].label=="Recent"&&places.entries[0].file.get_uri()=="recent:///");
         assert(places.entries[1].label=="Favorites");
         string[] names={"Desktop","Documents","Downloads","Pictures","Music","Videos"};string[] suffixes={"DESKTOP","DOCUMENTS","DOWNLOAD","PICTURES","MUSIC","VIDEOS"};
         for(int i=0;i<6;i++){assert(places.entries[i+2].section=="Folders"&&places.entries[i+2].label==names[i]);assert(places.entries[i+2].file.equal(File.new_for_path(fixture_root+"/Redirected/"+suffixes[i])));}

@@ -94,7 +94,7 @@ namespace MajorisFiles {
         }
         public static Gee.ArrayList<Place> compose(Gee.List<Place> folders, Gee.List<SidebarDevice> devices, string root_identity="") {
             var result=new Gee.ArrayList<Place>();
-            var home=new Place(_("Home"),File.new_for_uri("recent:///"));home.icon_name="user-home-symbolic";result.add(home);
+            var recent=new Place(_("Recent"),File.new_for_uri("recent:///"));recent.icon_name="document-open-recent-symbolic";result.add(recent);
             var favorites=new Place(_("Favorites"),File.new_for_uri("majoris:///favorites"));favorites.icon_name="starred-symbolic";result.add(favorites);
             result.add_all(folders);
             var system=new Place(_("System Drive"),File.new_for_path("/"));system.section="Devices";system.system=true;system.icon_name="drive-harddisk-system-symbolic";result.add(system);

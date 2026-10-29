@@ -10,6 +10,9 @@ int main(string[] args) {
         Environment.set_variable("XDG_CACHE_HOME", root, true);
     } catch (Error e) { error("%s", e.message); }
     Gtk.init(); Adw.init(); Test.init(ref args);
+    Gtk.Settings.get_default().gtk_enable_animations = false;
+    if(Environment.get_variable("MAJORIS_VISUAL_DARK") == "1")
+        Adw.StyleManager.get_default().color_scheme = Adw.ColorScheme.FORCE_DARK;
     Test.add_func("/redesign/native-layout-and-schemes", layout_case);
     Test.add_func("/redesign/collections-search-and-actions", () => {
         var loop = new MainLoop();
@@ -19,6 +22,11 @@ int main(string[] args) {
     Test.add_func("/redesign/path-editing-and-history", () => {
         var loop = new MainLoop();
         navigation_case.begin((obj, res) => { try { navigation_case.end(res); } catch (Error e) { error("%s", e.message); } loop.quit(); });
+        loop.run();
+    });
+    Test.add_func("/redesign/large-grid-viewport", () => {
+        var loop = new MainLoop();
+        large_grid_case.begin((obj, res) => { try { large_grid_case.end(res); } catch(Error e) { error("%s", e.message); } loop.quit(); });
         loop.run();
     });
     return Test.run();
@@ -61,7 +69,7 @@ void layout_case() {
         assert(find_class(window, "majoris-toolbar-segmented") != null);
         assert(find_class(window, "majoris-document-tabs") != null);
         var places = new Places(metadata);
-        assert(places.entries[0].label == "Home");
+        assert(places.entries[0].label == "Recent");
         assert(places.entries[1].label == "Favorites");
         foreach (var place in places.entries) assert(place.label != "Home Overview");
         var navigation = (Gtk.Box)find_class(window, "majoris-toolbar");
@@ -177,3 +185,141 @@ async void navigation_case() throws Error {
     browser.cancel(); window.destroy();
 }
 
+
+// Check rendered labels intersecting the actual viewport, not just model counts.
+bool visible_file(Gtk.Widget widget, Gtk.Widget viewport, string name) {
+    if(widget is Gtk.Label && ((Gtk.Label)widget).label == name && widget.get_mapped()) {
+        Graphene.Rect bounds;
+        if(widget.compute_bounds(viewport, out bounds) && bounds.origin.y < viewport.get_height() &&
+           bounds.origin.y + bounds.size.height > 0) return true;
+    }
+    for(var child = widget.get_first_child(); child != null; child = child.get_next_sibling())
+        if(visible_file(child, viewport, name)) return true;
+    return false;
+}
+async void large_grid_case() throws Error {
+    var folder = File.new_for_path(DirUtils.make_tmp("majoris-large-grid-XXXXXX"));
+    for(int i = 0; i < 1500; i++)
+        FileUtils.set_contents(folder.get_child("file-%04d.txt".printf(i)).get_path(), "fixture");
+    MetadataStore metadata;
+    var window = fixture(out metadata);
+    window.set_default_size(1100, 800); window.present();
+    var browser = window.current;
+    browser.navigate(folder);
+    for(int attempt = 0; attempt < 100; attempt++) {
+        yield settle();
+        if(!browser.directory.loading && browser.active_selection.get_n_items() == 1500) break;
+    }
+    assert(browser.active_selection.get_n_items() == 1500);
+    foreach(string mode in new string[]{"None", "Type", "Modified Date"}) {
+        browser.set_group(mode);
+        foreach(string density in new string[]{"Compact", "Standard", "Large"}) {
+            browser.set_density(density);
+            foreach(int width in new int[]{600, 1100}) {
+                window.set_default_size(width, 800);
+                yield settle();
+                var stack = browser.file_surface as Gtk.Stack;
+                var grids = stack.get_child_by_name("Grid") as Gtk.Stack;
+                assert(grids != null);
+                var scroll = grids.visible_child as Gtk.ScrolledWindow;
+                assert(scroll != null && scroll.child is Gtk.Scrollable);
+                var adjustment = scroll.vadjustment;
+                assert(adjustment.page_size > 0 && adjustment.upper > adjustment.page_size);
+                foreach(uint position in new uint[]{0, 750, 1499, 0}) {
+                    var item = (FileItem)browser.active_selection.get_item(position);
+                    // Newly realized grouped rows refine GTK's height estimates.
+                    // Repeat the request after allocation until the target is visible.
+                    for(int attempt = 0; attempt < 5; attempt++) {
+                        if(scroll.child is Gtk.GridView)
+                            ((Gtk.GridView)scroll.child).scroll_to(position, Gtk.ListScrollFlags.NONE, null);
+                        else {
+                            var cells = find_class(scroll.child, "majoris-data-grid") as Gtk.GridView;
+                            assert(cells != null);
+                            ((Gtk.ListView)scroll.child).scroll_to(1 + position / cells.max_columns, Gtk.ListScrollFlags.NONE, null);
+                        }
+                        yield settle();
+                        if(visible_file(scroll.child, scroll, item.file.get_basename())) break;
+                    }
+                    stdout.printf("Grid %s %s width %d position %u adjustment %.0f/%.0f page %.0f\n", mode, density, width, position, adjustment.value, adjustment.upper, adjustment.page_size);
+                    if(!visible_file(scroll.child, scroll, item.file.get_basename())) {
+                        dump_visible(scroll.child, scroll);
+                    }
+                    assert(visible_file(scroll.child, scroll, item.file.get_basename()));
+                    if(density == "Standard" && width == 1100) {
+                        if(position == 0) { adjustment.value = 0; yield settle(); }
+                        grid_capture(window, "%s-%u".printf(mode.replace(" ", "-"), position));
+                    }
+                }
+            }
+        }
+    }
+    browser.set_group("None");
+    foreach(string mode in new string[]{"List", "Columns", "Gallery"}) {
+        browser.set_view(mode); yield settle();
+        var page = ((Gtk.Stack)browser.file_surface).visible_child;
+        var view = find_class(page, mode == "List" ? "majoris-data-column" : "majoris-data-list");
+        assert(view != null && view.get_mapped());
+        if(view is Gtk.ColumnView) ((Gtk.ColumnView)view).scroll_to(1499, null, Gtk.ListScrollFlags.NONE, null);
+        else ((Gtk.ListView)view).scroll_to(1499, Gtk.ListScrollFlags.NONE, null);
+        yield settle();
+        var viewport = view.get_ancestor(typeof(Gtk.ScrolledWindow));
+        assert(viewport != null && visible_file(view, viewport, "file-1499.txt"));
+    }
+    browser.cancel(); window.destroy();
+    var directories = File.new_for_path(DirUtils.make_tmp("majoris-large-folders-XXXXXX"));
+    for(int i = 0; i < 1500; i++) directories.get_child("file-%04d.txt".printf(i)).make_directory();
+    foreach(string mode in new string[]{"open", "multiple", "save", "folder", "savefiles"}) {
+        var values = new VariantBuilder(VariantType.VARDICT);
+        if(mode == "multiple") values.add("{sv}", "multiple", new Variant.boolean(true));
+        if(mode == "folder") values.add("{sv}", "directory", new Variant.boolean(true));
+        if(mode == "savefiles") {
+            var names = new VariantBuilder(new VariantType("aay"));
+            names.add_value(new Variant.bytestring("output.txt"));
+            values.add("{sv}", "files", names.end());
+        }
+        var options = new ChooserOptions(mode == "save" || mode == "savefiles", values.end(), mode == "savefiles");
+        options.initial = mode == "folder" || mode == "savefiles" ? directories : folder;
+        var chooser = new ChooserWindow(options, metadata, new Places(metadata));
+        chooser.present();
+        for(int attempt = 0; attempt < 50; attempt++) {
+            yield settle();
+            if(!chooser.browser.directory.loading && chooser.browser.active_selection.get_n_items() == 1500) break;
+        }
+        chooser.browser.set_view("Grid"); chooser.browser.set_group("None"); yield settle();
+        var grids = ((Gtk.Stack)chooser.browser.file_surface).get_child_by_name("Grid") as Gtk.Stack;
+        var scroll = grids.visible_child as Gtk.ScrolledWindow;
+        ((Gtk.GridView)scroll.child).scroll_to(1499, Gtk.ListScrollFlags.NONE, null);
+        yield settle();
+        assert(visible_file(scroll.child, scroll, "file-1499.txt"));
+        chooser.browser.active_selection.select_item(1499, true);
+        assert(chooser.browser.selected().size == 1);
+        chooser.browser.cancel(); chooser.destroy();
+    }
+    for(int i = 0; i < 1500; i++) folder.get_child("file-%04d.txt".printf(i)).delete();
+    folder.delete();
+    for(int i = 0; i < 1500; i++) directories.get_child("file-%04d.txt".printf(i)).delete();
+    directories.delete();
+}
+
+void dump_visible(Gtk.Widget widget, Gtk.Widget viewport) {
+    Graphene.Rect bounds = Graphene.Rect();
+    if(widget.get_mapped() && widget.compute_bounds(viewport, out bounds) && bounds.origin.y < viewport.get_height() && bounds.origin.y + bounds.size.height > 0) {
+        if(widget is Gtk.Label) stdout.printf("VISIBLE %s y %.0f h %.0f\n", ((Gtk.Label)widget).label, bounds.origin.y, bounds.size.height);
+        if(widget is Gtk.GridView) stdout.printf("CELLS columns %u width %d height %d\n", ((Gtk.GridView)widget).max_columns, widget.get_width(), widget.get_height());
+    }
+    for(var child = widget.get_first_child(); child != null; child = child.get_next_sibling()) dump_visible(child, viewport);
+}
+
+void grid_capture(Gtk.Window window, string name) throws Error {
+    string? output = Environment.get_variable("MAJORIS_GRID_EVIDENCE");
+    if(output == null) return;
+    DirUtils.create_with_parents(output, 0755);
+    var paintable = new Gtk.WidgetPaintable(window);
+    var snapshot = new Gtk.Snapshot();
+    paintable.snapshot(snapshot, window.get_width(), window.get_height());
+    var node = snapshot.to_node(); assert(node != null);
+    var renderer = Gsk.Renderer.for_surface(window.get_surface());
+    var texture = renderer.render_texture(node, null);
+    assert(texture.save_to_png(Path.build_filename(output, name + ".png")));
+    renderer.unrealize();
+}

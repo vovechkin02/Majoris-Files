@@ -36,7 +36,7 @@ async void run_fixture(string output,MainLoop loop) throws Error {
     browser.set_density("Standard");browser.set_view("Grid");browser.sidebar_width=260;
     window.set_default_size(560,820);yield pause_layout();yield capture(window,output,"narrow-sidebar");assert(browser.narrow);
     if(browser.narrow) {
-    var toggle=sidebar_control(window);assert(toggle!=null);toggle.clicked();yield pause_layout();
+    assert(sidebar_control(window)==null);browser.toggle_locations();yield pause_layout();
     yield capture(window,output,"narrow-sidebar-overlay");
     assert(find_component(window,"navigation-sidebar").get_mapped());
     browser.navigate(File.new_for_path(root));yield pause_layout();

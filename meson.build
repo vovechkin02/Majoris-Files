@@ -134,7 +134,7 @@ install_data('data/majoris-samba-foundation.conf', install_dir: get_option('data
 
 redesign_tests = executable('redesign-tests', 'tests/redesign.vala', core, ui, dependencies: deps)
 if xvfb.found()
-  test('redesign', find_program('dbus-run-session'), args: ['--', xvfb, '-a', redesign_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 45)
+  test('redesign', find_program('dbus-run-session'), args: ['--', xvfb, '-a', redesign_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 180)
 endif
 
 # Theme ownership checks also run without a graphical display.

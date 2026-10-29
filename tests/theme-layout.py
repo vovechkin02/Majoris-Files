@@ -18,7 +18,8 @@ assert '"/com/majoris/files/theme/files.css"' in loader
 browser = (root / "src/views/browser.vala").read_text()
 assert "toolbar.margin_" not in browser
 assert browser.count("new Majoris.Ui.Toolbar()") == 2
-assert "toolbar.append_widget(location_bar)" in browser
+assert "toolbar.append_widget(address_fields)" in browser
+assert "address_fields.attach(location_bar, 0, 0, 3, 1)" in browser
 assert "majoris-toolbar-segmented" in browser
 assert "commands.append_widget(switcher)" in browser
 assert "majoris-toolbar-view-switcher" not in browser

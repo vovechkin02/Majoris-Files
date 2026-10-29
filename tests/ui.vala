@@ -1114,7 +1114,7 @@ Gtk.ListBox? sidebar_widget(Gtk.Widget widget) {
 void assert_sidebar_structure(Browser browser) {
     var sidebar=sidebar_widget(browser);assert(sidebar!=null);
     var entries=browser.places.entries;
-    assert(entries[0].label=="Home"&&entries[0].file.get_uri()=="recent:///");
+    assert(entries[0].label=="Recent"&&entries[0].file.get_uri()=="recent:///");
     assert(entries[1].label=="Favorites"&&entries[1].section=="");
     bool devices=false;int roots=0;
     for(int i=0;i<entries.size;i++) {

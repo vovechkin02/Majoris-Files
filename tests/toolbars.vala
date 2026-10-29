@@ -65,6 +65,30 @@ async void keyboard(FilesWindow window, string key, Gtk.Widget? target = null) t
     var input = new Subprocess.newv({"xdotool","key",key},SubprocessFlags.STDOUT_SILENCE|SubprocessFlags.STDERR_PIPE);
     yield input.wait_check_async(null); yield pause_layout();
 }
+bool has_text(Gtk.Widget widget, string text) {
+    if(widget is Gtk.Label && ((Gtk.Label)widget).label == text) return true;
+    for(var child = widget.get_first_child(); child != null; child = child.get_next_sibling())
+        if(has_text(child, text)) return true;
+    return false;
+}
+async void right_click(Gtk.Window window, Gtk.Widget widget) throws Error {
+    window.title = "Majoris Context Regression";
+    Graphene.Rect bounds; assert(widget.compute_bounds(window, out bounds));
+    var search = new Subprocess.newv({"xdotool", "search", "--name", "^Majoris Context Regression$"}, SubprocessFlags.STDOUT_PIPE);
+    string? result; yield search.communicate_utf8_async(null, null, out result, null);
+    assert(search.get_successful());
+    var input = new Subprocess.newv({"xdotool", "mousemove", "--window", result.strip(),
+        ((int)(bounds.origin.x + bounds.size.width / 2)).to_string(),
+        ((int)(bounds.origin.y + bounds.size.height / 2)).to_string(), "click", "3"}, SubprocessFlags.NONE);
+    yield input.wait_check_async(null); yield pause_layout();
+}
+Gtk.Popover? visible_popup(Gtk.Widget widget) {
+    if(widget is Gtk.Popover && widget.visible) return (Gtk.Popover)widget;
+    for(var child = widget.get_first_child(); child != null; child = child.get_next_sibling()) {
+        var popup = visible_popup(child); if(popup != null) return popup;
+    }
+    return null;
+}
 async void run_toolbar_fixture(string? output) throws Error {
     var folder = File.new_for_path(DirUtils.make_tmp("majoris-toolbar-files-XXXXXX"));
     folder.get_child("child").make_directory();
@@ -94,6 +118,46 @@ async void run_toolbar_fixture(string? output) throws Error {
     var location = find_component(browser, "majoris-location-bar");
     assert(location != null && !location.has_css_class("majoris-toolbar-control"));
     assert(!browser.path.has_css_class("majoris-toolbar-field"));
+    double ratio = (double)location.get_allocated_width() / browser.search_entry.get_allocated_width();
+    stdout.printf("Address width %d search width %d ratio %.2f\n", location.get_allocated_width(), browser.search_entry.get_allocated_width(), ratio);
+    assert(ratio > 2.8 && ratio < 3.3);
+    foreach(int width in new int[]{700, 800, 1100}) {
+        window.set_default_size(width, 820); yield pause_layout();
+        if(!browser.search_entry.get_mapped()) {
+            assert(tool(browser, "Search files (Ctrl+F)").get_mapped());
+            continue;
+        }
+        Graphene.Rect search_bounds;
+        assert(browser.search_entry.compute_bounds(window, out search_bounds));
+        assert(search_bounds.origin.x + search_bounds.size.width <= window.get_width());
+        assert(location.get_allocated_width() > 2.8 * browser.search_entry.get_allocated_width());
+    }
+    yield right_click(window, location);
+    var address_menu = visible_popup(location); assert(address_menu != null);
+    assert(has_text(address_menu, "Copy Address") && has_text(address_menu, "Copy Address as Text") && has_text(address_menu, "Edit Address"));
+    assert(!has_text(address_menu, "New Folder"));
+    if(output != null) {
+        yield capture(window, output, "location-context");
+        // Popovers use native surfaces and are absent from WidgetPaintable(window).
+        var screenshot = new Subprocess.newv({"import", "-window", "root", Path.build_filename(output, "location-menu-native.png")}, SubprocessFlags.NONE);
+        yield screenshot.wait_check_async(null);
+    }
+    address_menu.popdown(); yield pause_layout();
+    assert(location.activate_action("address.copy", null));
+    assert((yield location.get_clipboard().read_text_async(null)) == browser.location.get_uri());
+    assert(location.activate_action("address.text", null));
+    assert((yield location.get_clipboard().read_text_async(null)) == browser.location.get_path());
+    assert(location.activate_action("address.edit", null));
+    assert(browser.path.get_mapped() && browser.path.text == browser.location.get_parse_name());
+    yield keyboard(window, "Escape");
+    assert(visible_popup(browser.file_surface) == null);
+    // Empty sidebar and toolbar surfaces must not route into file operations.
+    yield right_click(window, find_component(browser, "navigation-sidebar"));
+    assert(visible_popup(browser.file_surface) == null);
+    yield keyboard(window, "Escape");
+    yield right_click(window, bars[0]);
+    assert(visible_popup(browser.file_surface) == null);
+    yield keyboard(window, "Escape");
     if (output != null) {
         yield capture(window, output, "standard");
         tool(browser,"Back").grab_focus(); yield keyboard(window,"Tab"); yield capture(window,output,"keyboard-focus");
@@ -155,7 +219,8 @@ async void run_toolbar_fixture(string? output) throws Error {
     assert(find_component(browser,"majoris-toolbar-segmented").get_mapped());
     if (output != null) yield capture(window,output,"narrow");
     window.set_default_size(1100,820); yield pause_layout(); assert(!browser.narrow && browser.search_entry.get_mapped());
-    click(browser,"Show or Hide Locations"); click(browser,"Show or Hide Locations");
+    assert(tool(browser,"Show or Hide Locations") == null);
+    browser.toggle_locations(); browser.toggle_locations();
     // Mutate a genuine packaged Toolbar without replacing application callbacks.
     var dynamic_bar = new Majoris.Ui.Toolbar(); var group = dynamic_bar.append_group(); assert(!group.visible);
     var action = new SimpleAction("fixture",null); int calls=0; action.activate.connect(()=>calls++); window.add_action(action);

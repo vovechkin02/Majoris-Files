@@ -76,6 +76,7 @@ namespace MajorisFiles {
         Gee.HashMap<Gtk.Widget, DirectoryModel> loaded_columns = new Gee.HashMap<Gtk.Widget, DirectoryModel>();
         PreviewPane gallery_preview = new PreviewPane();
         Gtk.Stack location_bar = new Gtk.Stack();
+        Gtk.PopoverMenu address_popup;
         Gtk.Widget? breadcrumb_space;
         Gtk.Box breadcrumbs = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
         Gtk.Box searches;
@@ -207,10 +208,6 @@ namespace MajorisFiles {
             var toolbar = new Majoris.Ui.Toolbar();
             toolbar.divider = true;
             var history_controls = toolbar.append_group();
-            history_controls.append_control(button("sidebar-show-symbolic", _("Show or Hide Locations"), () => { if (narrow)
-                                                                                              sidebar_overlay.show_sidebar = !sidebar_overlay.show_sidebar;
-                                                                                          else sidebar_pane.start_child.visible = !sidebar_pane.start_child.visible;
-                }));
             history_controls.append_control(button("go-previous-symbolic", _("Back"), () => { var file = history.back();
                                                                           if (file != null)
                                                                               navigate(file, false);
@@ -301,9 +298,43 @@ namespace MajorisFiles {
             location_bar.add_named(crumbs_scroll, "breadcrumbs");
             location_bar.visible_child_name = "breadcrumbs";
             toolbar.append_separator();
-            toolbar.append_widget(location_bar);
+            // Four equal tracks allocate three to the address and one to search.
+            var address_fields = new Gtk.Grid();
+            address_fields.column_homogeneous = true;
+            address_fields.column_spacing = 8;
+            address_fields.hexpand = true;
+            address_fields.attach(location_bar, 0, 0, 3, 1);
+            toolbar.append_widget(address_fields);
             location_bar.add_css_class("majoris-location-bar");
             path.add_css_class("majoris-location-entry");
+            var address_actions = new SimpleActionGroup();
+            var address_menu = new Menu();
+            string[] address_names = {"copy", "text", "edit"};
+            string[] address_labels = {_("Copy Address"), _("Copy Address as Text"), _("Edit Address")};
+            for(int i = 0; i < address_names.length; i++) {
+                string name = address_names[i];
+                var action = new SimpleAction(name, null);
+                action.activate.connect(() => {
+                    if(name == "edit") edit_location();
+                    else get_clipboard().set_text(name == "copy" ? location.get_uri() : location.get_parse_name());
+                });
+                address_actions.add_action(action);
+                address_menu.append(address_labels[i], "address." + name);
+            }
+            location_bar.insert_action_group("address", address_actions);
+            address_popup = new Gtk.PopoverMenu.from_model(address_menu);
+            address_popup.set_parent(location_bar);
+            var address_click = new Gtk.GestureClick();
+            address_click.button = 3;
+            address_click.pressed.connect((n, x, y) => {
+                // Leave the entry's native selection and clipboard menu intact.
+                if(location_bar.visible_child_name == "entry") return;
+                address_click.set_state(Gtk.EventSequenceState.CLAIMED);
+                Gdk.Rectangle rect = {(int)x, (int)y, 1, 1};
+                address_popup.pointing_to = rect;
+                address_popup.popup();
+            });
+            location_bar.add_controller(address_click);
             location_bar.notify["visible-child-name"].connect(() => {
                 if (location_bar.visible_child_name == "entry")
                     location_bar.add_css_class("majoris-location-editing");
@@ -314,19 +345,38 @@ namespace MajorisFiles {
             empty_space.hexpand = true;
             empty_space.width_request = 32;
             var edit_click = new Gtk.GestureClick();
+            edit_click.button = 1;
             edit_click.released.connect(() => edit_location());
             empty_space.add_controller(edit_click);
             // Reattached after each breadcrumb rebuild.
             breadcrumb_space = empty_space;
-            search_entry.width_request = 200;
+            search_entry.width_request = -1;
+            search_entry.width_chars = 8;
+            path.width_chars = 1;
             search_entry.placeholder_text = _("Search files");
-            toolbar.append_control(search_entry);
+            search_entry.add_css_class("majoris-toolbar-control");
+            address_fields.attach(search_entry, 3, 0, 1, 1);
             var navigation_scroll = new Gtk.ScrolledWindow();
             navigation_scroll.set_policy(Gtk.PolicyType.EXTERNAL, Gtk.PolicyType.NEVER);
             navigation_scroll.propagate_natural_height = true;
             navigation_scroll.hexpand = true;
             navigation_scroll.child = toolbar;
-            append(navigation_scroll);
+            var navigation_adaptive = new Adw.BreakpointBin();
+            navigation_adaptive.width_request = 320;
+            // BreakpointBin needs an explicit minimum; derive it from the
+            // themed toolbar so font and theme changes keep their own geometry.
+            int navigation_minimum, navigation_natural;
+            navigation_scroll.measure(Gtk.Orientation.VERTICAL, -1, out navigation_minimum, out navigation_natural, null, null);
+            navigation_adaptive.height_request = int.max(1, navigation_natural);
+            navigation_adaptive.add_tick_callback(() => {
+                int minimum, natural;
+                navigation_scroll.measure(Gtk.Orientation.VERTICAL, -1, out minimum, out natural, null, null);
+                if(natural > 0 && navigation_adaptive.height_request != natural)
+                    navigation_adaptive.height_request = natural;
+                return Source.CONTINUE;
+            });
+            navigation_adaptive.child = navigation_scroll;
+            append(navigation_adaptive);
             var commands = new Majoris.Ui.Toolbar();
             commands.divider = true;
             Majoris.Ui.ToolbarGroup? operations_group = null;
@@ -482,6 +532,27 @@ namespace MajorisFiles {
             compact_search.popover = compact_search_popup;
             toolbar.append_control(compact_search);
             compact_search.visible = false;
+            // Search collapses before its minimum text width could force the
+            // homogeneous address tracks beyond the navigation viewport. Scale
+            // the threshold with text size independently of the sidebar.
+            var search_breakpoint = new Adw.Breakpoint(Adw.BreakpointCondition.parse("max-width: 1000sp"));
+            search_breakpoint.apply.connect(() => {
+                address_fields.remove(search_entry);
+                address_fields.remove(location_bar);
+                address_fields.attach(location_bar, 0, 0, 4, 1);
+                compact_search_popup.child = search_entry;
+                compact_search.visible = true;
+            });
+            search_breakpoint.unapply.connect(() => {
+                compact_search.popdown();
+                compact_search_popup.child = null;
+                address_fields.remove(location_bar);
+                address_fields.attach(location_bar, 0, 0, 3, 1);
+                address_fields.attach(search_entry, 3, 0, 1, 1);
+                compact_search.visible = false;
+            });
+            navigation_adaptive.add_breakpoint(search_breakpoint);
+
             var overflow = new Gtk.MenuButton();
             overflow.icon_name = "view-more-symbolic";
             overflow.tooltip_text = _("File Actions");
@@ -557,9 +628,6 @@ namespace MajorisFiles {
             breakpoint.apply.connect(() => {
                 up_control.visible = false;
                 refresh_control.visible = false;
-                toolbar.remove_control(search_entry);
-                compact_search_popup.child = search_entry;
-                compact_search.visible = true;
                 if (!chooser_mode) {
                     operations_group.visible = false; selection_group.visible = false;
                     operations_separator.visible = false; sort_control.visible = false;
@@ -573,14 +641,8 @@ namespace MajorisFiles {
                 sidebar_overlay.show_sidebar = false;
             });
             breakpoint.unapply.connect(() => {
-                compact_search.popdown();
-                compact_search_popup.child = null;
-                uint position = 0;
-                for (var child = toolbar.get_first_child(); child != null && child != location_bar; child = child.get_next_sibling()) position++;
-                toolbar.insert_control(search_entry, position + 1);
                 up_control.visible = true;
                 refresh_control.visible = true;
-                compact_search.visible = false;
                 if (!chooser_mode) {
                     operations_group.visible = true; selection_group.visible = true;
                     operations_separator.visible = true; sort_control.visible = true;
@@ -605,7 +667,7 @@ namespace MajorisFiles {
             grid.enable_rubberband = true;
             grid.single_click_activate = metadata.state("single-click", "false") == "true";
             grid.activate.connect(activate_position);
-            grid_views.add_named(grid, "plain");
+            grid_views.add_named(scrolled(grid), "plain");
             grid_rows = new GridRows(sorted, metadata);
             var rows_factory = new Gtk.SignalListItemFactory();
             rows_factory.bind.connect((obj) => {
@@ -621,6 +683,7 @@ namespace MajorisFiles {
                     var cells=new Gtk.GridView(slice,factory(true,slice));
                     style_data_view(cells, "majoris-data-grid");
                     cells.min_columns=grid_rows.columns;cells.max_columns=grid_rows.columns;
+                    cells.vscroll_policy = Gtk.ScrollablePolicy.NATURAL;
                     cells.single_click_activate=metadata.state("single-click","false")=="true";
                     cells.enable_rubberband=true;
                     cells.set_data<GridSlice>("majoris-grid-slice",slice);
@@ -630,7 +693,7 @@ namespace MajorisFiles {
             });
             rows_factory.unbind.connect((obj)=>{var li=(Gtk.ListItem)obj;if(li.child is Gtk.GridView){var cells=(Gtk.GridView)li.child;var slice=cells.get_data<GridSlice>("majoris-grid-slice");cells.model=null;if(slice!=null)slice.detach();}li.child=null;});
             grouped_grid=new Gtk.ListView(null,rows_factory);
-            grid_views.add_named(grouped_grid,"grouped");
+            grid_views.add_named(scrolled(grouped_grid),"grouped");
             grid_views.visible_child_name="plain";
             grid_views.add_tick_callback(()=>{
                 if(grid_views.visible_child_name=="grouped"){
@@ -642,7 +705,7 @@ namespace MajorisFiles {
                 }
                 return Source.CONTINUE;
             });
-            views.add_named(scrolled(grid_views), "Grid");
+            views.add_named(grid_views, "Grid");
             var list = new Gtk.ColumnView(selection);
             style_data_view(list, "majoris-data-column");
             section_headers = group_headers();
@@ -683,9 +746,9 @@ namespace MajorisFiles {
             strip_scroll.height_request = 160;
             gallery.append(strip_scroll);
             views.add_named(gallery, "Gallery");
-            foreach(var view in new string[] {"Grid", "List", "Columns"})
+            foreach(var widget in new Gtk.Widget[] {grid_views.get_child_by_name("plain"), grid_views.get_child_by_name("grouped"), views.get_child_by_name("List"), views.get_child_by_name("Columns")})
             {
-                var scroll = (Gtk.ScrolledWindow)views.get_child_by_name(view);
+                var scroll = (Gtk.ScrolledWindow)widget;
                 scroll.vadjustment.value_changed.connect(() => session_changed());
                 scroll.hadjustment.value_changed.connect(() => session_changed());
             }
@@ -728,6 +791,7 @@ namespace MajorisFiles {
             });
             var keys = new Gtk.EventControllerKey();
             keys.key_pressed.connect((key, code, mods) => {
+                if (key == Gdk.Key.F9) { toggle_locations(); return true; }
                 if (key == Gdk.Key.F5) { navigate(directory.location, false); return true; }
                 if(key == Gdk.Key.Escape && location_bar.visible_child_name == "entry")
                 {
@@ -802,6 +866,14 @@ namespace MajorisFiles {
             b.clicked.connect(() => callback());
             return b;
         }
+        public void toggle_locations()
+        {
+            if(narrow) sidebar_overlay.show_sidebar = !sidebar_overlay.show_sidebar;
+            else sidebar_pane.start_child.visible = !sidebar_pane.start_child.visible;
+        }
+        // Context gestures belong only to the file-content subtree.
+        public Gtk.Widget file_surface { get { return views; } }
+
         public static Gtk.ScrolledWindow scrolled(Gtk.Widget widget)
         {
             var scroll = new Gtk.ScrolledWindow();
@@ -999,6 +1071,8 @@ namespace MajorisFiles {
         }
         Gtk.ScrolledWindow? current_scroll()
         {
+            if(view_mode == "Grid")
+                return grid_views.visible_child as Gtk.ScrolledWindow;
             var child = views.get_child_by_name(view_mode);
             if(child is Gtk.ScrolledWindow)
                 return (Gtk.ScrolledWindow)child;
@@ -2166,10 +2240,28 @@ namespace MajorisFiles {
         }
         void focus_grouped(uint position){
             grouped_grid.scroll_to(grid_rows.row_for(position),Gtk.ListScrollFlags.NONE,null);
-            Idle.add(()=>{focus_grouped_cell(grouped_grid,position);return Source.REMOVE;});
+            // Realized rows refine ListView's estimated heights. Wait for
+            // allocation before focusing a recycled cell, retrying the outer
+            // scroll while GTK settles the requested row into the viewport.
+            uint frames = 0;
+            grouped_grid.add_tick_callback(() => {
+                if(grouped_grid.model == null || position >= selection.get_n_items()) return Source.REMOVE;
+                if(focus_grouped_cell(grouped_grid, position)) return Source.REMOVE;
+                grouped_grid.scroll_to(grid_rows.row_for(position),Gtk.ListScrollFlags.NONE,null);
+                return ++frames < 12 ? Source.CONTINUE : Source.REMOVE;
+            });
         }
         bool focus_grouped_cell(Gtk.Widget widget,uint position){
-            if(widget is Gtk.GridView){var slice=widget.get_data<GridSlice>("majoris-grid-slice");if(slice!=null&&position>=slice.offset&&position<slice.offset+slice.get_n_items()){((Gtk.GridView)widget).scroll_to(position-slice.offset,Gtk.ListScrollFlags.FOCUS,null);return true;}}
+            if(widget is Gtk.GridView){
+                var slice=widget.get_data<GridSlice>("majoris-grid-slice");
+                Graphene.Rect bounds;
+                if(slice!=null && position>=slice.offset && position<slice.offset+slice.get_n_items() && widget.get_mapped()) {
+                    if(widget.compute_bounds(grouped_grid,out bounds) && bounds.origin.y >= 0 && bounds.origin.y + bounds.size.height <= grouped_grid.get_height()) {
+                        ((Gtk.GridView)widget).scroll_to(position-slice.offset,Gtk.ListScrollFlags.FOCUS,null);
+                        return true;
+                    }
+                }
+            }
             for(var child=widget.get_first_child();child!=null;child=child.get_next_sibling())if(focus_grouped_cell(child,position))return true;
             return false;
         }
@@ -2231,6 +2323,8 @@ namespace MajorisFiles {
             if (cloud_changed != 0) { CloudFiles.get_default().disconnect(cloud_changed); cloud_changed = 0; }
             if (shares_changed != 0) { shares.disconnect(shares_changed); shares_changed = 0; }
             cancel();
+            if(address_popup != null && address_popup.get_parent() != null)
+                address_popup.unparent();
             if(completion_popup.get_parent() != null)
                 completion_popup.unparent();
             base.dispose();
