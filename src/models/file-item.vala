@@ -10,7 +10,7 @@ namespace MajorisFiles {
         }
         public string name {
             owned get {
-                return info.get_display_name();
+                return info.has_attribute("standard::display-name") ? info.get_display_name() : info.has_attribute("standard::name") ? info.get_name() : file.get_basename() ?? file.get_uri();
             }
         }
         public bool directory {
@@ -37,7 +37,7 @@ namespace MajorisFiles {
             owned get {
                 var cloud = CloudFiles.get_default().cached(file);
                 if (cloud != null && cloud.online_only && cloud.mime != "") return cloud.mime;
-                return info.get_content_type() ?? "application/octet-stream";
+                return (info.has_attribute("standard::content-type") ? info.get_content_type() : null) ?? "application/octet-stream";
             }
         }
         public FileItem(File file, FileInfo info)

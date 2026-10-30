@@ -5,6 +5,7 @@ namespace MajorisFiles {
         public uint64 bytes;
         public uint64 allocated;
         public uint64 unreadable;
+        public bool allocated_known = true;
         public signal void updated();
         public async void scan(Gee.List<File> roots, Cancellable token) throws Error
         {
@@ -45,8 +46,9 @@ namespace MajorisFiles {
                     }
                     else {
                         files++;
-                        bytes += info.get_size();
-                        allocated += info.has_attribute("standard::allocated-size") ? info.get_attribute_uint64("standard::allocated-size") : info.get_size();
+                        if (info.has_attribute("standard::size")) bytes += info.get_size(); else unreadable++;
+                        allocated_known = allocated_known && info.has_attribute("standard::allocated-size");
+                        allocated += info.has_attribute("standard::allocated-size") ? info.get_attribute_uint64("standard::allocated-size") : info.has_attribute("standard::size") ? info.get_size() : 0;
                     }
                 }
                 catch(IOError.CANCELLED e) {

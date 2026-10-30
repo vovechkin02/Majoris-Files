@@ -21,7 +21,7 @@ namespace MajorisFiles {
                 uint id = 0;
                 if(fields.length < (users ? 7 : 4) || fields[0] == "" || !Regex.match_simple("^[0-9]+$", fields[2]) || !uint.try_parse(fields[2], out id) || id == uint.MAX || !seen.add(fields[0]))
                     continue;
-                string friendly = users ? fields[4].split(",")[0].strip() : "";
+                string friendly = users && fields[4] != "" ? fields[4].split(",")[0].strip() : "";
                 string label = friendly == "" ? "%s · %u".printf(fields[0], id) : "%s (%s · %u)".printf(friendly, fields[0], id);
                 result.add(new SystemAccount(fields[0], label, id));
                 if(result.size >= 10000)

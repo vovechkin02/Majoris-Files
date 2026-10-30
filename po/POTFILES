@@ -19,6 +19,7 @@ src/dialogs/checksum.vala
 src/dialogs/dialogs.vala
 src/dialogs/permissions.vala
 src/dialogs/preferences.vala
+src/dialogs/properties.vala
 src/dialogs/sevenzip.vala
 src/dialogs/shortcuts.vala
 src/dialogs/split.vala

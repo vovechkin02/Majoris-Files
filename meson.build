@@ -56,7 +56,7 @@ ui += files('src/actions/registry.vala', 'src/actions/rotation.vala')
 ui += files('src/extensions/manager.vala')
 ui += files('src/actions/desktop.vala')
 ui += files('src/actions/nearby.vala')
-ui += files('src/dialogs/permissions.vala')
+ui += files('src/dialogs/permissions.vala', 'src/dialogs/properties.vala')
 ui += files('src/dialogs/associations.vala')
 ui += files('src/dialogs/preferences.vala')
 ui += files('src/dialogs/shortcuts.vala')
@@ -164,4 +164,9 @@ endif
 inline_rename_tests = executable('inline-rename-tests', 'tests/inline-rename.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
 if xvfb.found()
   test('inline-rename', find_program('dbus-run-session'), args: ['--', xvfb, '-a', inline_rename_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 180)
+endif
+
+properties_tests = executable('properties-tests', 'tests/properties.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
+if xvfb.found()
+  test('properties', find_program('dbus-run-session'), args: ['--', xvfb, '-a', properties_tests], depends: preview_helper, env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none'], timeout: 180)
 endif

@@ -3,13 +3,13 @@ namespace MajorisFiles {
         public static uint mode(string text) throws Error
         {
             uint64 value = 0;
-            if(!Regex.match_simple("^[0-7]{3,4}$", text) || !uint64.try_parse(text, out value, null, 8) || value > 0777)
-                throw new FileError.INVALID("Permissions must be between 0000 and 0777");
+            if(!Regex.match_simple("^[0-7]{3,4}$", text) || !uint64.try_parse(text, out value, null, 8) || value > 07777)
+                throw new FileError.INVALID("Permissions must be between 0000 and 7777");
             return (uint)value;
         }
-        public static async void apply(Gee.List<File> roots, uint file_mode, uint folder_mode, bool recursive, uint? uid, uint? gid, Cancellable token) throws Error
+        public static async void apply(Gee.List<File> roots, uint file_mode, uint folder_mode, bool recursive, uint? uid, uint? gid, Cancellable token, uint file_mask = 0777, uint folder_mask = 0777) throws Error
         {
-            if(file_mode > 0777 || folder_mode > 0777)
+            if(file_mode > 07777 || folder_mode > 07777 || file_mask > 07777 || folder_mask > 07777)
                 throw new FileError.INVALID("Unsupported permission bits");
             var queue = new Gee.ArrayQueue<File>();
             var directories = new Gee.ArrayList<File>();
@@ -55,17 +55,20 @@ namespace MajorisFiles {
                         yield en.close_async(Priority.LOW, null);
                     }
                 }
-                else yield set_permissions(file, file_mode, uid, gid, token);
+                else yield set_permissions(file, file_mode, file_mask, uid, gid, token);
             }
             // Apply directory modes after descendants so removing traversal access
             // does not prevent completing the requested recursive operation.
             for(int i = directories.size - 1; i >= 0; i--)
-                yield set_permissions(directories[i], folder_mode, uid, gid, token);
+                yield set_permissions(directories[i], folder_mode, folder_mask, uid, gid, token);
         }
-        static async void set_permissions(File file, uint mode, uint? uid, uint? gid, Cancellable token) throws Error
+        static async void set_permissions(File file, uint mode, uint mask, uint? uid, uint? gid, Cancellable token) throws Error
         {
             var info = new FileInfo();
-            info.set_attribute_uint32("unix::mode", mode);
+            if (mask != 0) {
+                var original = yield file.query_info_async("unix::mode", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.LOW, token);
+                info.set_attribute_uint32("unix::mode", (original.get_attribute_uint32("unix::mode") & 07777 & ~mask) | (mode & mask));
+            }
             if(uid != null)
                 info.set_attribute_uint32("unix::uid", uid);
             if(gid != null)

@@ -82,7 +82,7 @@ int main(string[] args)
                                      var items = new Gee.ArrayList<FileItem>();
                                      for(uint i = 0; i < window.current.active_selection.get_n_items(); i++)
                                          items.add((FileItem)window.current.active_selection.get_item(i));
-                                     Dialogs.show_properties(window, items, metadata);
+                                     PropertiesDialog.present_selection(window, items, metadata);
                                      Timeout.add(500, () => {
                     screenshot(window, "multi-properties.png");
                     if(window.visible_dialog != null)

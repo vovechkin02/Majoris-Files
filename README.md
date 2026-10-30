@@ -31,3 +31,5 @@ without installing it using `python3 tools/build-debian.py`.
 The shared GTK component requirements, measured dimensions and native validation evidence are documented in [Theme integration](docs/theme-integration.md).
 
 The remaining Details section, metadata and focus investigations are documented in [Details corrections](docs/details-corrections.md).
+
+The [Properties interface](docs/properties.md) uses one General page with embedded Open With and native Sharing, Permissions and Details subpages.

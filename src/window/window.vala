@@ -259,8 +259,7 @@ namespace MajorisFiles {
                 }));
             action("properties", () => { var chosen = current.selected();
                                          if (chosen.size > 0)
-                                             Dialogs.show_properties(this, chosen, metadata, () => { return new PermissionsPage(this, chosen);
-                                                 }, () => { return new SharingPage(this, chosen[0].file); }, () => { return new MetadataPage(chosen[0], metadata); }, () => { return new AssociationsPage(this, chosen[0]); });
+                                             PropertiesDialog.present_selection(this, chosen, metadata);
                 });
             action("source-folder", () => { var chosen = current.selected(); if (chosen.size == 1 && chosen[0].file.get_parent() != null) { var file = chosen[0].file; current.navigate(file.get_parent()); current.select_file(file); } });
             action("favorite", () => { foreach (var item in current.selected())

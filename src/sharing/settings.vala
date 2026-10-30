@@ -1,6 +1,13 @@
 namespace MajorisFiles {
     public class SharingPage : Adw.PreferencesPage {
         Gtk.Window parent_window;
+        bool managed;
+        Adw.ActionRow state_row = new Adw.ActionRow();
+        Adw.SwitchRow enabled = new Adw.SwitchRow();
+        Adw.PreferencesGroup configuration = new Adw.PreferencesGroup();
+        Adw.ExpanderRow allowed = new Adw.ExpanderRow();
+        Adw.ExpanderRow advanced = new Adw.ExpanderRow();
+        Gtk.Button reconcile = new Gtk.Button.with_label(_("Reload Sharing State"));
         File folder;
         SharingManager manager = new SharingManager();
         Cancellable token = new Cancellable();
@@ -15,6 +22,8 @@ namespace MajorisFiles {
         Gee.HashMap<string, Gtk.CheckButton> assignments = new Gee.HashMap<string, Gtk.CheckButton>();
         Gee.HashMap<string, Gtk.DropDown> levels = new Gee.HashMap<string, Gtk.DropDown>();
         string snapshot = "";
+        string state_fingerprint = "";
+        bool busy;
         uint monitor;
         bool monitoring;
         bool loading;
@@ -23,39 +32,54 @@ namespace MajorisFiles {
         Gtk.Button stop = new Gtk.Button.with_label(_("Stop Sharing"));
         string? existing;
         string? requested;
-        public SharingPage(Gtk.Window parent, File folder, string? requested = null)
+        public SharingPage(Gtk.Window parent, File folder, string? requested = null, bool managed = false)
         {
+            this.managed = managed;
             title = "Sharing";
             icon_name = "folder-remote-symbolic";
             parent_window = parent;
             this.folder = folder;
-            manager.warning_message.connect((message) => Dialogs.error(parent_window, message));
+            foreach (var row in new Adw.PreferencesRow[] {enabled, everyone, writable, guest, hidden, address, state_row, allowed, advanced}) row.use_markup = false;
+            manager.warning_message.connect((message) => Dialogs.error(presenter(), message));
             this.requested = requested;
             var group = new Adw.PreferencesGroup();
-            group.title = folder.get_parse_name();
+            group.title = folder.get_basename();
             group.description = _("Network permissions also depend on filesystem permissions. Write access permits creating, modifying and deleting content.");
             add(group);
+            enabled.title = _("Share this folder"); enabled.subtitle = _("Allow other devices on your network to access this folder.");
+            group.add(enabled); enabled.sensitive = false;
+            state_row.title = _("Sharing Status"); state_row.subtitle_selectable = true; group.add(state_row);
+            reconcile.visible = false; group.add(reconcile); reconcile.clicked.connect(() => load.begin());
+            configuration.title = _("Share Details"); configuration.visible = false; add(configuration);
+            allowed.title = _("Allowed Users");
+            advanced.title = _("Advanced Sharing Settings"); advanced.subtitle = _("Guest access, visibility, firewall and diagnostics");
+            enabled.notify["active"].connect(() => {
+                if (loading || busy) return;
+                if (!enabled.active && existing != null) { remove.begin(); return; }
+                configuration.visible = enabled.active;
+            });
             share_name.title = _("Share Name");
             share_name.text = folder.get_basename();
-            group.add(share_name);
+            configuration.add(share_name);
             everyone.title = _("All Authenticated Users");
             everyone.active = true;
-            group.add(everyone);
+            allowed.add_row(everyone);
             writable.title = _("Read and Write");
-            group.add(writable);
+            configuration.add(writable);
             guest.title = _("Allow Guest Access");
-            group.add(guest);
+            advanced.add_row(guest);
             hidden.title = _("Hide from network browsing");
             hidden.subtitle = _("Direct access still requires the configured authentication and permissions.");
             hidden.sensitive = false;
-            group.add(hidden);
+            advanced.add_row(hidden);
             address.title = _("Network Address");
             address.subtitle = _("Loading sharing state…");
             address.subtitle_selectable = true;
-            group.add(address);
+            configuration.add(address);
+            configuration.add(allowed); configuration.add(advanced);
             accounts.title = _("Allowed Accounts");
             accounts.description = _("Select at least one account when access for all authenticated users is disabled. Samba credentials must be configured for each account.");
-            add(accounts);
+            allowed.add_row(accounts);
             everyone.notify["active"].connect(() => {
                 guest.sensitive = everyone.active;
                 if (!everyone.active)
@@ -66,24 +90,37 @@ namespace MajorisFiles {
             apply.add_css_class("suggested-action");
             buttons.append(apply);
             buttons.append(stop);
-            group.add(buttons);
+            configuration.add(buttons);
             var firewall = new Gtk.Button.with_label(_("Allow SMB on Home and Work Networks…"));
-            group.add(firewall);
+            advanced.add_row(firewall);
             firewall.clicked.connect(() => configure_firewall.begin(true));
             var close_firewall = new Gtk.Button.with_label(_("Close Files-owned SMB Firewall Access…"));
-            group.add(close_firewall);
+            advanced.add_row(close_firewall);
             close_firewall.clicked.connect(() => configure_firewall.begin(false));
             var reload = new Gtk.Button.with_label(_("Reload Sharing State"));
-            group.add(reload);
+            advanced.add_row(reload);
             reload.clicked.connect(() => load.begin());
             var clients = new Gtk.Button.with_label(_("Inspect Connected Clients…"));
-            group.add(clients);
+            advanced.add_row(clients);
             clients.clicked.connect(() => inspect_clients.begin());
             apply.sensitive = stop.sensitive = false;
             apply.clicked.connect(() => save.begin());
             stop.clicked.connect(() => remove.begin());
+            everyone.notify["active"].connect(update_summary); writable.notify["active"].connect(update_summary);
             load.begin();
             monitor = Timeout.add_seconds(10, () => { check_external.begin(); return Source.CONTINUE; });
+        }
+        Gtk.Widget presenter() { return get_ancestor(typeof(Adw.Dialog)) ?? parent_window; }
+        void update_summary() {
+            int count = 0; string? uniform = null; bool mixed = false;
+            foreach (var entry in assignments.entries) if (entry.value.active) {
+                count++; string level = levels[entry.key].selected == 1 ? "F" : levels[entry.key].selected == 2 ? "D" : "R";
+                if (uniform != null && uniform != level) mixed = true; uniform = level;
+            }
+            allowed.subtitle = everyone.active ? _("All authenticated users") : _("%d selected accounts").printf(count);
+            if (everyone.active) { string level = writable.active ? "F" : "R"; if (uniform != null && uniform != level) mixed = true; uniform = level; }
+            writable.sensitive = everyone.active;
+            writable.subtitle = mixed ? _("Custom Access") : uniform == "F" ? _("Read & Write") : uniform == "R" ? _("Read Only") : _("No Access");
         }
         public void cancel() { token.cancel(); if (monitor != 0) { Source.remove(monitor); monitor = 0; } }
         async void check_external()
@@ -93,15 +130,15 @@ namespace MajorisFiles {
             try {
                 string actual = "";
                 foreach (var share in (yield manager.inventory(token)))
-                    if (share.name == (existing ?? share_name.text)) actual = share.acl + "|" + share.guest.to_string();
-                if (actual != snapshot) {
-                    apply.sensitive = stop.sensitive = false;
+                    if (share.name == (existing ?? share_name.text)) actual = share.path + "|" + share.acl + "|" + share.guest.to_string();
+                if (actual != state_fingerprint) {
+                    apply.sensitive = stop.sensitive = enabled.sensitive = false; reconcile.visible = true; state_row.visible = true; state_row.subtitle = _("Sharing changed outside Files. Reload before editing.");
                     address.subtitle = _("Sharing changed outside Files. Reload Sharing State before editing.");
                 }
                 if (existing != null && hidden.sensitive) {
                     SharingProxy helper = yield Bus.get_proxy(BusType.SYSTEM, "com.majoris.Files.Sharing", "/com/majoris/Files/Sharing");
                     if ((yield helper.get_hidden(existing)) != hidden_snapshot) {
-                        apply.sensitive = false;
+                        apply.sensitive = stop.sensitive = enabled.sensitive = false; reconcile.visible = true; state_row.visible = true; state_row.subtitle = _("Sharing changed outside Files. Reload before editing.");
                         address.subtitle = _("Share visibility changed outside Files. Reload Sharing State before editing.");
                     }
                 }
@@ -116,16 +153,16 @@ namespace MajorisFiles {
                 var backend = yield helper.firewall_backend();
                 if (backend != "firewalld") {
                     var dialog = new Adw.AlertDialog(_("Sharing Firewall"), backend == "none" ? _("No active packet-filter rules were detected. There is no supported firewall policy for Files to change. Network access still depends on Samba permissions and the surrounding network.") : _("An alternative or unknown firewall policy is present. Files cannot manage this policy; ask the administrator to configure SMB access. No rules were changed."));
-                    dialog.add_response("close", _("Close")); dialog.present(parent_window); return;
+                    dialog.add_response("close", _("Close")); dialog.present(presenter()); return;
                 }
-                if (!(yield Dialogs.confirm(parent_window, enabled ? "Allow local-network SMB sharing?" : "Close Files-owned SMB firewall access?", enabled ? "Only networks assigned to firewalld's Home or Work zones will be allowed. Public zones and administrator rules are unchanged. This applies to all local SMB shares." : "This removes only the trusted-zone access managed by Files. Other administrator rules remain unchanged.", enabled ? "Allow Trusted Networks" : "Close Access"))) return;
+                if (!(yield Dialogs.confirm(presenter(), enabled ? "Allow local-network SMB sharing?" : "Close Files-owned SMB firewall access?", enabled ? "Only networks assigned to firewalld's Home or Work zones will be allowed. Public zones and administrator rules are unchanged. This applies to all local SMB shares." : "This removes only the trusted-zone access managed by Files. Other administrator rules remain unchanged.", enabled ? "Allow Trusted Networks" : "Close Access"))) return;
                 yield helper.configure_firewall(enabled);
             }
-            catch (Error e) { Dialogs.error(parent_window, e.message); }
+            catch (Error e) { Dialogs.error(presenter(), e.message); }
         }
         async void inspect_clients()
         {
-            if (existing == null) { Dialogs.error(parent_window, _("This folder is not currently shared.")); return; }
+            if (existing == null) { Dialogs.error(presenter(), _("This folder is not currently shared.")); return; }
             try {
                 SharingProxy helper = yield Bus.get_proxy(BusType.SYSTEM, "com.majoris.Files.Sharing", "/com/majoris/Files/Sharing");
                 var json = yield helper.get_clients(existing);
@@ -136,19 +173,19 @@ namespace MajorisFiles {
                     output.append(client.get_string_member("client") + " · " + client.get_string_member("user") + " · " + client.get_string_member("share") + " · " + client.get_string_member("status") + "\n");
                 }
                 var dialog = new Adw.AlertDialog(_("Connected Clients"), output.len == 0 ? "No active clients were reported." : output.str);
-                dialog.add_response("close", _("Close")); dialog.present(parent_window);
+                dialog.add_response("close", _("Close")); dialog.present(presenter());
             }
-            catch (Error e) { Dialogs.error(parent_window, _("Connection status unavailable. Sharing remains usable.\n") + e.message); }
+            catch (Error e) { Dialogs.error(presenter(), _("Connection status unavailable. Sharing remains usable.\n") + e.message); }
         }
         public override void unroot()
         {
-            cancel();
+            if (!managed) cancel();
             base.unroot();
         }
         void account(string id, string label, bool selected, string level = "R")
         {
             var row = new Adw.ActionRow();
-            row.title = label;
+            row.title = label; row.use_markup = false;
             row.subtitle = _("Share-level access; filesystem permissions can further restrict it.");
             var check = new Gtk.CheckButton();
             check.active = selected;
@@ -165,6 +202,7 @@ namespace MajorisFiles {
             accounts.add(row);
             account_rows.add(row);
             assignments[id] = check;
+            check.toggled.connect(update_summary); access.notify["selected"].connect(update_summary);
         }
         async void load()
         {
@@ -176,7 +214,7 @@ namespace MajorisFiles {
                 foreach (var row in account_rows) accounts.remove(row);
                 account_rows.clear(); assignments.clear(); levels.clear();
                 everyone.active = true; writable.active = false; guest.active = false;
-                existing = null; snapshot = ""; share_name.editable = true;
+                existing = null; snapshot = ""; state_fingerprint = ""; share_name.editable = true;
                 ShareRecord? current = null;
                 foreach (var share in shares)
                     if (File.new_for_path(share.path).equal(folder) && (requested == null || requested == share.name))
@@ -195,6 +233,7 @@ namespace MajorisFiles {
                     everyone.active = false;
                     rights = SharePolicy.parse_acl(current.acl);
                     snapshot = current.acl + "|" + current.guest.to_string();
+                    state_fingerprint = current.path + "|" + snapshot;
                     foreach (var entry in rights.entries)
                     {
                         if (entry.key == "Everyone") {
@@ -238,10 +277,19 @@ namespace MajorisFiles {
                 if (!token.is_cancelled())
                     address.subtitle = _("Sharing state unavailable: ") + e.message;
             }
-            finally { loading = false; }
+            finally {
+                loading = false;
+                enabled.sensitive = !token.is_cancelled() && apply.sensitive;
+                loading = true; enabled.active = existing != null; loading = false;
+                configuration.visible = enabled.active;
+                stop.visible = existing != null;
+                reconcile.visible = !apply.sensitive; state_row.visible = !apply.sensitive; state_row.subtitle = address.subtitle;
+                update_summary();
+            }
         }
         async void save()
         {
+            if (busy || loading || token.is_cancelled()) return;
             string[] users = {};
             var access = new Gee.HashMap<string, string>();
             if (everyone.active)
@@ -256,10 +304,11 @@ namespace MajorisFiles {
                         users += entry.key;
                 if (users.length == 0)
                 {
-                    Dialogs.error(parent_window, _("Select at least one account or enable access for all authenticated users."));
+                    Dialogs.error(presenter(), _("Select at least one account or enable access for all authenticated users."));
                     return;
                 }
             }
+            busy = true; enabled.sensitive = false;
             apply.sensitive = stop.sensitive = false;
             try {
                 yield manager.share(folder, share_name.text, writable.active, guest.active, users, access, snapshot);
@@ -269,33 +318,41 @@ namespace MajorisFiles {
                     hidden_snapshot = hidden.active;
                 }
                 foreach (var share in (yield manager.inventory(token)))
-                    if (share.name == share_name.text)
-                        snapshot = share.acl + "|" + share.guest.to_string();
+                    if (share.name == share_name.text) {
+                        snapshot = share.acl + "|" + share.guest.to_string(); state_fingerprint = share.path + "|" + snapshot;
+                    }
                 existing = share_name.text;
+                configuration.visible = true; stop.visible = true; update_summary();
                 share_name.editable = false;
                 address.subtitle = _("smb://") + Environment.get_host_name() + "/" + Uri.escape_string(existing);
                 apply.label = _("Apply Changes");
             }
-            catch (Error e) { Dialogs.error(parent_window, e.message); }
-            apply.sensitive = true;
+            catch (Error e) { Dialogs.error(presenter(), e.message); }
+            busy = false; enabled.sensitive = !token.is_cancelled();
+            apply.sensitive = !token.is_cancelled();
             stop.sensitive = existing != null;
         }
         async void remove()
         {
-            if (existing == null || !(yield Dialogs.confirm(parent_window, "Stop sharing this folder?", "Existing clients may lose access to this share.", "Stop Sharing")))
-                return;
+            if (existing == null || busy || token.is_cancelled()) return;
+            if (!(yield Dialogs.confirm(presenter(), "Stop sharing this folder?", "Existing clients may lose access to this share.", "Stop Sharing"))) {
+                loading = true; enabled.active = true; loading = false; return;
+            }
+            busy = true; enabled.sensitive = false;
             apply.sensitive = stop.sensitive = false;
             try {
                 yield manager.remove(existing);
                 existing = null;
-                snapshot = "";
+                snapshot = ""; state_fingerprint = "";
                 address.subtitle = _("Not shared");
                 apply.label = _("Share Folder");
                 share_name.editable = true;
+                loading = true; enabled.active = false; loading = false; configuration.visible = false; stop.visible = false;
             }
-            catch (Error e) { Dialogs.error(parent_window, e.message); }
-            apply.sensitive = true;
-            stop.sensitive = existing != null;
+            catch (Error e) { Dialogs.error(presenter(), e.message); }
+            busy = false; loading = true; enabled.active = existing != null; loading = false;
+            enabled.sensitive = !token.is_cancelled(); configuration.visible = enabled.active; stop.visible = existing != null;
+            apply.sensitive = !token.is_cancelled(); stop.sensitive = existing != null;
         }
     }
     public class SharingDialog : Adw.PreferencesDialog {
