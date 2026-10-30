@@ -1,4 +1,25 @@
 namespace MajorisFiles {
+    // General information has its own geometry; advanced pages retain value_row().
+    public class PropertiesInformationRow : Adw.ActionRow {
+        public Gtk.Label value_label = new Gtk.Label("");
+        public string value {
+            owned get { return value_label.label; }
+            set {
+                value_label.label = value;
+                value_label.tooltip_text = value;
+                value_label.update_property(Gtk.AccessibleProperty.LABEL, title + ": " + value, -1);
+            }
+        }
+        public PropertiesInformationRow(string title, string value) {
+            use_markup = false; this.title = title; title_lines = 1;
+            value_label.xalign = 1; value_label.valign = Gtk.Align.CENTER;
+            value_label.hexpand = true; value_label.selectable = true;
+            value_label.wrap = false;
+            value_label.lines = 1; value_label.ellipsize = Pango.EllipsizeMode.END;
+            value_label.max_width_chars = 30;
+            add_suffix(value_label); this.value = value;
+        }
+    }
     // A selection snapshot and one native navigation stack own the entire lifetime.
     public class PropertiesDialog : Adw.PreferencesDialog {
         public static void present_selection(Gtk.Window parent, Gee.List<FileItem> items, MetadataStore metadata) { if (items.size > 0) new PropertiesDialog(parent, items, metadata).present(parent); }
@@ -12,9 +33,11 @@ namespace MajorisFiles {
         SharingPage? sharing;
         MetadataPage? details;
         FileCounts counts = new FileCounts();
-        Adw.ActionRow identity;
-        Adw.ActionRow? contents;
-        Adw.ActionRow? total;
+        public Gtk.Box identity = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 12);
+        public Gtk.Label identity_name = new Gtk.Label("");
+        PropertiesInformationRow? contents;
+        PropertiesInformationRow size_row;
+        string? scan_error;
         Adw.ActionRow? exact_size;
         Adw.ActionRow? allocated;
         Adw.SwitchRow favorites;
@@ -33,11 +56,15 @@ namespace MajorisFiles {
             general.title = _("General"); general.name = "general"; general.icon_name = "document-properties-symbolic";
             add(general);
             var heading = new Adw.PreferencesGroup(); general.add(heading);
-            identity = value_row(items.size == 1 ? items[0].name : _("%d selected items").printf(items.size), identity_description());
-            identity.title_lines = 2; identity.subtitle_lines = 2;
+            identity_name.label = items.size == 1 ? items[0].name : _("%d selected items").printf(items.size);
+            identity_name.wrap = true; identity_name.wrap_mode = Pango.WrapMode.WORD_CHAR;
+            identity_name.max_width_chars = 34; identity_name.hexpand = true;
+            identity_name.xalign = 0; identity_name.valign = Gtk.Align.CENTER;
+            identity_name.selectable = true; identity_name.add_css_class("heading");
+            identity.update_property(Gtk.AccessibleProperty.LABEL, identity_name.label, -1);
             var image = new Gtk.Image.from_icon_name("edit-copy-symbolic"); image.pixel_size = 48;
             if (items.size == 1) image.set_from_gicon((items[0].info.has_attribute("standard::icon") ? items[0].info.get_icon() : null) ?? new ThemedIcon("text-x-generic"));
-            identity.add_prefix(image); heading.add(identity);
+            identity.append(image); identity.append(identity_name); heading.add(identity);
             if (items.size == 1 && !items[0].directory) {
                 var thumbnails = new ThumbnailService(metadata);
                 thumbnails.texture.begin(items[0], token, (obj, res) => {
@@ -45,21 +72,23 @@ namespace MajorisFiles {
                 });
             }
             var information = new Adw.PreferencesGroup(); information.title = _("Information"); general.add(information);
+            bool needs_scan = items.size > 1 || counted_folder(items[0]);
+            information.add(information_row(_("Type"), selection_type()));
+            string initial_size = _("Unavailable");
+            if (needs_scan) initial_size = _("Calculating…");
+            else if (single_size_known) initial_size = Paths.size(items[0].bytes);
+            size_row = information_row(_("Size"), initial_size); information.add(size_row);
+            if (items.size == 1 && counted_folder(items[0])) { contents = information_row(_("Contents"), _("Calculating…")); information.add(contents); }
             File? common = items[0].file.get_parent();
             foreach (var item in items) if (common != null && (item.file.get_parent() == null || !common.equal(item.file.get_parent()))) common = null;
-            var location = value_row(_("Location"), common == null ? _("Multiple locations") : readable_location(common));
+            var location = information_row(_("Location"), common == null ? _("Multiple locations") : readable_location(common));
             string? copied_location = items.size == 1 ? (items[0].file.get_path() ?? items[0].file.get_uri()) : common == null ? null : (common.get_path() ?? common.get_uri());
             if (copied_location != null) location.add_suffix(Browser.button("edit-copy-symbolic", _("Copy Location"), () => get_clipboard().set_text(copied_location)));
             information.add(location);
             if (items.size == 1) {
                 var date = items[0].info.has_attribute("time::modified") ? items[0].info.get_modification_date_time() : null;
-                if (date != null) information.add(value_row(_("Modified"), date.to_local().format("%x")));
-            } else {
-                total = value_row(_("Total Size"), _("Calculating…")); information.add(total);
-                var types = new Gee.HashSet<string>(); foreach (var item in items) types.add(item.mime);
-                information.add(value_row(_("Types"), types.size == 1 ? ContentType.get_description(items[0].mime) : _("Multiple file types")));
+                if (date != null) information.add(information_row(_("Modified"), date.to_local().format("%x")));
             }
-            if (items.size == 1 && counted_folder(items[0])) { contents = value_row(_("Contents"), _("Calculating…")); information.add(contents); }
             if (items.size == 1 && !items[0].directory && items[0].info.get_file_type() != FileType.MOUNTABLE) {
                 var applications = new Adw.PreferencesGroup(); applications.title = _("Open With"); general.add(applications);
                 association = value_row("", "");
@@ -106,13 +135,13 @@ namespace MajorisFiles {
                     show_subpage("details", _("Details"), page);
                 } else push_subpage(subpages["details"]);
             });
-            counting = items.size > 1 || counted_folder(items[0]);
+            counting = needs_scan;
             if (counting) {
                 counts.updated.connect(() => { if (!token.is_cancelled()) update_counts(); });
                 var roots = new Gee.ArrayList<File>(); foreach (var item in items) roots.add(item.file);
                 counts.scan.begin(roots, token, (obj, res) => {
                     try { counts.scan.end(res); if (!token.is_cancelled()) { counting = false; update_counts(); announce(_("Contents calculation complete"), Gtk.AccessibleAnnouncementPriority.MEDIUM); } }
-                    catch (Error e) { if (!token.is_cancelled() && contents != null) contents.subtitle = e.message; }
+                    catch (Error e) { if (!token.is_cancelled()) { counting = false; scan_error = e.message; update_counts(); } }
                 });
             } else { counts.bytes = items[0].bytes; counts.allocated_known = items[0].info.has_attribute("standard::allocated-size"); counts.allocated = counts.allocated_known ? items[0].info.get_attribute_uint64("standard::allocated-size") : 0; }
             closed.connect(() => {
@@ -147,19 +176,29 @@ namespace MajorisFiles {
             push_subpage(subpages[key]);
         }
         static bool counted_folder(FileItem item) { return item.directory && !Paths.is_symlink(item.info); }
-        string identity_description() {
-            if (items.size == 1) { string description = ContentType.get_description(items[0].mime); return counted_folder(items[0]) ? _("Folder") : (Paths.is_symlink(items[0].info) ? _("Symbolic Link") : description.contains(items[0].mime) ? _("File") : description) + (single_size_known ? " · " + Paths.size(items[0].bytes) : ""); }
-            int folders = 0; foreach (var item in items) if (counted_folder(item)) folders++;
-            return (items.size - folders == 1 ? _("1 file") : _("%d files").printf(items.size - folders)) + " · " + (folders == 1 ? _("1 folder") : _("%d folders").printf(folders));
+        public static PropertiesInformationRow information_row(string title, string value) { return new PropertiesInformationRow(title, value); }
+        static string display_type(FileItem item) {
+            if (Paths.is_symlink(item.info)) return _("Symbolic link");
+            if ((item.info.has_attribute("unix::is-mountpoint") && item.info.get_attribute_boolean("unix::is-mountpoint")) || item.info.get_file_type() == FileType.MOUNTABLE) return _("Filesystem location");
+            if (counted_folder(item)) return _("File folder");
+            if (item.info.get_file_type() == FileType.SPECIAL) return _("Special file");
+            if (item.info.get_file_type() == FileType.SHORTCUT) return _("Shortcut");
+            string description = ContentType.get_description(item.mime);
+            return description.contains(item.mime) ? _("File") : description;
+        }
+        string selection_type() {
+            var types = new Gee.HashSet<string>(); bool folders = false, files = false;
+            foreach (var item in items) { types.add(display_type(item)); if (counted_folder(item)) folders = true; else files = true; }
+            if (folders && files) return _("Mixed files and folders");
+            return types.size == 1 ? display_type(items[0]) : _("Multiple file types");
         }
         void update_counts() {
-            string partial = counts.unreadable > 0 ? _(" · Partial total; some items are unreadable") : "";
+            string partial = counts.unreadable > 0 || scan_error != null ? _(" · Partial total; some items are unreadable") : "";
             uint64 children = counts.files + counts.folders;
             if (items.size == 1 && counted_folder(items[0]) && counts.folders > 0) children--;
             string summary = (children == 1 ? _("1 item") : _("%s items").printf(children.to_string())) + (counting ? _(" · Calculating…") : "") + partial;
-            if (contents != null) contents.subtitle = summary;
-            if (total != null) total.subtitle = Paths.size(counts.bytes) + (counting ? _(" · Calculating…") : "") + partial;
-            if (items.size == 1 && counted_folder(items[0])) identity.subtitle = _("Folder") + " · " + summary;
+            if (contents != null) contents.value = scan_error == null ? summary : summary + " · " + scan_error;
+            size_row.value = items.size == 1 && !counted_folder(items[0]) && !single_size_known ? _("Unavailable") : Paths.size(counts.bytes) + (counting ? _(" · Calculating…") : "") + partial + (scan_error == null ? "" : " · " + scan_error);
             if (exact_size != null) exact_size.subtitle = items.size == 1 && !counted_folder(items[0]) && !single_size_known ? _("Unavailable") : counts.bytes.to_string() + _(" bytes") + partial;
             if (allocated != null) allocated.subtitle = counts.allocated_known ? Paths.size(counts.allocated) + (counting ? _(" · Calculating…") : "") + partial : _("Unavailable for this selection");
         }

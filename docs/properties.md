@@ -1,10 +1,14 @@
 # Properties
 
-General is the sole main page of the existing `Adw.PreferencesDialog`. It shows
-an icon or an existing-service thumbnail, a copyable location, concise modified
-date, folder contents or combined size, the default application for a single
-file, Favorites and Tags. Technical attributes are in Details. Ordinary files
-have no “Items: 1” or recursive Contents calculation.
+General is the sole main page of the existing `Adw.PreferencesDialog`. Its header contains only the icon or thumbnail and a wrapped, selectable filename. A separate Information group shows Type, Size, Location and Modified as left-hand titles with right-aligned values. Folders also show Contents between Size and Location. General retains Open With, Favorites and Tags; technical attributes remain in Details. Ordinary files have no recursive Contents calculation.
+
+The identity header is a native horizontal Gtk.Box with a 48-pixel image and a
+heading label; it has no subtitle. General-only PropertiesInformationRow suffix
+labels use ellipsis and full-value tooltips for long values. The existing
+value_row helper and advanced pages keep their title/subtitle layout. Folder
+and multi-selection scans update Size (and folder Contents) without modifying
+the header. Multiple selections show the item count, a summarized Type, combined
+Size and common Location; no duplicate totals or per-item Modified row appear.
 
 Open With is embedded in General. Change opens a searchable application chooser
 with grouped single-selection rows, one Set Default action and a secondary Reset

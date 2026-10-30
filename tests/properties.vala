@@ -53,6 +53,69 @@ FileItem item(File file, string? mime = null) throws Error {
     if (mime != null) info.set_content_type(mime); return new FileItem(file, info);
 }
 Gee.ArrayList<FileItem> selection(FileItem a, FileItem? b = null) { var items = new Gee.ArrayList<FileItem>(); items.add(a); if (b != null) items.add(b); return items; }
+string information_value(PropertiesDialog dialog, string title) {
+    var row = titled(dialog.general, title) as PropertiesInformationRow; assert(row != null);
+    assert(row.value_label.xalign == 1 && row.value_label.selectable && !row.value_label.wrap);
+    assert(row.subtitle == "" || row.subtitle == null);
+    return row.value;
+}
+void assert_identity(PropertiesDialog dialog, string name) {
+    assert(dialog.identity_name.label == name && dialog.identity_name.wrap && dialog.identity_name.selectable);
+    assert(dialog.identity.get_first_child() is Gtk.Image);
+    assert(((Gtk.Image)dialog.identity.get_first_child()).pixel_size == 48);
+    assert(dialog.identity.get_first_child().get_next_sibling() == dialog.identity_name);
+    assert(dialog.identity_name.get_next_sibling() == null);
+    assert(titled(dialog.general, name) == null);
+}
+void collect_information(Gtk.Widget widget, Gee.ArrayList<string> titles) {
+    if (widget is PropertiesInformationRow) titles.add(((PropertiesInformationRow)widget).title);
+    for (var child = widget.get_first_child(); child != null; child = child.get_next_sibling()) collect_information(child, titles);
+}
+void assert_information_order(PropertiesDialog dialog, string[] expected) {
+    var titles = new Gee.ArrayList<string>(); collect_information(dialog.general, titles);
+    assert(titles.size == expected.length);
+    for (int i = 0; i < expected.length; i++) assert(titles[i] == expected[i]);
+}
+async void wait_scan(PropertiesDialog dialog) {
+    for (int i = 0; information_value(dialog, "Size").contains("Calculating") && i < 40; i++) yield pause_layout();
+    assert(!information_value(dialog, "Size").contains("Calculating"));
+}
+void restore_fixture(File folder) { try { folder.set_attribute_uint32("unix::mode", 0700, FileQueryInfoFlags.NONE); } catch (Error e) { warning("%s", e.message); } }
+async void counting_cases(Adw.ApplicationWindow window, MetadataStore metadata, FileItem document) throws Error {
+    var empty = File.new_for_path(fixture + "/Empty"); empty.make_directory();
+    var dialog = new PropertiesDialog(window, selection(item(empty)), metadata);
+    var name_widget = dialog.identity_name; var icon_widget = dialog.identity.get_first_child();
+    assert(information_value(dialog, "Size") == "Calculating…");
+    dialog.present(window); yield wait_scan(dialog);
+    assert(information_value(dialog, "Size") == Paths.size(0)); assert(information_value(dialog, "Contents") == "0 items");
+    assert(dialog.identity_name == name_widget && dialog.identity.get_first_child() == icon_widget); assert_identity(dialog, "Empty");
+    dialog.close(); yield pause_layout();
+    var large = File.new_for_path(fixture + "/Large"); large.make_directory();
+    for (int i = 0; i < 1500; i++) FileUtils.set_contents(large.get_child("file-%04d.txt".printf(i)).get_path(), "abc");
+    dialog = new PropertiesDialog(window, selection(item(large)), metadata); name_widget = dialog.identity_name; icon_widget = dialog.identity.get_first_child();
+    dialog.present(window); yield wait_scan(dialog);
+    assert(information_value(dialog, "Size") == Paths.size(4500)); assert(information_value(dialog, "Contents") == "1500 items");
+    assert(dialog.identity_name == name_widget && dialog.identity.get_first_child() == icon_widget); assert_identity(dialog, "Large");
+    dialog.close(); yield pause_layout();
+    dialog = new PropertiesDialog(window, selection(item(large)), metadata); dialog.present(window); dialog.token.cancel(); dialog.close(); yield pause_layout();
+    assert(dialog.token.is_cancelled()); string cancelled = information_value(dialog, "Size"); yield pause_layout(); assert(information_value(dialog, "Size") == cancelled);
+    var partial = File.new_for_path(fixture + "/Partial"); partial.make_directory();
+    FileUtils.set_contents(partial.get_child("visible.txt").get_path(), "visible"); var locked = partial.get_child("Locked"); locked.make_directory();
+    FileUtils.set_contents(locked.get_child("secret.txt").get_path(), "secret"); locked.set_attribute_uint32("unix::mode", 0000, FileQueryInfoFlags.NONE);
+    try {
+        dialog = new PropertiesDialog(window, selection(item(partial)), metadata); dialog.present(window); yield wait_scan(dialog);
+        assert(information_value(dialog, "Size").contains("Partial total")); assert(information_value(dialog, "Contents").contains("unreadable")); assert_identity(dialog, "Partial");
+        dialog.close(); yield pause_layout();
+    } finally { restore_fixture(locked); }
+    var other = empty.get_child("other.txt"); FileUtils.set_contents(other.get_path(), "other");
+    dialog = new PropertiesDialog(window, selection(document, item(other)), metadata); dialog.present(window); yield wait_scan(dialog);
+    assert(information_value(dialog, "Location") == "Multiple locations" && find_copy(dialog.general) == null);
+    assert(titled(dialog.general, "Modified") == null && titled(dialog.general, "Total Size") == null);
+    dialog.close(); yield pause_layout();
+    other.set_attribute_uint32("unix::mode", 0444, FileQueryInfoFlags.NONE);
+    dialog = new PropertiesDialog(window, selection(item(other)), metadata); dialog.present(window); yield pause_layout();
+    assert(information_value(dialog, "Size") == Paths.size(5)); assert_identity(dialog, "other.txt"); dialog.close(); yield pause_layout();
+}
 async void shot(Gtk.Window window, string name) throws Error {
     Test.message("stage: %s", name);
     foreach (bool dark in new bool[] {false, true}) {
@@ -86,7 +149,10 @@ async void scenarios() throws Error {
     var selected = selection(document);
     var properties = new PropertiesDialog(window, selected, metadata); properties.present(window); yield pause_layout();
     assert(properties.get_visible_page() == properties.general);
-    assert(titled(properties.general, document.name) != null && titled(properties.general, "Items") == null && titled(properties.general, "Contents") == null);
+    assert_identity(properties, document.name);
+    assert_information_order(properties, {"Type", "Size", "Location", "Modified"});
+    assert(information_value(properties, "Type") == "File" && information_value(properties, "Size") == Paths.size(6));
+    assert(titled(properties.general, "Items") == null && titled(properties.general, "Contents") == null);
     assert(titled(properties.general, "Owner") == null && titled(properties.general, "Sharing") == null);
     selected.clear(); assert(properties.items.size == 1);
     var favorite = (Adw.SwitchRow)titled(properties.general, "Favorite"); favorite.active = true; assert(metadata.favorite(document.file));
@@ -96,11 +162,16 @@ async void scenarios() throws Error {
     var copy = find_copy(properties.general); assert(copy != null); copy.clicked();
     string? clipboard = yield window.get_clipboard().read_text_async(null); assert(clipboard == document.file.get_path());
     yield shot(window, "general-document");
+    var long_name = "Annual_Report_gjpqy_" + string.nfill(150, 'x') + " 年次.txt";
+    var long_file = File.new_for_path(fixture + "/" + long_name); FileUtils.set_contents(long_file.get_path(), "long"); var long_item = item(long_file);
+    var long_properties = new PropertiesDialog(window, selection(long_item), metadata); long_properties.present(window); yield pause_layout();
+    assert_identity(long_properties, long_name); assert(long_properties.content_width == 560);
+    yield shot(window, "general-long-name"); long_properties.close(); yield pause_layout();
     window.visible = false;
     var larger_text = new Gtk.CssProvider(); larger_text.load_from_string("* { font-size: 20px; }");
     Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), larger_text, Gtk.STYLE_PROVIDER_PRIORITY_USER + 10);
     var narrow = new Adw.ApplicationWindow(app); narrow.set_default_size(620, 720); narrow.content = new Gtk.Box(Gtk.Orientation.VERTICAL, 0); narrow.present();
-    var large_properties = new PropertiesDialog(narrow, selection(document), metadata); large_properties.present(narrow);
+    var large_properties = new PropertiesDialog(narrow, selection(long_item), metadata); large_properties.present(narrow);
     yield pause_layout(); yield shot(narrow, "general-large-text-narrow"); large_properties.close(); yield pause_layout(); narrow.destroy();
     Gtk.StyleContext.remove_provider_for_display(Gdk.Display.get_default(), larger_text); window.present(); yield pause_layout();
 
@@ -126,6 +197,7 @@ async void scenarios() throws Error {
     var chooser = typed(window, typeof(AssociationChooser)) as AssociationChooser; assert(chooser != null);
     var default_button = button_label(chooser, "Set Default"); var reset_button = button_label(chooser, "Reset to System Default");
     assert(default_button.get_mapped() && reset_button.get_mapped());
+    yield pause_layout();
     Graphene.Rect before_scroll, after_scroll, reset_bounds;
     assert(default_button.compute_bounds(chooser, out before_scroll));
     assert(reset_button.compute_bounds(chooser, out reset_bounds));
@@ -134,7 +206,7 @@ async void scenarios() throws Error {
     var app_scroll = typed(chooser, typeof(Gtk.ScrolledWindow)) as Gtk.ScrolledWindow; assert(app_scroll != null);
     app_scroll.vadjustment.value = app_scroll.vadjustment.upper;
     yield pause_layout(); assert(default_button.get_mapped() && reset_button.get_mapped());
-    assert(default_button.compute_bounds(chooser, out after_scroll) && after_scroll.origin.y == before_scroll.origin.y);
+    assert(default_button.compute_bounds(chooser, out after_scroll) && Math.fabs(after_scroll.origin.y - before_scroll.origin.y) <= 1);
     app_scroll.vadjustment.value = 0; yield pause_layout();
     yield shot(window, "application-chooser");
     ((Gtk.CheckButton)((Adw.ActionRow)titled(chooser, first.get_display_name())).activatable_widget).active = false; assert(chooser.selected == null && !button_label(chooser, "Set Default").sensitive);
@@ -147,6 +219,10 @@ async void scenarios() throws Error {
     properties.close(); yield pause_layout(); assert(properties.token.is_cancelled());
     properties = new PropertiesDialog(window, selection(folder), metadata); properties.present(window); yield pause_layout();
     assert(button_label(properties.general, "Change…") == null && titled(properties.general, "Sharing") != null);
+    yield wait_scan(properties); assert_identity(properties, folder.name);
+    assert_information_order(properties, {"Type", "Size", "Contents", "Location", "Modified"});
+    assert(information_value(properties, "Type") == "File folder" && information_value(properties, "Size") == Paths.size(5));
+    assert(information_value(properties, "Contents") == "1 item");
     yield shot(window, "general-folder");
     ((Adw.ActionRow)titled(properties.general, "Sharing")).activated(); yield pause_layout();
     var sharing = typed(window, typeof(SharingPage)) as SharingPage; assert(sharing != null);
@@ -190,6 +266,10 @@ async void scenarios() throws Error {
     properties = new PropertiesDialog(window, selection(document, folder), metadata); properties.present(window); yield pause_layout();
     assert(titled(properties.general, "Sharing") == null && button_label(properties.general, "Change…") == null);
     var all = (Adw.SwitchRow)titled(properties.general, "Favorite All Selected Items"); all.active = true; assert(metadata.favorite(document.file) && metadata.favorite(folder.file));
+    yield wait_scan(properties); assert_identity(properties, "2 selected items");
+    assert_information_order(properties, {"Type", "Size", "Location"});
+    assert(information_value(properties, "Type") == "Mixed files and folders"); assert(information_value(properties, "Size") == Paths.size(11));
+    assert(titled(properties.general, "Total Size") == null && titled(properties.general, "Types") == null);
     yield shot(window, "general-multiple");
     ((Adw.ActionRow)titled(properties.general, "Tags")).activated(); yield pause_layout(); prompt = typed(window, typeof(Adw.AlertDialog)) as Adw.AlertDialog; assert(prompt != null);
     ((Gtk.Entry)prompt.extra_child).text = "Shared"; prompt.response("apply"); prompt.close(); yield pause_layout(); assert(metadata.tags(document.file) == "Shared" && metadata.tags(folder.file) == "Shared");
@@ -225,7 +305,7 @@ async void scenarios() throws Error {
     }
     assert(MetadataPage.classify("Unrecognised Provider Field", "image/png") == "Additional Metadata");
     Test.message("stage: remote");
-    var remote_file = File.new_for_uri("sftp://example.invalid/Reports/年度.txt");
+    var remote_file = File.new_for_uri("sftp://example.invalid/Reports/very-long-location-very-long-location-very-long-location-very-long-location-very-long-location-very-long-location-very-long-location-very-long-location-/年度.txt");
     var remote_info = new FileInfo(); remote_info.set_display_name("年度.txt"); remote_info.set_file_type(FileType.REGULAR); remote_info.set_content_type(document.mime); remote_info.set_size(100);
     var remote = new FileItem(remote_file, remote_info);
     properties = new PropertiesDialog(window, selection(remote), metadata); properties.present(window); yield pause_layout();
@@ -236,14 +316,14 @@ async void scenarios() throws Error {
     assert(titled(properties, "Permissions unavailable") != null); properties.close(); yield pause_layout();
     remote_info.remove_attribute("standard::size");
     properties = new PropertiesDialog(window, selection(new FileItem(remote_file, remote_info)), metadata); properties.present(window); yield pause_layout();
-    assert(((Adw.ActionRow)titled(properties.general, remote.name)).subtitle == "File");
+    assert_identity(properties, remote.name); assert(information_value(properties, "Type") == "File" && information_value(properties, "Size") == "Unavailable");
     ((Adw.ActionRow)titled(properties.general, "Details")).activated(); yield pause_layout();
     assert(((Adw.ActionRow)titled(properties, "Exact Size")).subtitle == "Unavailable"); properties.close(); yield pause_layout();
     var mount_info = folder.info.dup(); mount_info.set_attribute_boolean("unix::is-mountpoint", true); assert(!PropertiesDialog.shareable(new FileItem(folder.file, mount_info)));
     var link = File.new_for_path(fixture + "/Project Link"); link.make_symbolic_link(folder.file.get_path());
     var link_item = item(link); link_item.resolved_directory = true;
     properties = new PropertiesDialog(window, selection(link_item), metadata); properties.present(window); yield pause_layout();
-    assert(((Adw.ActionRow)titled(properties.general, link_item.name)).subtitle.has_prefix("Symbolic Link"));
+    assert_identity(properties, link_item.name); assert(information_value(properties, "Type") == "Symbolic link");
     assert(titled(properties.general, "Contents") == null && titled(properties.general, "Sharing") == null);
     ((Adw.ActionRow)titled(properties.general, "Details")).activated(); yield pause_layout(); assert(titled(properties, "Link Target") != null);
     properties.close(); yield pause_layout();
@@ -262,6 +342,7 @@ async void scenarios() throws Error {
     details = typed(window, typeof(MetadataPage)) as MetadataPage;
     assert(titled(details, "Unavailable") != null && titled(details, "Dimensions") != null && titled(details, "Fixture Property") != null);
     properties.close(); yield pause_layout();
+    yield counting_cases(window, metadata, document);
     var previous_default = AppInfo.get_default_for_type(document.mime, false);
     var standalone = new AssociationsDialog(window, document); yield pause_layout();
     var open_row = titled(standalone, first.get_display_name()); assert(open_row != null);

@@ -115,3 +115,52 @@ long General/advanced/metadata sections, while dialog geometry remains stable.
   it passed under the debugger and in the final complete 18-target run.
 
 See [Properties architecture and source changes](properties.md).
+
+## Identity and Information separation — 31 October 2026
+
+The identity is now a horizontal Gtk.Box containing the existing 48px image and
+one selectable, wrapping heading label. The old identity_description() and all
+count-driven identity subtitle updates were removed. No production CSS was added.
+
+General uses a separate PropertiesInformationRow helper: native ActionRow titles
+on the left and selectable suffix values aligned right. Long values ellipsize,
+with the full value in a tooltip; Copy Location still copies the full native path
+or URI. The shared value_row() used by advanced pages is unchanged.
+
+Type and Size precede Location and Modified. Folders insert Contents after Size.
+The existing FileCounts scan updates Size and Contents, preserves partial/error
+states and cancellation, and continues updating exact/allocated storage in Details.
+Ordinary files use their existing size attributes without a recursive scan.
+Multiple selections show a count in the header and only Type, Size and Location
+in Information. Duplicate Types and Total Size rows were removed.
+
+Modified files: src/dialogs/properties.vala, tests/properties.vala,
+docs/properties.md and this verification report.
+
+The mapped Properties regression was extended with ordered Information rows,
+header structure and stability, a long Unicode filename, enlarged text, unknown
+size, symlink type, mixed-parent selection, read-only files, empty and 1,500-file
+folders, unreadable partial totals and cancellation. Existing functional tests
+for navigation, applications, organisation, permissions, sharing and Details remain.
+The chooser footer geometry assertion now waits for layout settling and permits
+one pixel of rounding difference.
+
+The real Majoris Theme run passed /properties/redesign in 76.08 seconds. It wrote
+30 PNGs and matching widget-tree JSON under build/identity-evidence. All six
+required General scenarios were inspected in both light and dark: document,
+image, folder, multiple selection, long filename, and narrow enlarged text.
+The header wrapped without clipping, values remained separate and the Copy
+Location button stayed visible. Screenshots include the native focus selection
+on the selectable filename. Non-fatal Pixman diagnostics still occurred during
+theme transitions; the environment-dependent limits above continue to apply.
+
+Commands and logs for this update:
+
+- meson setup build --reconfigure: build/identity-configure.log
+- meson compile -C build: build/identity-full-build.log
+- meson test -C build --num-processes 1 --print-errorlogs: build/identity-suite.log
+- Majoris bridge mapped UI run: build/identity-visual.log
+Reconfigure and full compilation succeeded. The complete serial suite passed
+18/18 targets with zero failures, skips or timeouts, including inline-rename
+(145.33 seconds), details-corrections and Properties (58.57 seconds). Existing
+compiler warnings remain. git diff --check reported no whitespace errors.
