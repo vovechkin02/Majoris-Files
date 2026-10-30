@@ -1,5 +1,133 @@
 namespace MajorisFiles {
     public class Browser : Gtk.Box {
+        public InlineRename? inline_rename;
+        bool reconciling_inline_rename;
+        Gee.ArrayList<FilenameCell> filename_cells = new Gee.ArrayList<FilenameCell>();
+        public signal void rename_requested(InlineRename transaction);
+        public bool can_inline_rename() {
+            var chosen = selected();
+            return !chooser_mode && chosen.size == 1 && inline_rename == null &&
+                !chosen[0].file.has_uri_scheme("majoris") && !chosen[0].file.has_uri_scheme("recent") &&
+                !chosen[0].file.has_uri_scheme("trash") &&
+                (!chosen[0].info.has_attribute("access::can-rename") || chosen[0].info.get_attribute_boolean("access::can-rename"));
+        }
+        bool rename_matches(FilenameCell cell) {
+            if (inline_rename == null || cell.item == null) return false;
+            var context = cell.context;
+            if (context is GridSlice) context = ((GridSlice)context).source;
+            return context == inline_rename.context && cell.item.file.equal(inline_rename.item.file);
+        }
+        void render_rename(bool focus = false) {
+            foreach (var cell in filename_cells) {
+                cell.render(rename_matches(cell) && cell.get_mapped() ? inline_rename : null, focus && rename_matches(cell) && cell.get_mapped());
+            }
+        }
+        public void begin_inline_rename() {
+            if (inline_rename != null) { if (!inline_rename.pending) foreach(var cell in filename_cells) if(rename_matches(cell)) cell.toggle_selection(); return; }
+            if (!can_inline_rename()) return;
+            inline_rename = new InlineRename(selected()[0], active_selection);
+            render_rename(true);
+            // scroll_to realizes an offscreen selection without relying on a row-local identity.
+            for (uint i = 0; i < active_selection.get_n_items(); i++) {
+                var item = active_selection.get_item(i) as FileItem;
+                if (item == null || !item.file.equal(inline_rename.item.file)) continue;
+                if (view_mode == "Grid") {
+                    if (group_key == "None") plain_grid.scroll_to(i, Gtk.ListScrollFlags.NONE, null);
+                    else grouped_grid.scroll_to(grid_rows.row_for(i), Gtk.ListScrollFlags.NONE, null);
+                }
+                else if (view_mode == "Columns") scroll_rename_column(columns, i, active_selection);
+                else if (view_mode == "List") details.scroll_to(i, null, Gtk.ListScrollFlags.NONE, null);
+                else if (view_mode == "Gallery") gallery_strip.scroll_to(i, Gtk.ListScrollFlags.NONE, null);
+                break;
+            }
+            var expected = inline_rename;
+            uint frames = 0;
+            add_tick_callback(() => {
+                if (inline_rename != expected || expected == null || expected.pending) return Source.REMOVE;
+                foreach (var cell in filename_cells) if (rename_matches(cell) && cell.get_mapped()) {
+                    cell.render(expected, true);
+                    expected.focus_ready = true;
+                    return Source.REMOVE;
+                }
+                return ++frames < 20 ? Source.CONTINUE : Source.REMOVE;
+            });
+            selection_changed();
+        }
+        void scroll_rename_column(Gtk.Widget widget, uint position, Gtk.SelectionModel context) {
+            if (widget is Gtk.ListView && ((Gtk.ListView)widget).model == context)
+                ((Gtk.ListView)widget).scroll_to(position, Gtk.ListScrollFlags.NONE, null);
+            for (var child = widget.get_first_child(); child != null; child = child.get_next_sibling()) scroll_rename_column(child, position, context);
+        }
+        public void cancel_inline_rename() {
+            if (inline_rename == null) return;
+            inline_rename.cancelled = true; inline_rename = null;
+            render_rename(); selection_changed();
+        }
+        public void submit_inline_rename() {
+            var state = inline_rename;
+            if (state == null || state.pending || state.cancelled) return;
+            if (state.proposed == state.item.name) { cancel_inline_rename(); return; }
+            if (!Paths.valid_name(state.proposed)) { retry_inline_rename(state, _("Invalid filename")); return; }
+            state.pending = true;
+            render_rename();
+            rename_requested(state);
+        }
+        public void retry_inline_rename(InlineRename state, string message) {
+            if (inline_rename != state || state.cancelled) return;
+            state.pending = false; state.message = message;
+            render_rename(true);
+        }
+        public void reconcile_history_rename(File source, File result) {
+            var context = active_selection;
+            for (uint i = 0; i < context.get_n_items(); i++) {
+                var item = context.get_item(i) as FileItem;
+                if (item != null && item.file.equal(source) && (context.is_selected(i) || (initial_selection != null && initial_selection.equal(source)))) {
+                    reconcile_rename.begin(new InlineRename(item, context), result, context);
+                    return;
+                }
+            }
+        }
+        public void finish_inline_rename(InlineRename state, File result) {
+            if (inline_rename != state || state.cancelled) return;
+            var context = state.context;
+            bool return_focus = false;
+            foreach (var cell in filename_cells) if (rename_matches(cell) && cell.entry.has_focus) return_focus = true;
+            cancel_inline_rename();
+            if (return_focus) file_surface.grab_focus();
+            reconcile_rename.begin(state, result, context);
+        }
+        async void reconcile_rename(InlineRename state, File result, Gtk.SelectionModel context) {
+            uint epoch = navigation_generation;
+            string mode = view_mode;
+            try {
+                var info = yield result.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
+                if (epoch != navigation_generation || mode != view_mode) return;
+                var replacement = new FileItem(result, info);
+                var stores = new Gee.ArrayList<GLib.ListStore>(); stores.add(directory.items);
+                foreach (var model in column_models) stores.add(model.items);
+                reconciling_inline_rename = true;
+                foreach (var store in stores) for (uint i = 0; i < store.get_n_items(); i++) {
+                    var item = (FileItem)store.get_item(i);
+                    if (item.file.equal(state.item.file)) { store.splice(i, 1, new Object[] {replacement}); break; }
+                }
+                if (view_mode == "Columns" && state.item.directory) {
+                    // Retarget only affected descendants, keeping their scrollers alive.
+                    foreach (var model in column_models) {
+                        var relative = state.item.file.get_relative_path(model.location);
+                        if (model.location.equal(state.item.file)) model.open.begin(result);
+                        else if (relative != null) model.open.begin(result.resolve_relative_path(relative));
+                    }
+                    if (column_folder != null && column_folder.equal(state.item.file)) column_folder = result;
+                }
+                for (uint i = 0; i < context.get_n_items(); i++) {
+                    var item = context.get_item(i) as FileItem;
+                    if (item != null && item.file.equal(result)) { context.select_item(i, true); break; }
+                }
+                reconciling_inline_rename = false;
+                if (view_mode != "Columns" || context == selection) select_file(result);
+                if (view_mode == "Gallery") gallery_preview.show_item.begin(replacement);
+            } catch (Error e) { reconciling_inline_rename = false; error(e.message); }
+        }
         public DirectoryModel directory = new DirectoryModel();
         public History history = new History();
         public SearchController search = new SearchController();
@@ -61,6 +189,7 @@ namespace MajorisFiles {
         Gtk.Stack grid_views = new Gtk.Stack();
         GridRows grid_rows;
         Gtk.ListView grouped_grid;
+        Gtk.GridView plain_grid;
         uint grid_anchor = uint.MAX;
         Gtk.ListBox sidebar = new Gtk.ListBox();
         Gtk.Label status = new Gtk.Label("");
@@ -68,6 +197,7 @@ namespace MajorisFiles {
         Gtk.Box columns = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 1);
         Gtk.MultiSelection? column_selection;
         File? column_folder;
+        File? column_root;
         Gee.ArrayList<DirectoryModel> column_models = new Gee.ArrayList<DirectoryModel>();
         Gee.HashMap<Gtk.Widget, Gtk.MultiSelection> column_selections = new Gee.HashMap<Gtk.Widget, Gtk.MultiSelection>();
         Gee.HashMap<Gtk.Widget, ulong?> column_handlers = new Gee.HashMap<Gtk.Widget, ulong?>();
@@ -661,6 +791,7 @@ namespace MajorisFiles {
             append(adaptive);
             display_changed.connect(() => refresh_density(views));
             var grid = new Gtk.GridView(selection, factory(true));
+            plain_grid = grid;
             style_data_view(grid, "majoris-data-grid");
             grid.min_columns = 1;
             grid.max_columns = 16;
@@ -779,9 +910,12 @@ namespace MajorisFiles {
                 location_error.revealed = true;
             });
             directory.loaded.connect(() => { update_status();
+                                             bool keep_columns = view_mode == "Columns" && column_root != null && column_root.equal(directory.location) && columns.get_first_child() != null;
+                                             if (keep_columns) reconciling_inline_rename = true;
                                              restore_selection();
+                                             reconciling_inline_rename = false;
                                              if(column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn&&!column_sort_pending)set_sort(sort_key,ascending);
-                                             if (view_mode == "Columns")
+                                             if (view_mode == "Columns" && !keep_columns)
                                                  build_columns();
                 });
             search.found.connect((item) => directory.items.append(item));
@@ -791,6 +925,7 @@ namespace MajorisFiles {
             });
             var keys = new Gtk.EventControllerKey();
             keys.key_pressed.connect((key, code, mods) => {
+                if (inline_rename != null) return false;
                 if (key == Gdk.Key.F9) { toggle_locations(); return true; }
                 if (key == Gdk.Key.F5) { navigate(directory.location, false); return true; }
                 if(key == Gdk.Key.Escape && location_bar.visible_child_name == "entry")
@@ -1548,6 +1683,7 @@ namespace MajorisFiles {
         }
         public void set_view(string mode, bool remember = true)
         {
+            if (view_mode != mode) cancel_inline_rename();
             if(chooser_mode && mode != "Grid" && mode != "List")
                 mode = "Grid";
             if(view_mode == mode)
@@ -1598,6 +1734,7 @@ namespace MajorisFiles {
         }
         public void navigate(File file, bool record = true)
         {
+            cancel_inline_rename();
             // Migrate old saved Home Overview tabs into the new default collection.
             if (file.get_uri() == "majoris:///home") { navigate(File.new_for_uri("recent:///"), record); return; }
             location_bar.visible_child_name = "breadcrumbs";
@@ -1856,6 +1993,7 @@ namespace MajorisFiles {
         }
         void build_columns()
         {
+            column_root = directory.location;
             foreach(var model in column_models)
                 model.cancel();
             column_models.clear();
@@ -1936,7 +2074,7 @@ namespace MajorisFiles {
             column_selections[scroll] = selected;
             column_generations[scroll] = 0;
             column_handlers[scroll] = selected.selection_changed.connect(() => {
-                if(view_mode != "Columns" || scroll.get_parent() != columns)
+                if(reconciling_inline_rename || (selected == selection && directory.loading) || (loaded_columns.has_key(scroll) && loaded_columns[scroll].loading) || view_mode != "Columns" || scroll.get_parent() != columns)
                     return;
                 if(!applying_column_restore)
                     column_restore = null;
@@ -1948,7 +2086,7 @@ namespace MajorisFiles {
                     pending_columns.unset(scroll);
                 }
                 column_selection = selected;
-                column_folder = folder;
+                column_folder = loaded_columns.has_key(scroll) ? loaded_columns[scroll].location : directory.location;
                 selection_changed();
                 session_changed();
                 update_status();
@@ -1986,6 +2124,22 @@ namespace MajorisFiles {
             pending_columns.unset(anchor);
             var child = append_column(folder, model.items);
             loaded_columns[child] = model;
+            var remembered = new Gee.HashSet<string>();
+            model.resetting.connect(() => {
+                remembered.clear();
+                var context = column_selections[child];
+                if (context != null) for (uint i = 0; i < context.get_n_items(); i++)
+                    if (context.is_selected(i)) remembered.add(((FileItem)context.get_item(i)).info.get_name());
+            });
+            model.loaded.connect(() => {
+                if (!column_selections.has_key(child)) return;
+                var context = column_selections[child];
+                reconciling_inline_rename = true;
+                for (uint i = 0; i < context.get_n_items(); i++)
+                    if (remembered.contains(((FileItem)context.get_item(i)).info.get_name())) context.select_item(i, false);
+                reconciling_inline_rename = false;
+                if (column_selection == context) { column_folder = model.location; selection_changed(); update_status(); }
+            });
             restore_column(child, folder);
         }
         delegate string ItemText(FileItem item);
@@ -2071,6 +2225,7 @@ namespace MajorisFiles {
         {
             var f = new Gtk.SignalListItemFactory();
             var display_handlers = new Gee.HashMap<Gtk.ListItem, ulong?>();
+            var cells = new Gee.HashMap<Gtk.ListItem, FilenameCell>();
             f.setup.connect((obj) => { var li = (Gtk.ListItem)obj;
                                        var box = new Gtk.Box(grid ? Gtk.Orientation.VERTICAL : Gtk.Orientation.HORIZONTAL, 8);
                                        box.add_css_class(grid ? "majoris-data-tile" : "majoris-data-cell");
@@ -2087,7 +2242,14 @@ namespace MajorisFiles {
                                        cloud_badge.halign = Gtk.Align.END; cloud_badge.valign = Gtk.Align.END;
                                        cloud_badge.can_target = false; cloud_badge.visible = false;
                                        icon_area.add_overlay(cloud_badge); box.append(icon_area);
-                                       var label = new Gtk.Label("");
+                                       var filename = new FilenameCell();
+                                       var label = filename.label;
+                                       filename.hexpand = !grid;
+                                       filename_cells.add(filename); cells[li] = filename;
+                                       filename.edited.connect((text) => { if(rename_matches(filename)) { inline_rename.proposed = text; inline_rename.message = ""; } });
+                                       filename.commit_requested.connect(() => { if(rename_matches(filename)) submit_inline_rename(); });
+                                       filename.cancel_requested.connect(() => { cancel_inline_rename(); box.grab_focus(); });
+                                       filename.map.connect(() => { if(rename_matches(filename)) filename.render(inline_rename, !inline_rename.pending); });
                                        label.ellipsize = Pango.EllipsizeMode.END;
                                        label.max_width_chars = grid ? 1 : 50;
                                        label.xalign = grid ? 0.5f : 0;
@@ -2100,7 +2262,7 @@ namespace MajorisFiles {
                                            label.lines = 2;
                                        }
                                        else label.halign = Gtk.Align.START;
-                                       box.append(label);
+                                       box.append(filename);
                                        var caption = new Gtk.Label("");
                                        caption.add_css_class("majoris-data-metadata");
                                        caption.ellipsize = Pango.EllipsizeMode.END;
@@ -2159,6 +2321,7 @@ namespace MajorisFiles {
                                            });box.add_controller(click);
                                            var keys=new Gtk.EventControllerKey();keys.propagation_phase=Gtk.PropagationPhase.CAPTURE;
                                            keys.key_pressed.connect((key,code,state)=>{
+                                               if (filename.transaction != null) return false;
                                                int current=(int)(slice.offset+li.position),target=current;
                                                if(key==Gdk.Key.Up)target-=(int)grid_rows.columns;
                                                else if(key==Gdk.Key.Down)target+=(int)grid_rows.columns;
@@ -2192,7 +2355,7 @@ namespace MajorisFiles {
                                            drag.actions = Gdk.DragAction.COPY | Gdk.DragAction.MOVE | Gdk.DragAction.LINK;
                                            drag.prepare.connect(() => {
                         var item = li.item as FileItem;
-                        if(item == null)
+                        if(item == null || filename.transaction != null)
                             return null;
                         var model=row_selection??active_selection;
                         if(!model.is_selected(li.position))
@@ -2215,7 +2378,10 @@ namespace MajorisFiles {
                                       var image = (Gtk.Image)area.child;
                                       cloud_badge_for((Gtk.Image)area.child.get_next_sibling(), item);
                                       image.set_from_gicon(item_icon(item));
-                                      ((Gtk.Label)area.get_next_sibling()).label = visible_name(item);
+                                      var filename = (FilenameCell)area.get_next_sibling();
+                                      filename.item = item; filename.context = row_selection ?? selection;
+                                      filename.label.label = visible_name(item);
+                                      filename.render(rename_matches(filename) && box.get_mapped() ? inline_rename : null);
                                       if(grid)
                                           ((Gtk.Label)area.get_next_sibling().get_next_sibling()).label = caption_key == "None" ? "" : column_text(item, caption_key);
                                       ((Gtk.CheckButton)(grid ? area.get_last_child() : box.get_last_child())).active = li.selected;
@@ -2223,6 +2389,7 @@ namespace MajorisFiles {
                                       refresh_thumbnail(li, image, item);
                 });
             f.unbind.connect((obj) => { var li = (Gtk.ListItem)obj;
+                                        if (cells.has_key(li)) cells[li].detach();
                                         var token = thumbnail_jobs[li];
                                         if (token != null)
                                             token.cancel();
@@ -2230,6 +2397,7 @@ namespace MajorisFiles {
                 });
             f.teardown.connect((obj) => {
                 var li = (Gtk.ListItem)obj;
+                if (cells.has_key(li)) { var cell = cells[li]; cell.detach(); filename_cells.remove(cell); cells.unset(li); }
                 if(display_handlers.has_key(li))
                 {
                     disconnect(display_handlers[li]);
@@ -2267,6 +2435,7 @@ namespace MajorisFiles {
         }
         public void cancel()
         {
+            cancel_inline_rename();
             location_bar.visible_child_name = "breadcrumbs";
             column_sort_token.cancel();column_sort_pending=false;
             if (collection_refresh != 0) { Source.remove(collection_refresh); collection_refresh = 0; }
@@ -2331,6 +2500,7 @@ namespace MajorisFiles {
         }
         public override void unroot()
         {
+            cancel_inline_rename();
             if (cloud_changed != 0) { CloudFiles.get_default().disconnect(cloud_changed); cloud_changed = 0; }
             if (shares_changed != 0) { shares.disconnect(shares_changed); shares_changed = 0; }
             base.unroot();

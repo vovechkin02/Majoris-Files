@@ -49,7 +49,7 @@ deps += [dependency('gstreamer-app-1.0')]
 ui += files('src/devices/disk-images.vala')
 ui += files('src/views/column-provider.vala')
 ui += files('src/views/file-groups.vala')
-ui += files('src/views/grid-rows.vala')
+ui += files('src/views/grid-rows.vala', 'src/views/filename-cell.vala')
 ui += configure_file(input: 'src/preview/config.vala.in', output: 'preview-config.vala', configuration: {'office_source_helper_path': meson.project_source_root() / 'src/preview/office-render.py', 'office_helper_path': get_option('prefix') / get_option('libexecdir') / 'majoris-files-office-render.py', 'helper_path': get_option('prefix') / get_option('libexecdir') / 'majoris-files-preview-helper'})
 preview_helper = executable('majoris-files-preview-helper', 'src/preview/helper.c', 'src/preview/media.c', 'src/preview/playback-worker.c', 'src/preview/image-metadata.c', 'src/preview/image-decoders.c', 'src/preview/rotation.c', 'src/archive/native.c', dependencies: [dependency('gio-2.0'), dependency('poppler-glib'), dependency('libarchive'), dependency('pangocairo'), dependency('pangoft2'), dependency('fontconfig'), dependency('gdk-pixbuf-2.0'), dependency('gexiv2'), dependency('libraw'), dependency('libheif', version: '>=1.19'), dependency('lcms2'), dependency('libturbojpeg'), dependency('gstreamer-pbutils-1.0'), dependency('gstreamer-app-1.0'), dependency('gstreamer-video-1.0'), dependency('libcmark'), dependency('json-glib-1.0')], link_args: ['-lm'], install: true, install_dir: get_option('libexecdir'))
 ui += files('src/actions/registry.vala', 'src/actions/rotation.vala')
@@ -159,4 +159,9 @@ endif
 toolbar_tests = executable('toolbar-tests', 'tests/toolbars.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
 if xvfb.found()
   test('toolbars', find_program('dbus-run-session'), args: ['--', xvfb, '-a', toolbar_tests], depends: preview_helper, env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 90)
+endif
+
+inline_rename_tests = executable('inline-rename-tests', 'tests/inline-rename.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
+if xvfb.found()
+  test('inline-rename', find_program('dbus-run-session'), args: ['--', xvfb, '-a', inline_rename_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 180)
 endif

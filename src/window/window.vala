@@ -23,6 +23,10 @@ namespace MajorisFiles {
             this.metadata = metadata;
             this.places = places;
             this.operations = operations;
+            operations.renamed.connect((source, result) => {
+                for (int i = 0; i < tabs.n_pages; i++)
+                    ((Browser)tabs.get_nth_page(i).child).reconcile_history_rename(source, result);
+            });
             operations.conflict_presentation = (dialog, source, destination) => ConflictThumbnails.attach(dialog, source, destination, metadata);
             extension_manager = ExtensionManager.get_default(metadata);
             foreach(var extension in extension_manager.extensions)if("nearby" in extension.capabilities)providers.register_nearby(new ExternalNearby(extension));
@@ -184,7 +188,7 @@ namespace MajorisFiles {
                                                window.present();
                                                return window.tabs;
                 });
-            tabs.notify["selected-page"].connect(() => { update_commands(); var recorder = app as SessionRecorder;
+            tabs.notify["selected-page"].connect(() => { for (int i = 0; i < tabs.n_pages; i++) { var browser = tabs.get_nth_page(i).child as Browser; if (browser != null && browser != current) browser.cancel_inline_rename(); } update_commands(); var recorder = app as SessionRecorder;
                                                          if(recorder != null)
                                                              recorder.queue_session_save();
                 });
@@ -210,6 +214,34 @@ namespace MajorisFiles {
             action("new-folder", () => create_folder.begin());
             action("new-file", () => create_file.begin());
             action("rename", () => rename.begin());
+            var rename_keys = new Gtk.EventControllerKey();
+            rename_keys.propagation_phase = Gtk.PropagationPhase.CAPTURE;
+            rename_keys.key_pressed.connect((key, code, mods) => {
+                if (current == null || current.inline_rename == null) return false;
+                Gtk.Entry? editor = null;
+                for (var widget = get_focus(); widget != null; widget = widget.get_parent())
+                    if (widget is Gtk.Entry) { editor = (Gtk.Entry)widget; break; }
+                if (editor == null) return false;
+                if (key == Gdk.Key.F2) { current.begin_inline_rename(); return true; }
+                if (key == Gdk.Key.Escape) { current.cancel_inline_rename(); current.file_surface.grab_focus(); return true; }
+                // Forward exactly once directly to the entry's native handlers.
+                if (key == Gdk.Key.Tab || key == Gdk.Key.ISO_Left_Tab) { current.submit_inline_rename(); return false; }
+                return rename_keys.forward(get_focus());
+            });
+            ((Gtk.Widget)this).add_controller(rename_keys);
+            var rename_click = new Gtk.GestureClick();
+            rename_click.button = 1;
+            rename_click.propagation_phase = Gtk.PropagationPhase.CAPTURE;
+            rename_click.pressed.connect((n, x, y) => {
+                if (current == null || current.inline_rename == null || current.inline_rename.pending) return;
+                var picked = pick(x, y, Gtk.PickFlags.DEFAULT);
+                for (var widget = picked; widget != null; widget = widget.get_parent())
+                    if (widget is FilenameCell && ((FilenameCell)widget).transaction == current.inline_rename) return;
+                current.submit_inline_rename();
+            });
+            ((Gtk.Widget)this).add_controller(rename_click);
+
+
             action("trash", () => operations.run.begin(OperationKind.TRASH, selected_files(), null, this));
             action("delete", () => permanent_delete.begin());
             action("copy", () => copy(false));
@@ -288,7 +320,7 @@ namespace MajorisFiles {
             if (name in new string[] {"new-folder", "new-file", "paste", "split", "join", "duplicate-items", "folder-with-selection", "paste-link", "compress", "compress-sevenzip", "compress-encrypted", "extract", "extract-encrypted", "link", "templates"})
                 return current.accepts_destination;
             int count = current.selected().size;
-            if (name == "rename") return count == 1;
+            if (name == "rename") return current.inline_rename != null ? !current.inline_rename.pending : count > 1 || current.can_inline_rename();
             if (name == "share-folder") return count == 1 && current.selected()[0].directory && current.selected()[0].file.is_native();
             if (name in new string[] {"cut", "copy", "trash", "delete", "favorite", "properties"}) return count > 0;
             return true;
@@ -351,6 +383,7 @@ namespace MajorisFiles {
                     });
             });
             tabs.selected_page = page;
+            browser.rename_requested.connect((state) => commit_inline_rename.begin(browser, state));
             browser.selection_changed.connect(() => { var window = browser.get_root() as FilesWindow; if (window != null) window.update_commands(); });
             browser.location_changed.connect(() => { var window = browser.get_root() as FilesWindow; if (window != null) window.update_commands(); });
             browser.navigate(location);
@@ -399,7 +432,7 @@ namespace MajorisFiles {
                 menu.append("Permissions…", "win.permissions");
                 if (one) {
                     menu.append("Open Preview", "win.quick-preview");
-                    menu.append("Rename…", "win.rename");
+                    menu.append("Rename", "win.rename");
                     menu.append("Open With…", "win.open-with");
                     menu.append("Default Application…", "win.associations");
                     menu.append("Custom Icon…", "win.custom-icon");
@@ -510,24 +543,33 @@ namespace MajorisFiles {
         }
         async void rename()
         {
-            var chosen = current.selected();
-            if (chosen.size != 1)
-                return;
-            var name = yield Dialogs.prompt(this, "Rename", chosen[0].name);
-            if (name == null)
-                return;
+            if (current.selected().size > 1) { lookup_action("batch-rename").activate(null); return; }
+            current.begin_inline_rename();
+        }
+        async void commit_inline_rename(Browser browser, InlineRename state)
+        {
             try {
-                string old_name = chosen[0].name;
-                int old_dot = old_name.last_index_of("."), new_dot = name.last_index_of(".");
-                string old_extension = old_dot > 0 ? old_name.substring(old_dot) : "";
-                string new_extension = new_dot > 0 ? name.substring(new_dot) : "";
-                if(!chosen[0].directory && old_extension != new_extension && metadata.state("extension-warning", "true") == "true")
-                    if(!(yield Dialogs.confirm(this, "Change File Extension?", "Changing the extension can change which application opens this file.", "Rename")))
-                        return;
-                yield operations.rename(chosen[0].file, name);
-            }
-            catch (Error e) {
-                Dialogs.error(this, e.message);
+                // Validate identity after model refreshes, before warnings and mutation.
+                var info = yield state.item.file.query_info_async("id::file,standard::name", FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
+                var identity = state.item.info.get_attribute_string("id::file");
+                if (identity != null && identity != info.get_attribute_string("id::file"))
+                    throw new IOError.NOT_FOUND("The original item has changed. Cancel and select it again.");
+                if (state.cancelled || browser.inline_rename != state) return;
+                if (!state.item.directory && InlineRename.extension(state.item.name) != InlineRename.extension(state.proposed) && metadata.state("extension-warning", "true") == "true") {
+                    if (!(yield Dialogs.confirm(this, "Change File Extension?", "Changing the extension can change which application opens this file.", "Rename"))) {
+                        browser.retry_inline_rename(state, ""); return;
+                    }
+                }
+                if (state.cancelled || browser.inline_rename != state) return;
+                // Confirmation can remain open while the directory changes.
+                info = yield state.item.file.query_info_async("id::file", FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
+                if (state.cancelled || browser.inline_rename != state) return;
+                if (identity != null && identity != info.get_attribute_string("id::file"))
+                    throw new IOError.NOT_FOUND("The original item has changed. Cancel and select it again.");
+                var result = yield operations.rename(state.item.file, state.proposed);
+                browser.finish_inline_rename(state, result);
+            } catch (Error e) {
+                browser.retry_inline_rename(state, e.message);
             }
         }
         async void permanent_delete()

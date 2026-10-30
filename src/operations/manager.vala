@@ -82,6 +82,7 @@ namespace MajorisFiles {
         public signal void changed();
         public signal void replacement_checkpoint(string phase, ReplacementRecord record);
         public signal void rename_checkpoint(string phase);
+        public signal void renamed(File source, File destination);
         public signal void edit_checkpoint(string phase);
         public async bool replace_existing(File source, File destination, bool move, Job job, bool keep_backup = false, string? expected_guard = null) throws Error
         {
@@ -1037,7 +1038,7 @@ namespace MajorisFiles {
             }
             yield file.delete_async(Priority.DEFAULT, token);
         }
-        public async void rename(File file, string name) throws Error
+        public async File rename(File file, string name) throws Error
         {
             if(history_busy)
                 throw new IOError.BUSY("Wait for undo or redo to finish");
@@ -1049,6 +1050,7 @@ namespace MajorisFiles {
             redo_stack.clear();
             persist_history();
             changed();
+            return result;
         }
         async Gee.ArrayList<File> rename_files(Gee.List<File> sources, Gee.List<string> names, Cancellable token) throws Error
         {
@@ -1221,6 +1223,7 @@ namespace MajorisFiles {
                 yield ensure_parent(entry.source);
                 yield entry.destination.move_async(entry.source, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
                 metadata.relocate(entry.destination, entry.source);
+                if (entry.kind == OperationKind.RENAME) renamed(entry.destination, entry.source);
             }
             else if (entry.kind == OperationKind.CREATE_FOLDER || entry.kind == OperationKind.LINK)
                 yield entry.destination.delete_async(Priority.DEFAULT, null);
@@ -1278,6 +1281,7 @@ namespace MajorisFiles {
             {
                 yield entry.source.move_async(entry.destination, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
                 metadata.relocate(entry.source, entry.destination);
+                if (entry.kind == OperationKind.RENAME) renamed(entry.source, entry.destination);
             }
             else if(entry.kind == OperationKind.TRASH)
             {

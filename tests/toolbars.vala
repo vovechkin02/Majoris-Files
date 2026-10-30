@@ -1,4 +1,9 @@
 using MajorisFiles;
+Gtk.Entry? inline_editor(Gtk.Widget widget) {
+    if (widget is MajorisFiles.FilenameCell && ((MajorisFiles.FilenameCell)widget).transaction != null) return ((MajorisFiles.FilenameCell)widget).entry;
+    for (var child = widget.get_first_child(); child != null; child = child.get_next_sibling()) { var found = inline_editor(child); if (found != null) return found; }
+    return null;
+}
 
 Gtk.Widget? tool(Gtk.Widget root, string tooltip) {
     if (root.tooltip_text == tooltip) return root;
@@ -167,7 +172,10 @@ async void run_toolbar_fixture(string? output) throws Error {
     click(browser, "New Folder"); yield respond(window, "made-by-toolbar");
     assert(folder.get_child("made-by-toolbar").query_exists());
     browser.select_file(folder.get_child("alpha.txt")); yield pause_layout();
-    click(browser, "Rename"); yield respond(window, "renamed.txt"); assert(folder.get_child("renamed.txt").query_exists());
+    click(browser, "Rename"); yield pause_layout();
+    var rename_entry = inline_editor(browser); assert(rename_entry != null);
+    rename_entry.text = "renamed.txt"; rename_entry.activate(); yield pause_layout();
+    assert(folder.get_child("renamed.txt").query_exists());
     browser.select_file(folder.get_child("renamed.txt")); click(browser, "Cut");
     browser.navigate(folder.get_child("child")); yield pause_layout(); click(browser, "Paste"); yield pause_layout();
     assert(folder.get_child("child/renamed.txt").query_exists() && !folder.get_child("renamed.txt").query_exists());
