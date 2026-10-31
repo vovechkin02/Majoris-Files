@@ -1,4 +1,37 @@
 namespace MajorisFiles {
+    // Preserve action targets and submenu semantics while dropping decoration.
+    public class MenuPresentation : Object {
+        public static Menu text_only(MenuModel source, string? alias = null) {
+            var result = new Menu();
+            for (int i = 0; i < source.get_n_items(); i++) {
+                var item = new MenuItem.from_model(source, i);
+                item.set_attribute_value("icon", null);
+                item.set_attribute_value("verb-icon", null);
+                if (alias != null) {
+                    var action = source.get_item_attribute_value(i, "action", VariantType.STRING);
+                    if (action != null && action.get_string().has_prefix("cloudprovider.")) item.set_attribute_value("action", new Variant.string(alias + action.get_string().substring("cloudprovider".length)));
+                }
+                var links = source.iterate_item_links(i); string name; MenuModel model; bool empty = false;
+                while (links.get_next(out name, out model)) {
+                    var nested = text_only(model, alias);
+                    if ((name == Menu.LINK_SECTION || name == Menu.LINK_SUBMENU) && nested.get_n_items() == 0) empty = true;
+                    item.set_link(name, nested);
+                }
+                if (!empty) result.append_item(item);
+            }
+            return result;
+        }
+        public static void section(Menu menu, Menu section) {
+            if (section.get_n_items() > 0) menu.append_section(null, section);
+        }
+        public static void button(Gtk.MenuButton button) {
+            button.always_show_arrow = false;
+            button.direction = Gtk.ArrowType.NONE;
+            button.notify["popover"].connect(() => { if (button.popover != null) button.popover.has_arrow = false; });
+            if (button.popover != null) button.popover.has_arrow = false;
+        }
+    }
+
     public class QuickAction : Object {
         public string id;
         public string label;

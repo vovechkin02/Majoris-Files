@@ -1,0 +1,27 @@
+TAP version 14
+# random seed: R02S86dbd1b8b884573b1f337fdc29df792e
+dbus-daemon[239161]: [session uid=1000 pid=239161 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=239179 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[239161]: [session uid=1000 pid=239161 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ‘gio-vfs’
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for ‘gsettings-backend’
+1..1
+# Start of menus tests
+dbus-daemon[239161]: [session uid=1000 pid=239161 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=239179 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[239161]: [session uid=1000 pid=239161 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[239161]: [session uid=1000 pid=239161 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=239179 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[239161]: [session uid=1000 pid=239161 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[239161]: [session uid=1000 pid=239161 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=239179 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[239161]: [session uid=1000 pid=239161 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[239161]: [session uid=1000 pid=239161 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=239179 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[239161]: [session uid=1000 pid=239161 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[239161]: [session uid=1000 pid=239161 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=239179 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[239161]: [session uid=1000 pid=239161 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+# Sidebar popup: 248x88 items=1
+# Sidebar popup: 248x88 items=1
+# Keyboard context key=Menu focus=GtkListItemWidget
+# Keyboard context key=shift+F10 focus=GtkListItemWidget
+ok 1 /menus/context-and-presentation
+# slow test /menus/context-and-presentation executed in 41.36 secs
+# End of menus tests
+A connection to the bus can't be made

@@ -105,7 +105,7 @@ namespace MajorisFiles {
                 }
                 failure = "";
             }
-            catch (Error e) { failure = e.message; cached_actions.clear(); verified = false; }
+            catch (Error e) { if (epoch == request_generation) { failure = e.message; cached_actions.clear(); verified = false; } }
         }
         public Gee.List<QuickAction> actions(Gee.List<FileItem> selection)
         {

@@ -64,7 +64,11 @@ void assert_identity(PropertiesDialog dialog, string name) {
     assert(dialog.identity.get_first_child() is Gtk.Image);
     assert(((Gtk.Image)dialog.identity.get_first_child()).pixel_size == 48);
     assert(dialog.identity.get_first_child().get_next_sibling() == dialog.identity_name);
-    assert(dialog.identity_name.get_next_sibling() == null);
+    if (dialog.items.size == 1) {
+        var icons = dialog.identity_name.get_next_sibling() as Gtk.MenuButton;
+        assert(icons != null && icons.label == "Icon…" && !icons.popover.has_arrow);
+        assert(icons.menu_model.get_n_items() == 2 && icons.get_next_sibling() == null);
+    } else assert(dialog.identity_name.get_next_sibling() == null);
     assert(titled(dialog.general, name) == null);
 }
 void collect_information(Gtk.Widget widget, Gee.ArrayList<string> titles) {

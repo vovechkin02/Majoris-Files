@@ -54,9 +54,11 @@ namespace MajorisFiles {
             header.title_widget = new Adw.WindowTitle("Files", "");
             header.pack_start(Browser.button("tab-new-symbolic", _("New Tab"), () => new_tab(current.location)));
             var progress = new Gtk.MenuButton();
+            MenuPresentation.button(progress);
             progress.icon_name = "folder-download-symbolic";
             progress.tooltip_text = _("File Operations");
             var popover = new Gtk.Popover();
+            popover.has_arrow = false;
             var jobs = new Gtk.ListBox();
             jobs.selection_mode = Gtk.SelectionMode.NONE;
             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
@@ -107,6 +109,7 @@ namespace MajorisFiles {
                 menu.append(parts[0], parts[1]);
             }
             var menu_button = new Gtk.MenuButton();
+            MenuPresentation.button(menu_button);
             menu_button.icon_name = "open-menu-symbolic";
             menu_button.menu_model = menu;
             header.pack_end(menu_button);
@@ -262,9 +265,11 @@ namespace MajorisFiles {
                                              PropertiesDialog.present_selection(this, chosen, metadata);
                 });
             action("source-folder", () => { var chosen = current.selected(); if (chosen.size == 1 && chosen[0].file.get_parent() != null) { var file = chosen[0].file; current.navigate(file.get_parent()); current.select_file(file); } });
-            action("favorite", () => { foreach (var item in current.selected())
-                                           metadata.set_favorite(item.file, !metadata.favorite(item.file));
+            action("favorite", () => { bool all = true; foreach (var item in current.selected()) all = all && metadata.favorite(item.file);
+                                       foreach (var item in current.selected()) metadata.set_favorite(item.file, !all);
                 });
+            action("open", () => { var items = current.selected(); if (items.size == 1) current.activate_item.begin(items[0]); });
+            action("open-selected-tab", () => { var items = current.selected(); if (items.size == 1 && items[0].directory) new_tab(items[0].file); });
             action("tags", () => set_tags.begin());
             action("quick-preview", () => quick_preview());
             action("save-search", () => save_search.begin());
@@ -392,7 +397,10 @@ namespace MajorisFiles {
                 });
             var context = new Menu();
             var popup = new Gtk.PopoverMenu.from_model(context);
+            popup.has_arrow = false;
             popup.set_parent(browser.file_surface);
+            weak Gtk.Widget? context_focus = null;
+            popup.closed.connect(() => { if (context_focus != null && context_focus.get_mapped()) context_focus.grab_focus(); });
             extension_manager.columns.begin(browser);
             var click = new Gtk.GestureClick();
             click.button = 3;
@@ -402,10 +410,12 @@ namespace MajorisFiles {
                 var root = browser.get_root() as FilesWindow;
                 context.remove_all();
                 popup.pointing_to = rect;
-                if (root != null) root.open_context.begin(context, browser, popup);
+                browser.target_context(x, y);
+                if (root != null) { context_focus = root.get_focus(); root.open_context.begin(context, browser, popup); }
             });
             browser.file_surface.add_controller(click);
             var context_keys = new Gtk.EventControllerKey();
+            context_keys.propagation_phase = Gtk.PropagationPhase.CAPTURE;
             context_keys.key_pressed.connect((key, code, modifiers) => {
                 if (key != Gdk.Key.Menu && !(key == Gdk.Key.F10 && (modifiers & Gdk.ModifierType.SHIFT_MASK) != 0))
                     return false;
@@ -414,79 +424,128 @@ namespace MajorisFiles {
                     return false;
                 Gdk.Rectangle rect = {browser.file_surface.get_width() / 2, browser.file_surface.get_height() / 3, 1, 1};
                 popup.pointing_to = rect;
+                context_focus = root.get_focus();
                 root.open_context.begin(context, browser, popup);
                 return true;
             });
             browser.file_surface.add_controller(context_keys);
         }
-        void populate_context(Menu menu, Browser browser)
+        uint context_generation;
+        public void populate_context(Menu menu, Browser browser)
         {
             var selection = browser.selected();
             bool one = selection.size == 1;
-            bool regular = one && selection[0].info.get_file_type() == FileType.REGULAR;
-            if (selection.size > 0) {
-                foreach (var entry in new string[] {"Cut|win.cut", "Copy|win.copy", "Copy To…|win.copy-to", "Move To…|win.move-to", "Duplicate|win.duplicate-items", "New Folder with Selection…|win.folder-with-selection", "Favorite|win.favorite", "Tags…|win.tags", "Move to Trash|win.trash", "Properties|win.properties"}) {
-                    var parts = entry.split("|", 2); menu.append(parts[0], parts[1]);
+            bool trash = browser.location.has_uri_scheme("trash");
+            bool writable = browser.accepts_destination;
+            if (selection.size == 0) {
+                var creation = new Menu();
+                if (trash) creation.append(_("Empty Trash"), "win.empty-trash");
+                else if (writable) {
+                    creation.append(_("New Folder…"), "win.new-folder");
+                    creation.append(_("New File…"), "win.new-file");
+                    var formats = get_clipboard().get_formats();
+                    if (formats.contain_mime_type("text/uri-list") || formats.contain_mime_type("x-special/gnome-copied-files") || formats.contain_gtype(typeof(Gdk.FileList)))
+                        creation.append(_("Paste"), "win.paste");
                 }
-                menu.append("Permissions…", "win.permissions");
+                MenuPresentation.section(menu, creation);
+                var display = new Menu();
+                display.append_submenu(_("Sort By…"), browser.sort_menu());
+                display.append_submenu(_("Group By…"), browser.group_menu());
+                display.append_submenu(_("View…"), browser.view_menu());
+                MenuPresentation.section(menu, display);
+                var location = new Menu(); location.append(_("Refresh"), "context.refresh");
+                if (browser.location.is_native()) location.append(_("Open in Terminal"), "win.terminal");
+                MenuPresentation.section(menu, location);
+                return;
+            }
+            if (trash) {
+                var recovery = new Menu(); recovery.append(_("Restore"), "win.restore"); recovery.append(_("Delete Permanently"), "win.delete");
+                MenuPresentation.section(menu, recovery);
+            } else {
+                var opening = new Menu();
                 if (one) {
-                    menu.append("Open Preview", "win.quick-preview");
-                    menu.append("Rename", "win.rename");
-                    menu.append("Open With…", "win.open-with");
-                    menu.append("Default Application…", "win.associations");
-                    menu.append("Custom Icon…", "win.custom-icon");
-                    menu.append("Reset Icon", "win.reset-icon");
-                    if (selection[0].file.is_native()) menu.append("Create Link…", "win.link");
-                    if (selection[0].directory && selection[0].file.is_native() && !Paths.is_symlink(selection[0].info))
-                        menu.append("Share Folder…", "win.share-folder");
-                }
-                var quick = new Menu();
-                if (selection.size == 1 && ImageRotation.supports(selection[0])) {
-                    quick.append(_("Rotate Image Clockwise"), "win.rotate-clockwise");
-                    quick.append(_("Rotate Image Counterclockwise"), "win.rotate-counterclockwise");
-                }
-                quick.append("Compress…", "win.compress");
-                quick.append("Create 7z / Multi-volume Archive…", "win.compress-sevenzip");
-                quick.append("Create Encrypted ZIP…", "win.compress-encrypted");
-                if (regular) {
-                    quick.append("Checksums…", "win.checksum");
-                    quick.append("Split File…", "win.split");
-                    bool joinable = selection[0].name.has_suffix(".parts.json");
-                    try { SplitService.raw_name(selection[0].file); joinable = true; } catch (Error e) {}
-                    if (joinable) quick.append("Join Split File…", "win.join");
-                    if (new ArchivePreview().supports(selection[0])) {
-                        quick.append("Extract…", "win.extract");
-                        quick.append("Extract with Password…", "win.extract-encrypted");
+                    opening.append(_("Open"), "win.open");
+                    if (selection[0].directory) opening.append(_("Open in New Tab"), "win.open-selected-tab");
+                    else {
+                        opening.append(_("Open With…"), "win.open-with");
+                        if (browser.supports_preview(selection[0])) opening.append(_("Preview"), "win.quick-preview");
+                        if (writable && new ArchivePreview().supports(selection[0])) opening.append(_("Extract…"), "win.extract");
                     }
                 }
-                menu.append_submenu("Quick Actions", quick);
-                menu.append_submenu("User Actions", providers.menu(selection));
-            }
-            var formats = get_clipboard().get_formats();
-            if (formats.contain_mime_type("text/uri-list") || formats.contain_mime_type("x-special/gnome-copied-files") || formats.contain_gtype(typeof(Gdk.FileList))) {
-                menu.append("Paste", "win.paste");
-                if (browser.location.is_native()) menu.append("Paste as Link", "win.paste-link");
-            }
-            menu.append("New Folder…", "win.new-folder");
-            if (selection.size == 1) {
-                var state = CloudFiles.get_default().peek(selection[0].file);
-                if (state != null) {
-                    if ("pin" in state.capabilities) menu.append(_("Make Available Offline"), "win.cloud-pin");
-                    if ("evict" in state.capabilities) menu.append(_("Free Local Space"), "win.cloud-evict");
-                    if ("retry" in state.capabilities) menu.append(_("Retry Cloud Sync"), "win.cloud-retry");
+                MenuPresentation.section(menu, opening);
+                var editing = new Menu();
+                bool mutable = true;
+                foreach (var item in selection) if (item.info.has_attribute("access::can-delete") && !item.info.get_attribute_boolean("access::can-delete")) mutable = false;
+                if (mutable) editing.append(_("Cut"), "win.cut");
+                editing.append(_("Copy"), "win.copy");
+                if (mutable) {
+                    editing.append(one ? _("Rename") : _("Batch Rename…"), one ? "win.rename" : "win.batch-rename");
+                    editing.append(_("Move to Trash"), "win.trash");
                 }
+                MenuPresentation.section(menu, editing);
+                var organisation = new Menu(); bool all = true;
+                foreach (var item in selection) all = all && metadata.favorite(item.file);
+                organisation.append(all ? _("Remove from Favorites") : _("Add to Favorites"), "win.favorite");
+                organisation.append(_("Tags…"), "win.tags");
+                if (one && PropertiesDialog.shareable(selection[0])) organisation.append(_("Share…"), "win.share-folder");
+                MenuPresentation.section(menu, organisation);
+                var more = new Menu(); var files = new Menu();
+                files.append(_("Copy To…"), "win.copy-to");
+                if (mutable) files.append(_("Move To…"), "win.move-to");
+                if (writable) {
+                    files.prepend(_("Duplicate"), "win.duplicate-items");
+                    if (mutable) files.append(_("New Folder with Selection…"), "win.folder-with-selection");
+                    if (one && selection[0].file.is_native()) files.append(_("Create Link…"), "win.link");
+                }
+                if (browser.virtual_collection && one) files.append(_("Open Source Folder"), "win.source-folder");
+                MenuPresentation.section(more, files);
+                var tools = new Menu();
+                if (writable) tools.append(_("Compress…"), "win.compress");
+                if (one && selection[0].info.get_file_type() == FileType.REGULAR) {
+                    tools.append(_("Checksums…"), "win.checksum");
+                    if (writable) {
+                        tools.append(_("Split File…"), "win.split");
+                        bool joinable = selection[0].name.has_suffix(".parts.json");
+                        try { SplitService.raw_name(selection[0].file); joinable = true; } catch (Error e) {}
+                        if (joinable) tools.append(_("Join Split File…"), "win.join");
+                    }
+                }
+                MenuPresentation.section(more, tools);
+                var quick = new Menu();
+                if (one && ImageRotation.supports(selection[0]) && mutable) {
+                    quick.append(_("Rotate Clockwise"), "win.rotate-clockwise");
+                    quick.append(_("Rotate Counterclockwise"), "win.rotate-counterclockwise");
+                }
+                var extensions = new Menu();
+                if (quick.get_n_items() > 0) extensions.append_submenu(_("Quick Actions…"), quick);
+                var user = providers.menu(selection);
+                if (user.get_n_items() > 0) extensions.append_submenu(_("User Actions…"), user);
+                MenuPresentation.section(more, extensions);
+                if (one) {
+                    var cloud = new Menu(); var state = CloudFiles.get_default().peek(selection[0].file);
+                    if (state != null) {
+                        if ("pin" in state.capabilities) cloud.append(_("Make Available Offline"), "win.cloud-pin");
+                        if ("evict" in state.capabilities) cloud.append(_("Free Local Space"), "win.cloud-evict");
+                        if ("retry" in state.capabilities) cloud.append(_("Retry Cloud Sync"), "win.cloud-retry");
+                    }
+                    MenuPresentation.section(more, cloud);
+                }
+                if (more.get_n_items() > 0) { var secondary = new Menu(); secondary.append_submenu(_("More Actions…"), more); MenuPresentation.section(menu, secondary); }
             }
+            var properties = new Menu(); properties.append(_("Properties"), "win.properties"); MenuPresentation.section(menu, properties);
         }
         async void open_context(Menu menu, Browser browser, Gtk.Popover popup)
         {
-            var selection = browser.selected();
-            menu.remove_all(); populate_context(menu, browser); if (browser.virtual_collection && selection.size == 1) menu.append(_("Open Source Folder"), "win.source-folder"); popup.popup();
+            uint generation = ++context_generation;
+            var selection = browser.selected(); var location = browser.location;
+            menu.remove_all(); populate_context(menu, browser); popup.popup();
+            if (selection.size == 0) return;
             yield extension_manager.prepare(selection);
-            if (browser.get_root() != this || !popup.visible) return;
+            if (generation != context_generation || browser.get_root() != this || !popup.visible || !browser.location.equal(location)) return;
             var current = browser.selected();
             if (current.size != selection.size) return;
             for (int i = 0; i < current.size; i++) if (!current[i].file.equal(selection[i].file)) return;
-            menu.remove_all(); populate_context(menu, browser); if (browser.virtual_collection && selection.size == 1) menu.append(_("Open Source Folder"), "win.source-folder");
+            menu.remove_all(); populate_context(menu, browser);
         }
         Gee.ArrayList<File> selected_files()
         {

@@ -26,7 +26,7 @@ namespace MajorisFiles {
             action("paste-link", () => paste_link.begin());
             action("recover-replacements", () => recover_replacements.begin());
             action("recover-rename",()=>recover_rename.begin());
-            action("compress", () => compress.begin());
+            action("compress", () => { var items = current.selected(); if (items.size > 0) new SevenZipDialog(window, items, current.location, operations); });
             action("compress-sevenzip", () => { var items = current.selected(); if (items.size > 0) new SevenZipDialog(window, items, current.location, operations); });
             action("compress-encrypted", () => compress.begin(true));
             action("extract", () => extract.begin());
@@ -251,6 +251,8 @@ namespace MajorisFiles {
             var items = current.selected();
             if(items.size != 1 || items[0].directory)
                 return;
+            var folder = yield destination_folder(_("Extract Archive — Destination"));
+            if (folder == null) return;
             var name = yield Dialogs.prompt(window, "Extract to New Folder", items[0].name + " extracted");
             if(name == null)
                 return;
@@ -268,7 +270,15 @@ namespace MajorisFiles {
             }
             var job = operations.start("Extract");
             try {
-                yield ArchiveService.extract(items[0].file, current.location.get_child(name), job, password);
+                while (true) {
+                    try { yield ArchiveService.extract(items[0].file, folder.get_child(name), job, password); break; }
+                    catch (Error auth) {
+                        string message = auth.message.down();
+                        if (job.cancellable.is_cancelled() || !(message.contains("passphrase") || message.contains("password") || message.contains("encrypted"))) throw auth;
+                        password = yield Dialogs.password(window, _("Archive Password"));
+                        if (password == null) throw new IOError.CANCELLED("Extraction cancelled");
+                    }
+                }
                 operations.finish(job);
             }
             catch(Error e) {

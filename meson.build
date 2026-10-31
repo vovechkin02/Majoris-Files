@@ -170,3 +170,8 @@ properties_tests = executable('properties-tests', 'tests/properties.vala', 'test
 if xvfb.found()
   test('properties', find_program('dbus-run-session'), args: ['--', xvfb, '-a', properties_tests], depends: preview_helper, env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none'], timeout: 180)
 endif
+
+menu_tests = executable('menu-tests', 'tests/menus.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
+if xvfb.found()
+  test('menus', find_program('dbus-run-session'), args: ['--', xvfb, '-a', menu_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none'], timeout: 90)
+endif

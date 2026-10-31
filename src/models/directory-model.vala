@@ -6,6 +6,7 @@ namespace MajorisFiles {
             private set;
             default = File.new_for_path(Environment.get_home_dir());
         }
+        public bool writable { get; private set; default = false; }
         public bool loading {
             get;
             private set;
@@ -45,7 +46,7 @@ namespace MajorisFiles {
             var token = pending;
             uint epoch = ++generation;
             location = folder;
-            loading = true;
+            loading = true; writable = false;
             items.remove_all();
             FileEnumerator? enumerator = null;
             try {
@@ -56,6 +57,11 @@ namespace MajorisFiles {
                     yield folder.mount_enclosing_volume(MountMountFlags.NONE, new Gtk.MountOperation(parent), token);
                     enumerator = yield folder.enumerate_children_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token);
                 }
+                try {
+                    var folder_info = yield folder.query_info_async("access::can-write", FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+                    if (epoch != generation || token.is_cancelled()) return;
+                    writable = !folder_info.has_attribute("access::can-write") || folder_info.get_attribute_boolean("access::can-write");
+                } catch (IOError.CANCELLED e) { return; } catch (Error e) { writable = false; }
                 while (!token.is_cancelled())
                 {
                     var batch = yield enumerator.next_files_async(128, Priority.DEFAULT, token);

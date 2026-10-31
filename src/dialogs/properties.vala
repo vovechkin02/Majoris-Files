@@ -64,7 +64,16 @@ namespace MajorisFiles {
             identity.update_property(Gtk.AccessibleProperty.LABEL, identity_name.label, -1);
             var image = new Gtk.Image.from_icon_name("edit-copy-symbolic"); image.pixel_size = 48;
             if (items.size == 1) image.set_from_gicon((items[0].info.has_attribute("standard::icon") ? items[0].info.get_icon() : null) ?? new ThemedIcon("text-x-generic"));
-            identity.append(image); identity.append(identity_name); heading.add(identity);
+            identity.append(image); identity.append(identity_name);
+            if (items.size == 1) {
+                var icons = new Gtk.MenuButton(); icons.label = _("Icon…"); MenuPresentation.button(icons);
+                var model = new Menu(); model.append(_("Set Custom Icon…"), "identity.custom"); model.append(_("Reset to Default Icon"), "identity.reset"); icons.menu_model = model;
+                var actions = new SimpleActionGroup();
+                var custom = new SimpleAction("custom", null); custom.activate.connect(() => change_icon.begin(false, image)); actions.add_action(custom);
+                var reset = new SimpleAction("reset", null); reset.activate.connect(() => change_icon.begin(true, image)); actions.add_action(reset);
+                icons.insert_action_group("identity", actions); identity.append(icons);
+            }
+            heading.add(identity);
             if (items.size == 1 && !items[0].directory) {
                 var thumbnails = new ThumbnailService(metadata);
                 thumbnails.texture.begin(items[0], token, (obj, res) => {
@@ -148,6 +157,23 @@ namespace MajorisFiles {
                 token.cancel(); if (permissions != null) permissions.cancel(); if (sharing != null) sharing.cancel(); if (details != null) details.cancel();
                 if (metadata_handler != 0) { metadata.disconnect(metadata_handler); metadata_handler = 0; }
             });
+        }
+        async void change_icon(bool reset, Gtk.Image image) {
+            try {
+                string uri = "";
+                if (!reset) {
+                    var chooser = new Gtk.FileDialog(); chooser.title = _("Choose Custom Icon");
+                    var filter = new Gtk.FileFilter(); filter.add_mime_type("image/*");
+                    var filters = new GLib.ListStore(typeof(Gtk.FileFilter)); filters.append(filter); chooser.filters = filters;
+                    var file = yield chooser.open(owner_window, token);
+                    if (!file.is_native()) throw new FileError.UNSUPPORTED("Custom icons must be local images");
+                    uri = file.get_uri();
+                }
+                var info = new FileInfo(); info.set_attribute_string("metadata::custom-icon", uri);
+                yield items[0].file.set_attributes_async(info, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, token, null);
+                var refreshed = yield items[0].file.query_info_async("standard::icon", FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+                image.set_from_gicon(refreshed.get_icon());
+            } catch (Error e) { if (!(e is Gtk.DialogError.DISMISSED) && !(e is IOError.CANCELLED)) Dialogs.error(owner_window, e.message); }
         }
         public static Adw.ActionRow value_row(string title, string value) {
             var row = new Adw.ActionRow(); row.use_markup = false; row.title = title; row.subtitle = value; row.subtitle_selectable = true; row.subtitle_lines = 2; return row;
