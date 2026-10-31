@@ -116,7 +116,7 @@ namespace MajorisFiles {
                 settings.add("{sv}", "directory", new Variant.boolean(true));
                 var options = new ChooserOptions(false, settings.end());
                 options.initial = current.location;
-                var chooser = new ChooserWindow(options, metadata, new Places());
+                var chooser = new ChooserWindow(options, metadata, new Places(metadata));
                 chooser.title = title;
                 chooser.transient_for = window;
                 File? result = null;
@@ -308,7 +308,7 @@ namespace MajorisFiles {
                         return;
                     }
                     options.directory = true;
-                    var chooser = new ChooserWindow(options, metadata, new Places());
+                    var chooser = new ChooserWindow(options, metadata, new Places(metadata));
                     chooser.transient_for = window;
                     File? chosen = null;
                     SourceFunc resume = restore.callback;
@@ -441,7 +441,7 @@ namespace MajorisFiles {
                 return;
             }
             options.initial = File.new_for_path(path);
-            var chooser = new ChooserWindow(options, metadata, new Places());
+            var chooser = new ChooserWindow(options, metadata, new Places(metadata));
             chooser.title = _("New Document from Template");
             chooser.transient_for = window;
             chooser.completed.connect((code, result) => { if(code != 0)

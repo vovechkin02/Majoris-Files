@@ -21,13 +21,30 @@ namespace MajorisFiles {
             }
             return result;
         }
+        public static bool equal(MenuModel first, MenuModel second) {
+            if (first.get_n_items() != second.get_n_items()) return false;
+            for (int i = 0; i < first.get_n_items(); i++) {
+                string name; Variant value; int count = 0, other_count = 0;
+                var attributes = first.iterate_item_attributes(i);
+                while (attributes.get_next(out name, out value)) { count++; var other = second.get_item_attribute_value(i, name, null); if (other == null || !other.equal(value)) return false; }
+                attributes = second.iterate_item_attributes(i); while (attributes.get_next(out name, out value)) other_count++;
+                if (count != other_count) return false;
+                MenuModel model; count = 0; other_count = 0;
+                var links = first.iterate_item_links(i);
+                while (links.get_next(out name, out model)) { count++; var other = second.get_item_link(i, name); if (other == null || !equal(model, other)) return false; }
+                links = second.iterate_item_links(i); while (links.get_next(out name, out model)) other_count++;
+                if (count != other_count) return false;
+            }
+            return true;
+        }
         public static void section(Menu menu, Menu section) {
             if (section.get_n_items() > 0) menu.append_section(null, section);
         }
         public static void button(Gtk.MenuButton button) {
             button.always_show_arrow = false;
             button.direction = Gtk.ArrowType.NONE;
-            button.notify["popover"].connect(() => { if (button.popover != null) button.popover.has_arrow = false; });
+            weak Gtk.MenuButton owner = button;
+            button.notify["popover"].connect(() => { if (owner != null && owner.popover != null) owner.popover.has_arrow = false; });
             if (button.popover != null) button.popover.has_arrow = false;
         }
     }

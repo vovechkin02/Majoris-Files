@@ -100,7 +100,7 @@ async void collections_case() throws Error {
     metadata.save_search("Sidebar saved search",alpha.get_parent(),new SearchQuery().serialize());
     File? tag_target=null;File? saved_target=null;
     foreach(var place in browser.collection_locations()){
-        if(place.file.get_uri().has_prefix("majoris:///tag/"))tag_target=place.file;
+        if(place.tag != null && place.tag.name == "Sidebar regression")tag_target=place.file;
         if(place.file.get_uri().has_prefix("majoris:///search/"))saved_target=place.file;
     }
     assert(tag_target!=null&&saved_target!=null);

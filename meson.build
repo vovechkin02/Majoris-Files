@@ -175,3 +175,11 @@ menu_tests = executable('menu-tests', 'tests/menus.vala', 'tests/native-evidence
 if xvfb.found()
   test('menus', find_program('dbus-run-session'), args: ['--', xvfb, '-a', menu_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none'], timeout: 90)
 endif
+
+tag_tests = executable('tag-tests', 'tests/tags.vala', core, dependencies: deps)
+test('tags', find_program('dbus-run-session'), args: ['--', tag_tests], timeout: 120)
+
+tag_ui_tests = executable('tag-ui-tests', 'tests/tags-ui.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
+if xvfb.found()
+  test('tags-ui', find_program('dbus-run-session'), args: ['--', xvfb, '-a', tag_ui_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none', 'ADW_DISABLE_PORTAL=1'], timeout: 180)
+endif

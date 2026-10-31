@@ -9,6 +9,7 @@ namespace MajorisFiles {
         public Volume? volume;
         public Drive? drive;
         public bool system;
+        public TagDefinition? tag;
         public CloudProviders.Account? cloud;
         public Place(string label, File file, Mount? mount = null) {
             this.label=label; this.file=file; this.mount=mount;
@@ -34,36 +35,41 @@ namespace MajorisFiles {
         uint config_refresh;
         CloudAccounts cloud = new CloudAccounts();
         string last_signature = "";
+        MetadataStore? metadata;
+        ulong tags_handler;
         public string root_filesystem { get; private set; default = ""; }
         [CCode (cname = "g_reload_user_special_dirs_cache", cheader_filename = "glib.h")]
         static extern void reload_special_dirs();
         public Places(MetadataStore? metadata = null) {
+            this.metadata = metadata;
             volumes=VolumeMonitor.get();
-            weak Places self=this;
-            volume_handlers={
-                volumes.mount_added.connect(()=>{if(self!=null)self.reload();}),
-                volumes.mount_removed.connect(()=>{if(self!=null)self.reload();}),
-                volumes.mount_changed.connect(()=>{if(self!=null)self.reload();}),
-                volumes.volume_added.connect(()=>{if(self!=null)self.reload();}),
-                volumes.volume_removed.connect(()=>{if(self!=null)self.reload();}),
-                volumes.volume_changed.connect(()=>{if(self!=null)self.reload();}),
-                volumes.drive_connected.connect(()=>{if(self!=null)self.reload();}),
-                volumes.drive_disconnected.connect(()=>{if(self!=null)self.reload();}),
-                volumes.drive_changed.connect(()=>{if(self!=null)self.reload();})
-            };
+            if (metadata != null) tags_handler = observe_tags(metadata, this);
+            volume_handlers = observe_volumes(volumes, this);
             // GTK bookmarks are never read into the navigation model or Favorites.
             var configuration=File.new_for_path(Path.build_filename(Environment.get_user_config_dir(),"user-dirs.dirs"));
             try {
                 watcher=configuration.monitor_file(FileMonitorFlags.NONE);
-                watcher.changed.connect(()=>{
-                    if(self==null)return;
-                    if(self.config_refresh!=0)Source.remove(self.config_refresh);
-                    self.config_refresh=Timeout.add(100,()=>{if(self!=null){self.config_refresh=0;reload_special_dirs();self.reload();}return Source.REMOVE;});
-                });
+                watcher.changed.connect(user_directories_changed);
             } catch(Error e) {}
             reload();
         }
+        static ulong observe_tags(MetadataStore store, Places places) {
+            weak Places self = places; return store.tag_definitions_changed.connect(() => { if (self != null) self.refresh_tags(); });
+        }
+        static ulong[] observe_volumes(VolumeMonitor volumes, Places places) {
+            weak Places self = places;
+            return {
+                volumes.mount_added.connect(() => { if (self != null) self.reload(); }), volumes.mount_removed.connect(() => { if (self != null) self.reload(); }), volumes.mount_changed.connect(() => { if (self != null) self.reload(); }),
+                volumes.volume_added.connect(() => { if (self != null) self.reload(); }), volumes.volume_removed.connect(() => { if (self != null) self.reload(); }), volumes.volume_changed.connect(() => { if (self != null) self.reload(); }),
+                volumes.drive_connected.connect(() => { if (self != null) self.reload(); }), volumes.drive_disconnected.connect(() => { if (self != null) self.reload(); }), volumes.drive_changed.connect(() => { if (self != null) self.reload(); })
+            };
+        }
+        void user_directories_changed() {
+            if (config_refresh != 0) Source.remove(config_refresh);
+            config_refresh = Timeout.add(100, () => { config_refresh = 0; reload_special_dirs(); reload(); return Source.REMOVE; });
+        }
         protected override void dispose() {
+            if (metadata != null && tags_handler != 0) { metadata.disconnect(tags_handler); tags_handler = 0; }
             if(config_refresh!=0){Source.remove(config_refresh);config_refresh=0;}
             if(watcher!=null){watcher.cancel();watcher=null;}
             foreach(var handler in volume_handlers)volumes.disconnect(handler);
@@ -92,7 +98,7 @@ namespace MajorisFiles {
             }
             return result;
         }
-        public static Gee.ArrayList<Place> compose(Gee.List<Place> folders, Gee.List<SidebarDevice> devices, string root_identity="") {
+        public static Gee.ArrayList<Place> compose(Gee.List<Place> folders, Gee.List<SidebarDevice> devices, string root_identity="", Gee.List<TagDefinition>? tags = null) {
             var result=new Gee.ArrayList<Place>();
             var recent=new Place(_("Recent"),File.new_for_uri("recent:///"));recent.icon_name="document-open-recent-symbolic";result.add(recent);
             var favorites=new Place(_("Favorites"),File.new_for_uri("majoris:///favorites"));favorites.icon_name="starred-symbolic";result.add(favorites);
@@ -109,9 +115,24 @@ namespace MajorisFiles {
                 if(device.identity!="")identities.add(device.identity);
                 device.place.section="Devices";result.add(device.place);
             }
+            if (tags != null) result.add_all(tag_places(tags));
             var network=new Place(_("Network"),File.new_for_uri("network:///"));network.icon_name="network-workgroup-symbolic";result.add(network);
             var trash=new Place(_("Trash"),File.new_for_uri("trash:///"));trash.icon_name="user-trash-symbolic";result.add(trash);
             return result;
+        }
+        public static Gee.ArrayList<Place> tag_places(Gee.List<TagDefinition> tags) {
+            var result = new Gee.ArrayList<Place>();
+            foreach (var tag in tags) if (tag.sidebar_visible) { var place = new Place(tag.name, tag.location()); place.section = "Tags"; place.tag = tag; result.add(place); }
+            return result;
+        }
+        void refresh_tags() {
+            var next = new Gee.ArrayList<Place>(); bool inserted = false;
+            foreach (var place in entries) {
+                if (place.section == "Tags") continue;
+                if (!inserted && place.file.has_uri_scheme("network")) { if (metadata != null) next.add_all(tag_places(metadata.tag_definitions())); inserted = true; }
+                next.add(place);
+            }
+            entries = next; changed();
         }
         static Gee.HashMap<string,string> mount_identities() {
             // GUnixMountEntry identifies the enclosing mount. Kernel filesystem
@@ -190,10 +211,10 @@ namespace MajorisFiles {
                 var place=new Place(drive.get_name(),File.new_for_uri("majoris:///device/"+Uri.escape_string(identity)));place.drive=drive;place.icon=icon;
                 candidates.add(new SidebarDevice(place,identity,3));
             }
-            var next=compose(standard_folders(paths),candidates,root_filesystem);
+            var next=compose(standard_folders(paths),candidates,root_filesystem,metadata == null ? null : metadata.tag_definitions());
             var signature=new StringBuilder();
             foreach(var place in next){
-                string icon=place.icon_name;if(place.icon!=null)icon=place.icon.to_string();
+                string icon=place.tag != null ? place.tag.color : place.icon_name;if(place.icon!=null)icon=place.icon.to_string();
                 signature.append_printf("%s\n%s\n%s\n%s\n%u:%u:%u\n",place.label,place.file.get_uri(),place.section,icon,place.mount==null?0:direct_hash(place.mount),place.volume==null?0:direct_hash(place.volume),place.drive==null?0:direct_hash(place.drive));
             }
             if(signature.str!=last_signature){entries=next;last_signature=signature.str;changed();}

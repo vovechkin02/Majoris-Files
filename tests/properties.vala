@@ -161,8 +161,9 @@ async void scenarios() throws Error {
     selected.clear(); assert(properties.items.size == 1);
     var favorite = (Adw.SwitchRow)titled(properties.general, "Favorite"); favorite.active = true; assert(metadata.favorite(document.file));
     ((Adw.ActionRow)titled(properties.general, "Tags")).activated(); yield pause_layout();
-    var prompt = typed(window, typeof(Adw.AlertDialog)) as Adw.AlertDialog; assert(prompt != null);
-    ((Gtk.Entry)prompt.extra_child).text = "Work, Reports"; prompt.response("apply"); prompt.close(); yield pause_layout(); assert(metadata.tags(document.file).contains("Work"));
+    Adw.AlertDialog? prompt = null;
+    var tag_assignment = typed(window, typeof(TagAssignmentDialog)) as TagAssignmentDialog; assert(tag_assignment != null);
+    tag_assignment.checkbox(metadata.tag_by_name("Work").id).active = true; tag_assignment.close(); yield pause_layout(); assert(metadata.has_tag(document.file, metadata.tag_by_name("Work").id));
     var copy = find_copy(properties.general); assert(copy != null); copy.clicked();
     string? clipboard = yield window.get_clipboard().read_text_async(null); assert(clipboard == document.file.get_path());
     yield shot(window, "general-document");
@@ -275,8 +276,9 @@ async void scenarios() throws Error {
     assert(information_value(properties, "Type") == "Mixed files and folders"); assert(information_value(properties, "Size") == Paths.size(11));
     assert(titled(properties.general, "Total Size") == null && titled(properties.general, "Types") == null);
     yield shot(window, "general-multiple");
-    ((Adw.ActionRow)titled(properties.general, "Tags")).activated(); yield pause_layout(); prompt = typed(window, typeof(Adw.AlertDialog)) as Adw.AlertDialog; assert(prompt != null);
-    ((Gtk.Entry)prompt.extra_child).text = "Shared"; prompt.response("apply"); prompt.close(); yield pause_layout(); assert(metadata.tags(document.file) == "Shared" && metadata.tags(folder.file) == "Shared");
+    ((Adw.ActionRow)titled(properties.general, "Tags")).activated(); yield pause_layout(); tag_assignment = typed(window, typeof(TagAssignmentDialog)) as TagAssignmentDialog; assert(tag_assignment != null);
+    tag_assignment.new_button.clicked(); tag_assignment.creator.entry.text = "Shared"; tag_assignment.creator.entry.activate(); tag_assignment.close(); yield pause_layout();
+    assert(metadata.has_tag(document.file, metadata.tag_by_name("Shared").id) && metadata.has_tag(folder.file, metadata.tag_by_name("Shared").id));
     ((Adw.ActionRow)titled(properties.general, "Permissions")).activated(); yield pause_layout(); permissions = typed(window, typeof(PermissionsPage)) as PermissionsPage;
     assert(!permissions.apply.sensitive);
     permissions.files.text = "0640"; permissions.folders.text = "0750"; permissions.apply.clicked(); yield pause_layout();

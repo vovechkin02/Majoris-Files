@@ -31,7 +31,7 @@ namespace MajorisFiles {
             extension_manager = ExtensionManager.get_default(metadata);
             foreach(var extension in extension_manager.extensions)if("nearby" in extension.capabilities)providers.register_nearby(new ExternalNearby(extension));
             foreach (var extension in extension_manager.extensions) providers.register_provider(extension);
-            metadata.changed.connect(()=>{for(int i=0;i<tabs.n_pages;i++)extension_manager.columns.begin((Browser)tabs.get_nth_page(i).child);});
+            metadata.changed.connect(()=>{for(int i=0;i<tabs.n_pages;i++){ var browser=(Browser)tabs.get_nth_page(i).child; extension_manager.columns.begin(browser); tabs.get_nth_page(i).title = location_title(browser.location); }});
             close_request.connect(() => { for(int i = 0; i < tabs.n_pages; i++)
                                               ((Browser)tabs.get_nth_page(i).child).cancel();
                                           return false;
@@ -95,6 +95,7 @@ namespace MajorisFiles {
             progress.popover = popover;
             header.pack_end(progress);
             var menu = new Menu();
+            menu.append(_("Manage Tags…"), "win.manage-tags");
             menu.append("Shared Folders", "win.shared-folders");
             menu.append("Recover Previous Replaced Files…", "win.recover-replacements");
             menu.append("Recover Interrupted Batch Rename…", "win.recover-rename");
@@ -335,7 +336,9 @@ namespace MajorisFiles {
                 if (command_available("share-folder")) share_menu.append(_("Share Folder…"), "win.share-folder");
                 var provider_menu = providers.menu(current.selected(), true);
                 if (provider_menu.get_n_items() > 0) share_menu.append_section(null, provider_menu);
-                current.share_button.menu_model = share_menu;
+                var existing = current.share_button.menu_model as Menu;
+                if (existing == null) current.share_button.menu_model = share_menu;
+                else if (!MenuPresentation.equal(existing, share_menu)) { existing.remove_all(); for (int i = 0; i < share_menu.get_n_items(); i++) existing.append_item(new MenuItem.from_model(share_menu, i)); }
                 current.share_button.sensitive = share_menu.get_n_items() > 0 && current.selected().size > 0;
             }
             foreach (var name in new string[] {"new-folder", "new-file", "paste", "split", "join", "rename", "share-folder", "cut", "copy", "trash", "delete", "favorite", "properties", "quick-preview"}) {
@@ -343,7 +346,8 @@ namespace MajorisFiles {
                 if (command != null) command.set_enabled(command_available(name));
             }
         }
-        static string location_title(File file) {
+        string location_title(File file) {
+            if (MetadataStore.is_tag_location(file)) { var tag = metadata.tag_at(file); return tag == null ? _("Deleted Tag") : tag.name; }
             if (file.has_uri_scheme("recent")) return _("Recent");
             if (file.get_uri() == "majoris:///favorites") return _("Favorites");
             if (file.equal(File.new_for_path(Environment.get_home_dir()))) return _("Home");
@@ -636,13 +640,8 @@ namespace MajorisFiles {
             if (files.size > 0 && (metadata.state("confirm-delete", "true") != "true" || (yield Dialogs.confirm(this, "Permanently delete selected items?", "This cannot be undone.", "Delete"))))
                 operations.run.begin(OperationKind.DELETE, files, null, this);
         }
-        async void set_tags()
-        {
-            var items = current.selected();
-            var tags = yield Dialogs.prompt(this, "Tags (comma separated)", items.size == 1 ? metadata.tags(items[0].file) : "");
-            if (tags != null)
-                foreach (var item in items)
-                    metadata.set_tags(item.file, tags);
+        async void set_tags() {
+            var items = current.selected(); if (items.size > 0) new TagAssignmentDialog(metadata, items).present(this);
         }
         async void save_search()
         {

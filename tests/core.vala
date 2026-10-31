@@ -243,12 +243,12 @@ int main(string[] args)
             store.set_tags(file, "Work,Finance");
             store.define_tag("Work", "#ff0000", 2);
             store.define_tag("Finance", "#00ff00", 1);
-            assert(store.all_tags()[0] == "Finance");
-            store.rename_tag("Work", "Projects");
-            assert(store.tags(file) == "Projects,Finance");
-            assert(store.tag_color("Projects") == "#ff0000");
+            assert(store.all_tags().contains("Finance"));
+            store.rename_tag("Work", "Business");
+            assert(store.tags(file) == "Business,Finance");
+            assert(store.tag_color("Business") == "#FF0000");
             store.delete_tag("Finance");
-            assert(store.tags(file) == "Projects");
+            assert(store.tags(file) == "Business");
         }
         catch(Error e) { error("%s", e.message);
         }

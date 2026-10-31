@@ -42,6 +42,7 @@ namespace MajorisFiles {
         Adw.ActionRow? allocated;
         Adw.SwitchRow favorites;
         Adw.ActionRow tags;
+        Gtk.Box tag_markers = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
         Adw.ActionRow? association;
         bool updating;
         bool counting;
@@ -111,7 +112,7 @@ namespace MajorisFiles {
             }
             var organisation = new Adw.PreferencesGroup(); organisation.title = _("Organisation"); general.add(organisation);
             favorites = new Adw.SwitchRow(); favorites.title = items.size == 1 ? _("Favorite") : _("Favorite All Selected Items"); organisation.add(favorites);
-            tags = value_row(_("Tags"), ""); tags.activatable = true; tags.add_suffix(new Gtk.Image.from_icon_name("go-next-symbolic")); organisation.add(tags);
+            tags = value_row(_("Tags"), ""); tags.activatable = true; tag_markers.valign = Gtk.Align.CENTER; tags.add_suffix(tag_markers); tags.add_suffix(new Gtk.Image.from_icon_name("go-next-symbolic")); organisation.add(tags);
             refresh_organisation();
             favorites.notify["active"].connect(() => {
                 if (updating) return;
@@ -238,13 +239,13 @@ namespace MajorisFiles {
         }
         void refresh_organisation() {
             if (updating) return;
-            updating = true; bool all = true; string first = metadata.tags(items[0].file); bool mixed = false;
-            foreach (var item in items) { all = all && metadata.favorite(item.file); if (metadata.tags(item.file) != first) mixed = true; }
-            favorites.active = all; tags.subtitle = mixed ? _("Mixed tags") : first == "" ? _("None") : first; updating = false;
+            updating = true; bool all = true; string first = metadata.tag_set_key(items[0].file); bool mixed = false;
+            foreach (var item in items) { all = all && metadata.favorite(item.file); if (metadata.tag_set_key(item.file) != first) mixed = true; }
+            favorites.active = all; tags.subtitle = mixed ? _("Mixed tags") : first == "" ? _("None") : metadata.tag_summary(items[0].file);
+            while (tag_markers.get_first_child() != null) tag_markers.remove(tag_markers.get_first_child());
+            if (!mixed) { int count = 0; foreach (var tag in metadata.tags_for(items[0].file)) { if (count++ >= 3) break; var marker = new TagMarker(tag.color); marker.tooltip_text = tag.name; tag_markers.append(marker); } }
+            updating = false;
         }
-        async void edit_tags() {
-            var text = yield Dialogs.prompt(this, _("Tags"), items.size == 1 ? metadata.tags(items[0].file) : "", items.size == 1 ? _("Separate tags with commas.") : _("Applying replaces tags on all %d selected items. Separate tags with commas.").printf(items.size));
-            if (text != null && !token.is_cancelled()) foreach (var item in items) metadata.set_tags(item.file, text);
-        }
+        async void edit_tags() { if (!token.is_cancelled()) new TagAssignmentDialog(metadata, items).present(this); }
     }
 }

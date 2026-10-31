@@ -1,6 +1,12 @@
 namespace MajorisFiles {
     public class Browser : Gtk.Box {
         public InlineRename? inline_rename;
+        public Adw.StatusPage tag_empty = new Adw.StatusPage();
+        ulong tags_definitions_handler;
+        ulong tags_assignments_handler;
+        ulong metadata_update_handler;
+        ulong places_update_handler;
+        ulong recent_update_handler;
         bool reconciling_inline_rename;
         Gee.ArrayList<FilenameCell> filename_cells = new Gee.ArrayList<FilenameCell>();
         public signal void rename_requested(InlineRename transaction);
@@ -35,8 +41,8 @@ namespace MajorisFiles {
                     if (group_key == "None") plain_grid.scroll_to(i, Gtk.ListScrollFlags.NONE, null);
                     else grouped_grid.scroll_to(grid_rows.row_for(i), Gtk.ListScrollFlags.NONE, null);
                 }
-                else if (view_mode == "Columns") scroll_rename_column(columns, i, active_selection);
-                else if (view_mode == "List") details.scroll_to(i, null, Gtk.ListScrollFlags.NONE, null);
+                else if (view_mode == "Columns" && !virtual_collection) scroll_rename_column(columns, i, active_selection);
+                else if (view_mode == "List" || (view_mode == "Columns" && virtual_collection)) details.scroll_to(i, null, Gtk.ListScrollFlags.NONE, null);
                 else if (view_mode == "Gallery") gallery_strip.scroll_to(i, Gtk.ListScrollFlags.NONE, null);
                 break;
             }
@@ -136,7 +142,7 @@ namespace MajorisFiles {
         {
             search_query.text = search_entry.text;
             search_query.scope = everywhere ? "everywhere" : recursive ? "recursive" : "folder";
-            return search_query.serialize();
+            search_query.resolve_tag(metadata); return search_query.serialize();
         }
         public Gtk.MultiSelection selection;
         public Gtk.MultiSelection active_selection {
@@ -292,34 +298,10 @@ namespace MajorisFiles {
             click_preference = metadata.state("single-click", "false") == "true";
             preview = new PreviewPane(metadata);
             gallery_preview = new PreviewPane(metadata);
-            Gtk.RecentManager.get_default().changed.connect(() => {
-                if (directory.location.has_uri_scheme("recent")) refresh_collection();
-            });
-            metadata.changed.connect(() => {
-                if (directory.location.get_uri() == "majoris:///favorites") refresh_collection();
-                bool hidden = metadata.state("show-hidden", "false") == "true";
-                if(hidden != hidden_preference)
-                {
-                    hidden_preference = hidden;
-                    show_hidden = hidden;
-                    refilter();
-                }
-                bool click = metadata.state("single-click", "false") == "true";
-                if(click != click_preference)
-                {
-                    click_preference = click;
-                    apply_click_mode(views);
-                }
-                display_changed();
-                if(column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn&&!((ExternalColumn)column_providers[sort_key]).sort_ready&&!column_sort_pending)set_sort(sort_key,ascending);
-                if(group_key == "Tags" && group_refresh == 0)
-                    group_refresh = Idle.add(() => { group_refresh = 0;
-                                                     var chosen=selection_uris();
-                                                     group_sorter.changed(Gtk.SorterChange.DIFFERENT);
-                                                     restore_reordered(chosen);
-                                                     return Source.REMOVE;
-                        });
-            });
+            recent_update_handler = observe_recent(this);
+            metadata_update_handler = observe_metadata(metadata, this, 0);
+            tags_assignments_handler = observe_metadata(metadata, this, 1);
+            tags_definitions_handler = observe_metadata(metadata, this, 2);
             location_suggestions = new LocationSuggestions(metadata);
             directory.items.items_changed.connect((position, removed, added) => {
                 column_model_revision++;
@@ -734,7 +716,7 @@ namespace MajorisFiles {
                 var previous = before == null ? null : before.get_data<Place>("majoris-place");
                 string? section = null;
                 if(place != null && place.section != "" && (previous == null || previous.section != place.section))
-                    section=place.section=="Folders"?_("Folders"):_("Devices");
+                    section = place.section == "Folders" ? _("Folders") : place.section == "Devices" ? _("Devices") : place.section == "Tags" ? _("Tags") : null;
                 if (section != null) { var heading = new Gtk.Label(section); heading.halign = Gtk.Align.START; heading.add_css_class("majoris-sidebar-heading"); if (before == null) heading.add_css_class("majoris-sidebar-heading-first"); row.set_header(heading); }
                 else row.set_header(null);
             });
@@ -748,10 +730,12 @@ namespace MajorisFiles {
                                                      if(row != null) {var place=row.get_data<Place>("majoris-place");if(place!=null)place_menu(place, x, y);}
                 });
             sidebar.add_controller(side_menu);
-            places.changed.connect(rebuild_sidebar);
+            places_update_handler = observe_places(places, this);
             rebuild_sidebar();
             var content = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
-            content.start_child = views;
+            var file_overlay = new Gtk.Overlay(); file_overlay.child = views;
+            tag_empty.title = _("No tagged files"); tag_empty.description = _("Assign this tag to files or folders to see them here."); tag_empty.icon_name = "tag-symbolic"; tag_empty.can_target = false; tag_empty.visible = false; file_overlay.add_overlay(tag_empty);
+            content.start_child = file_overlay;
             if(!chooser_mode)
                 add_drop(views, () => location);
             content.end_child = preview;
@@ -1007,6 +991,51 @@ namespace MajorisFiles {
             if (compact_search != null && compact_search.visible) compact_search.popup();
             search_entry.grab_focus();
         }
+        static ulong observe_recent(Browser browser) {
+            weak Browser owner = browser; return Gtk.RecentManager.get_default().changed.connect(() => { if (owner != null && owner.directory.location.has_uri_scheme("recent")) owner.refresh_collection(); });
+        }
+        static ulong observe_metadata(MetadataStore store, Browser browser, int kind) {
+            weak Browser owner = browser;
+            if (kind == 1) return store.tag_assignments_changed.connect(() => { if (owner != null && MetadataStore.is_tag_location(owner.directory.location)) owner.refresh_collection(); });
+            if (kind == 2) return store.tag_definitions_changed.connect(() => { if (owner != null) owner.tag_definitions_updated(); });
+            return store.changed.connect(() => { if (owner != null) owner.metadata_updated(); });
+        }
+        static ulong observe_places(Places places, Browser browser) {
+            weak Browser owner = browser; return places.changed.connect(() => { if (owner != null) owner.rebuild_sidebar(); });
+        }
+        void metadata_updated() {
+
+                if (directory.location.get_uri() == "majoris:///favorites") refresh_collection();
+                bool hidden = metadata.state("show-hidden", "false") == "true";
+                if(hidden != hidden_preference)
+                {
+                    hidden_preference = hidden;
+                    show_hidden = hidden;
+                    refilter();
+                }
+                bool click = metadata.state("single-click", "false") == "true";
+                if(click != click_preference)
+                {
+                    click_preference = click;
+                    apply_click_mode(views);
+                }
+                display_changed();
+                if(column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn&&!((ExternalColumn)column_providers[sort_key]).sort_ready&&!column_sort_pending)set_sort(sort_key,ascending);
+                if(group_key == "Tags" && group_refresh == 0)
+                    group_refresh = Idle.add(() => { group_refresh = 0;
+                                                     var chosen=selection_uris();
+                                                     group_sorter.changed(Gtk.SorterChange.DIFFERENT);
+                                                     restore_reordered(chosen);
+                                                     return Source.REMOVE;
+                        });
+            if (search_query.tag != "" && filter != null) { search_query.resolve_tag(metadata); refilter(); }
+        }
+        void tag_definitions_updated() {
+            if (!MetadataStore.is_tag_location(directory.location)) return;
+            var tag = metadata.tag_at(directory.location);
+            if (tag == null) { navigate(File.new_for_uri("majoris:///favorites")); return; }
+            build_breadcrumbs(directory.location); update_status(); location_changed(directory.location);
+        }
         public static Gtk.Button button(string icon, string tooltip, owned Callback callback)
         {
             var b = new Gtk.Button.from_icon_name(icon);
@@ -1078,7 +1107,7 @@ namespace MajorisFiles {
             var result=new Gee.ArrayList<Place>();
             result.add(new Place(_("Home Folder"),File.new_for_path(Environment.get_home_dir())));
             result.add(new Place(_("Recent"),File.new_for_uri("recent:///")));
-            foreach(var tag in metadata.all_tags())result.add(new Place(_("Tag: ")+tag,File.new_for_uri("majoris:///tag/"+Uri.escape_string(tag))));
+            foreach (var tag in metadata.tag_definitions()) { var place = new Place(_("Tag: ") + tag.name, tag.location()); place.tag = tag; result.add(place); }
             foreach(var saved in metadata.saved_searches())result.add(new Place(saved.name,File.new_for_uri("majoris:///search/"+Uri.escape_string(saved.name))));
             result.add_all(places.cloud_locations());return result;
         }
@@ -1163,8 +1192,9 @@ namespace MajorisFiles {
         {
             while(breadcrumbs.get_first_child() != null)
                 breadcrumbs.remove(breadcrumbs.get_first_child());
-            if(file.has_uri_scheme("recent") || file.get_uri() == "majoris:///favorites") {
-                var crumb = new Gtk.Button.with_label(file.has_uri_scheme("recent") ? _("Recent") : _("Favorites"));
+            if(file.has_uri_scheme("recent") || file.get_uri() == "majoris:///favorites" || MetadataStore.is_tag_location(file)) {
+                var tag = metadata.tag_at(file);
+                var crumb = new Gtk.Button.with_label(tag != null ? tag.name : file.has_uri_scheme("recent") ? _("Recent") : _("Favorites"));
                 crumb.add_css_class("majoris-location-crumb");
                 crumb.add_css_class("majoris-location-current");
                 crumb.clicked.connect(() => navigate(file));
@@ -1204,6 +1234,7 @@ namespace MajorisFiles {
         }
         Gtk.ScrolledWindow? current_scroll()
         {
+            if (view_mode == "Columns" && virtual_collection) return views.get_child_by_name("List") as Gtk.ScrolledWindow;
             if(view_mode == "Grid")
                 return grid_views.visible_child as Gtk.ScrolledWindow;
             var child = views.get_child_by_name(view_mode);
@@ -1327,7 +1358,7 @@ namespace MajorisFiles {
             if(key == "Location")
                 return item.file.get_parent() == null ? item.file.get_parse_name() : item.file.get_parent().get_parse_name();
             if(key == "Tags")
-                return metadata.tags(item.file);
+                return metadata.tag_summary(item.file);
             if(key == "Favorite")
                 return metadata.favorite(item.file) ? "★" : "";
             if(key == "Owner" || key == "Group")
@@ -1711,17 +1742,16 @@ namespace MajorisFiles {
                 label.halign = Gtk.Align.FILL;
                 label.xalign = 0;
                 var place_row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8);
-                var icon = place.icon != null ? new Gtk.Image.from_gicon(place.icon) : new Gtk.Image.from_icon_name(place.icon_name);
-                icon.pixel_size = 16;
-                place_row.append(icon);
+                if (place.tag != null) place_row.append(new TagMarker(place.tag.color));
+                else { var icon = place.icon != null ? new Gtk.Image.from_gicon(place.icon) : new Gtk.Image.from_icon_name(place.icon_name); icon.pixel_size = 16; place_row.append(icon); }
                 label.hexpand = true;
                 label.ellipsize = Pango.EllipsizeMode.END;
                 place_row.append(label);
                 var row=new Gtk.ListBoxRow();row.child=place_row;row.set_data<Place>("majoris-place",place);
                 sidebar.append(row);
                 if (place.file.equal(directory.location)) sidebar.select_row(sidebar.get_row_at_index(places.entries.index_of(place)));
-                if(!chooser_mode && place.volume == null && place.drive == null)
-                    add_drop(label, () => place.file);
+                if (!chooser_mode && place.tag != null) add_tag_drop(row, place.tag.id);
+                else if(!chooser_mode && place.volume == null && place.drive == null) add_drop(label, () => place.file);
             }
         }
         public bool accepts_destination {
@@ -1733,10 +1763,13 @@ namespace MajorisFiles {
             }
         }
         public bool virtual_collection {
-            get { return directory.location.has_uri_scheme("recent") || directory.location.get_uri() == "majoris:///favorites"; }
+            get { return directory.location.has_uri_scheme("recent") || directory.location.get_uri() == "majoris:///favorites" || MetadataStore.is_tag_location(directory.location); }
         }
         public void navigate(File file, bool record = true)
         {
+            File resolved_location = file;
+            if (MetadataStore.is_tag_location(file)) { var tag = metadata.tag_at(file); resolved_location = tag == null ? File.new_for_uri("majoris:///favorites") : tag.location(); }
+            file = resolved_location;
             cancel_inline_rename();
             // Migrate old saved Home Overview tabs into the new default collection.
             if (file.get_uri() == "majoris:///home") { navigate(File.new_for_uri("recent:///"), record); return; }
@@ -1778,7 +1811,7 @@ namespace MajorisFiles {
                 sort_key = "Recent Date"; ascending = false;
                 sorter.changed(Gtk.SorterChange.DIFFERENT);
             }
-            if (file.has_uri_scheme("recent") || file.get_uri() == "majoris:///favorites") {
+            if (virtual_collection) {
                 caption_key = "Location";
                 detail_columns["Location"].visible = true;
             }
@@ -1796,10 +1829,9 @@ namespace MajorisFiles {
                 directory.virtual_location(file);
                 load_virtual.begin(metadata.favorites(), navigation_generation);
             }
-            else if(file.get_uri().has_prefix("majoris:///tag/"))
-            {
-                directory.virtual_location(file);
-                load_virtual.begin(metadata.tagged(Uri.unescape_string(file.get_uri().substring(15))), navigation_generation);
+            else if (MetadataStore.is_tag_location(file)) {
+                directory.virtual_location(file); var tag = metadata.tag_at(file);
+                load_virtual.begin(tag == null ? new Gee.ArrayList<File>() : metadata.files_for_tag(tag.id), navigation_generation);
             }
             else if(file.get_uri().has_prefix("majoris:///search/"))
             {
@@ -1844,13 +1876,21 @@ namespace MajorisFiles {
                 collection_refresh = 0;
                 if (!virtual_collection) return Source.REMOVE;
                 var selected = selection_uris();
-                navigation_generation++;
+                var scroll = current_scroll(); double vertical = scroll == null ? 0 : scroll.vadjustment.value;
+                uint refresh_epoch = ++navigation_generation;
                 directory.items.remove_all();
                 var files = new Gee.ArrayList<File>();
                 if (directory.location.has_uri_scheme("recent")) {
                     files.add_all(ActivityFiles.recent());
+                } else if (MetadataStore.is_tag_location(directory.location)) {
+                    var tag = metadata.tag_at(directory.location); if (tag == null) { navigate(File.new_for_uri("majoris:///favorites")); return Source.REMOVE; }
+                    files.add_all(metadata.files_for_tag(tag.id));
                 } else files.add_all(metadata.favorites());
-                load_virtual.begin(files, navigation_generation, (obj, res) => { load_virtual.end(res); restore_reordered(selected); });
+                load_virtual.begin(files, refresh_epoch, (obj, res) => {
+                    load_virtual.end(res); if (refresh_epoch != navigation_generation) return;
+                    restore_reordered(selected);
+                    if (scroll != null) { uint frames = 0; scroll.add_tick_callback(() => { if (refresh_epoch != navigation_generation) return Source.REMOVE; scroll.vadjustment.value = vertical; return ++frames < 4 ? Source.CONTINUE : Source.REMOVE; }); }
+                });
                 return Source.REMOVE;
             });
         }
@@ -2006,6 +2046,9 @@ namespace MajorisFiles {
         }
         void update_status()
         {
+            var tag = metadata.tag_at(directory.location);
+            tag_empty.visible = tag != null && sorted != null && sorted.get_n_items() == 0;
+            if (tag != null) tag_empty.title = _("No files tagged “%s”").printf(tag.name);
             var chosen = selected();
             uint64 bytes = 0;
             foreach(var item in chosen)
@@ -2542,6 +2585,12 @@ namespace MajorisFiles {
         }
         protected override void dispose()
         {
+            if (metadata_update_handler != 0) { metadata.disconnect(metadata_update_handler); metadata_update_handler = 0; }
+            if (tags_definitions_handler != 0) { metadata.disconnect(tags_definitions_handler); tags_definitions_handler = 0; }
+            if (tags_assignments_handler != 0) { metadata.disconnect(tags_assignments_handler); tags_assignments_handler = 0; }
+            if (places_update_handler != 0) { places.disconnect(places_update_handler); places_update_handler = 0; }
+            if (recent_update_handler != 0) { Gtk.RecentManager.get_default().disconnect(recent_update_handler); recent_update_handler = 0; }
+            if (collection_refresh != 0) { Source.remove(collection_refresh); collection_refresh = 0; }
             if(grid_rows!=null)grid_rows.detach();
             if (cloud_changed != 0) { CloudFiles.get_default().disconnect(cloud_changed); cloud_changed = 0; }
             if (shares_changed != 0) { shares.disconnect(shares_changed); shares_changed = 0; }
@@ -2587,6 +2636,16 @@ namespace MajorisFiles {
             catch(Error e) {
                 error(e.message);
             }
+        }
+        public void assign_tag_drop(int64 id, Gee.List<File> files) throws Error { metadata.set_tag_for_files(files, id, true); }
+        void add_tag_drop(Gtk.Widget widget, int64 id) {
+            var drop = new Gtk.DropTarget(typeof(Gdk.FileList), Gdk.DragAction.COPY);
+            drop.drop.connect((value) => {
+                var payload = (Gdk.FileList)value.get_boxed(); if (payload == null) return false;
+                var files = new Gee.ArrayList<File>(); foreach (var file in payload.get_files()) files.add(file);
+                if (files.size == 0) return false;
+                try { assign_tag_drop(id, files); return true; } catch (Error e) { error(e.message); return false; }
+            }); widget.add_controller(drop);
         }
         void add_drop(Gtk.Widget widget, owned DropFolder folder)
         {

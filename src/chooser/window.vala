@@ -48,7 +48,9 @@ namespace MajorisFiles {
             var toolbar = new Adw.ToolbarView();
             var header = new Adw.HeaderBar();
             toolbar.add_top_bar(header);
-            header.pack_start(Browser.button("folder-new-symbolic", _("New Folder"), () => create_folder.begin()));
+            var new_folder = Browser.button("folder-new-symbolic", _("New Folder"), () => create_folder.begin()); new_folder.sensitive = false; header.pack_start(new_folder);
+            browser.location_changed.connect(() => new_folder.sensitive = browser.accepts_destination);
+            browser.directory.loaded.connect(() => new_folder.sensitive = browser.accepts_destination);
             header.pack_end(Browser.button("view-reveal-symbolic", _("Preview Pane"), () => { browser.preview.visible = !browser.preview.visible;
                                                                                            var chosen = browser.selected();
                                                                                            if (chosen.size > 0 && browser.preview.visible)
@@ -212,8 +214,10 @@ namespace MajorisFiles {
         }
         async void create_folder()
         {
+            if (!browser.accepts_destination) return;
+            var destination = browser.location;
             var name = yield Dialogs.prompt(this, "New Folder");
-            if (name == null || finished)
+            if (name == null || finished || !browser.location.equal(destination) || !browser.accepts_destination)
                 return;
             try {
                 if (!Paths.valid_name(name))
@@ -242,10 +246,12 @@ namespace MajorisFiles {
                     if (chosen.size > 1)
                         throw new FileError.INVALID("Select one destination folder");
                     var folder = chosen.size == 1 ? chosen[0].file : browser.location;
+                    if (folder.has_uri_scheme("majoris") || folder.has_uri_scheme("recent")) throw new FileError.INVALID(_("Choose a real writable folder."));
                     files = yield options.destinations(folder, token);
                 }
                 else if (options.save)
                 {
+                    if (!browser.accepts_destination) throw new FileError.INVALID(_("Choose a real writable folder to save your file."));
                     string name = filter == null ? filename.text : filter.filename(filename.text);
                     if (!Paths.valid_name(name))
                         throw new FileError.INVALID("Enter a valid filename");
@@ -271,8 +277,10 @@ namespace MajorisFiles {
                 }
                 else {
                     var chosen = browser.selected();
-                    if (options.directory && chosen.size == 0)
+                    if (options.directory && chosen.size == 0) {
+                        if (browser.virtual_collection) throw new FileError.INVALID(_("Select a real folder."));
                         files.add(browser.location);
+                    }
                     foreach (var item in chosen)
                     {
                         transfer_progress.visible = true;

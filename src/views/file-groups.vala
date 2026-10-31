@@ -41,9 +41,7 @@ namespace MajorisFiles {
             if(mode == "Tags")
             {
                 var tags = new Gee.ArrayList<string>();
-                foreach(var tag in metadata.tags(item.file).split(","))
-                    if(tag.strip() != "" && !tags.contains(tag.strip()))
-                        tags.add(tag.strip());
+                foreach (var tag in metadata.tags_for(item.file)) tags.add(tag.name);
                 tags.sort((a, b) => Paths.natural_compare(a, b));
                 return tags.size == 0 ? "Untagged" : string.joinv(", ", tags.to_array());
             }

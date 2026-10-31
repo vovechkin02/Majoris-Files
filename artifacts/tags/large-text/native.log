@@ -1,0 +1,56 @@
+TAP version 14
+# random seed: R02S847fd6e156fdb5abed6f91f22a0bb9d5
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=278912 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ‘gio-vfs’
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for ‘gsettings-backend’
+1..1
+# Start of tags tests
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=278912 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=278912 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=278912 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=278912 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=278912 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+# Row properties: selectable=true visible=true child=true mapped=true mode=1 index=0 parent=true
+# Delete selection: true / sensitive=true / rooted=true
+# Delete after cancel: selected=true sensitive=true
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Activating service name='org.gtk.vfs.Metadata' requested by ':1.0' (uid=1000 pid=278912 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[278895]: [session uid=1000 pid=278895 pidfd=5] Successfully activated service 'org.gtk.vfs.Metadata'
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+ok 1 /tags/native-ui
+# slow test /tags/native-ui executed in 58.86 secs
+# End of tags tests
+A connection to the bus can't be made

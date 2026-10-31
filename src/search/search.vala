@@ -8,7 +8,19 @@ namespace MajorisFiles {
         public string date_field = "modified";
         public uint64 after;
         public uint64 before = uint64.MAX;
-        public string tag = "";
+        string tag_name = "";
+        public int64 tag_id;
+        public string tag { get { return tag_name; } set { if (tag_name != value) { tag_name = value; tag_id = 0; } } }
+        public void resolve_tag(MetadataStore metadata) {
+            if (tag_name == "") { tag_id = 0; return; }
+            if (tag_id == 0) {
+                var definition = metadata.tag_by_name(tag_name.strip());
+                if (definition == null) foreach (var candidate in metadata.tag_definitions()) if (candidate.name.casefold() == tag_name.strip().casefold()) { definition = candidate; break; }
+                if (definition == null) definition = metadata.tag_at(File.new_for_uri("majoris:///tag/" + Uri.escape_string(tag_name.strip())));
+                if (definition != null) tag_id = definition.id;
+            }
+            var current = metadata.tag_by_id(tag_id); if (current != null) tag_name = current.name;
+        }
         public bool favorites_only;
         public string owner = "";
         public string content = "";
@@ -59,30 +71,27 @@ namespace MajorisFiles {
             {
                 if(metadata == null)
                     return false;
-                bool tagged = false;
-                foreach(var stored in metadata.tags(item.file).split(","))
-                    if(stored.strip().casefold() == tag.strip().casefold())
-                        tagged = true;
-                if(!tagged)
-                    return false;
+                resolve_tag(metadata);
+                if (tag_id == 0 || !metadata.has_tag(item.file, tag_id)) return false;
             }
             return true;
         }
         public string serialize()
         {
-            return "majoris-search-v3:" + new Variant("(ssttssttbssss)", text, mime, minimum, maximum, kind, date_field, after, before, favorites_only, tag, owner, content, scope).print(true);
+            return "majoris-search-v4:" + new Variant("(ssttssttbssssx)", text, mime, minimum, maximum, kind, date_field, after, before, favorites_only, tag, owner, content, scope, tag_id).print(true);
         }
         public static SearchQuery deserialize(string saved) throws Error
         {
             var result = new SearchQuery();
             bool version_two = saved.has_prefix("majoris-search-v2:");
-            bool version_three = saved.has_prefix("majoris-search-v3:");
+            bool version_four = saved.has_prefix("majoris-search-v4:");
+            bool version_three = version_four || saved.has_prefix("majoris-search-v3:");
             if(!version_three && !version_two && !saved.has_prefix("majoris-search-v1:"))
             {
                 result.text = saved;
                 return result;
             }
-            var value = Variant.parse(new VariantType(version_three ? "(ssttssttbssss)" : version_two ? "(ssttssttbss)" : "(ssttssttbs)"), saved.substring(18));
+            var value = Variant.parse(new VariantType(version_four ? "(ssttssttbssssx)" : version_three ? "(ssttssttbssss)" : version_two ? "(ssttssttbss)" : "(ssttssttbs)"), saved.substring(18));
             result.text = value.get_child_value(0).get_string();
             result.mime = value.get_child_value(1).get_string();
             result.minimum = value.get_child_value(2).get_uint64();
@@ -97,6 +106,7 @@ namespace MajorisFiles {
             result.owner = version_three ? value.get_child_value(10).get_string() : extra.length > 1 ? extra[1] : "";
             result.content = version_three ? value.get_child_value(11).get_string() : extra.length > 2 ? extra[2] : "";
             result.scope = version_three ? value.get_child_value(12).get_string() : version_two ? value.get_child_value(10).get_string() : "recursive";
+            if (version_four) result.tag_id = value.get_child_value(13).get_int64();
             if(!(result.scope in new string[] {"folder", "recursive", "everywhere"}))
                 throw new FileError.INVALID("Invalid saved search scope");
             if(result.minimum > result.maximum || result.after > result.before || !(result.date_field in new string[] {"modified", "created", "access"}))
