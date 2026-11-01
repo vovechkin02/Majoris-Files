@@ -1,0 +1,49 @@
+TAP version 14
+# random seed: R02S03d909c3771ba346f0947aa6c65d562c
+dbus-daemon[604574]: [session uid=1000 pid=604574 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=604588 comm="build/grid-caption-tests" label="kernel")
+dbus-daemon[604574]: [session uid=1000 pid=604574 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ‘gio-vfs’
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for ‘gsettings-backend’
+1..1
+# Start of grid-captions tests
+dbus-daemon[604574]: [session uid=1000 pid=604574 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=604588 comm="build/grid-caption-tests" label="kernel")
+dbus-daemon[604574]: [session uid=1000 pid=604574 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[604574]: [session uid=1000 pid=604574 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=604588 comm="build/grid-caption-tests" label="kernel")
+dbus-daemon[604574]: [session uid=1000 pid=604574 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[604574]: [session uid=1000 pid=604574 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=604588 comm="build/grid-caption-tests" label="kernel")
+dbus-daemon[604574]: [session uid=1000 pid=604574 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[604574]: [session uid=1000 pid=604574 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=604588 comm="build/grid-caption-tests" label="kernel")
+dbus-daemon[604574]: [session uid=1000 pid=604574 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[604574]: [session uid=1000 pid=604574 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=604588 comm="build/grid-caption-tests" label="kernel")
+dbus-daemon[604574]: [session uid=1000 pid=604574 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+# legacy migration
+# collection file:///tmp/majoris-grid-captions-8MI1X3/Documents
+# group None
+# group Type
+# collection recent:///
+# group None
+# group Type
+# collection majoris:///favorites
+# group None
+# group Type
+# collection majoris:///tag-id/6
+# group None
+# group Type
+# collection majoris:///search/Caption%20Search
+# group None
+# group Type
+# invalid preferences
+# legacy file:///tmp/majoris-grid-captions-8MI1X3/Documents Location
+# legacy file:///tmp/majoris-grid-captions-8MI1X3/Documents Unknown caption
+# legacy recent:/// Location
+# legacy recent:/// Unknown caption
+# legacy majoris:///favorites Location
+# legacy majoris:///favorites Unknown caption
+# legacy majoris:///tag-id/6 Location
+# legacy majoris:///tag-id/6 Unknown caption
+# tile recycling
+ok 1 /grid-captions/preferences-factories-and-collections
+# slow test /grid-captions/preferences-factories-and-collections executed in 36.13 secs
+# End of grid-captions tests
+A connection to the bus can't be made

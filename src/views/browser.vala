@@ -1474,6 +1474,15 @@ namespace MajorisFiles {
             if (result == 0) result = strcmp(x.file.get_uri(), y.file.get_uri());
             return direction ? result : -result;
         }
+        bool valid_grid_caption(string key) {
+            return key != "None" && key != "Name" && key != "Location" && key in column_titles;
+        }
+        string normalise_grid_caption(string key) { return valid_grid_caption(key) ? key : "None"; }
+        void update_grid_caption(Gtk.Label caption, FileItem? item, bool grid) {
+            bool show = grid && item != null && valid_grid_caption(caption_key);
+            caption.label = show ? column_text(item, caption_key) : "";
+            caption.visible = show;
+        }
         void save_display()
         {
             if(details == null || loading_display || metadata.state("remember-folder-settings", "true") != "true")
@@ -1485,7 +1494,7 @@ namespace MajorisFiles {
                 columns_state.add("(sbi)", column.title, column.visible, column.fixed_width);
             }
             metadata.set_state("display:" + directory.location.get_uri(), new Variant("(sbbib@a(sbi))", sort_key, ascending, folders_first, icon_size, selection_checkboxes, columns_state.end()).print(true));
-            metadata.set_state("caption:" + directory.location.get_uri(), caption_key);
+            metadata.set_state("caption:" + directory.location.get_uri(), normalise_grid_caption(caption_key));
             metadata.set_state("group:" + directory.location.get_uri(), group_key);
         }
         void load_display(File location)
@@ -1507,9 +1516,12 @@ namespace MajorisFiles {
             grid_views.visible_child_name = group_key == "None" ? "plain" : "grouped";
             grouped_grid.model = group_key == "None" || view_mode!="Grid" ? null : new Gtk.NoSelection(grid_rows);
             group_sorter.changed(Gtk.SorterChange.DIFFERENT);
-            caption_key = remember ? metadata.state("caption:" + location.get_uri(), "None") : "None";
-            if(caption_key != "None" && !(caption_key in column_titles))
-                caption_key = "None";
+            string saved_caption = remember ? metadata.state("caption:" + location.get_uri(), "None") : "None";
+            caption_key = normalise_grid_caption(saved_caption);
+            // Migrate only this caption key; sorting, grouping and columns retain
+            // their saved state. Rendering independently validates every binding.
+            if (remember && saved_caption != caption_key)
+                metadata.set_state("caption:" + location.get_uri(), caption_key);
             foreach(var title in column_titles)
             {
                 var column = detail_columns[title];
@@ -1604,14 +1616,14 @@ namespace MajorisFiles {
                 "None"
             };
             foreach(var key in column_titles)
-                if(key != "Name")
+                if(valid_grid_caption(key))
                     captions += key;
             caption.model = new Gtk.StringList(captions);
             for(uint i = 0; i < captions.length; i++)
                 if(captions[i] == caption_key)
                     caption.selected = i;
             group.add(caption);
-            caption.notify["selected"].connect(() => { caption_key = captions[caption.selected];
+            caption.notify["selected"].connect(() => { caption_key = caption.selected < captions.length ? normalise_grid_caption(captions[caption.selected]) : "None";
                                                        display_changed();
                                                        save_display();
                 });
@@ -1945,7 +1957,6 @@ namespace MajorisFiles {
                 sorter.changed(Gtk.SorterChange.DIFFERENT);
             }
             if (virtual_collection) {
-                caption_key = "Location";
                 detail_columns["Location"].visible = true;
             }
             display_changed();
@@ -2530,7 +2541,7 @@ namespace MajorisFiles {
                                        caption.add_css_class("majoris-data-metadata");
                                        caption.ellipsize = Pango.EllipsizeMode.END;
                                        caption.max_width_chars = 18;
-                                       caption.visible = grid && (caption_key != "None" || virtual_collection);
+                                       update_grid_caption(caption, null, grid);
                                        if(grid)
                                            box.append(caption);
                                        var checkbox = new Gtk.CheckButton();
@@ -2553,9 +2564,7 @@ namespace MajorisFiles {
                     icon.pixel_size = grid ? icon_size : 16;
                     if(grid) configure_tile(box, icon_area, label);
                     checkbox.visible = selection_checkboxes;
-                    caption.visible = grid && (caption_key != "None" || virtual_collection);
-                    if(grid && li.item != null)
-                        caption.label = column_text((FileItem)li.item, caption_key);
+                    update_grid_caption(caption, li.item as FileItem, grid);
                     if(li.item != null)
                         label.label = visible_name((FileItem)li.item);
                     if(li.item != null) cloud_badge_for(cloud_badge, (FileItem)li.item);
@@ -2647,12 +2656,13 @@ namespace MajorisFiles {
                                       filename.label.label = visible_name(item);
                                       filename.render(rename_matches(filename) && box.get_mapped() ? inline_rename : null);
                                       if(grid)
-                                          ((Gtk.Label)area.get_next_sibling().get_next_sibling()).label = caption_key == "None" ? "" : column_text(item, caption_key);
+                                          update_grid_caption((Gtk.Label)area.get_next_sibling().get_next_sibling(), item, true);
                                       ((Gtk.CheckButton)(grid ? area.get_last_child() : box.get_last_child())).active = li.selected;
                                       box.tooltip_text = item.file.get_parse_name();
                                       refresh_thumbnail(li, image, item);
                 });
             f.unbind.connect((obj) => { var li = (Gtk.ListItem)obj;
+                                        if(grid) update_grid_caption((Gtk.Label)li.child.get_first_child().get_next_sibling().get_next_sibling(), null, true);
                                         if (cells.has_key(li)) cells[li].detach();
                                         var token = thumbnail_jobs[li];
                                         if (token != null)

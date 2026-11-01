@@ -1,0 +1,33 @@
+ 1/24 core                       OK               0.05s
+ 2/24 image-decoders             OK               0.09s
+ 3/24 firewall                   OK               0.01s
+ 4/24 cloud                      OK               0.27s
+ 5/24 archive-crash              OK               0.31s
+ 6/24 replacement-crash          OK               1.34s
+ 7/24 filesystem                 OK               1.28s
+ 8/24 session                    OK               1.31s
+ 9/24 theme-layout               OK               0.15s
+10/24 sidebar                    OK               0.36s
+11/24 portal                     OK               3.64s
+12/24 ui                         OK              17.28s
+13/24 theme-integration-fallback OK              17.17s
+14/24 toolbars                   OK              33.31s
+15/24 details-corrections        OK              55.79s
+16/24 menus                      OK              18.43s
+17/24 tags                       OK               2.07s
+18/24 redesign                   OK             103.81s
+19/24 properties                 OK              57.62s
+20/24 tags-ui                    OK              41.87s
+21/24 grid-captions              OK              28.94s
+22/24 inline-rename              OK             144.75s
+23/24 device-properties          OK              80.43s
+24/24 creation-sorting           OK             123.55s
+
+Ok:                 24  
+Expected Fail:      0   
+Fail:               0   
+Unexpected Pass:    0   
+Skipped:            0   
+Timeout:            0   
+
+Full log written to /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/meson-logs/grid-captions.txt

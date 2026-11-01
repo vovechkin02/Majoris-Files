@@ -194,3 +194,8 @@ device_properties_tests = executable('device-properties-tests', 'tests/device-pr
 if xvfb.found()
   test('device-properties', find_program('dbus-run-session'), args: ['--', xvfb, '-a', device_properties_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none'], timeout: 240)
 endif
+
+grid_caption_tests = executable('grid-caption-tests', 'tests/grid-captions.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
+if xvfb.found()
+  test('grid-captions', find_program('dbus-run-session'), args: ['--', xvfb, '-a', grid_caption_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none', 'ADW_DISABLE_PORTAL=1'], timeout: 240)
+endif
