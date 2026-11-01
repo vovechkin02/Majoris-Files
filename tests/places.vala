@@ -4,6 +4,36 @@ string executable_path;
 string configuration;
 string bookmarks_path;
 string original_bookmarks;
+class SidebarProvider : DeviceInfoProvider {
+    public int queries;
+    protected override async Variant read_objects(Cancellable token) throws Error {
+        token.set_error_if_cancelled();queries++;return new VariantBuilder(new VariantType("a{oa{sa{sv}}}")).end();
+    }
+}
+void media_sidebar() {
+    var card=new DeviceInfo();card.category=DeviceCategory.MEMORY_CARD;card.media="flash_sdxc";card.media_removable=true;
+    var generic=new ThemedIcon("drive-harddisk-symbolic");
+    var preferred=card.media_identity.select_icon(card.category,generic,(name)=>name=="media-flash-symbolic"||name=="drive-removable-media-symbolic");assert(((ThemedIcon)preferred).get_names()[0]=="media-flash-symbolic");
+    var fallback=card.media_identity.select_icon(card.category,generic,(name)=>name=="drive-removable-media-symbolic");assert(((ThemedIcon)fallback).get_names()[0]=="drive-removable-media-symbolic");
+    var supplied=new ThemedIcon("fixture-accurate-reader-symbolic");var preserved=card.media_identity.select_icon(card.category,supplied,(name)=>true);assert(preserved==supplied);
+    var cartridge=new DeviceInfo();cartridge.category=DeviceCategory.REMOVABLE_CARTRIDGE;cartridge.media="floppy_zip";
+    var zip=cartridge.media_identity.select_icon(cartridge.category,new ThemedIcon("media-floppy-symbolic"),(name)=>true);assert(((ThemedIcon)zip).get_names()[0]=="drive-removable-media-symbolic");
+    var floppy=new DeviceInfo();floppy.category=DeviceCategory.FLOPPY_DRIVE;assert(((ThemedIcon)floppy.media_identity.select_icon(floppy.category,generic,(name)=>true)).get_names()[0]=="media-floppy-symbolic");
+    var optical=new DeviceInfo();optical.category=DeviceCategory.OPTICAL_DRIVE;assert(((ThemedIcon)optical.media_identity.select_icon(optical.category,generic,(name)=>true)).get_names()[0]=="drive-optical-symbolic");
+    var provider=new SidebarProvider();var places=new Places(null,provider);
+    var first=new Place("CAMERA",File.new_for_uri("majoris:///device/card-one"));first.section="Devices";
+    var second=new Place("CAMERA",File.new_for_uri("majoris:///device/card-two"));second.section="Devices";places.entries.add(first);places.entries.add(second);
+    int structure=0;int presentation=0;ulong structure_handler=places.changed.connect(()=>structure++);ulong presentation_handler=places.presentation_changed.connect((place)=>{if(place==first||place==second)presentation++;});
+    places.set_device_information(first,card);assert(presentation==1&&structure==0&&first.label=="CAMERA"&&second.device_info==null);
+    places.set_device_information(first,card);assert(presentation==1);
+    var reader=new DeviceInfo();reader.category=DeviceCategory.MEMORY_CARD;reader.media_removable=true;reader.media_presence=MediaPresence.ABSENT;reader.media_compatibility={"flash_sd","flash_sdxc"};
+    places.set_device_information(first,reader);assert(presentation==2&&structure==0&&first.device_info.media==""&&first.device_info.type_name()=="Memory card reader"&&first.label=="CAMERA");
+    var next=new DeviceInfo();next.category=DeviceCategory.MEMORY_CARD;next.media="flash_mmc";next.media_removable=true;next.media_presence=MediaPresence.PRESENT;places.set_device_information(first,next);assert(presentation==3&&first.device_info.media=="flash_mmc"&&second.device_info==null);
+    places.set_device_information(first,null);assert(presentation==4&&first.device_info==null);
+    places.entries.remove(first);places.set_device_information(first,card);assert(presentation==4); // stale response cannot attach to another row
+    var candidates=new Gee.ArrayList<SidebarDevice>();candidates.add(new SidebarDevice(second,"partition:two",2));candidates.add(new SidebarDevice(new Place("CAMERA",File.new_for_uri("majoris:///device/partition-three")),"partition:three",2));
+    candidates.add(new SidebarDevice(new Place("Reader alias",second.file),"partition:two",2));var projected=Places.compose(new Gee.ArrayList<Place>(),candidates);int cards=0;foreach(var place in projected)if(place.label=="CAMERA")cards++;assert(cards==2);places.disconnect(structure_handler);places.disconnect(presentation_handler);
+}
 int main(string[] args) {
     if(args.length>1&&args[1]=="--probe") {
         var places=new Places();foreach(var place in places.entries)stdout.printf("%s|%s|%s\n",place.section,place.label,place.file.get_uri());return 0;
@@ -25,6 +55,7 @@ int main(string[] args) {
     }catch(Error e){error("%s",e.message);}
     executable_path=args[0];
     Test.init(ref args);
+    Test.add_func("/sidebar/media-families",media_sidebar);
     Test.add_func("/sidebar/xdg-and-bookmarks",()=>{
         var places=new Places();assert(places.entries[0].label=="Recent"&&places.entries[0].file.get_uri()=="recent:///");
         assert(places.entries[1].label=="Favorites");

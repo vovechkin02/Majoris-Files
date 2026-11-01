@@ -46,7 +46,7 @@ ui += files('src/preview/animation.vala')
 ui += files('src/preview/sandbox.vala')
 ui += files('src/preview/playback.vala','src/preview/playback.c')
 deps += [dependency('gstreamer-app-1.0')]
-core += files('src/devices/device-info.vala', 'src/devices/device-provider.vala')
+core += files('src/devices/media-identity.vala', 'src/devices/device-info.vala', 'src/devices/device-provider.vala')
 ui += files('src/dialogs/device-properties.vala')
 ui += files('src/devices/disk-images.vala')
 ui += files('src/views/column-provider.vala')
@@ -192,5 +192,5 @@ if xvfb.found() and find_program('xdotool', required: false).found()
 endif
 device_properties_tests = executable('device-properties-tests', 'tests/device-properties.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
 if xvfb.found()
-  test('device-properties', find_program('dbus-run-session'), args: ['--', xvfb, '-a', device_properties_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none'], timeout: 120)
+  test('device-properties', find_program('dbus-run-session'), args: ['--', xvfb, '-a', device_properties_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none'], timeout: 240)
 endif

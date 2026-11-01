@@ -1,0 +1,640 @@
+ninja: Entering directory `/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build'
+[1/1355] Compiling Vala source ../src/application/main.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+Compilation succeeded - 6 warning(s)
+[2/1279] Compiling Vala source ../src/portal/main.vala ../src/portal/backend.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+Compilation succeeded - 6 warning(s)
+[3/1202] Compiling Vala source ../tests/visual.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+Compilation succeeded - 6 warning(s)
+[4/1126] Compiling Vala source ../tests/remote.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/remote.vala:6.105-6.124: warning: unreachable code detected
+    6 |     uint watchdog=Timeout.add_seconds(90,()=>{stderr.printf("Remote fixture timeout\n");Process.exit(2);return Source.REMOVE;});
+      |                                                                                                         ^~~~~~~~~~~~~~~~~~~~    
+Compilation succeeded - 7 warning(s)
+[5/1050] Compiling Vala source ../tests/ui.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/ui.vala:277.14-277.17: warning: Local variable `poll' declared but never used
+  277 |         uint poll = Timeout.add(50, () => { var dialog = window.visible_dialog as Adw.AlertDialog;
+      |              ^~~~                                                                                  
+../tests/ui.vala:286.57-286.76: warning: unreachable code detected
+  286 |                                                         return Source.REMOVE;
+      |                                                         ^~~~~~~~~~~~~~~~~~~~  
+../tests/ui.vala:549.14-549.17: warning: Local variable `poll' declared but never used
+  549 |         uint poll = Timeout.add(20, () => {
+      |              ^~~~                           
+../tests/ui.vala:696.57-696.76: warning: unreachable code detected
+  696 |                                                         return Source.REMOVE;
+      |                                                         ^~~~~~~~~~~~~~~~~~~~  
+Compilation succeeded - 10 warning(s)
+[6/974] Compiling Vala source ../tests/flatpak-host.vala ../src/portal/backend.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+Compilation succeeded - 6 warning(s)
+[7/897] Compiling Vala source ../tests/portal.vala ../src/portal/backend.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/portal.vala:70.5-70.36: warning: unhandled error `GLib.Error'
+   70 |     mock_portal_bus.flush_sync(null);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+../tests/portal.vala:2.21-2.36: warning: Field `FixturePeer.id' never used
+    2 | struct FixturePeer {public string id;public string name;}
+      |                     ^~~~~~~~~~~~~~~~                      
+../tests/portal.vala:2.38-2.55: warning: Field `FixturePeer.name' never used
+    2 | struct FixturePeer {public string id;public string name;}
+      |                                      ^~~~~~~~~~~~~~~~~~   
+../tests/portal.vala:426.57-426.76: warning: unreachable code detected
+  426 |                                                         return Source.REMOVE;
+      |                                                         ^~~~~~~~~~~~~~~~~~~~  
+Compilation succeeded - 10 warning(s)
+[8/820] Compiling Vala source ../tests/redesign.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+Compilation succeeded - 6 warning(s)
+[9/744] Compiling Vala source ../tests/theme-integration.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+Compilation succeeded - 10 warning(s)
+[10/667] Compiling Vala source ../tests/details-corrections.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+Compilation succeeded - 10 warning(s)
+[11/590] Compiling Vala source ../tests/toolbars.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../tests/toolbars.vala:42.18-42.44: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   42 |     int height = widget.get_allocated_height();
+      |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~    
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/toolbars.vala:101.9-101.24: warning: `Gtk.StyleContext' has been deprecated since 4.10
+  101 |         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_USER + 2);
+      |         ^~~~~~~~~~~~~~~~                                                                                                 
+../tests/toolbars.vala:110.84-110.107: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+  110 |             assert(Environment.get_variable("MAJORIS_TOOLBAR_LARGE_TEXT") == "1" ? bar.get_allocated_height() >= 40 : bar.get_allocated_height() == 40);
+      |                                                                                    ^~~~~~~~~~~~~~~~~~~~~~~~                                              
+../tests/toolbars.vala:110.119-110.142: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+  110 |             assert(Environment.get_variable("MAJORIS_TOOLBAR_LARGE_TEXT") == "1" ? bar.get_allocated_height() >= 40 : bar.get_allocated_height() == 40);
+      |                                                                                                                       ^~~~~~~~~~~~~~~~~~~~~~~~           
+../tests/toolbars.vala:116.28-116.55: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+  116 |     double ratio = (double)location.get_allocated_width() / browser.search_entry.get_allocated_width();
+      |                            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~                                                 
+../tests/toolbars.vala:116.61-116.100: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+  116 |     double ratio = (double)location.get_allocated_width() / browser.search_entry.get_allocated_width();
+      |                                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+../tests/toolbars.vala:117.68-117.95: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+  117 |     stdout.printf("Address width %d search width %d ratio %.2f\n", location.get_allocated_width(), browser.search_entry.get_allocated_width(), ratio);
+      |                                                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~                                                        
+../tests/toolbars.vala:117.100-117.139: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+  117 |     stdout.printf("Address width %d search width %d ratio %.2f\n", location.get_allocated_width(), browser.search_entry.get_allocated_width(), ratio);
+      |                                                                                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~            
+../tests/toolbars.vala:128.16-128.43: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+  128 |         assert(location.get_allocated_width() > 2.8 * browser.search_entry.get_allocated_width());
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~                                                        
+../tests/toolbars.vala:128.55-128.94: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+  128 |         assert(location.get_allocated_width() > 2.8 * browser.search_entry.get_allocated_width());
+      |                                                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+Compilation succeeded - 20 warning(s)
+[12/513] Compiling Vala source ../tests/inline-rename.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:7.1-7.26: warning: Method `find_component' never used
+    7 | Gtk.Widget? find_component(Gtk.Widget widget, string name) {
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+Compilation succeeded - 11 warning(s)
+[13/436] Compiling Vala source ../tests/properties.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/properties.vala:177.5-177.20: warning: `Gtk.StyleContext' has been deprecated since 4.10
+  177 |     Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), larger_text, Gtk.STYLE_PROVIDER_PRIORITY_USER + 10);
+      |     ^~~~~~~~~~~~~~~~                                                                                                          
+../tests/properties.vala:181.5-181.20: warning: `Gtk.StyleContext' has been deprecated since 4.10
+  181 |     Gtk.StyleContext.remove_provider_for_display(Gdk.Display.get_default(), larger_text); window.present(); yield pause_layout();
+      |     ^~~~~~~~~~~~~~~~                                                                                                              
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/properties.vala:30.23-30.41: warning: Field `TestProperty.title' never used
+   30 | struct TestProperty { public string title; public string value; }
+      |                       ^~~~~~~~~~~~~~~~~~~                         
+../tests/properties.vala:30.44-30.62: warning: Field `TestProperty.value' never used
+   30 | struct TestProperty { public string title; public string value; }
+      |                                            ^~~~~~~~~~~~~~~~~~~    
+../tests/native-evidence.vala:7.1-7.26: warning: Method `find_component' never used
+    7 | Gtk.Widget? find_component(Gtk.Widget widget, string name) {
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+Compilation succeeded - 15 warning(s)
+[14/359] Compiling Vala source ../tests/menus.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/menus.vala:95.13-95.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   95 |             Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_USER);
+      |             ^~~~~~~~~~~~~~~~                                                                                             
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:7.1-7.26: warning: Method `find_component' never used
+    7 | Gtk.Widget? find_component(Gtk.Widget widget, string name) {
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../tests/native-evidence.vala:71.1-71.18: warning: Method `capture' never used
+   71 | async void capture(Gtk.Window window,string output,string name) throws Error {
+      | ^~~~~~~~~~~~~~~~~~                                                             
+Compilation succeeded - 13 warning(s)
+[15/282] Compiling Vala source ../tests/tags-ui.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/tags-ui.vala:44.201-44.216: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   44 |         var theme = Environment.get_variable("MAJORIS_TAG_THEME"); if (theme != null) { var css = new Gtk.CssProvider(); css.load_from_path(theme + "/gtk-4.0/" + (dark ? "gtk-dark.css" : "gtk.css")); Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_USER); }
+      |                                                                                                                                                                                                         ^~~~~~~~~~~~~~~~                                                                                               
+../tests/tags-ui.vala:52.65-52.76: warning: `Gtk.Dialog' has been deprecated since 4.10
+   52 |         var toplevels = Gtk.Window.get_toplevels(); Gtk.Dialog? color_dialog = null;
+      |                                                                 ^~~~~~~~~~~~         
+../tests/tags-ui.vala:53.66-53.74: warning: `Gtk.Dialog' has been deprecated since 4.10
+   53 |         for (uint i = 0; i < toplevels.get_n_items(); i++) { var candidate = toplevels.get_item(i) as Gtk.Dialog; if (candidate != null && candidate is Gtk.ColorChooser && candidate.visible) { color_dialog = candidate; break; } }
+      |                                                                  ^~~~~~~~~                                                                                                                                                            
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/tags-ui.vala:113.113-113.120: warning: Local variable `original' declared but never used
+  113 |     browser.navigate(root); while (browser.directory.loading) yield pause_layout(); browser.select_file(a); var original = metadata.tags_for(a);
+      |                                                                                                                 ^~~~~~~~                         
+../tests/native-evidence.vala:7.1-7.26: warning: Method `find_component' never used
+    7 | Gtk.Widget? find_component(Gtk.Widget widget, string name) {
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../tests/native-evidence.vala:71.1-71.18: warning: Method `capture' never used
+   71 | async void capture(Gtk.Window window,string output,string name) throws Error {
+      | ^~~~~~~~~~~~~~~~~~                                                             
+Compilation succeeded - 16 warning(s)
+[16/205] Compiling Vala source ../tests/creation-sorting.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:7.1-7.26: warning: Method `find_component' never used
+    7 | Gtk.Widget? find_component(Gtk.Widget widget, string name) {
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../tests/native-evidence.vala:71.1-71.18: warning: Method `capture' never used
+   71 | async void capture(Gtk.Window window,string output,string name) throws Error {
+      | ^~~~~~~~~~~~~~~~~~                                                             
+Compilation succeeded - 12 warning(s)
+[17/128] Compiling Vala source ../tests/device-properties.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../tests/device-properties.vala:324.103-324.118: warning: `Gtk.StyleContext' has been deprecated since 4.10
+  324 |         var theme=Environment.get_variable("MAJORIS_DEVICE_THEME");if(theme!=null){if(theme_css!=null)Gtk.StyleContext.remove_provider_for_display(Gdk.Display.get_default(),theme_css);theme_css=new Gtk.CssProvider();theme_css.load_from_path(theme+"/gtk-4.0/"+(dark?"gtk-dark.css":"gtk.css"));Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(),theme_css,Gtk.STYLE_PROVIDER_PRIORITY_USER);}
+      |                                                                                                       ^~~~~~~~~~~~~~~~                                                                                                                                                                                                                                                                                                
+../tests/device-properties.vala:324.293-324.308: warning: `Gtk.StyleContext' has been deprecated since 4.10
+  324 |         var theme=Environment.get_variable("MAJORIS_DEVICE_THEME");if(theme!=null){if(theme_css!=null)Gtk.StyleContext.remove_provider_for_display(Gdk.Display.get_default(),theme_css);theme_css=new Gtk.CssProvider();theme_css.load_from_path(theme+"/gtk-4.0/"+(dark?"gtk-dark.css":"gtk.css"));Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(),theme_css,Gtk.STYLE_PROVIDER_PRIORITY_USER);}
+      |                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~                                                                                                  
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/device-properties.vala:364.44-364.59: warning: `Gtk.StyleContext' has been deprecated since 4.10
+  364 |         if(theme!=null){if(theme_css!=null)Gtk.StyleContext.remove_provider_for_display(Gdk.Display.get_default(),theme_css);theme_css=new Gtk.CssProvider();theme_css.load_from_path(theme+"/gtk-4.0/"+(dark?"gtk-dark.css":"gtk.css"));Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(),theme_css,Gtk.STYLE_PROVIDER_PRIORITY_USER);}
+      |                                            ^~~~~~~~~~~~~~~~                                                                                                                                                                                                                                                                                                
+../tests/device-properties.vala:364.234-364.249: warning: `Gtk.StyleContext' has been deprecated since 4.10
+  364 |         if(theme!=null){if(theme_css!=null)Gtk.StyleContext.remove_provider_for_display(Gdk.Display.get_default(),theme_css);theme_css=new Gtk.CssProvider();theme_css.load_from_path(theme+"/gtk-4.0/"+(dark?"gtk-dark.css":"gtk.css"));Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(),theme_css,Gtk.STYLE_PROVIDER_PRIORITY_USER);}
+      |                                                                                                                                                                                                                                          ^~~~~~~~~~~~~~~~                                                                                                  
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/native-evidence.vala:7.1-7.26: warning: Method `find_component' never used
+    7 | Gtk.Widget? find_component(Gtk.Widget widget, string name) {
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+Compilation succeeded - 15 warning(s)
+[18/52] Compiling C object majoris-files.p/meson-generated_src_dialogs_device-properties.c.o
+[19/52] Compiling C object majoris-files-portal.p/meson-generated_src_dialogs_device-properties.c.o
+[20/52] Compiling C object visual-check.p/meson-generated_src_dialogs_device-properties.c.o
+[21/52] Compiling C object remote-check.p/meson-generated_src_dialogs_device-properties.c.o
+[22/52] Compiling C object ui-tests.p/meson-generated_src_dialogs_device-properties.c.o
+[23/52] Compiling C object flatpak-host.p/meson-generated_src_dialogs_device-properties.c.o
+[24/52] Compiling C object portal-tests.p/meson-generated_src_dialogs_device-properties.c.o
+[25/52] Compiling C object redesign-tests.p/meson-generated_src_dialogs_device-properties.c.o
+[26/52] Compiling C object theme-integration.p/meson-generated_src_dialogs_device-properties.c.o
+[27/52] Compiling C object details-corrections.p/meson-generated_src_dialogs_device-properties.c.o
+[28/52] Compiling C object toolbar-tests.p/meson-generated_src_dialogs_device-properties.c.o
+[29/52] Compiling C object inline-rename-tests.p/meson-generated_src_dialogs_device-properties.c.o
+[30/52] Compiling C object properties-tests.p/meson-generated_src_dialogs_device-properties.c.o
+[31/52] Compiling C object menu-tests.p/meson-generated_src_dialogs_device-properties.c.o
+[32/52] Compiling C object tag-ui-tests.p/meson-generated_src_dialogs_device-properties.c.o
+[33/52] Compiling C object creation-sorting-tests.p/meson-generated_src_dialogs_device-properties.c.o
+[34/52] Compiling C object device-properties-tests.p/meson-generated_src_dialogs_device-properties.c.o
+[35/52] Compiling C object device-properties-tests.p/meson-generated_tests_device-properties.c.o
+../tests/device-properties.vala: In function ‘media_inventory’:
+../tests/device-properties.vala:8:32: warning: passing argument 1 of ‘g_variant_new_strv’ from incompatible pointer type [-Wincompatible-pointer-types]
+    8 |     drive.add("{sv}","Media",new Variant.string(current));drive.add("{sv}","MediaCompatibility",new Variant.strv(compatibility));drive.add("{sv}","ConnectionBus",new Variant.string(bus));
+      |                                ^~~~~~~~~~~~~
+      |                                |
+      |                                gchar ** {aka char **}
+In file included from /usr/include/glib-2.0/glib/gmessages.h:38,
+                 from /usr/include/glib-2.0/glib.h:64,
+                 from device-properties-tests.p/tests/device-properties.c:6:
+/usr/include/glib-2.0/glib/gvariant.h:120:96: note: expected ‘const gchar * const*’ {aka ‘const char * const*’} but argument is of type ‘gchar **’ {aka ‘char **’}
+  120 | GVariant *                      g_variant_new_strv                      (const gchar * const  *strv,
+      |                                                                          ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/device-properties.vala: In function ‘inventory’:
+../tests/device-properties.vala:197:32: warning: passing argument 1 of ‘g_variant_new_strv’ from incompatible pointer type [-Wincompatible-pointer-types]
+  197 |     var drive=properties({"ConnectionBus","Model","Media","Optical","MediaAvailable","MediaChangeDetected","Removable","RotationRate","Size","OpticalBlank","OpticalNumAudioTracks","OpticalNumDataTracks","MediaCompatibility","MediaRemovable"},
+      |                                ^~~~~~~
+      |                                |
+      |                                gchar ** {aka char **}
+/usr/include/glib-2.0/glib/gvariant.h:120:96: note: expected ‘const gchar * const*’ {aka ‘const char * const*’} but argument is of type ‘gchar **’ {aka ‘char **’}
+  120 | GVariant *                      g_variant_new_strv                      (const gchar * const  *strv,
+      |                                                                          ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/device-properties.vala: In function ‘sidebar_widget_case_co’:
+../tests/device-properties.vala:307:36: warning: assignment to ‘gchar **’ {aka ‘char **’} from incompatible pointer type ‘const gchar * const*’ {aka ‘const char * const*’} [-Wincompatible-pointer-types]
+  307 |     assert(((ThemedIcon)image.get_gicon()).get_names()[0]=="media-flash-symbolic");
+      |                                    ^
+../tests/device-properties.vala:309:36: warning: assignment to ‘gchar **’ {aka ‘char **’} from incompatible pointer type ‘const gchar * const*’ {aka ‘const char * const*’} [-Wincompatible-pointer-types]
+  309 |     assert(((ThemedIcon)image.get_gicon()).get_names()[0]=="drive-removable-media-symbolic");
+      |                                    ^
+../tests/device-properties.vala:312:38: warning: assignment to ‘gchar **’ {aka ‘char **’} from incompatible pointer type ‘const gchar * const*’ {aka ‘const char * const*’} [-Wincompatible-pointer-types]
+  312 |     places.set_device_information(place,null);assert(((ThemedIcon)image.get_gicon()).get_names()[0]=="drive-harddisk-symbolic");window.content=null;
+      |                                      ^
+[36/52] Linking target majoris-files
+[37/52] Linking target remote-check
+[38/52] Linking target visual-check
+[39/52] Linking target majoris-files-portal
+[40/52] Linking target redesign-tests
+[41/52] Linking target theme-integration
+[42/52] Linking target flatpak-host
+[43/52] Linking target portal-tests
+[44/52] Linking target details-corrections
+[45/52] Linking target toolbar-tests
+[46/52] Linking target inline-rename-tests
+[47/52] Linking target ui-tests
+[48/52] Linking target properties-tests
+[49/52] Linking target menu-tests
+[50/52] Linking target tag-ui-tests
+[51/52] Linking target creation-sorting-tests
+[52/52] Linking target device-properties-tests
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /usr/bin/ninja -C /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build

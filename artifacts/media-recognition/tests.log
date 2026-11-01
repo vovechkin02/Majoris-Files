@@ -1,0 +1,32 @@
+ 1/23 core                       OK               0.06s
+ 2/23 image-decoders             OK               0.09s
+ 3/23 firewall                   OK               0.01s
+ 4/23 cloud                      OK               0.27s
+ 5/23 archive-crash              OK               0.30s
+ 6/23 filesystem                 OK               1.27s
+ 7/23 replacement-crash          OK               1.52s
+ 8/23 session                    OK               1.26s
+ 9/23 theme-layout               OK               0.15s
+10/23 sidebar                    OK               0.36s
+11/23 portal                     OK               3.58s
+12/23 ui                         OK              16.99s
+13/23 theme-integration-fallback OK              16.74s
+14/23 toolbars                   OK              33.29s
+15/23 details-corrections        OK              55.59s
+16/23 menus                      OK              18.35s
+17/23 tags                       OK               2.07s
+18/23 redesign                   OK              99.13s
+19/23 properties                 OK              56.93s
+20/23 tags-ui                    OK              41.80s
+21/23 inline-rename              OK             143.79s
+22/23 device-properties          OK              80.39s
+23/23 creation-sorting           OK             117.63s
+
+Ok:                 23  
+Expected Fail:      0   
+Fail:               0   
+Unexpected Pass:    0   
+Skipped:            0   
+Timeout:            0   
+
+Full log written to /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/meson-logs/media-recognition.txt

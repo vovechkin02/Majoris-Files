@@ -1,0 +1,33 @@
+1/2 sidebar           FAIL             0.08s   (exit status 134 or signal 6 SIGABRT)
+>>> MALLOC_PERTURB_=165 MESON_TEST_ITERATION=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 /usr/bin/dbus-run-session -- ./sidebar-tests
+――――――――――――――――――――――――――――――――――――― ✀  ―――――――――――――――――――――――――――――――――――――
+stdout:
+TAP version 14
+# random seed: R02S2fcb1be854db8acb682145de7d16b8b1
+1..7
+# Start of sidebar tests
+not ok /sidebar/media-families - ERROR:../tests/places.vala:21:media_sidebar: assertion failed: (((ThemedIcon)floppy.media_identity.select_icon(floppy.category,generic,(name)=>true)).get_names()[0]=="media-floppy-symbolic")
+Bail out!
+stderr:
+dbus-daemon[591181]: [session uid=1000 pid=591181 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=591185 comm="./sidebar-tests" label="kernel")
+dbus-daemon[591181]: [session uid=1000 pid=591181 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+**
+ERROR:../tests/places.vala:21:media_sidebar: assertion failed: (((ThemedIcon)floppy.media_identity.select_icon(floppy.category,generic,(name)=>true)).get_names()[0]=="media-floppy-symbolic")
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+A connection to the bus can't be made
+――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+
+2/2 device-properties OK              80.05s
+
+Summary of Failures:
+
+1/2 sidebar           FAIL             0.08s   (exit status 134 or signal 6 SIGABRT)
+
+Ok:                 1   
+Expected Fail:      0   
+Fail:               1   
+Unexpected Pass:    0   
+Skipped:            0   
+Timeout:            0   
+
+Full log written to /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/meson-logs/testlog.txt

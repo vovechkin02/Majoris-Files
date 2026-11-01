@@ -71,3 +71,5 @@ src/window/window.vala
 src/devices/device-info.vala
 src/devices/device-provider.vala
 src/dialogs/device-properties.vala
+
+src/devices/media-identity.vala

@@ -69,6 +69,7 @@ namespace MajorisFiles {
         ulong tags_assignments_handler;
         ulong metadata_update_handler;
         ulong places_update_handler;
+        ulong places_presentation_handler;
         ulong recent_update_handler;
         bool reconciling_inline_rename;
         Gee.ArrayList<FilenameCell> filename_cells = new Gee.ArrayList<FilenameCell>();
@@ -770,6 +771,7 @@ namespace MajorisFiles {
                 });
             sidebar.add_controller(side_menu);
             places_update_handler = observe_places(places, this);
+            places_presentation_handler=observe_place_presentation(places,this);
             rebuild_sidebar();
             var content = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
             var file_overlay = new Gtk.Overlay(); file_overlay.child = views;
@@ -1049,6 +1051,17 @@ namespace MajorisFiles {
         }
         static ulong observe_places(Places places, Browser browser) {
             weak Browser owner = browser; return places.changed.connect(() => { if (owner != null) owner.rebuild_sidebar(); });
+        }
+        static ulong observe_place_presentation(Places places,Browser browser) {
+            weak Browser owner=browser;return places.presentation_changed.connect((place)=>{if(owner!=null)owner.refresh_place_presentation(place);});
+        }
+        void refresh_place_presentation(Place place) {
+            for(var child=sidebar.get_first_child();child!=null;child=child.get_next_sibling()) {
+                var row=child as Gtk.ListBoxRow;if(row==null||row.get_data<Place>("majoris-place")!=place)continue;
+                var box=row.child as Gtk.Box;if(box==null)continue;
+                var image=box.get_first_child() as Gtk.Image;
+                if(image!=null)image.set_from_gicon(place.device_icon(Gtk.IconTheme.get_for_display(get_display())));
+            }
         }
         void metadata_updated() {
 
@@ -1863,7 +1876,7 @@ namespace MajorisFiles {
                 label.xalign = 0;
                 var place_row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8);
                 if (place.tag != null) place_row.append(new TagMarker(place.tag.color));
-                else { var icon = place.icon != null ? new Gtk.Image.from_gicon(place.icon) : new Gtk.Image.from_icon_name(place.icon_name); icon.pixel_size = 16; place_row.append(icon); }
+                else { var icon = new Gtk.Image.from_gicon(place.device_icon(Gtk.IconTheme.get_for_display(get_display()))); icon.pixel_size = 16; place_row.append(icon); }
                 label.hexpand = true;
                 label.ellipsize = Pango.EllipsizeMode.END;
                 place_row.append(label);
@@ -2742,6 +2755,7 @@ namespace MajorisFiles {
             if (metadata_update_handler != 0) { metadata.disconnect(metadata_update_handler); metadata_update_handler = 0; }
             if (tags_definitions_handler != 0) { metadata.disconnect(tags_definitions_handler); tags_definitions_handler = 0; }
             if (tags_assignments_handler != 0) { metadata.disconnect(tags_assignments_handler); tags_assignments_handler = 0; }
+            if(places_presentation_handler!=0){places.disconnect(places_presentation_handler);places_presentation_handler=0;}
             if (places_update_handler != 0) { places.disconnect(places_update_handler); places_update_handler = 0; }
             if (recent_update_handler != 0) { Gtk.RecentManager.get_default().disconnect(recent_update_handler); recent_update_handler = 0; }
             if (collection_refresh != 0) { Source.remove(collection_refresh); collection_refresh = 0; }

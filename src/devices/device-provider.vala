@@ -8,7 +8,54 @@ namespace MajorisFiles {
         const string FS = "org.freedesktop.UDisks2.Filesystem";
         static DeviceInfoProvider? instance;
         VolumeMonitor volume_monitor;
-        public DeviceInfoProvider(VolumeMonitor? inventory = null) { this.volume_monitor=inventory??VolumeMonitor.get(); }
+        public DeviceInfoProvider(VolumeMonitor? inventory = null) {
+            this.volume_monitor=inventory??VolumeMonitor.get();
+            changed.connect(invalidate_snapshot);
+            inventory_handlers=observe_inventory(volume_monitor,this);
+        }
+        Variant? cached_objects;
+        bool inventory_loading;
+        uint inventory_generation;
+        ulong[] inventory_handlers;
+        signal void inventory_ready();
+        static ulong[] observe_inventory(VolumeMonitor monitor,DeviceInfoProvider provider) {
+            weak DeviceInfoProvider owner=provider;
+            return {monitor.mount_added.connect(()=>{if(owner!=null)owner.changed();}),monitor.mount_removed.connect(()=>{if(owner!=null)owner.changed();}),monitor.mount_changed.connect(()=>{if(owner!=null)owner.changed();}),monitor.volume_added.connect(()=>{if(owner!=null)owner.changed();}),monitor.volume_removed.connect(()=>{if(owner!=null)owner.changed();}),monitor.volume_changed.connect(()=>{if(owner!=null)owner.changed();}),monitor.drive_connected.connect(()=>{if(owner!=null)owner.changed();}),monitor.drive_disconnected.connect(()=>{if(owner!=null)owner.changed();}),monitor.drive_changed.connect(()=>{if(owner!=null)owner.changed();})};
+        }
+        public void invalidate_snapshot(){inventory_generation++;cached_objects=null;}
+        async void wait_for_inventory(Cancellable token) throws Error {
+            token.set_error_if_cancelled();bool waiting=true;
+            ulong ready=inventory_ready.connect(()=>{if(waiting){waiting=false;wait_for_inventory.callback();}});
+            ulong cancelled=token.cancelled.connect(()=>{Idle.add(()=>{if(waiting){waiting=false;wait_for_inventory.callback();}return Source.REMOVE;});});
+            if(token.is_cancelled())Idle.add(()=>{if(waiting){waiting=false;wait_for_inventory.callback();}return Source.REMOVE;});
+            yield;
+            disconnect(ready);SignalHandler.disconnect(token,cancelled);token.set_error_if_cancelled();
+        }
+        // Share a read-only ObjectManager snapshot between the sidebar and dialogs.
+        // Invalidated by backend events, not a polling timer or one query per row.
+        public async Variant media_snapshot(Cancellable token) throws Error {
+            while(true){
+                token.set_error_if_cancelled();if(cached_objects!=null)return cached_objects;
+                if(inventory_loading){yield wait_for_inventory(token);continue;}
+                inventory_loading=true;uint request=inventory_generation;
+                try{var objects=yield read_objects(token);token.set_error_if_cancelled();if(request==inventory_generation){cached_objects=objects;return objects;}}
+                finally{inventory_loading=false;inventory_ready();}
+            }
+        }
+        public static DeviceInfo describe_place(Place place,Variant objects) {
+            var info=new DeviceInfo();info.name=place.label;
+            if(place.system)info.category=DeviceCategory.SYSTEM_FILESYSTEM;
+            if(place.tape_sysfs!=""){info.category=DeviceCategory.TAPE_DRIVE;return info;}
+            var volume=place.volume??(place.mount==null?null:place.mount.get_volume());
+            var drive=place.drive??(volume==null?(place.mount==null?null:place.mount.get_drive()):volume.get_drive());
+            var mount=volume==null?place.mount:volume.get_mount();
+            File? root=place.system?File.new_for_path("/"):mount==null?null:mount.get_root();
+            if(root!=null){info.mounted=true;info.mount_point=root.get_path()??root.get_uri();string scheme=root.get_uri_scheme();if(scheme=="mtp"||scheme=="gphoto2"||scheme=="afc")info.category=DeviceCategory.PORTABLE_DEVICE;if(scheme=="cdda")info.category=DeviceCategory.OPTICAL_DRIVE;if(root.is_native()){var entry=new UnixMountEntry.for(root.get_path());if(entry!=null)info.filesystem=entry.get_fs_type();}}
+            if(volume!=null)info.device=volume.get_identifier(VolumeIdentifier.UNIX_DEVICE)??"";
+            if(info.device==""&&drive!=null)info.device=drive.get_identifier(VolumeIdentifier.UNIX_DEVICE)??"";
+            if(drive!=null){info.media_removable=drive.is_media_removable();if(drive.is_media_removable()&&drive.is_media_check_automatic())info.media_presence=drive.has_media()?MediaPresence.PRESENT:MediaPresence.ABSENT;}
+            info.status=info.mounted?_("Mounted"):_("Not mounted");enrich(info,objects,info.device,root);return info;
+        }
         DBusConnection? bus;
         uint subscription;
         uint owner_subscription;
@@ -28,6 +75,11 @@ namespace MajorisFiles {
             Volume? volume = place.volume ?? (place.mount == null ? null : place.mount.get_volume());
             Drive? drive = place.drive ?? (volume == null ? (place.mount == null ? null : place.mount.get_drive()) : volume.get_drive());
             Mount? mount = volume == null ? place.mount : volume.get_mount();
+            // A reader selection persists across inserted volumes. Select only
+            // its single current volume; a multi-volume reader stays a reader.
+            if(volume==null&&drive!=null&&drive.is_media_removable()) {
+                var media=drive.get_volumes();if(media.length()==1){volume=media.data;mount=volume.get_mount();}
+            }
             bool present = place.system || place.tape_sysfs != "";
             if (volume != null) { foreach (var current in monitor.get_volumes()) if (current == volume) present = true; }
             else if (drive != null) { foreach (var current in monitor.get_connected_drives()) if (current == drive) present = true; }
@@ -53,7 +105,7 @@ namespace MajorisFiles {
                 info.mount_point = root.get_path() ?? root.get_uri();
                 string scheme = root.get_uri_scheme();
                 if (scheme == "mtp" || scheme == "gphoto2" || scheme == "afc") info.category = DeviceCategory.PORTABLE_DEVICE;
-                if (scheme == "cdda") { info.category = DeviceCategory.OPTICAL_DRIVE; info.media = _("Audio CD"); }
+                if (scheme == "cdda") { info.category = DeviceCategory.OPTICAL_DRIVE; info.audio_cd=true; }
             }
             if (volume != null) { info.device = volume.get_identifier(VolumeIdentifier.UNIX_DEVICE) ?? ""; info.uuid = volume.get_uuid() ?? ""; }
             if (info.device == "" && drive != null) info.device = drive.get_identifier(VolumeIdentifier.UNIX_DEVICE) ?? "";
@@ -64,13 +116,14 @@ namespace MajorisFiles {
             info.identity = info.device != "" ? info.device : (root == null ? "" : root.get_uri());
             if (drive != null) {
                 if (drive.is_removable() || drive.is_media_removable()) { if (!place.system && info.category == DeviceCategory.GENERIC_STORAGE) info.category = DeviceCategory.REMOVABLE_VOLUME; }
-                if (drive.is_media_check_automatic()) info.media_presence = drive.has_media() ? MediaPresence.PRESENT : MediaPresence.ABSENT;
+                info.media_removable=drive.is_media_removable();
+                if (drive.is_media_removable() && drive.is_media_check_automatic()) info.media_presence = drive.has_media() ? MediaPresence.PRESENT : MediaPresence.ABSENT;
             }
             try {
-                var objects=yield read_objects(token);
+                var objects=yield media_snapshot(token);
                 enrich(info, objects, info.device, info.filesystem == "btrfs" ? null : root);
             } catch (Error e) { token.set_error_if_cancelled(); }
-            if (info.media_presence == MediaPresence.ABSENT) { info.volume_size=null;info.filesystem="";info.label="";info.uuid="";info.read_only=null;info.blank=null;info.audio_tracks=null;info.data_tracks=null; }
+            if (info.media_presence == MediaPresence.ABSENT) info.clear_media_storage();
             if (root != null && !root.has_uri_scheme("cdda") && info.media_presence != MediaPresence.ABSENT && !(info.optical && info.audio_tracks != null && info.audio_tracks > 0 && info.data_tracks == 0) && info.category != DeviceCategory.TAPE_DRIVE) {
                 try { var fs = yield read_filesystem(root, token); info.filesystem_info(fs); }
                 catch (Error e) { token.set_error_if_cancelled(); }
@@ -140,7 +193,7 @@ namespace MajorisFiles {
             if(partition!=null){info.partition_uuid=text(partition,"UUID");var table_object=objects.lookup_value(text(partition,"Table","o"),null);if(table_object!=null)table_properties=table_object.lookup_value("org.freedesktop.UDisks2.PartitionTable",null);}
             info.partition_scheme=text(table_properties,"Type");
             if(loop==null && partition!=null) { var table=objects.lookup_value(text(partition,"Table","o"),null); if(table!=null)loop=table.lookup_value("org.freedesktop.UDisks2.Loop",null); }
-            if(loop!=null) { if(info.category!=DeviceCategory.SYSTEM_FILESYSTEM)info.category=DeviceCategory.DISK_IMAGE;info.backing_file=bytes(loop,"BackingFile");return; }
+            if(loop!=null) { if(info.category!=DeviceCategory.SYSTEM_FILESYSTEM&&info.category!=DeviceCategory.TAPE_DRIVE)info.category=DeviceCategory.DISK_IMAGE;info.backing_file=bytes(loop,"BackingFile");return; }
             string path=text(block,"Drive","o"); info.drive_object=path=="/"?"":path;
             var drive_interfaces = path == "" || path == "/" ? null : objects.lookup_value(path,null);
             if(drive_interfaces!=null)hardware(info,drive_interfaces.lookup_value(DRIVE,null));
@@ -151,24 +204,29 @@ namespace MajorisFiles {
             switch(info.connection){case "usb":info.connection="USB";break;case "ata":info.connection="ATA";break;case "sata":info.connection="SATA";break;case "nvme":info.connection="NVMe";break;case "scsi":info.connection="SCSI";break;}
             info.vendor=text(drive,"Vendor");info.model=text(drive,"Model");info.serial=text(drive,"Serial");info.revision=text(drive,"Revision");
             var size=field(drive,"Size","t");if(size!=null&&size.get_uint64()>0)info.physical_size=size.get_uint64();
-            var detected=field(drive,"MediaChangeDetected","b");var available=field(drive,"MediaAvailable","b");if(available!=null&&detected!=null&&detected.get_boolean())info.media_presence=available.get_boolean()?MediaPresence.PRESENT:MediaPresence.ABSENT;
             info.media=text(drive,"Media");
-            var optical=field(drive,"Optical","b"); bool is_optical=optical!=null&&optical.get_boolean();
-            var compatibility=field(drive,"MediaCompatibility","as");bool floppy=false;
-            if(compatibility!=null)info.media_compatibility=compatibility.dup_strv();
-            if(compatibility!=null)foreach(string medium in compatibility.dup_strv()) { if(medium.has_prefix("optical_"))is_optical=true;if(medium.has_prefix("floppy"))floppy=true; }
-            if(info.category!=DeviceCategory.SYSTEM_FILESYSTEM) {
-                if(is_optical) info.category=DeviceCategory.OPTICAL_DRIVE;
-                else if(floppy) info.category=DeviceCategory.FLOPPY_DRIVE;
-                else { var removable=field(drive,"Removable","b");info.category=(removable!=null&&removable.get_boolean())||info.connection=="USB"?DeviceCategory.REMOVABLE_VOLUME:DeviceCategory.INTERNAL_VOLUME; }
+            var compatibility=field(drive,"MediaCompatibility","as");info.media_compatibility=compatibility==null?new string[]{}:compatibility.dup_strv();
+            var media_removable=field(drive,"MediaRemovable","b");if(media_removable!=null)info.media_removable=media_removable.get_boolean();
+            var removable=field(drive,"Removable","b");
+            var optical=field(drive,"Optical","b");bool is_optical=optical!=null&&optical.get_boolean();
+            var identity=info.media_identity;
+            bool removable_medium=info.media_removable==true||identity.family==MediaFamily.OPTICAL||identity.family==MediaFamily.FLOPPY||identity.family==MediaFamily.CARTRIDGE;
+            var detected=field(drive,"MediaChangeDetected","b");var available=field(drive,"MediaAvailable","b");
+            if(removable_medium){if(detected!=null&&detected.get_boolean()&&available!=null)info.media_presence=available.get_boolean()?MediaPresence.PRESENT:MediaPresence.ABSENT;}
+            else info.media_presence=MediaPresence.UNKNOWN;
+            var fallback=info.category;
+            if(fallback==DeviceCategory.GENERIC_STORAGE||fallback==DeviceCategory.INTERNAL_VOLUME||fallback==DeviceCategory.REMOVABLE_VOLUME){
+                if((removable!=null&&removable.get_boolean())||info.media_removable==true||info.connection=="USB")fallback=DeviceCategory.REMOVABLE_VOLUME;
+                else if((removable!=null&&!removable.get_boolean())||info.connection=="ATA"||info.connection=="SATA"||info.connection=="NVMe")fallback=DeviceCategory.INTERNAL_VOLUME;
             }
-            var rotation=field(drive,"RotationRate","i");if(rotation!=null&&!is_optical&&!floppy) { int rate=rotation.get_int32();if(rate==0)info.hardware_type=_("Solid state storage");else if(rate!=0)info.hardware_type=_("Hard disk drive"); }
-            var media_removable=field(drive,"MediaRemovable","b");
-            if(!is_optical&&!floppy&&(media_removable==null||!media_removable.get_boolean()))info.media_presence=MediaPresence.UNKNOWN;
-            if(is_optical||floppy||(media_removable!=null&&media_removable.get_boolean())) {if(info.media_presence==MediaPresence.PRESENT)info.media_size=info.physical_size;info.physical_size=null;}
+            info.category=identity.classify(fallback,is_optical);
+            if(info.category==DeviceCategory.SYSTEM_FILESYSTEM||info.category==DeviceCategory.DISK_IMAGE||info.category==DeviceCategory.PORTABLE_DEVICE||info.category==DeviceCategory.TAPE_DRIVE)info.media_presence=MediaPresence.UNKNOWN;
+            var rotation=field(drive,"RotationRate","i");if(rotation!=null&&identity.family==MediaFamily.UNKNOWN&&!is_optical){int rate=rotation.get_int32();info.hardware_type=rate==0?_("Solid state storage"):_("Hard disk drive");}
+            if(removable_medium){if(info.media_presence==MediaPresence.PRESENT)info.media_size=info.physical_size;info.physical_size=null;}
             var blank=field(drive,"OpticalBlank","b");if(optical!=null&&optical.get_boolean()&&blank!=null)info.blank=blank.get_boolean();
             var audio=field(drive,"OpticalNumAudioTracks","u");if(optical!=null&&optical.get_boolean()&&audio!=null)info.audio_tracks=audio.get_uint32();
             var data=field(drive,"OpticalNumDataTracks","u");if(optical!=null&&optical.get_boolean()&&data!=null)info.data_tracks=data.get_uint32();
+            if(info.media_presence==MediaPresence.ABSENT)info.clear_media_storage();
         }
         async void tape_info(DeviceInfo info, Place place, Cancellable token) throws Error {
             info.category=DeviceCategory.TAPE_DRIVE;info.device=place.file.get_path()??"";info.identity=place.tape_sysfs;info.status=_("Unavailable");
@@ -183,6 +241,6 @@ namespace MajorisFiles {
                 yield directory.get_child("device/model").load_contents_async(token,out contents,out etag);info.model=((string)contents).strip();
             } catch(Error e) { token.set_error_if_cancelled();if(!FileUtils.test(place.tape_sysfs,FileTest.EXISTS)){info.connected=false;info.status=_("Disconnected");} }
         }
-        protected override void dispose() { if(bus!=null) {if(subscription!=0)bus.signal_unsubscribe(subscription);if(owner_subscription!=0)bus.signal_unsubscribe(owner_subscription);}subscription=0;owner_subscription=0;base.dispose(); }
+        protected override void dispose() { foreach(var handler in inventory_handlers)volume_monitor.disconnect(handler);inventory_handlers={};if(bus!=null) {if(subscription!=0)bus.signal_unsubscribe(subscription);if(owner_subscription!=0)bus.signal_unsubscribe(owner_subscription);}subscription=0;owner_subscription=0;base.dispose(); }
     }
 }

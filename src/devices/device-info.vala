@@ -1,5 +1,5 @@
 namespace MajorisFiles {
-    public enum DeviceCategory { SYSTEM_FILESYSTEM, INTERNAL_VOLUME, REMOVABLE_VOLUME, OPTICAL_DRIVE, FLOPPY_DRIVE, TAPE_DRIVE, DISK_IMAGE, PORTABLE_DEVICE, GENERIC_STORAGE }
+    public enum DeviceCategory { SYSTEM_FILESYSTEM, INTERNAL_VOLUME, REMOVABLE_VOLUME, MEMORY_CARD, REMOVABLE_CARTRIDGE, OPTICAL_DRIVE, FLOPPY_DRIVE, TAPE_DRIVE, DISK_IMAGE, PORTABLE_DEVICE, GENERIC_STORAGE }
     public enum MediaPresence { UNKNOWN, ABSENT, PRESENT }
 
     // Nullable measurements preserve real zeroes. Filesystem and hardware sizes
@@ -26,6 +26,17 @@ namespace MajorisFiles {
         public string partition_scheme = "";
         public string[] media_compatibility = {};
         public string media = "";
+        public bool? media_removable;
+        public bool audio_cd;
+        public MediaIdentity media_identity { owned get { return new MediaIdentity(media,media_compatibility,media_presence,media_removable); } }
+        public string media_description() { if(media_presence!=MediaPresence.ABSENT&&(audio_cd||(audio_tracks!=null&&audio_tracks>0&&data_tracks==0)))return _("Audio CD");return media_identity.inserted_description(); }
+        public string supported_media() { return media_identity.supported_description(); }
+        public Icon display_icon(Icon? supplied, Gtk.IconTheme theme) {return media_identity.select_icon(category,supplied,theme.has_icon);}
+        public void clear_media_storage() {
+            capacity=null;used=null;available=null;volume_size=null;media_size=null;used_estimated=false;
+            filesystem="";label="";uuid="";partition_uuid="";partition_scheme="";mount_point="";read_only=null;blank=null;audio_tracks=null;data_tracks=null;
+            mounted=false;if(status!=_("Locked"))status=_("Not mounted");
+        }
         public string backing_object = "";
         public string backing_file = "";
         public string hardware_type = "";
@@ -44,7 +55,7 @@ namespace MajorisFiles {
         public bool used_estimated;
 
         public bool optical { get { return category == DeviceCategory.OPTICAL_DRIVE; } }
-        public bool usage_allowed { get { return mounted && !optical && category != DeviceCategory.TAPE_DRIVE && category != DeviceCategory.PORTABLE_DEVICE; } }
+        public bool usage_allowed { get { return connected && media_presence != MediaPresence.ABSENT && mounted && !optical && category != DeviceCategory.TAPE_DRIVE && category != DeviceCategory.PORTABLE_DEVICE; } }
         public bool show_usage { get { return usage_allowed && capacity != null && capacity > 0 && used != null && used <= capacity && (available == null || available <= capacity - used); } }
         public void filesystem_info(FileInfo info) {
             used_estimated = false;
@@ -59,6 +70,8 @@ namespace MajorisFiles {
             case DeviceCategory.SYSTEM_FILESYSTEM: return _("System filesystem");
             case DeviceCategory.INTERNAL_VOLUME: return _("Internal storage");
             case DeviceCategory.REMOVABLE_VOLUME: return _("Removable storage");
+            case DeviceCategory.MEMORY_CARD: return media_identity.reader_description(_("Memory card"));
+            case DeviceCategory.REMOVABLE_CARTRIDGE: return media_identity.reader_description(_("Removable disk cartridge"));
             case DeviceCategory.OPTICAL_DRIVE: return _("Optical disc drive");
             case DeviceCategory.FLOPPY_DRIVE: return _("Floppy disk drive");
             case DeviceCategory.TAPE_DRIVE: return _("Magnetic tape drive");
@@ -67,7 +80,7 @@ namespace MajorisFiles {
             default: return _("Storage device");
             }
         }
-        public bool has_hardware { get { return device != "" || model != "" || connection != "" || backing_file != "" || uuid != "" || block_object != ""; } }
+        public bool has_hardware { get { return device != "" || model != "" || connection != "" || backing_file != "" || uuid != "" || block_object != "" || media_compatibility.length > 0; } }
     }
     public interface DeviceInformationProvider : Object {
         public abstract async DeviceInfo query(Place place, Cancellable token) throws Error;

@@ -43,7 +43,7 @@ namespace MajorisFiles {
         public void render(DeviceInfo info) {
             clear(); information=info;
             var heading=group("");var identity=new Gtk.Box(Gtk.Orientation.HORIZONTAL,12);
-            var icon=new Gtk.Image.from_gicon(place.icon??new ThemedIcon(place.icon_name));icon.pixel_size=48;
+            var icon=new Gtk.Image.from_gicon(info.display_icon(place.icon??new ThemedIcon(place.icon_name),Gtk.IconTheme.get_for_display(get_display())));icon.pixel_size=48;
             var name=new Gtk.Label(info.name);name.xalign=0;name.wrap=true;name.wrap_mode=Pango.WrapMode.WORD_CHAR;name.max_width_chars=34;name.hexpand=true;name.selectable=true;name.add_css_class("heading");identity.append(icon);identity.append(name);heading.add(identity);
             var information=group(_("Information"));row(information,_("Type"),info.type_name());row(information,_("Status"),info.status);
             if(!info.connected){announce(_("Device disconnected"),Gtk.AccessibleAnnouncementPriority.MEDIUM);rebuild_hardware(info);return;}
@@ -51,17 +51,18 @@ namespace MajorisFiles {
             row(information,info.optical?_("Disc label"):_("Volume label"),info.label);
             if(info.read_only!=null)row(information,_("Read only"),info.read_only?_("Yes"):_("No"));
             if(info.category==DeviceCategory.TAPE_DRIVE){row(information,_("Access"),_("Sequential storage"));var refresh=new Adw.ActionRow();refresh.title=_("Refresh");refresh.activatable=true;refresh.activated.connect(schedule);information.add(refresh);}
-            if(info.media!="")row(information,_("Media type"),info.media);
-            if(info.media_presence!=MediaPresence.UNKNOWN)row(information,_("Media"),info.media_presence==MediaPresence.ABSENT?_("No media"):_("Media inserted"));
+            row(information,_("Media type"),info.media_description());
+            if(info.media_presence!=MediaPresence.UNKNOWN||info.media_removable==true)row(information,_("Media"),info.media_identity.presence_description(info.category));
             if(info.blank!=null&&info.blank)row(information,_("Disc status"),_("Blank"));
             if(info.optical) {
-                if(info.media_presence!=MediaPresence.ABSENT&&(info.audio_tracks!=null||info.data_tracks!=null||info.media_size!=null||(info.data_tracks!=null&&info.data_tracks>0&&info.capacity!=null))) {
+                bool filesystem_data=info.mounted&&info.blank!=true&&!info.audio_cd&&!(info.audio_tracks!=null&&info.audio_tracks>0&&info.data_tracks==0);
+                if(info.media_presence!=MediaPresence.ABSENT&&(info.audio_tracks!=null||info.data_tracks!=null||info.media_size!=null||(filesystem_data&&info.capacity!=null))) {
                     var media=group(_("Disc Information"));
                     if(info.audio_tracks!=null)row(media,_("Audio tracks"),info.audio_tracks.to_string());
                     if(info.data_tracks!=null)row(media,_("Data tracks"),info.data_tracks.to_string());
                     size_row(media,_("Reported media size"),info.media_size);
-                    if(info.data_tracks!=null&&info.data_tracks>0)size_row(media,_("Recorded data"),info.used_estimated?null:info.used);
-                    if(info.data_tracks!=null&&info.data_tracks>0)size_row(media,_("Filesystem capacity"),info.capacity);
+                    if(filesystem_data)size_row(media,_("Recorded data"),info.used_estimated?null:info.used);
+                    if(filesystem_data)size_row(media,_("Filesystem capacity"),info.capacity);
                 }
             } else if(info.category!=DeviceCategory.TAPE_DRIVE&&(info.capacity!=null||info.volume_size!=null)) {
                 var storage=group(_("Storage"));size_row(storage,_("Capacity"),info.capacity);
@@ -69,7 +70,7 @@ namespace MajorisFiles {
                 if(info.show_usage){var bar=new Gtk.ProgressBar();bar.fraction=(double)info.used/(double)info.capacity;bar.margin_start=12;bar.margin_end=12;bar.margin_top=8;bar.margin_bottom=8;bar.update_property(Gtk.AccessibleProperty.LABEL,_("Used storage"),-1);var usage_row=new Adw.PreferencesRow();usage_row.selectable=false;usage_row.activatable=false;usage_row.child=bar;storage.add(usage_row);}
                 if(info.usage_allowed){size_row(storage,info.used_estimated?_("Used (estimated)"):_("Used"),info.used);size_row(storage,_("Available"),info.available);}
             }
-            if(info.has_hardware){var summary=group(_("Hardware"));row(summary,_("Connection"),info.connection);row(summary,_("Device type"),info.hardware_type);row(summary,_("Model"),info.model);var details=new Adw.ActionRow();details.title=_("Hardware Details");details.activatable=true;details.add_suffix(new Gtk.Image.from_icon_name("go-next-symbolic"));details.activated.connect(()=>push_subpage(hardware_page));summary.add(details);}
+            if(info.has_hardware){var summary=group(_("Hardware"));row(summary,_("Connection"),info.connection);row(summary,_("Device type"),info.hardware_type);row(summary,_("Model"),info.model);row(summary,_("Supported media"),info.supported_media());var details=new Adw.ActionRow();details.title=_("Hardware Details");details.activatable=true;details.add_suffix(new Gtk.Image.from_icon_name("go-next-symbolic"));details.activated.connect(()=>push_subpage(hardware_page));summary.add(details);}
             rebuild_hardware(info);
         }
         void identifier(Adw.PreferencesGroup group,string title,string value) {
@@ -87,7 +88,7 @@ namespace MajorisFiles {
             if(!info.connected){row(hardware_section(_("Device")),_("Status"),_("Disconnected"));return;}
             if(info.vendor!=""||info.model!=""||info.serial!=""||info.revision!=""||info.connection!=""||info.media_compatibility.length>0){
                 var device=hardware_section(_("Device"));
-                identifier(device,_("Manufacturer"),info.vendor);identifier(device,_("Model"),info.model);identifier(device,_("Serial number"),info.serial);identifier(device,_("Revision"),info.revision);identifier(device,_("Connection"),info.connection);identifier(device,_("Media compatibility"),string.joinv(", ",info.media_compatibility));
+                identifier(device,_("Manufacturer"),info.vendor);identifier(device,_("Model"),info.model);identifier(device,_("Serial number"),info.serial);identifier(device,_("Revision"),info.revision);identifier(device,_("Connection"),info.connection);identifier(device,_("Supported media"),info.supported_media());
             }
             if(info.device!=""||info.block_object!=""||info.drive_object!=""||info.backing_file!=""||info.backing_object!=""||info.partition_uuid!=""||info.partition_scheme!=""||info.physical_size!=null||info.volume_size!=null||info.media_size!=null){
                 var storage=hardware_section(_("Storage"));

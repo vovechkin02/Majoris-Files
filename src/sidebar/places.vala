@@ -9,6 +9,11 @@ namespace MajorisFiles {
         public Volume? volume;
         public Drive? drive;
         public bool system;
+        public DeviceInfo? device_info;
+        public Icon device_icon(Gtk.IconTheme theme) {
+            Icon supplied=icon??new ThemedIcon(icon_name);
+            return device_info==null?supplied:device_info.display_icon(supplied,theme);
+        }
         public string tape_sysfs = "";
         public uint64? tape_inode;
         public TagDefinition? tag;
@@ -31,6 +36,12 @@ namespace MajorisFiles {
     public class Places : Object {
         public Gee.ArrayList<Place> entries = new Gee.ArrayList<Place>();
         public signal void changed();
+        public signal void presentation_changed(Place place);
+        DeviceInfoProvider media_provider;
+        ulong media_handler;
+        Cancellable media_token = new Cancellable();
+        uint media_generation;
+        uint media_source;
         VolumeMonitor volumes;
         FileMonitor? watcher;
         FileMonitor? tape_watcher;
@@ -47,7 +58,9 @@ namespace MajorisFiles {
         public string root_filesystem { get; private set; default = ""; }
         [CCode (cname = "g_reload_user_special_dirs_cache", cheader_filename = "glib.h")]
         static extern void reload_special_dirs();
-        public Places(MetadataStore? metadata = null) {
+        public Places(MetadataStore? metadata = null,DeviceInfoProvider? media_provider = null) {
+            this.media_provider=media_provider??DeviceInfoProvider.get_default();
+            media_handler=observe_media(this.media_provider,this);
             this.metadata = metadata;
             volumes=VolumeMonitor.get();
             if (metadata != null) tags_handler = observe_tags(metadata, this);
@@ -62,6 +75,30 @@ namespace MajorisFiles {
             try {device_watcher=File.new_for_path("/dev").monitor_directory(FileMonitorFlags.NONE);device_watcher.changed.connect((file)=>{if(Regex.match_simple("^n?st[0-9]+$",file.get_basename()??""))refresh_tapes.begin();});}catch(Error e){}
             refresh_tapes.begin();
             reload();
+        }
+        static ulong observe_media(DeviceInfoProvider provider,Places places) {
+            weak Places owner=places;return provider.changed.connect(()=>{if(owner!=null)owner.schedule_media();});
+        }
+        void schedule_media() {
+            media_token.cancel();media_generation++;
+            if(media_source!=0)return;
+            media_source=Idle.add(()=>{media_source=0;refresh_media.begin();return Source.REMOVE;});
+        }
+        async void refresh_media() {
+            media_token=new Cancellable();var token=media_token;uint request=media_generation;
+            try{var objects=yield media_provider.media_snapshot(token);if(!token.is_cancelled()&&request==media_generation)apply_media_snapshot(objects);}
+            catch(Error e){if(!token.is_cancelled()&&request==media_generation)foreach(var place in entries)if(place.section=="Devices")set_device_information(place,null);}
+        }
+        public void apply_media_snapshot(Variant objects) {
+            foreach(var place in entries)if(place.section=="Devices"&&place.tape_sysfs=="")set_device_information(place,DeviceInfoProvider.describe_place(place,objects));
+        }
+        static string presentation_key(DeviceInfo? info) {
+            return info==null?"":info.category.to_string()+"\n"+info.media+"\n"+info.media_presence.to_string()+"\n"+string.joinv("\n",info.media_compatibility);
+        }
+        public void set_device_information(Place place,DeviceInfo? info) {
+            if(!entries.contains(place))return;
+            bool changed=presentation_key(place.device_info)!=presentation_key(info);
+            place.device_info=info;if(changed)presentation_changed(place);
         }
         static ulong observe_tags(MetadataStore store, Places places) {
             weak Places self = places; return store.tag_definitions_changed.connect(() => { if (self != null) self.refresh_tags(); });
@@ -79,6 +116,7 @@ namespace MajorisFiles {
             config_refresh = Timeout.add(100, () => { config_refresh = 0; reload_special_dirs(); reload(); return Source.REMOVE; });
         }
         protected override void dispose() {
+            media_generation++;media_token.cancel();if(media_source!=0){Source.remove(media_source);media_source=0;}if(media_handler!=0){media_provider.disconnect(media_handler);media_handler=0;}
             if (metadata != null && tags_handler != 0) { metadata.disconnect(tags_handler); tags_handler = 0; }
             if(config_refresh!=0){Source.remove(config_refresh);config_refresh=0;}
             if(device_watcher!=null){device_watcher.cancel();device_watcher=null;}
@@ -258,6 +296,7 @@ namespace MajorisFiles {
                 signature.append_printf("%s\n%s\n%s\n%s\n%u:%u:%u\n",place.label,place.file.get_uri(),place.section,icon,place.mount==null?0:direct_hash(place.mount),place.volume==null?0:direct_hash(place.volume),place.drive==null?0:direct_hash(place.drive));
             }
             if(signature.str!=last_signature){entries=next;last_signature=signature.str;changed();}
+            schedule_media();
         }
     }
 }

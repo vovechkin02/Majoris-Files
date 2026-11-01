@@ -1,0 +1,107 @@
+The Meson build system
+Version: 1.7.0
+Source dir: /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files
+Build dir: /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build
+Build type: native build
+Project name: majoris-files
+Project version: 0.1.0
+C compiler for the host machine: cc (gcc 14.2.0 "cc (Debian 14.2.0-19) 14.2.0")
+C linker for the host machine: cc ld.bfd 2.44
+Vala compiler for the host machine: valac (valac 0.56.18)
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Dependency majoris-ui-gtk4 found: YES 0.1.0 (cached)
+Dependency gtk4 found: YES 4.18.6 (cached)
+Dependency libadwaita-1 found: YES 1.7.6 (cached)
+Dependency gee-0.8 found: YES 0.20.8 (cached)
+Dependency gio-unix-2.0 found: YES 2.84.4 (cached)
+Dependency sqlite3 found: YES 3.46.1 (cached)
+Dependency json-glib-1.0 found: YES 1.10.6 (cached)
+Dependency poppler-glib found: YES 25.03.0 (cached)
+Dependency libarchive found: YES 3.7.4 (cached)
+Dependency gtk4-wayland found: YES 4.18.6 (cached)
+Dependency gtk4-x11 found: YES 4.18.6 (cached)
+Dependency x11 found: YES 1.8.12 (cached)
+Dependency libportal-gtk4 found: YES 0.9.1 (cached)
+Dependency cloudproviders found: YES 0.3.6 (cached)
+Dependency gtksourceview-5 found: YES 5.16.0 (cached)
+Dependency tinysparql-3.0 found: YES 3.8.2 (cached)
+Found pkg-config: YES (/usr/bin/pkg-config) 1.8.1
+Dependency gio-2.0 found: YES 2.84.4 (cached)
+Program /usr/bin/glib-compile-resources found: YES (/usr/bin/glib-compile-resources)
+Dependency gstreamer-app-1.0 found: YES 1.26.2 (cached)
+Configuring preview-config.vala using configuration
+Dependency gio-2.0 found: YES 2.84.4 (cached)
+Dependency poppler-glib found: YES 25.03.0 (cached)
+Dependency libarchive found: YES 3.7.4 (cached)
+Dependency pangocairo found: YES 1.56.3 (cached)
+Dependency pangoft2 found: YES 1.56.3 (cached)
+Dependency fontconfig found: YES 2.15.0 (cached)
+Dependency gdk-pixbuf-2.0 found: YES 2.42.12 (cached)
+Dependency gexiv2 found: YES 0.14.3 (cached)
+Dependency libraw found: YES 0.21.4 (cached)
+Dependency libheif found: YES 1.23.4 (cached)
+Dependency lcms2 found: YES 2.16 (cached)
+Dependency libturbojpeg found: YES 2.1.5 (cached)
+Dependency gstreamer-pbutils-1.0 found: YES 1.26.2 (cached)
+Dependency gstreamer-app-1.0 found: YES 1.26.2 (cached)
+Dependency gstreamer-video-1.0 found: YES 1.26.2 (cached)
+Dependency libcmark found: YES 0.30.2 (cached)
+Dependency json-glib-1.0 found: YES 1.10.6 (cached)
+Dependency gio-2.0 found: YES 2.84.4 (cached)
+Dependency gee-0.8 found: YES 0.20.8 (cached)
+Dependency json-glib-1.0 found: YES 1.10.6 (cached)
+Dependency polkit-gobject-1 found: YES 126 (cached)
+Configuring com.majoris.Files.Sharing.service using configuration
+Configuring majoris-files-sharing.service using configuration
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Dependency gio-2.0 found: YES 2.84.4 (cached)
+Dependency gdk-pixbuf-2.0 found: YES 2.42.12 (cached)
+Dependency libraw found: YES 0.21.4 (cached)
+Dependency libheif found: YES 1.23.4 (cached)
+Dependency lcms2 found: YES 2.16 (cached)
+Dependency libtiff-4 found: YES 4.7.0 (cached)
+Dependency json-glib-1.0 found: YES 1.10.6 (cached)
+Dependency gio-2.0 found: YES 2.84.4 (cached)
+Dependency json-glib-1.0 found: YES 1.10.6 (cached)
+Dependency gio-2.0 found: YES 2.84.4 (cached)
+Dependency gtk4 found: YES 4.18.6 (cached)
+Program xvfb-run found: YES (/usr/bin/xvfb-run)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Program python3 found: YES (/usr/bin/python3)
+Configuring org.freedesktop.impl.portal.desktop.majoris.service using configuration
+Configuring org.freedesktop.FileManager1.service using configuration
+Configuring com.majoris.files.service using configuration
+Program gtk4-update-icon-cache found: YES (/usr/bin/gtk4-update-icon-cache)
+Program update-desktop-database found: YES (/usr/bin/update-desktop-database)
+Program msgfmt found: YES (/usr/bin/msgfmt)
+Program msginit found: YES (/usr/bin/msginit)
+Program msgmerge found: YES (/usr/bin/msgmerge)
+Program xgettext found: YES (/usr/bin/xgettext)
+Dependency gio-2.0 found: YES 2.84.4 (cached)
+Dependency json-glib-1.0 found: YES 1.10.6 (cached)
+Dependency gee-0.8 found: YES 0.20.8 (cached)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Program python3 found: YES (/usr/bin/python3)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Program xdotool found: YES (/usr/bin/xdotool)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Program xdotool found: YES (/usr/bin/xdotool)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Program dbus-run-session found: YES (/usr/bin/dbus-run-session)
+Build targets in project: 37
+
+majoris-files 0.1.0
+
+  User defined options
+    prefix: /usr
+
+Found ninja-1.12.1 at /usr/bin/ninja
+Generating targets:   0%|          | 0/37 eta ?Generating targets:  54%|█████▍    | 20/37 eta 00:00                                                    Writing build.ninja:   0%|          | 0/1799 eta ?Writing build.ninja:  80%|███████▉  | 1437/1799 eta 00:00                                                         Cleaning... 0 files.

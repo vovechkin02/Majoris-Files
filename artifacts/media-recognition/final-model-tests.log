@@ -1,0 +1,22 @@
+TAP version 14
+# random seed: R02S34bdf874d22a4daa6acc4bd3323f12b1
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for ‘gsettings-backend’
+dbus-daemon[602494]: [session uid=1000 pid=602494 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.1' (uid=1000 pid=602508 comm="build/device-properties-tests -x /devices/media-di" label="kernel")
+dbus-daemon[602494]: [session uid=1000 pid=602494 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ‘gio-vfs’
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+1..10
+# Start of devices tests
+ok 1 /devices/media-table
+ok 2 /devices/media-presence
+ok 3 /devices/snapshot-cache
+# slow test /devices/snapshot-cache executed in 1.54 secs
+ok 4 /devices/reader-lifecycle
+ok 5 /devices/media-dialog # SKIP by request (-s option)
+ok 6 /devices/calculations
+ok 7 /devices/mapping
+ok 8 /devices/provider
+ok 9 /devices/tape-discovery
+ok 10 /devices/dialog # SKIP by request (-s option)
+# End of devices tests
+A connection to the bus can't be made
