@@ -1,0 +1,14 @@
+1/5 sidebar           OK               0.37s
+2/5 portal            OK               3.65s
+3/5 menus             OK              18.47s
+4/5 device-properties OK              30.52s
+5/5 properties        OK              57.65s
+
+Ok:                 5   
+Expected Fail:      0   
+Fail:               0   
+Unexpected Pass:    0   
+Skipped:            0   
+Timeout:            0   
+
+Full log written to /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/meson-logs/testlog.txt

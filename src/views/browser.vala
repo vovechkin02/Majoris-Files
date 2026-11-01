@@ -1109,6 +1109,7 @@ namespace MajorisFiles {
         }
         async void open_place(Place place)
         {
+            if (place.tape_sysfs != "") { new DevicePropertiesDialog(place).present(this); return; }
             if(place.drive != null) {
                 try {
                     if(place.drive.can_poll_for_media())yield place.drive.poll_for_media(null);
@@ -1163,8 +1164,11 @@ namespace MajorisFiles {
             var model = new Menu(); var actions = new SimpleActionGroup();
             var menu = new Gtk.PopoverMenu.from_model(model); menu.has_arrow = false;
             menu.set_parent(sidebar); menu.insert_action_group("place", actions);
+            if (place.tape_sysfs == "" && place.volume == null && place.drive == null) {
+                var open = new SimpleAction("open", null); open.activate.connect(() => open_place.begin(place)); actions.add_action(open); model.append(_("Open"), "place.open");
+            }
             var tab = new SimpleAction("tab", null); tab.activate.connect(() => open_in_tab(place.file)); actions.add_action(tab);
-            if (place.volume == null && place.drive == null) model.append(_("Open in New Tab"), "place.tab");
+            if (place.volume == null && place.drive == null && place.tape_sysfs == "") model.append(_("Open in New Tab"), "place.tab");
             if (!place.system && place.mount == null && place.drive != null && place.drive.can_eject()) {
                 var eject = new SimpleAction("eject-drive", null); eject.activate.connect(() => eject_drive.begin(place.drive)); actions.add_action(eject); model.append(_("Eject"), "place.eject-drive");
             }
@@ -1173,6 +1177,11 @@ namespace MajorisFiles {
             }
             if (place.volume != null && place.volume.can_mount()) {
                 var mount = new SimpleAction("mount", null); mount.activate.connect(() => open_place.begin(place)); actions.add_action(mount); model.append(_("Mount"), "place.mount");
+            }
+            if (place.system || place.section == "Devices" || place.mount != null || place.volume != null || place.drive != null) {
+                var properties = new SimpleAction("properties", null);
+                properties.activate.connect(() => new DevicePropertiesDialog(place).present(this)); actions.add_action(properties);
+                var section = new Menu(); section.append(_("Properties"), "place.properties"); model.append_section(null, section);
             }
             if (place.cloud != null && place.cloud.get_menu_model() != null && place.cloud.get_action_group() != null) {
                 menu.insert_action_group("cloudprovider", place.cloud.get_action_group());

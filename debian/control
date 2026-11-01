@@ -14,3 +14,5 @@ Suggests: firewalld
 Description: Majoris file manager and system chooser
  Files provides shared local and remote browsing, file operations, previews,
  and a FileChooser portal backend for the Majoris desktop.
+ Read-only device inspection uses GIO and the UDisks2 D-Bus service;
+ legacy tape metadata is optional and requires no tape utilities.

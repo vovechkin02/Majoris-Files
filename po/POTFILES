@@ -67,3 +67,7 @@ src/views/grid-rows.vala
 src/views/home.vala
 src/window/extra-actions.vala
 src/window/window.vala
+
+src/devices/device-info.vala
+src/devices/device-provider.vala
+src/dialogs/device-properties.vala

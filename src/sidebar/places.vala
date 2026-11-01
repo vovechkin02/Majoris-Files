@@ -9,6 +9,8 @@ namespace MajorisFiles {
         public Volume? volume;
         public Drive? drive;
         public bool system;
+        public string tape_sysfs = "";
+        public uint64? tape_inode;
         public TagDefinition? tag;
         public CloudProviders.Account? cloud;
         public Place(string label, File file, Mount? mount = null) {
@@ -31,6 +33,11 @@ namespace MajorisFiles {
         public signal void changed();
         VolumeMonitor volumes;
         FileMonitor? watcher;
+        FileMonitor? tape_watcher;
+        FileMonitor? device_watcher;
+        Gee.ArrayList<Place> tapes = new Gee.ArrayList<Place>();
+        Cancellable tape_token = new Cancellable();
+        uint tape_generation;
         ulong[] volume_handlers;
         uint config_refresh;
         CloudAccounts cloud = new CloudAccounts();
@@ -51,6 +58,9 @@ namespace MajorisFiles {
                 watcher=configuration.monitor_file(FileMonitorFlags.NONE);
                 watcher.changed.connect(user_directories_changed);
             } catch(Error e) {}
+            try { tape_watcher=File.new_for_path("/sys/class/scsi_tape").monitor_directory(FileMonitorFlags.NONE); tape_watcher.changed.connect(()=>refresh_tapes.begin()); } catch(Error e) {}
+            try {device_watcher=File.new_for_path("/dev").monitor_directory(FileMonitorFlags.NONE);device_watcher.changed.connect((file)=>{if(Regex.match_simple("^n?st[0-9]+$",file.get_basename()??""))refresh_tapes.begin();});}catch(Error e){}
+            refresh_tapes.begin();
             reload();
         }
         static ulong observe_tags(MetadataStore store, Places places) {
@@ -71,6 +81,8 @@ namespace MajorisFiles {
         protected override void dispose() {
             if (metadata != null && tags_handler != 0) { metadata.disconnect(tags_handler); tags_handler = 0; }
             if(config_refresh!=0){Source.remove(config_refresh);config_refresh=0;}
+            if(device_watcher!=null){device_watcher.cancel();device_watcher=null;}
+            tape_token.cancel();if(tape_watcher!=null){tape_watcher.cancel();tape_watcher=null;}
             if(watcher!=null){watcher.cancel();watcher=null;}
             foreach(var handler in volume_handlers)volumes.disconnect(handler);
             volume_handlers={};base.dispose();
@@ -175,6 +187,32 @@ namespace MajorisFiles {
             if(drive!=null&&(drive.is_removable()||drive.is_media_removable()))return 2;
             return file==null||file.is_native()?1:5;
         }
+        async void refresh_tapes() {
+            uint request=++tape_generation;var next=new Gee.ArrayList<Place>();
+            try {
+                var directory=File.new_for_path("/sys/class/scsi_tape");
+                var enumerator=yield directory.enumerate_children_async("standard::name,unix::inode",FileQueryInfoFlags.NOFOLLOW_SYMLINKS,Priority.DEFAULT,tape_token);
+                while(true) {
+                    var batch=yield enumerator.next_files_async(32,Priority.DEFAULT,tape_token);if(batch==null)break;
+                    foreach(var entry in batch){string name=entry.get_name();if(!Regex.match_simple("^st[0-9]+$",name))continue;var place=new Place(_("Tape Drive")+" ("+name+")",File.new_for_path("/dev/n"+name));place.tape_sysfs=directory.get_child(name).get_path();if(entry.get_attribute_type("unix::inode")==FileAttributeType.UINT64)place.tape_inode=entry.get_attribute_uint64("unix::inode");place.icon_name="media-tape-symbolic";place.section="Devices";next.add(place);}
+                }
+                yield enumerator.close_async(Priority.DEFAULT,tape_token);
+            } catch(Error e) {}
+            if(!tape_token.is_cancelled()&&request==tape_generation){tapes=next;reload();}
+        }
+        public static Gee.ArrayList<Place> tape_devices(string sysfs = "/sys/class/scsi_tape") {
+            var result = new Gee.ArrayList<Place>();
+            try {
+                var directory = Dir.open(sysfs); string? name;
+                while ((name = directory.read_name()) != null) {
+                    // Both stN and nstN describe the same drive. Keep one identity.
+                    if (!Regex.match_simple("^st[0-9]+$", name)) continue;
+                    var place = new Place(_("Tape Drive") + " (" + name + ")", File.new_for_path("/dev/n" + name));
+                    place.tape_sysfs = Path.build_filename(sysfs, name); place.icon_name = "media-tape-symbolic";place.section = "Devices"; result.add(place);
+                }
+            } catch (Error e) {}
+            return result;
+        }
         public void reload() {
             string?[] paths={Environment.get_user_special_dir(UserDirectory.DESKTOP),Environment.get_user_special_dir(UserDirectory.DOCUMENTS),Environment.get_user_special_dir(UserDirectory.DOWNLOAD),Environment.get_user_special_dir(UserDirectory.PICTURES),Environment.get_user_special_dir(UserDirectory.MUSIC),Environment.get_user_special_dir(UserDirectory.VIDEOS)};
             var candidates=new Gee.ArrayList<SidebarDevice>();
@@ -206,14 +244,16 @@ namespace MajorisFiles {
             }
             foreach(var drive in volumes.get_connected_drives()) {
                 var icon=drive.get_symbolic_icon();
-                if(drive.has_volumes()||!drive.is_media_removable()||!(icon.to_string()??"").contains("optical"))continue;
+                if(drive.has_volumes()||!drive.is_media_removable())continue;
                 var identity=drive.get_identifier(VolumeIdentifier.UNIX_DEVICE)??"drive:%u".printf(direct_hash(drive));
                 var place=new Place(drive.get_name(),File.new_for_uri("majoris:///device/"+Uri.escape_string(identity)));place.drive=drive;place.icon=icon;
                 candidates.add(new SidebarDevice(place,identity,3));
             }
+            foreach (var tape in tapes) candidates.add(new SidebarDevice(tape, tape.tape_sysfs, 4));
             var next=compose(standard_folders(paths),candidates,root_filesystem,metadata == null ? null : metadata.tag_definitions());
             var signature=new StringBuilder();
             foreach(var place in next){
+                if(place.tape_inode!=null)signature.append(place.tape_inode.to_string());
                 string icon=place.tag != null ? place.tag.color : place.icon_name;if(place.icon!=null)icon=place.icon.to_string();
                 signature.append_printf("%s\n%s\n%s\n%s\n%u:%u:%u\n",place.label,place.file.get_uri(),place.section,icon,place.mount==null?0:direct_hash(place.mount),place.volume==null?0:direct_hash(place.volume),place.drive==null?0:direct_hash(place.drive));
             }

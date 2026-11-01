@@ -1,0 +1,34 @@
+ninja: Entering directory `/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build'
+ninja: no work to do.
+ 1/23 core                       OK               0.05s
+ 2/23 cloud                      OK               0.28s
+ 3/23 archive-crash              OK               0.31s
+ 4/23 image-decoders             OK               0.11s
+ 5/23 firewall                   OK               0.01s
+ 6/23 replacement-crash          OK               1.41s
+ 7/23 filesystem                 OK               1.30s
+ 8/23 session                    OK               1.31s
+ 9/23 portal                     OK               3.59s
+10/23 ui                         OK              16.48s
+11/23 theme-layout               OK               0.13s
+12/23 sidebar                    OK               0.35s
+13/23 theme-integration-fallback OK              16.91s
+14/23 details-corrections        OK              55.69s
+15/23 redesign                   OK             104.12s
+16/23 toolbars                   OK              33.33s
+17/23 properties                 OK              58.12s
+18/23 menus                      OK              18.45s
+19/23 tags                       OK               2.07s
+20/23 tags-ui                    OK              41.90s
+21/23 inline-rename              OK             144.89s
+22/23 device-properties          OK              30.73s
+23/23 creation-sorting           OK             143.74s
+
+Ok:                 23  
+Expected Fail:      0   
+Fail:               0   
+Unexpected Pass:    0   
+Skipped:            0   
+Timeout:            0   
+
+Full log written to /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/meson-logs/testlog.txt

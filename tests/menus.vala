@@ -138,7 +138,7 @@ async void scenarios() throws Error {
             var gesture = controllers.get_item(i) as Gtk.GestureClick;
             if (gesture != null && gesture.button == 3) { Graphene.Rect bounds; row.compute_bounds(row.get_parent(), out bounds); gesture.pressed(1, 16, bounds.origin.y + 8); yield pause_layout(); var device_popup = file_popup(row.get_parent()); assert(device_popup != null && device_popup.get_mapped());
                 Test.message("Sidebar popup: %dx%d items=%d", device_popup.get_width(), device_popup.get_height(), device_popup.menu_model.get_n_items());
-                assert(menu_label(device_popup, "Open in New Tab") != null); yield screenshot("sidebar" + suffix); break; }
+                assert(menu_label(device_popup, "Open in New Tab") != null); assert(menu_label(device_popup, "Properties") != null); assert(menu_label(device_popup, "Eject") == null && menu_label(device_popup, "Unmount") == null && menu_label(device_popup, "Mount") == null); yield screenshot("sidebar" + suffix); break; }
         }
         dismiss_popovers(window);
         window.set_default_size(1100, 740); yield pause_layout();

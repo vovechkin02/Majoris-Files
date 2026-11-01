@@ -22,7 +22,7 @@ namespace MajorisFiles {
     }
     // A selection snapshot and one native navigation stack own the entire lifetime.
     public class PropertiesDialog : Adw.PreferencesDialog {
-        public static void present_selection(Gtk.Window parent, Gee.List<FileItem> items, MetadataStore metadata) { if (items.size > 0) new PropertiesDialog(parent, items, metadata).present(parent); }
+        public static void present_selection(Gtk.Window parent, Gee.List<FileItem> items, MetadataStore metadata) { if (items.size == 1 && !Paths.is_symlink(items[0].info)) { var place = DeviceInfoProvider.for_root(items[0].file); if (place != null) { new DevicePropertiesDialog(place).present(parent); return; } } if (items.size > 0) new PropertiesDialog(parent, items, metadata).present(parent); }
         public Gee.ArrayList<FileItem> items = new Gee.ArrayList<FileItem>();
         public Adw.PreferencesPage general = new Adw.PreferencesPage();
         public Cancellable token = new Cancellable();
