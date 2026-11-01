@@ -32,11 +32,15 @@ namespace MajorisFiles {
             preview.add(limit);
             toggle(preview, "Show Preview Pane by Default", "preview-pane-default", false);
             toggle(preview, "Auto-play Media Previews", "autoplay-media", false);
-            var network = group(page("Network", "network-workgroup-symbolic"), "Remote Content");
+            var network_page=page("Network", "network-workgroup-symbolic");
+            command(group(page(_("Tags"),"tag-symbolic"),_("Tags")),_("Manage Tags…"),"win.manage-tags");
+            var network = group(network_page, "Remote Content");
             number(network, "File Dialog Download Limit (GiB)", "remote-import-limit-gib", 10, 1, 1024);
             number(network, "File Dialog Download Timeout (minutes)", "remote-import-timeout-minutes", 30, 1, 1440);
             choice(network, "Remote Previews", "remote-preview-policy", {"Never", "On Request", "Automatic"}, "On Request");
             number(network, "Remote Preview Download Limit (MiB)", "remote-preview-limit-mib", 16, 1, 1024);
+            var sharing=group(network_page,_("Sharing"));
+            command(sharing,_("Shared Folders…"),"win.shared-folders");command(sharing,_("SMB Account Password…"),"win.smb-password");
             var search = group(page("Search", "system-search-symbolic"), "Search Scope");
             var extensions = group(page("Extensions", "application-x-addon-symbolic"), "Installed External Extensions");
             extensions.description = _("Extensions run as separate user services. Enable only providers you trust; they receive selected file locations. Reopen Files to add or remove extension columns.");
@@ -55,6 +59,7 @@ namespace MajorisFiles {
             foreach(var key in new string[] {"favorites", "recent", "downloads", "recommended"})
                 toggle(home, key == "favorites" ? "Favorites" : key == "recent" ? "Recent" : key == "downloads" ? "Recent Downloads" : "Recommended", "home-" + key, true);
         }
+        void command(Adw.PreferencesGroup group,string title,string action){var row=new Adw.ActionRow();row.title=title;var button=new Gtk.Button.with_label(_("Open"));button.valign=Gtk.Align.CENTER;button.action_name=action;button.update_property(Gtk.AccessibleProperty.LABEL,title,-1);row.add_suffix(button);row.activatable_widget=button;group.add(row);}
         Adw.PreferencesPage page(string title, string icon)
         {
             var result = new Adw.PreferencesPage();

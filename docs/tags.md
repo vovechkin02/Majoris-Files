@@ -81,8 +81,8 @@ same transaction. Hidden sidebar tags remain available in this dialog.
 
 Properties retains its compact summary and shows up to three colour markers for
 a common tag set. Multiple differing sets display Mixed tags. The main context
-menu stays text-only with one Tags… action; Manage Tags… appears once in the
-application menu, with no new toolbar button.
+menu stays text-only with one Tags… action; Manage Tags… is available in the
+tag sidebar context menu, the Tags heading, and Preferences → Tags. The assignment dialog also opens the manager. No permanent toolbar button is added.
 
 ## Sidebar, collections and file operations
 

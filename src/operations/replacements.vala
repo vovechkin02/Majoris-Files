@@ -14,6 +14,7 @@ namespace MajorisFiles {
         }
     }
     public class ReplacementJournal : Object {
+        public signal void changed();
         MetadataStore metadata;
         public Gee.ArrayList<ReplacementRecord> records = new Gee.ArrayList<ReplacementRecord>();
         public ReplacementJournal(MetadataStore metadata)
@@ -45,7 +46,7 @@ namespace MajorisFiles {
             var entries = new VariantBuilder(new VariantType("a(ssssss)"));
             foreach (var record in records)
                 entries.add("(ssssss)", record.id, record.target.get_uri(), record.backup.get_uri(), record.previous_identity, record.current_identity, record.phase);
-            metadata.set_state_checked("replacement-recovery-v1", entries.end().print(true));
+            metadata.set_state_checked("replacement-recovery-v1", entries.end().print(true));changed();
         }
         public async ReplacementRecord prepare(File target, File backup) throws Error
         {

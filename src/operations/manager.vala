@@ -4,6 +4,7 @@ namespace MajorisFiles {
         COPY, MOVE, TRASH, DELETE, CREATE_FOLDER, RENAME, LINK, EDIT_FILE, CREATE_FILE
     }
     public class Job : Object {
+        public string recovery_action {get;set;default="";}
         public string title {
             get;
             set;
@@ -84,6 +85,30 @@ namespace MajorisFiles {
         public signal void rename_checkpoint(string phase);
         public signal void renamed(File source, File destination);
         public signal void edit_checkpoint(string phase);
+        public signal void recovery_changed();
+        Job? rename_notice;
+        Job? replacement_notice;
+        bool refreshing_recovery;
+        public bool has_rename_recovery {get{return rename_notice!=null;}}
+        public bool has_replacement_recovery {get{return replacement_notice!=null;}}
+        public string recovery_signature(){
+            string result=has_rename_recovery?metadata.state(RenameRecovery.KEY):"";
+            if(has_replacement_recovery)foreach(var record in replacements.records)if(record.phase!="history")result+="\n"+record.id;
+            return result==""?"":Checksum.compute_for_string(ChecksumType.SHA256,result);
+        }
+        void remove_recovery_job(Job? job){if(job==null)return;uint position;if(jobs.find(job,out position))jobs.remove(position);}
+        public void refresh_recovery_jobs(){
+            if(refreshing_recovery)return;refreshing_recovery=true;
+            bool active=false;for(uint i=0;i<jobs.get_n_items();i++)if(!((Job)jobs.get_item(i)).done)active=true;
+            bool rename_pending=rename_recovery.pending&&(!active||rename_notice!=null);
+            bool replacement_pending=false;foreach(var record in replacements.records)if(record.phase!="history")replacement_pending=true;
+            replacement_pending=replacement_pending&&(!active||replacement_notice!=null);
+            if(rename_pending&&rename_notice==null){rename_notice=new Job(_("Interrupted batch rename"));rename_notice.done=true;rename_notice.current=_("Review and restore original names without overwriting unrelated files.");rename_notice.recovery_action="recover-rename";jobs.append(rename_notice);}
+            if(!rename_pending&&rename_notice!=null){remove_recovery_job(rename_notice);rename_notice=null;}
+            if(replacement_pending&&replacement_notice==null){replacement_notice=new Job(_("Preserved replaced files"));replacement_notice.done=true;replacement_notice.current=_("Recover preserved files without overwriting current destinations.");replacement_notice.recovery_action="recover-replacements";jobs.append(replacement_notice);}
+            if(!replacement_pending&&replacement_notice!=null){remove_recovery_job(replacement_notice);replacement_notice=null;}
+            refreshing_recovery=false;recovery_changed();
+        }
         public async bool replace_existing(File source, File destination, bool move, Job job, bool keep_backup = false, string? expected_guard = null) throws Error
         {
             if (!destination.is_native()) throw new IOError.NOT_SUPPORTED("Local staging requires a native destination");
@@ -173,15 +198,9 @@ namespace MajorisFiles {
             this.metadata = metadata;
             replacements = new ReplacementJournal(metadata);
             rename_recovery = new RenameRecovery(metadata);
-            if(rename_recovery.pending){var recovery=new Job("Interrupted batch rename");recovery.done=true;recovery.error="Use Recover Interrupted Batch Rename from the menu. Original names can be restored without overwriting unrelated files.";jobs.append(recovery);}
-            bool pending_recovery = false;
-            foreach (var entry in replacements.records) if (entry.phase != "history") pending_recovery = true;
-            if (pending_recovery) {
-                var recovery = new Job("Replacement recovery available");
-                recovery.done = true;
-                recovery.error = "Previous destination data may be preserved. Use Recover Previous Replaced Files from the menu to inspect and restore it without overwriting current files.";
-                jobs.append(recovery);
-            }
+            replacements.changed.connect(refresh_recovery_jobs);rename_recovery.changed.connect(refresh_recovery_jobs);
+            jobs.items_changed.connect((position,removed,added)=>{for(uint i=position;i<position+added;i++){var job=(Job)jobs.get_item(i);if(job.recovery_action=="")job.notify["done"].connect(refresh_recovery_jobs);}refresh_recovery_jobs();});
+            refresh_recovery_jobs();
             string combined_history = metadata.state("operations-history-v4");
             try {
                 if (combined_history == "") {

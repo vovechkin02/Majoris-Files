@@ -1,0 +1,200 @@
+ninja: Entering directory `/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build'
+[1/82] Compiling Vala source ../tests/menus.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala build-info.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/devices/media-identity.vala ../src/devices/device-info.vala ../src/devices/device-provider.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/dialogs/device-properties.vala ../src/operations/presentation.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../tests/menus.vala:82.113-82.140: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   82 |     var paintable=new Gtk.WidgetPaintable(contents);var snapshot=new Gtk.Snapshot();paintable.snapshot(snapshot,contents.get_allocated_width(),contents.get_allocated_height());var node=snapshot.to_node();assert(node!=null);
+      |                                                                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~                                                                                    
+../tests/menus.vala:82.144-82.172: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   82 |     var paintable=new Gtk.WidgetPaintable(contents);var snapshot=new Gtk.Snapshot();paintable.snapshot(snapshot,contents.get_allocated_width(),contents.get_allocated_height());var node=snapshot.to_node();assert(node!=null);
+      |                                                                                                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                                    
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/views/browser.vala:770.179-770.196: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+  770 |                 var row=sidebar.get_selected_row();if(row==null)return false;var place=row.get_data<Place>("majoris-place");if(place==null)return false;Gtk.Allocation allocation;row.get_allocation(out allocation);place_menu(place,12,allocation.y);return true;
+      |                                                                                                                                                                                   ^~~~~~~~~~~~~~~~~~                                                                
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/menus.vala:113.186-113.201: warning: `Gtk.StyleContext' has been deprecated since 4.10
+  113 |             var theme=Environment.get_variable("MAJORIS_MENU_THEME");if(theme!=null){var css=new Gtk.CssProvider();css.load_from_path(theme+"/gtk-4.0/"+(dark?"gtk-dark.css":"gtk.css"));Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(),css,Gtk.STYLE_PROVIDER_PRIORITY_USER);}
+      |                                                                                                                                                                                          ^~~~~~~~~~~~~~~~                                                                                            
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/menus.vala:152.13-152.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+  152 |             Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_USER);
+      |             ^~~~~~~~~~~~~~~~                                                                                             
+../tests/menus.vala:140.10-140.15: warning: Local variable `cancel' declared but never used
+  140 |     uint cancel=Timeout.add(50,()=>{var alert=window.visible_dialog as Adw.AlertDialog;if(alert==null)return Source.CONTINUE;assert(alert.heading=="Empty Trash?");alert.response("cancel");alert.close();return Source.REMOVE;});
+      |          ^~~~~~                                                                                                                                                                                                                    
+../tests/menus.vala:142.10-142.16: warning: Local variable `confirm' declared but never used
+  142 |     uint confirm=Timeout.add(50,()=>{var alert=window.visible_dialog as Adw.AlertDialog;if(alert==null)return Source.CONTINUE;alert.response("apply");alert.close();return Source.REMOVE;});
+      |          ^~~~~~~                                                                                                                                                                             
+../tests/native-evidence.vala:7.1-7.26: warning: Method `find_component' never used
+    7 | Gtk.Widget? find_component(Gtk.Widget widget, string name) {
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../tests/native-evidence.vala:71.1-71.18: warning: Method `capture' never used
+   71 | async void capture(Gtk.Window window,string output,string name) throws Error {
+      | ^~~~~~~~~~~~~~~~~~                                                             
+Compilation succeeded - 19 warning(s)
+[2/3] Compiling C object menu-tests.p/meson-generated_tests_menus.c.o
+../tests/menus.vala: In function ‘screenshot_co’:
+../tests/menus.vala:75:45: warning: passing argument 1 of ‘g_subprocess_newv’ from incompatible pointer type [-Wincompatible-pointer-types]
+   75 |     var grab = new Subprocess.newv({"xwd", "-silent", "-root", "-out", path + ".xwd"}, SubprocessFlags.NONE); yield grab.wait_check_async(null);
+      |                                       ~~~~~~^~~~~~~~~
+      |                                             |
+      |                                             gchar ** {aka char **}
+In file included from /usr/include/glib-2.0/gio/gio.h:155,
+                 from menu-tests.p/tests/menus.c:8:
+/usr/include/glib-2.0/gio/gsubprocess.h:49:80: note: expected ‘const gchar * const*’ {aka ‘const char * const*’} but argument is of type ‘gchar **’ {aka ‘char **’}
+   49 | GSubprocess *    g_subprocess_newv                      (const gchar * const  *argv,
+      |                                                          ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala:76:45: warning: passing argument 1 of ‘g_subprocess_newv’ from incompatible pointer type [-Wincompatible-pointer-types]
+   76 |     var convert = new Subprocess.newv({"magick", path + ".xwd", path + ".png"}, SubprocessFlags.NONE); yield convert.wait_check_async(null); FileUtils.unlink(path + ".xwd");
+      |                                       ~~~~~~^~~~~~~~~
+      |                                             |
+      |                                             gchar ** {aka char **}
+/usr/include/glib-2.0/gio/gsubprocess.h:49:80: note: expected ‘const gchar * const*’ {aka ‘const char * const*’} but argument is of type ‘gchar **’ {aka ‘char **’}
+   49 | GSubprocess *    g_subprocess_newv                      (const gchar * const  *argv,
+      |                                                          ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala: In function ‘capture_popup_co’:
+../tests/menus.vala:82:2: warning: ‘gtk_widget_get_allocated_width’ is deprecated: Use 'gtk_widget_get_width' instead [-Wdeprecated-declarations]
+   82 |     var paintable=new Gtk.WidgetPaintable(contents);var snapshot=new Gtk.Snapshot();paintable.snapshot(snapshot,contents.get_allocated_width(),contents.get_allocated_height());var node=snapshot.to_node();assert(node!=null);
+      |  ^  ~~~~~~~~~~~~~~~~~~~
+In file included from /usr/include/gtk-4.0/gtk/gtkapplication.h:26,
+                 from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33,
+                 from menu-tests.p/tests/menus.c:11:
+/usr/include/gtk-4.0/gtk/gtkwidget.h:475:23: note: declared here
+  475 | int                   gtk_widget_get_allocated_width    (GtkWidget     *widget);
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../tests/menus.vala:82:2: warning: ‘gtk_widget_get_allocated_height’ is deprecated: Use 'gtk_widget_get_height' instead [-Wdeprecated-declarations]
+   82 |     var paintable=new Gtk.WidgetPaintable(contents);var snapshot=new Gtk.Snapshot();paintable.snapshot(snapshot,contents.get_allocated_width(),contents.get_allocated_height());var node=snapshot.to_node();assert(node!=null);
+      |  ^  ~~~~~~~~~~~~~~~~~~~
+/usr/include/gtk-4.0/gtk/gtkwidget.h:477:23: note: declared here
+  477 | int                   gtk_widget_get_allocated_height   (GtkWidget     *widget);
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../tests/menus.vala: In function ‘capture_empty_click_co’:
+../tests/menus.vala:86:44: warning: passing argument 1 of ‘g_subprocess_newv’ from incompatible pointer type [-Wincompatible-pointer-types]
+   86 |     var search = new Subprocess.newv({"xdotool", "search", "--onlyvisible", "--name", "^Files$"}, SubprocessFlags.STDOUT_PIPE);
+      |                                      ~~~~~~^~~~~~~~
+      |                                            |
+      |                                            gchar ** {aka char **}
+/usr/include/glib-2.0/gio/gsubprocess.h:49:80: note: expected ‘const gchar * const*’ {aka ‘const char * const*’} but argument is of type ‘gchar **’ {aka ‘char **’}
+   49 | GSubprocess *    g_subprocess_newv                      (const gchar * const  *argv,
+      |                                                          ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala:90:45: warning: passing argument 1 of ‘g_subprocess_newv’ from incompatible pointer type [-Wincompatible-pointer-types]
+   90 |     var click = new Subprocess.newv({"xdotool", "windowfocus", "--sync", ids.strip(), "mousemove", "--window", ids.strip(),
+      |                                       ~~~~~~^~~~~~~~~
+      |                                             |
+      |                                             gchar ** {aka char **}
+/usr/include/glib-2.0/gio/gsubprocess.h:49:80: note: expected ‘const gchar * const*’ {aka ‘const char * const*’} but argument is of type ‘gchar **’ {aka ‘char **’}
+   49 | GSubprocess *    g_subprocess_newv                      (const gchar * const  *argv,
+      |                                                          ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala: In function ‘scenarios_co’:
+../tests/menus.vala:106:100: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  106 |     var app = new Adw.Application("com.majoris.files.menucheck", ApplicationFlags.NON_UNIQUE); app.register(null);var new_window=new SimpleAction("new-window",null);app.add_action(new_window);app.set_accels_for_action("app.new-window",{"<Control>n"});
+      |                                                                                              ~~~~~~^~~~~~~~~
+      |                                                                                                    |
+      |                                                                                                    gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../tests/menus.vala:115:50: warning: passing argument 1 of ‘g_subprocess_newv’ from incompatible pointer type [-Wincompatible-pointer-types]
+  115 |             var click=new Subprocess.newv({"xdotool","search","--onlyvisible","--name","^Files$","mousemove","--window","%@",((int)(bounds.origin.x+bounds.size.width/2)).to_string(),((int)(bounds.origin.y+bounds.size.height/2)).to_string(),"click","1"},SubprocessFlags.NONE);yield click.wait_check_async(null);yield pause_layout();
+      |                                            ~~~~~~^~~~~~~~~~
+      |                                                  |
+      |                                                  gchar ** {aka char **}
+/usr/include/glib-2.0/gio/gsubprocess.h:49:80: note: expected ‘const gchar * const*’ {aka ‘const char * const*’} but argument is of type ‘gchar **’ {aka ‘char **’}
+   49 | GSubprocess *    g_subprocess_newv                      (const gchar * const  *argv,
+      |                                                          ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala:122:65: warning: passing argument 2 of ‘adw_preferences_dialog_set_visible_page’ from incompatible pointer type [-Wincompatible-pointer-types]
+  122 |             window.lookup_action("preferences").activate(null);yield pause_layout();var preferences=window.visible_dialog as Adw.PreferencesDialog;assert(preferences!=null);var sharing=preference(preferences,"Shared Folders…");preferences.visible_page=(Adw.PreferencesPage)sharing.get_ancestor(typeof(Adw.PreferencesPage));yield pause_layout();scroll_bottom(preferences.visible_page);yield screenshot("preferences-network"+suffix);preferences.close();yield pause_layout();
+In file included from /usr/include/libadwaita-1/adwaita.h:70,
+                 from menu-tests.p/tests/menus.c:13:
+/usr/include/libadwaita-1/adw-preferences-dialog.h:55:84: note: expected ‘AdwPreferencesPage *’ {aka ‘struct _AdwPreferencesPage *’} but argument is of type ‘GtkWidget *’ {aka ‘struct _GtkWidget *’}
+   55 |                                                              AdwPreferencesPage   *page);
+      |                                                              ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala:122:23: warning: assignment to ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} from incompatible pointer type ‘AdwPreferencesPage *’ {aka ‘struct _AdwPreferencesPage *’} [-Wincompatible-pointer-types]
+  122 |             window.lookup_action("preferences").activate(null);yield pause_layout();var preferences=window.visible_dialog as Adw.PreferencesDialog;assert(preferences!=null);var sharing=preference(preferences,"Shared Folders…");preferences.visible_page=(Adw.PreferencesPage)sharing.get_ancestor(typeof(Adw.PreferencesPage));yield pause_layout();scroll_bottom(preferences.visible_page);yield screenshot("preferences-network"+suffix);preferences.close();yield pause_layout();
+      |                       ^
+../tests/menus.vala:215:64: warning: passing argument 2 of ‘adw_preferences_dialog_set_visible_page’ from incompatible pointer type [-Wincompatible-pointer-types]
+  215 |         preferences.visible_page=(Adw.PreferencesPage)sharing.get_ancestor(typeof(Adw.PreferencesPage));yield screenshot("preferences-network"+suffix);
+/usr/include/libadwaita-1/adw-preferences-dialog.h:55:84: note: expected ‘AdwPreferencesPage *’ {aka ‘struct _AdwPreferencesPage *’} but argument is of type ‘GtkWidget *’ {aka ‘struct _GtkWidget *’}
+   55 |                                                              AdwPreferencesPage   *page);
+      |                                                              ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala:216:62: warning: passing argument 2 of ‘adw_preferences_dialog_set_visible_page’ from incompatible pointer type [-Wincompatible-pointer-types]
+  216 |         var tags=preference(preferences,"Manage Tags…");assert(tags!=null);preferences.visible_page=(Adw.PreferencesPage)tags.get_ancestor(typeof(Adw.PreferencesPage));yield screenshot("preferences-tags"+suffix);
+/usr/include/libadwaita-1/adw-preferences-dialog.h:55:84: note: expected ‘AdwPreferencesPage *’ {aka ‘struct _AdwPreferencesPage *’} but argument is of type ‘GtkWidget *’ {aka ‘struct _GtkWidget *’}
+   55 |                                                              AdwPreferencesPage   *page);
+      |                                                              ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala:217:64: warning: passing argument 2 of ‘adw_preferences_dialog_set_visible_page’ from incompatible pointer type [-Wincompatible-pointer-types]
+  217 |         preferences.visible_page=(Adw.PreferencesPage)sharing.get_ancestor(typeof(Adw.PreferencesPage));yield pause_layout();var shared_button=command_button(preferences,"win.shared-folders");assert(shared_button!=null);shared_button.activate();yield pause_layout();var shared=window.visible_dialog as SharedFoldersDialog;assert(shared!=null);window.lookup_action("shared-folders").activate(null);assert(window.visible_dialog==shared);shared.close();yield pause_layout();
+/usr/include/libadwaita-1/adw-preferences-dialog.h:55:84: note: expected ‘AdwPreferencesPage *’ {aka ‘struct _AdwPreferencesPage *’} but argument is of type ‘GtkWidget *’ {aka ‘struct _GtkWidget *’}
+   55 |                                                              AdwPreferencesPage   *page);
+      |                                                              ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala:220:64: warning: passing argument 2 of ‘adw_preferences_dialog_set_visible_page’ from incompatible pointer type [-Wincompatible-pointer-types]
+  220 |         preferences.visible_page=(Adw.PreferencesPage)tags.get_ancestor(typeof(Adw.PreferencesPage));yield pause_layout();var manage=command_button(preferences,"win.manage-tags");assert(manage!=null);manage.activate();yield pause_layout();assert(window.visible_dialog is TagsDialog);window.visible_dialog.close();yield pause_layout();
+/usr/include/libadwaita-1/adw-preferences-dialog.h:55:84: note: expected ‘AdwPreferencesPage *’ {aka ‘struct _AdwPreferencesPage *’} but argument is of type ‘GtkWidget *’ {aka ‘struct _GtkWidget *’}
+   55 |                                                              AdwPreferencesPage   *page);
+      |                                                              ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala:244:47: warning: passing argument 1 of ‘g_subprocess_newv’ from incompatible pointer type [-Wincompatible-pointer-types]
+  244 |     var focus = new Subprocess.newv({"xdotool", "search", "--name", "^Files$", "windowfocus", "--sync"}, SubprocessFlags.STDOUT_SILENCE); yield focus.wait_check_async(null);
+      |                                         ~~~~~~^~~~~~~~~~~
+      |                                               |
+      |                                               gchar ** {aka char **}
+/usr/include/glib-2.0/gio/gsubprocess.h:49:80: note: expected ‘const gchar * const*’ {aka ‘const char * const*’} but argument is of type ‘gchar **’ {aka ‘char **’}
+   49 | GSubprocess *    g_subprocess_newv                      (const gchar * const  *argv,
+      |                                                          ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala:249:47: warning: passing argument 1 of ‘g_subprocess_newv’ from incompatible pointer type [-Wincompatible-pointer-types]
+  249 |     var pointer_focus=new Subprocess.newv({"xdotool","search","--onlyvisible","--name","^Files$","mousemove","--window","%@",((int)file_bounds.origin.x+8).to_string(),((int)file_bounds.origin.y+8).to_string(),"click","1"},SubprocessFlags.NONE);yield pointer_focus.wait_check_async(null);yield pause_layout();
+      |                                         ~~~~~~^~~~~~~~~~~
+      |                                               |
+      |                                               gchar ** {aka char **}
+/usr/include/glib-2.0/gio/gsubprocess.h:49:80: note: expected ‘const gchar * const*’ {aka ‘const char * const*’} but argument is of type ‘gchar **’ {aka ‘char **’}
+   49 | GSubprocess *    g_subprocess_newv                      (const gchar * const  *argv,
+      |                                                          ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala:252:50: warning: passing argument 1 of ‘g_subprocess_newv’ from incompatible pointer type [-Wincompatible-pointer-types]
+  252 |         var input = new Subprocess.newv({"xdotool", "key", "--clearmodifiers", key}, SubprocessFlags.NONE); yield input.wait_check_async(null); yield pause_layout();
+      |                                            ~~~~~~^~~~~~~~~~~
+      |                                                  |
+      |                                                  gchar ** {aka char **}
+/usr/include/glib-2.0/gio/gsubprocess.h:49:80: note: expected ‘const gchar * const*’ {aka ‘const char * const*’} but argument is of type ‘gchar **’ {aka ‘char **’}
+   49 | GSubprocess *    g_subprocess_newv                      (const gchar * const  *argv,
+      |                                                          ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala:254:50: warning: passing argument 1 of ‘g_subprocess_newv’ from incompatible pointer type [-Wincompatible-pointer-types]
+  254 |         var escape = new Subprocess.newv({"xdotool", "key", "Escape"}, SubprocessFlags.NONE); yield escape.wait_check_async(null); yield pause_layout(); assert(!file_popup(browser.file_surface).visible);
+      |                                            ~~~~~~^~~~~~~~~~~
+      |                                                  |
+      |                                                  gchar ** {aka char **}
+/usr/include/glib-2.0/gio/gsubprocess.h:49:80: note: expected ‘const gchar * const*’ {aka ‘const char * const*’} but argument is of type ‘gchar **’ {aka ‘char **’}
+   49 | GSubprocess *    g_subprocess_newv                      (const gchar * const  *argv,
+      |                                                          ~~~~~~~~~~~~~~~~~~~~~~^~~~
+../tests/menus.vala:197:9: warning: ignoring return value of ‘gtk_widget_compute_bounds’ declared with attribute ‘warn_unused_result’ [-Wunused-result]
+  197 |             if (gesture != null && gesture.button == 3) { Graphene.Rect bounds; row.compute_bounds(row.get_parent(), out bounds); gesture.pressed(1, 16, bounds.origin.y + 8); yield pause_layout(); var device_popup = file_popup(row.get_parent()); assert(device_popup != null && device_popup.get_mapped());
+      |         ^   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[3/3] Linking target menu-tests
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /usr/bin/ninja -C /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build menu-tests

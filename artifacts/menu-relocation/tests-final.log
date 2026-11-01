@@ -1,0 +1,33 @@
+ 1/24 core                       OK               0.04s
+ 2/24 image-decoders             OK               0.08s
+ 3/24 firewall                   OK               0.01s
+ 4/24 cloud                      OK               0.27s
+ 5/24 archive-crash              OK               0.30s
+ 6/24 filesystem                 OK               1.24s
+ 7/24 replacement-crash          OK               1.38s
+ 8/24 session                    OK               1.28s
+ 9/24 theme-layout               OK               0.16s
+10/24 sidebar                    OK               0.34s
+11/24 portal                     OK               3.61s
+12/24 ui                         OK              16.30s
+13/24 theme-integration-fallback OK              16.84s
+14/24 toolbars                   OK              33.33s
+15/24 details-corrections        OK              56.22s
+16/24 redesign                   OK             105.59s
+17/24 properties                 OK              57.67s
+18/24 tags                       OK               2.21s
+19/24 menus                      OK              75.73s
+20/24 tags-ui                    OK              41.94s
+21/24 inline-rename              OK             145.35s
+22/24 grid-captions              OK              29.11s
+23/24 device-properties          OK              80.51s
+24/24 creation-sorting           OK             126.98s
+
+Ok:                 24  
+Expected Fail:      0   
+Fail:               0   
+Unexpected Pass:    0   
+Skipped:            0   
+Timeout:            0   
+
+Full log written to /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/meson-logs/menu-relocation-verified.txt

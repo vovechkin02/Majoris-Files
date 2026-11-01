@@ -1,0 +1,1 @@
+namespace MajorisFiles { public const string APP_VERSION = "@version@"; }

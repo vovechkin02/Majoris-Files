@@ -12,6 +12,11 @@ namespace MajorisFiles {
         QuickActionRegistry providers = new QuickActionRegistry();
         ExtensionManager extension_manager;
         Adw.TabPage? menu_page;
+        Adw.Banner recovery_banner=new Adw.Banner("");
+        string reviewed_recovery="";
+        Gtk.MenuButton operations_button;
+        PreferencesDialog? preferences_dialog;
+        TagsDialog? tags_dialog;
         public Browser? current {
             get {
                 return tabs.selected_page == null ? null : tabs.selected_page.child as Browser;
@@ -53,62 +58,16 @@ namespace MajorisFiles {
             var header = new Adw.HeaderBar();
             header.title_widget = new Adw.WindowTitle("Files", "");
             header.pack_start(Browser.button("tab-new-symbolic", _("New Tab"), () => new_tab(current.location)));
-            var progress = new Gtk.MenuButton();
+            var progress = new Gtk.MenuButton();operations_button=progress;
             MenuPresentation.button(progress);
             progress.icon_name = "folder-download-symbolic";
             progress.tooltip_text = _("File Operations");
             var popover = new Gtk.Popover();
             popover.has_arrow = false;
-            var jobs = new Gtk.ListBox();
-            jobs.selection_mode = Gtk.SelectionMode.NONE;
-            jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
-                                                        var box = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
-                                                        var label = new Gtk.Label(job.error != "" ? job.error : job.current == "" ? job.title : job.current);
-                                                        var bar = new Gtk.ProgressBar();
-                                                        bar.fraction = job.progress;
-                                                        var cancel = new Gtk.Button.with_label(_("Cancel"));
-                                                        cancel.sensitive = !job.done;
-                                                        cancel.clicked.connect(() => job.cancellable.cancel());
-                                                        var retry = new Gtk.Button.with_label(_("Retry Remaining Items"));
-                                                        retry.visible = job.can_retry;
-                                                        retry.clicked.connect(() => operations.retry.begin(job, this, (obj, res) => {
-                    try { operations.retry.end(res);
-                    }
-                    catch(Error e) { Dialogs.error(this, e.message);
-                    }
-                }));
-                                                        box.append(label);
-                                                        box.append(bar);
-                                                        box.append(cancel);
-                                                        box.append(retry);
-                                                        job.notify.connect(() => { label.label = job.error != "" ? job.error : job.current;
-                                                                                   if(job.cancelled)
-                                                                                       label.label = _("Cancelled · ") + job.current;
-                                                                                   bar.fraction = job.progress;
-                                                                                   cancel.sensitive = !job.done;
-                                                                                   retry.visible = job.can_retry;
-                                                                                   retry.sensitive = !job.retrying;
-                                                            });
-                                                        return box;
-                });
-            popover.child = jobs;
+            popover.child = new FileOperationsView(operations);
             progress.popover = popover;
             header.pack_end(progress);
-            var menu = new Menu();
-            menu.append(_("Manage Tags…"), "win.manage-tags");
-            menu.append("Shared Folders", "win.shared-folders");
-            menu.append("Recover Previous Replaced Files…", "win.recover-replacements");
-            menu.append("Recover Interrupted Batch Rename…", "win.recover-rename");
-            foreach (var entry in new string[] {"New Window|app.new-window", "New Tab|win.new-tab", "Reopen Closed Tab|win.reopen", "Duplicate Tab|win.duplicate-tab", "New Folder|win.new-folder", "New File|win.new-file", "Show Hidden Files|win.hidden", "Preview Pane|win.preview", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified", "Descending Order|win.descending", "Save Search|win.save-search", "Preferences|win.preferences", "Keyboard Shortcuts|win.shortcuts"})
-            {
-                var parts = entry.split("|", 2);
-                menu.append(parts[0], parts[1]);
-            }
-            foreach(var entry in new string[] {"Connect to Server|win.connect-server", "New Document from Template|win.templates", "Batch Rename|win.batch-rename", "Create Link|win.link", "Select by Pattern|win.select-pattern", "Invert Selection|win.invert-selection", "Select None|win.select-none", "Restore from Trash|win.restore", "Empty Trash|win.empty-trash", "Open in Terminal|win.terminal", "SMB Account Password|win.smb-password"})
-            {
-                var parts = entry.split("|", 2);
-                menu.append(parts[0], parts[1]);
-            }
+            var menu = application_menu();
             var menu_button = new Gtk.MenuButton();
             MenuPresentation.button(menu_button);
             menu_button.icon_name = "open-menu-symbolic";
@@ -171,6 +130,11 @@ namespace MajorisFiles {
                     close();
             });
             toolbar.add_top_bar(tabbar);
+            recovery_banner.title=_("File recovery is available");recovery_banner.button_label=_("Review");
+            recovery_banner.button_clicked.connect(()=>{reviewed_recovery=operations.recovery_signature();recovery_banner.revealed=false;operations_button.popup();});
+            toolbar.add_top_bar(recovery_banner);
+            operations.recovery_changed.connect(refresh_recovery);
+            refresh_recovery();
             toolbar.content = tabs;
             var overview = new Adw.TabOverview();
             overview.view = tabs;
@@ -181,6 +145,7 @@ namespace MajorisFiles {
                                                 if (browser != null)
                                                 {
                                                     closed.add(browser.location);
+                                                    update_commands();
                                                     browser.cancel();
                                                 }
                                                 tabs.close_page_finish(page, true);
@@ -200,10 +165,10 @@ namespace MajorisFiles {
             action("close-tab", () => tabs.close_page(tabs.selected_page));
             action("reopen", () => { if (closed.size > 0)
                                          new_tab(closed.remove_at(closed.size - 1));
+                                     update_commands();
                 });
             action("duplicate-tab", () => new_tab(current.location));
-            action("hidden", () => { current.show_hidden = !current.show_hidden;
-                                     current.refilter();
+            action("hidden", () => { current.toggle_hidden();
                 });
             action("preview", () => { if(current.narrow)
                                       {
@@ -292,7 +257,13 @@ namespace MajorisFiles {
             action("preferences", () => preferences());
             action("shortcuts", () => new ShortcutsDialog().present(this));
             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
-            action("manage-tags", () => new TagsDialog(metadata).present(this));
+            action("manage-tags", () => {if(tags_dialog==null){tags_dialog=new TagsDialog(metadata);tags_dialog.closed.connect(()=>tags_dialog=null);}tags_dialog.present(this);});
+            action("about", () => {
+                var about=new Adw.AboutDialog();about.application_name=_("Files");about.application_icon="com.majoris.files";
+                about.version=APP_VERSION;about.developer_name="Majoris Developers";about.license_type=Gtk.License.GPL_3_0;
+                about.website="https://github.com/vovechkin02/Majoris-Files";about.issue_url="https://github.com/vovechkin02/Majoris-Files/issues";
+                about.debug_info="Application ID: com.majoris.files\nVersion: "+APP_VERSION;about.present(this);
+            });
             string[] names = {
                 "new-tab", "close-tab", "reopen", "hidden", "new-folder", "rename", "trash", "delete", "copy", "cut", "paste", "undo", "redo", "properties", "quick-preview"
             };
@@ -302,6 +273,7 @@ namespace MajorisFiles {
             for (int i = 0; i < names.length; i++)
                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
             extra = new ExtraActions(this, operations, metadata);
+            update_commands();
             // Let native toolbar controls handle Space instead of the global
             // file-preview accelerator. The existing action and shortcut remain.
             notify["focus-widget"].connect(() => {
@@ -315,6 +287,15 @@ namespace MajorisFiles {
                                           return false;
                 });
         }
+        public static Menu application_menu() {
+            var menu=new Menu();var tabs=new Menu();var application=new Menu();
+            tabs.append(_("New Window"),"app.new-window");tabs.append(_("New Tab"),"win.new-tab");tabs.append(_("Reopen Closed Tab"),"win.reopen");
+            application.append(_("Preferences…"),"win.preferences");application.append(_("Keyboard Shortcuts"),"win.shortcuts");application.append(_("About Files"),"win.about");
+            menu.append_section(null,tabs);menu.append_section(null,application);return menu;
+        }
+        void refresh_recovery(){string signature=operations.recovery_signature();if(signature=="")reviewed_recovery="";recovery_banner.revealed=signature!=""&&signature!=reviewed_recovery;update_commands();}
+        public bool templates_available;
+        public Menu selection_menu(){var menu=new Menu();menu.append(_("Select All"),"win.select-all");menu.append(_("Select by Pattern…"),"win.select-pattern");menu.append(_("Invert Selection"),"win.invert-selection");menu.append(_("Select None"),"win.select-none");return menu;}
         void action(string name, owned Callback callback)
         {
             var a = new SimpleAction(name, null);
@@ -322,7 +303,19 @@ namespace MajorisFiles {
             add_action(a);
         }
         public bool command_available(string name) {
+            if(name=="reopen")return closed.size>0;
+            if(name=="recover-rename")return operations.has_rename_recovery;
+            if(name=="recover-replacements")return operations.has_replacement_recovery;
+            if(name=="empty-trash")return true; // sidebar action targets Trash, independently of the current tab
             if (current == null) return false;
+            if(name=="templates")return current.accepts_destination&&templates_available;
+            if(name=="save-search")return current.can_save_search;
+            if(name=="restore")return current.location.has_uri_scheme("trash")&&current.selected().size>0;
+            if(name=="select-none")return current.selected().size>0;
+            if(name=="select-all"||name=="invert-selection"||name=="select-pattern")return current.active_selection.get_n_items()>0;
+            if(name=="batch-rename")return current.selected().size>1&&!current.location.has_uri_scheme("trash");
+            if(name=="terminal"){var items=current.selected();return items.size==1&&items[0].directory?items[0].file.is_native():items.size==0&&current.location.is_native()&&!current.virtual_collection;}
+            if(name=="link")return current.accepts_destination&&current.location.is_native()&&current.selected().size==1&&current.selected()[0].file.is_native();
             if (name == "quick-preview") {
                 for (var widget = get_focus(); widget != null; widget = widget.get_parent())
                     if (widget is Majoris.Ui.Toolbar) return false;
@@ -350,7 +343,7 @@ namespace MajorisFiles {
                 var existing = current.share_menu;
                 if (!MenuPresentation.equal(existing, share_menu)) { existing.remove_all(); for (int i = 0; i < share_menu.get_n_items(); i++) existing.append_item(new MenuItem.from_model(share_menu, i)); }
             }
-            foreach (var name in new string[] {"new-folder", "new-file", "paste", "split", "join", "rename", "share-folder", "cut", "copy", "trash", "delete", "favorite", "properties", "quick-preview"}) {
+            foreach (var name in new string[] {"reopen","templates","save-search","select-all","select-pattern","invert-selection","select-none","batch-rename","link","terminal","restore","recover-rename","recover-replacements","new-folder", "new-file", "paste", "split", "join", "rename", "share-folder", "cut", "copy", "trash", "delete", "favorite", "properties", "quick-preview"}) {
                 var command = lookup_action(name) as SimpleAction;
                 if (command != null) command.set_enabled(command_available(name));
             }
@@ -453,21 +446,23 @@ namespace MajorisFiles {
             bool writable = browser.accepts_destination;
             if (selection.size == 0) {
                 var creation = new Menu();
-                if (trash) creation.append(_("Empty Trash"), "win.empty-trash");
-                else if (writable) {
+                if (writable) {
                     creation.append(_("New Folder"), "win.new-folder");
                     creation.append(_("New File"), "win.new-file");
+                    if(templates_available)creation.append(_("New Document from Template…"),"win.templates");
                     var formats = get_clipboard().get_formats();
                     if (formats.contain_mime_type("text/uri-list") || formats.contain_mime_type("x-special/gnome-copied-files") || formats.contain_gtype(typeof(Gdk.FileList)))
                         creation.append(_("Paste"), "win.paste");
                 }
                 MenuPresentation.section(menu, creation);
                 var display = new Menu();
+                display.append_submenu(_("Selection…"),selection_menu());
                 display.append_submenu(_("Sort By…"), browser.sort_menu());
                 display.append_submenu(_("Group By…"), browser.group_menu());
                 display.append_submenu(_("View…"), browser.view_menu());
                 MenuPresentation.section(menu, display);
                 var location = new Menu();
+                if(browser.location.get_uri()=="network:///")location.append(_("Connect to Server…"),"win.connect-server");
                 if (browser.location.is_native()) location.append(_("Open in Terminal"), "win.terminal");
                 MenuPresentation.section(menu, location);
                 return;
@@ -479,7 +474,7 @@ namespace MajorisFiles {
                 var opening = new Menu();
                 if (one) {
                     opening.append(_("Open"), "win.open");
-                    if (selection[0].directory) opening.append(_("Open in New Tab"), "win.open-selected-tab");
+                    if (selection[0].directory) {opening.append(_("Open in New Tab"), "win.open-selected-tab");if(selection[0].file.is_native())opening.append(_("Open in Terminal"),"win.terminal");}
                     else {
                         opening.append(_("Open With…"), "win.open-with");
                         if (browser.supports_preview(selection[0])) opening.append(_("Preview"), "win.quick-preview");
@@ -509,7 +504,7 @@ namespace MajorisFiles {
                 if (writable) {
                     files.prepend(_("Duplicate"), "win.duplicate-items");
                     if (mutable) files.append(_("New Folder with Selection…"), "win.folder-with-selection");
-                    if (one && selection[0].file.is_native()) files.append(_("Create Link…"), "win.link");
+                    if (one && browser.location.is_native() && selection[0].file.is_native()) files.append(_("Create Link…"), "win.link");
                 }
                 if (browser.virtual_collection && one) files.append(_("Open Source Folder"), "win.source-folder");
                 MenuPresentation.section(more, files);
@@ -525,6 +520,7 @@ namespace MajorisFiles {
                     }
                 }
                 MenuPresentation.section(more, tools);
+                more.append_submenu(_("Selection…"),selection_menu());
                 var quick = new Menu();
                 if (one && ImageRotation.supports(selection[0]) && mutable) {
                     quick.append(_("Rotate Clockwise"), "win.rotate-clockwise");
@@ -641,9 +637,10 @@ namespace MajorisFiles {
         }
         async void save_search()
         {
+            var browser=current;if(browser==null||!browser.can_save_search)return;
+            var location=browser.location;string query=browser.saved_query();
             var name = yield Dialogs.prompt(this, "Save Search");
-            if (name != null && name.strip() != "")
-                metadata.save_search(name, current.location, current.saved_query());
+            if (name != null && name.strip() != "")metadata.save_search(name.strip(),location,query);
         }
         void quick_preview()
         {
@@ -740,7 +737,8 @@ namespace MajorisFiles {
         }
         void preferences()
         {
-            new PreferencesDialog(metadata).present(this);
+            if(preferences_dialog==null){preferences_dialog=new PreferencesDialog(metadata);preferences_dialog.closed.connect(()=>preferences_dialog=null);}
+            preferences_dialog.present(this);
         }
     }
 }

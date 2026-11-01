@@ -3,6 +3,9 @@ namespace MajorisFiles {
         FilesWindow window;
         OperationManager operations;
         MetadataStore metadata;
+        SharedFoldersDialog? shared_dialog;
+        FileMonitor? templates_monitor;
+        Cancellable templates_token=new Cancellable();
         Browser current {
             get {
                 return window.current;
@@ -18,7 +21,7 @@ namespace MajorisFiles {
             action("cloud-pin", () => cloud_operation.begin("pin"));
             action("cloud-evict", () => cloud_operation.begin("evict"));
             action("cloud-retry", () => cloud_operation.begin("retry"));
-            action("shared-folders", () => new SharedFoldersDialog(window));
+            action("shared-folders", () => {if(shared_dialog==null){shared_dialog=new SharedFoldersDialog(window);shared_dialog.closed.connect(()=>shared_dialog=null);}else shared_dialog.present(window);});
             action("copy-to", () => transfer_to.begin(false));
             action("move-to", () => transfer_to.begin(true));
             action("duplicate-items", () => duplicate_items.begin());
@@ -48,6 +51,11 @@ namespace MajorisFiles {
             action("link", () => link.begin());
             action("batch-rename", () => batch_rename.begin());
             action("templates", () => templates.begin());
+            action("select-all", () => current.active_selection.select_all());
+            refresh_templates.begin();
+            var templates_path=Environment.get_user_special_dir(UserDirectory.TEMPLATES);
+            if(templates_path!=null&&templates_path!=Environment.get_home_dir())try{templates_monitor=File.new_for_path(templates_path).monitor_directory(FileMonitorFlags.NONE,null);templates_monitor.changed.connect(()=>refresh_templates.begin());}catch(Error e){}
+
             action("select-none", () => current.active_selection.unselect_all());
             action("invert-selection", () => { for (uint i = 0; i < current.active_selection.get_n_items(); i++)
                                                {
@@ -86,6 +94,7 @@ namespace MajorisFiles {
         }
         async void recover_replacements()
         {
+            var browser=current;
             try { yield operations.replacements.reconcile(new Cancellable()); }
             catch (Error e) { Dialogs.error(window, e.message); return; }
             var pending = new Gee.ArrayList<ReplacementRecord>();
@@ -95,19 +104,19 @@ namespace MajorisFiles {
                 return;
             }
             foreach (var record in pending)
-                if (yield Dialogs.confirm(window, "Recover previous “" + record.target.get_basename() + "”?", "The preserved item will be restored without overwriting any current destination. If the name is occupied, a recovered-original name is used.\n" + record.backup.get_parse_name(), "Recover Previous Item")) {
+                if (yield Dialogs.confirm(window, _("Recover Previous Item?"), _("The preserved item will be restored without overwriting any current destination. If the name is occupied, a recovered-original name is used.\n") + record.target.get_parse_name()+"\n"+record.backup.get_parse_name(), "Recover Previous Item")) {
                     try {
                         var restored = yield operations.replacements.restore(record, new Cancellable());
-                        window.current.navigate(restored.get_parent());
-                        window.current.select_file(restored);
+                        if(browser.get_root()!=null){browser.navigate(restored.get_parent());browser.select_file(restored);}
                     }
                     catch (Error e) { Dialogs.error(window, e.message); }
                 }
         }
         async void recover_rename(){
+            var browser=current;
             if(!operations.rename_recovery.pending){Dialogs.error(window,_("There is no interrupted batch rename to recover."));return;}
-            if(!(yield Dialogs.confirm(window,"Restore original batch names?","Restore the original names from the durable rename journal? Conflicting or externally replaced files will be preserved and reported.","Restore Names")))return;
-            try{yield operations.rename_recovery.recover(new Cancellable());window.current.navigate(window.current.location,false);}catch(Error e){Dialogs.error(window,e.message);}
+            if(!(yield Dialogs.confirm(window,_("Restore Names?"),"Restore the original names from the durable rename journal? Conflicting or externally replaced files will be preserved and reported.","Restore Names")))return;
+            try{yield operations.rename_recovery.recover(new Cancellable());if(browser.get_root()!=null)browser.navigate(browser.location,false);}catch(Error e){Dialogs.error(window,e.message);}
         }
         async File? destination_folder(string title)
         {
@@ -327,17 +336,21 @@ namespace MajorisFiles {
                 operations.run.begin(OperationKind.MOVE, files, parent, window);
             }
         }
-        async void empty_trash()
+        internal static async Gee.ArrayList<File> trash_contents(File root) throws Error {
+            var files=new Gee.ArrayList<File>();
+            var entries=yield root.enumerate_children_async("standard::name",FileQueryInfoFlags.NOFOLLOW_SYMLINKS,Priority.DEFAULT,null);
+            try{while(true){var batch=yield entries.next_files_async(128,Priority.DEFAULT,null);if(batch==null)break;foreach(var info in batch)files.add(root.get_child(info.get_name()));}}
+            catch(Error e){entries.close_async.begin(Priority.DEFAULT,null);throw e;}
+            yield entries.close_async(Priority.DEFAULT,null);return files;
+        }
+        async void empty_trash(){yield empty_trash_at(window,operations,File.new_for_uri("trash:///"));}
+        internal static async void empty_trash_at(Gtk.Window window,OperationManager operations,File root)
         {
-            if(!(yield Dialogs.confirm(window, "Empty Trash?", "All items in Trash will be permanently deleted.", "Empty Trash")))
-                return;
-            var model = new DirectoryModel();
-            yield model.open(File.new_for_uri("trash:///"), window);
-            var files = new Gee.ArrayList<File>();
-            for(uint i = 0; i < model.items.get_n_items(); i++)
-                files.add(((FileItem)model.items.get_item(i)).file);
-            model.cancel();
-            operations.run.begin(OperationKind.DELETE, files, null, window);
+            Gee.ArrayList<File> files;
+            try{files=yield trash_contents(root);}catch(Error e){Dialogs.error(window,e.message);return;}
+            if(files.size==0){var notice=new Adw.AlertDialog(_("Trash is Empty"),_("There are no items to delete."));notice.add_response("close",_("Close"));notice.present(window);return;}
+            if(!(yield Dialogs.confirm(window,_("Empty Trash?"),_("All items in Trash will be permanently deleted."),_("Empty Trash"))))return;
+            yield operations.run(OperationKind.DELETE,files,null,window);
         }
         async void terminal()
         {
@@ -373,6 +386,7 @@ namespace MajorisFiles {
             var items = current.selected();
             if(items.size != 1 || !items[0].file.is_native())
                 return;
+            var destination=current.location;
             var name = yield Dialogs.prompt(window, "Create Link", items[0].name + " link");
             if(name == null)
                 return;
@@ -381,7 +395,7 @@ namespace MajorisFiles {
                     throw new FileError.INVALID("Invalid name");
                 var names = new Gee.HashMap<string, string>();
                 names[items[0].file.get_uri()] = name;
-                yield operations.run(OperationKind.LINK, files(items), current.location, window, null, names);
+                yield operations.run(OperationKind.LINK, files(items), destination, window, null, names);
             }
             catch(Error e) {
                 Dialogs.error(window, e.message);
@@ -427,6 +441,23 @@ namespace MajorisFiles {
             var items = current.selected();
             if (items.size > 0) new BatchRenameDialog(window, items, operations);
         }
+        async void refresh_templates() {
+            templates_token.cancel();templates_token=new Cancellable();var token=templates_token;
+            var path=Environment.get_user_special_dir(UserDirectory.TEMPLATES);
+            bool available=false;
+            if(path!=null&&path!=Environment.get_home_dir())try {
+                var entries=yield File.new_for_path(path).enumerate_children_async("standard::type,access::can-read",FileQueryInfoFlags.NOFOLLOW_SYMLINKS,Priority.DEFAULT,token);
+                try {
+                    while(!available){
+                        var batch=yield entries.next_files_async(128,Priority.DEFAULT,token);if(batch==null)break;
+                        foreach(var info in batch)if(info.get_file_type()!=FileType.DIRECTORY&&(!info.has_attribute("access::can-read")||info.get_attribute_boolean("access::can-read"))){available=true;break;}
+                    }
+                }catch(Error e){entries.close_async.begin(Priority.DEFAULT,null);throw e;}
+                yield entries.close_async(Priority.DEFAULT,null);
+            }catch(Error e){available=false;}
+            if(token.is_cancelled())return;
+            window.templates_available=available;window.update_commands();
+        }
         async void templates()
         {
             var path = Environment.get_user_special_dir(UserDirectory.TEMPLATES);
@@ -440,6 +471,7 @@ namespace MajorisFiles {
                 Dialogs.error(window, e.message);
                 return;
             }
+            var destination=current.location;
             options.initial = File.new_for_path(path);
             var chooser = new ChooserWindow(options, metadata, new Places(metadata));
             chooser.title = _("New Document from Template");
@@ -448,19 +480,20 @@ namespace MajorisFiles {
                                                               return;
                                                           var files = new Gee.ArrayList<File>();
                                                           files.add(File.new_for_uri(result.lookup_value("uris", null).get_child_value(0).get_string()));
-                                                          operations.run.begin(OperationKind.COPY, files, current.location, window);
+                                                          operations.run.begin(OperationKind.COPY, files, destination, window);
                 });
             chooser.present();
         }
         async void select_pattern()
         {
+            var browser=current;var location=browser.location;
             var pattern = yield Dialogs.prompt(window, "Select by Filename Pattern", "*");
-            if(pattern == null)
+            if(pattern == null || !browser.location.equal(location) || browser.get_root()==null)
                 return;
-            current.active_selection.unselect_all();
-            for(uint i = 0; i < current.active_selection.get_n_items(); i++)
-                if(PatternSpec.match_simple(pattern, ((FileItem)current.active_selection.get_item(i)).name))
-                    current.active_selection.select_item(i, false);
+            browser.active_selection.unselect_all();
+            for(uint i = 0; i < browser.active_selection.get_n_items(); i++)
+                if(PatternSpec.match_simple(pattern, ((FileItem)browser.active_selection.get_item(i)).name))
+                    browser.active_selection.select_item(i, false);
         }
         async void smb_password()
         {
@@ -469,8 +502,7 @@ namespace MajorisFiles {
             dialog.extra_child = password;
             dialog.add_response("cancel", _("Cancel"));
             dialog.add_response("set", _("Set Password"));
-            if((yield dialog.choose(window, null)) != "set")
-                return;
+            if((yield dialog.choose(window, null)) != "set"){password.text="";return;}
             try {
                 SharingProxy helper = yield Bus.get_proxy(BusType.SYSTEM, "com.majoris.Files.Sharing", "/com/majoris/Files/Sharing");
                 yield helper.provision_password(password.text);
@@ -483,7 +515,8 @@ namespace MajorisFiles {
         }
         async void connect_server()
         {
-            var uri = yield Dialogs.prompt(window, "Connect to Server — SMB, SFTP, FTP, or WebDAV", "smb://");
+            var browser=current;
+            var uri = yield Dialogs.prompt(window, _("Connect to Server"), "smb://", _("Enter an SMB, SFTP, FTP, or WebDAV server URI."));
             if(uri == null)
                 return;
             var file = Paths.parse(uri);
@@ -492,7 +525,7 @@ namespace MajorisFiles {
                 Dialogs.error(window, _("Enter a server URI"));
                 return;
             }
-            current.navigate(file);
+            if(browser.get_root()!=null)browser.navigate(file);
         }
     }
 }

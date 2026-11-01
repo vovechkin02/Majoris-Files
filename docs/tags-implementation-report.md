@@ -24,7 +24,7 @@ Existing matching definitions retain their customisation. Defaults are never res
 
 ## 4. Management window
 
-The app menu has one Manage Tags entry. Native GTK/Adwaita rows provide colour controls and sidebar switches; one Rename and one Delete action operate on the selected row. Creation and renaming are inline, with validation errors, Enter submission and Escape cancellation. F2 renames; dragging rows or Alt+Up/Down reorders. Deletion asks for confirmation and explains that files remain untouched. Names have stable identities and exact Unicode uniqueness.
+Manage Tags is now available through Preferences → Tags, sidebar tag/heading context menus, and the assignment dialog. Native GTK/Adwaita rows provide colour controls and sidebar switches; one Rename and one Delete action operate on the selected row. Creation and renaming are inline, with validation errors, Enter submission and Escape cancellation. F2 renames; dragging rows or Alt+Up/Down reorders. Deletion asks for confirmation and explains that files remain untouched. Names have stable identities and exact Unicode uniqueness.
 
 ## 5. Colour picker
 

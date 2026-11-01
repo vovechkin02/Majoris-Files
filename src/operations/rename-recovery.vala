@@ -1,5 +1,6 @@
 namespace MajorisFiles {
     public class RenameRecovery : Object {
+        public signal void changed();
         public const string KEY="batch-rename-recovery-v1";
         MetadataStore metadata;
         public bool pending {get{return metadata.state(KEY)!="";}}
@@ -13,9 +14,9 @@ namespace MajorisFiles {
                 if(identity=="")throw new IOError.NOT_SUPPORTED("Cannot identify a batch rename input");
                 entries.add("(ssss)",sources[i].get_uri(),temporary[i].get_uri(),sources[i].get_parent().get_child(names[i]).get_uri(),identity);
             }
-            metadata.set_state_checked(KEY,entries.end().print(true));
+            metadata.set_state_checked(KEY,entries.end().print(true));changed();
         }
-        public void clear() throws Error{metadata.set_state_checked(KEY,"");}
+        public void clear() throws Error{metadata.set_state_checked(KEY,"");changed();}
         public async void recover(Cancellable token) throws Error {
             string saved=metadata.state(KEY);if(saved=="")return;
             if(saved.length>4*1024*1024)throw new IOError.INVALID_DATA("Invalid rename recovery journal");

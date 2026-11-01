@@ -1,0 +1,70 @@
+TAP version 14
+# random seed: R02S84ccd481ce79265aa6f72d047047bc75
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=637319 comm="build/menu-tests" label="kernel")
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ‘gio-vfs’
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for ‘gsettings-backend’
+1..2
+# Start of menus tests
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=637319 comm="build/menu-tests" label="kernel")
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=637319 comm="build/menu-tests" label="kernel")
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=637319 comm="build/menu-tests" label="kernel")
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=637319 comm="build/menu-tests" label="kernel")
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=637319 comm="build/menu-tests" label="kernel")
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Activating service name='org.gtk.vfs.Metadata' requested by ':1.0' (uid=1000 pid=637319 comm="build/menu-tests" label="kernel")
+dbus-daemon[637301]: [session uid=1000 pid=637301 pidfd=5] Successfully activated service 'org.gtk.vfs.Metadata'
+# Sidebar popup: 248x152 items=3
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+# Sidebar popup: 248x152 items=3
+# Keyboard context key=Menu focus=GtkListItemWidget
+# Keyboard context key=shift+F10 focus=GtkListItemWidget
+ok 1 /menus/context-and-presentation
+# slow test /menus/context-and-presentation executed in 105.46 secs
+ok 2 /menus/durable-recovery-state
+# End of menus tests
+A connection to the bus can't be made

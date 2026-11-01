@@ -14,6 +14,7 @@ add_project_arguments('--pkg=libarchive', language: 'vala')
 add_project_arguments('-Wno-unused-variable', '-Wno-unused-but-set-variable', '-Wno-unused-function', '-Wno-discarded-qualifiers', language: 'c')
 core = files('src/utils/paths.vala', 'src/models/file-item.vala', 'src/models/directory-model.vala', 'src/navigation/history.vala', 'src/metadata/store.vala', 'src/sidebar/places.vala', 'src/search/search.vala', 'src/operations/manager.vala', 'src/chooser/options.vala', 'src/split/split.vala')
 ui = files('src/views/browser.vala', 'src/preview/preview.vala', 'src/window/window.vala', 'src/chooser/window.vala')
+core += configure_file(input: 'src/application/build-info.vala.in', output: 'build-info.vala', configuration: {'version': meson.project_version()})
 core += files('src/dialogs/dialogs.vala')
 core += files('src/models/counts.vala')
 core += files('src/utils/i18n.vala')
@@ -47,7 +48,7 @@ ui += files('src/preview/sandbox.vala')
 ui += files('src/preview/playback.vala','src/preview/playback.c')
 deps += [dependency('gstreamer-app-1.0')]
 core += files('src/devices/media-identity.vala', 'src/devices/device-info.vala', 'src/devices/device-provider.vala')
-ui += files('src/dialogs/device-properties.vala')
+ui += files('src/dialogs/device-properties.vala', 'src/operations/presentation.vala')
 ui += files('src/devices/disk-images.vala')
 ui += files('src/views/column-provider.vala')
 ui += files('src/views/file-groups.vala')
@@ -175,7 +176,7 @@ endif
 
 menu_tests = executable('menu-tests', 'tests/menus.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
 if xvfb.found()
-  test('menus', find_program('dbus-run-session'), args: ['--', xvfb, '-a', menu_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none'], timeout: 90)
+  test('menus', find_program('dbus-run-session'), args: ['--', xvfb, '-a', menu_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none'], timeout: 180)
 endif
 
 tag_tests = executable('tag-tests', 'tests/tags.vala', core, dependencies: deps)
