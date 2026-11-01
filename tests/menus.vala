@@ -65,6 +65,16 @@ async void screenshot(string name) throws Error {
     var path = Path.build_filename(output, name);
     var grab = new Subprocess.newv({"xwd", "-silent", "-root", "-out", path + ".xwd"}, SubprocessFlags.NONE); yield grab.wait_check_async(null);
     var convert = new Subprocess.newv({"magick", path + ".xwd", path + ".png"}, SubprocessFlags.NONE); yield convert.wait_check_async(null); FileUtils.unlink(path + ".xwd");
+
+}
+async void capture_empty_click(FilesWindow window, Browser browser) throws Error {
+    var search = new Subprocess.newv({"xdotool", "search", "--onlyvisible", "--name", "^Files$"}, SubprocessFlags.STDOUT_PIPE);
+    string? ids; yield search.communicate_utf8_async(null, null, out ids, null);
+    assert(search.get_successful());
+    Graphene.Rect bounds; assert(browser.file_surface.compute_bounds(window, out bounds));
+    var click = new Subprocess.newv({"xdotool", "windowfocus", "--sync", ids.strip(), "mousemove", "--window", ids.strip(),
+        ((int)(bounds.origin.x + bounds.size.width / 2)).to_string(), ((int)(bounds.origin.y + bounds.size.height - 40)).to_string(), "click", "3"}, SubprocessFlags.NONE);
+    yield click.wait_check_async(null); yield pause_layout();
 }
 async void scenarios() throws Error {
     var folder = File.new_for_path(DirUtils.make_tmp("majoris-menu-fixture-XXXXXX"));
@@ -91,7 +101,7 @@ async void scenarios() throws Error {
             var model = new Menu(); window.populate_context(model, browser); var all = labels(model); var main = labels(model, false);
             assert(!("Permissions…" in all) && !("Default Application…" in all) && !("Custom Icon…" in all));
             assert(!("Extract with Password…" in all) && !("Create Encrypted ZIP…" in all));
-            if (filename == "empty") { assert("New Folder…" in main); assert(!("Properties" in main)); }
+            if (filename == "empty") { assert("New Folder" in main); assert(!("Properties" in main)); }
             else {
                 assert(main[main.length - 1] == "Properties"); assert("More Actions…" in main); assert("Compress…" in all); assert(!("Compress…" in main));
                 assert("Add to Favorites" in main); assert("Tags…" in main);
@@ -103,7 +113,12 @@ async void scenarios() throws Error {
             }
             var popup = file_popup(browser.file_surface); assert(popup != null && !popup.has_arrow);
             popup.menu_model = model;
-            Gdk.Rectangle anchor = {browser.file_surface.get_width() / 2, browser.file_surface.get_height() / 3, 1, 1}; popup.pointing_to = anchor; popup.popup(); yield screenshot(filename + suffix);
+            Gdk.Rectangle anchor = {browser.file_surface.get_width() / 2, browser.file_surface.get_height() / 3, 1, 1}; popup.pointing_to = anchor; popup.popup();
+            if (filename == "empty" && output != "") {
+                popup.popdown(); yield pause_layout();
+                yield capture_empty_click(window, browser);
+            }
+            yield screenshot(filename + suffix);
             if (filename == "document.txt") {
                 // GtkPopoverMenu exposes native submenu navigation as an action.
                 var more = menu_label(popup, "More Actions…"); assert(more != null); more.get_parent().activate(); yield pause_layout();
@@ -181,15 +196,15 @@ async void scenarios() throws Error {
     readonly.set_attribute_uint32("unix::mode", 0555, FileQueryInfoFlags.NONE); browser.navigate(readonly);
     while (browser.directory.loading) yield pause_layout(); yield pause_layout();
     var readonly_menu = new Menu(); window.populate_context(readonly_menu, browser);
-    assert(!browser.accepts_destination && !("New Folder…" in labels(readonly_menu)) && !("Paste" in labels(readonly_menu)));
+    assert(!browser.accepts_destination && !("New Folder" in labels(readonly_menu)) && !("Paste" in labels(readonly_menu)));
     readonly.set_attribute_uint32("unix::mode", 0755, FileQueryInfoFlags.NONE);
     browser.directory.virtual_location(File.new_for_uri("trash:///"));
     browser.directory.items.append(selected[0]); browser.selection.select_all();
     var trash = new Menu(); window.populate_context(trash, browser); var trash_labels = labels(trash);
     assert("Restore" in trash_labels && "Delete Permanently" in trash_labels && !("Cut" in trash_labels) && !("Compress…" in trash_labels));
     browser.selection.unselect_all(); trash.remove_all(); window.populate_context(trash, browser);
-    assert("Empty Trash" in labels(trash) && !("New Folder…" in labels(trash)));
-    browser.directory.virtual_location(File.new_for_uri("recent:///")); var recent = new Menu(); window.populate_context(recent, browser); assert(!("New Folder…" in labels(recent)));
+    assert("Empty Trash" in labels(trash) && !("New Folder" in labels(trash)));
+    browser.directory.virtual_location(File.new_for_uri("recent:///")); var recent = new Menu(); window.populate_context(recent, browser); assert(!("New Folder" in labels(recent)));
     window.destroy();
 }
 int main(string[] args) {

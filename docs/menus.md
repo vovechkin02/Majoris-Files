@@ -10,7 +10,8 @@ Preview, and offer Share only when Properties' sharing capability check succeeds
 Multiple selections omit opening commands and use Batch Rename. Favorites applies
 one consistent state to the whole selection. Trash exposes Restore, Delete
 Permanently and Properties. Empty space exposes creation/paste only at writable
-destinations, Sort By, Group By, View, Refresh and supported Terminal access.
+destinations, Sort By, Group By, View and supported Terminal access. Creation uses inline
+naming, so New Folder and New File have no ellipsis.
 
 More Actions contains Duplicate, Copy To, Move To, New Folder with Selection and
 Create Link where supported; Compress, Checksums, Split/Join; image Quick Actions;

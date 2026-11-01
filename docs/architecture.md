@@ -28,12 +28,15 @@ filename queries. Native clipboard publication provides GdkFileList, URI lists
 and GNOME copy/cut data; paste reads the current desktop clipboard asynchronously.
 
 `OperationManager` maintains concurrent cancellable jobs and a journal for
-rename, move, folder creation and non-replacing copies. Replacement retains the
+rename, move, folder and empty-file creation, and non-replacing copies. Replacement retains the
 previous destination at a temporary sibling until transfer succeeds. Copy undo
 requires confirmation and moves copied content to Trash, since it may have been
 edited since the copy. History is private SQLite state; backend file identifiers,
 device/inode and creation timestamps are checked before reversal. Unverifiable
-legacy entries are retained but cannot be reversed. History actions are serialized.
+legacy entries are retained but cannot be reversed. New-file creation undo refuses
+nonempty files and uses Trash; new-folder undo refuses nonempty folders. Redo
+recreates exclusively and retargets matching dependent identity guards so later
+renames remain reversible. History actions are serialized.
 Trash undo records only
 an unambiguous newly created backend entry. Merged moves journal new child
 transfers and recreate missing source parents on undo. Recursive deletion does

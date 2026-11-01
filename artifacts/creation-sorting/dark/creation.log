@@ -1,0 +1,113 @@
+TAP version 14
+# random seed: R02Sbb74c0013bb3eca6d314427bca3770a5
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=494607 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ‘gio-vfs’
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for ‘gsettings-backend’
+1..2
+# Start of creation-sorting tests
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Activating service name='org.gtk.vfs.Metadata' requested by ':1.0' (uid=1000 pid=494607 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Successfully activated service 'org.gtk.vfs.Metadata'
+ok 1 /creation-sorting/history
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=494607 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=494607 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=494607 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=494607 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=494607 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[494568]: [session uid=1000 pid=494568 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+# ready mode=Grid folder=true enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-9LG3X3
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+# creation mode=Grid folder=true epoch=3 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Grid folder=false enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-9LG3X3
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+*** BUG ***
+In pixman_region32_init_rect: Invalid rectangle passed
+Set a breakpoint on '_pixman_log_error' to debug
+
+# creation mode=Grid folder=false epoch=6 state=true selected=1 cell=true focus=true writable=true
+# ready mode=List folder=true enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-9LG3X3
+# creation mode=List folder=true epoch=10 state=true selected=1 cell=true focus=true writable=true
+# ready mode=List folder=false enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-9LG3X3
+# creation mode=List folder=false epoch=13 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Columns folder=true enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-9LG3X3
+# creation mode=Columns folder=true epoch=17 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Columns folder=false enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-9LG3X3
+# creation mode=Columns folder=false epoch=20 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Gallery folder=true enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-9LG3X3
+# creation mode=Gallery folder=true epoch=24 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Gallery folder=false enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-9LG3X3
+# creation mode=Gallery folder=false epoch=27 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Grouped Grid folder=true enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-9LG3X3
+# creation mode=Grouped Grid folder=true epoch=31 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Grouped Grid folder=false enabled=true loading=true writable=true destination=true current=true location=file:///tmp/majoris-creation-9LG3X3
+# creation mode=Grouped Grid folder=false epoch=34 state=true selected=1 cell=true focus=true writable=true
+# pointer column at 563,483 window 1098x818
+# pointer Name at 266,190 window 1098x818
+# pointer Name at 266,190 window 1098x818
+# pointer Size at 739,190 window 1098x818
+# pointer Size at 739,190 window 1098x818
+# pointer Type at 820,190 window 1098x818
+# pointer Type at 820,190 window 1098x818
+# pointer Modified at 978,190 window 1098x818
+# pointer Modified at 978,190 window 1098x818
+# pointer Created at 975,190 window 1098x818
+# pointer Created at 975,190 window 1098x818
+# pointer Accessed at 980,190 window 1098x818
+# pointer Accessed at 980,190 window 1098x818
+# pointer Byte Count at 1027,190 window 1098x818
+# pointer Byte Count at 1027,190 window 1098x818
+# pointer Name at 266,190 window 1098x818
+# pointer Name at 266,190 window 1098x818
+# pointer Non-sortable at 1042,190 window 1098x818
+# pointer Async Bytes at 1024,190 window 1098x818
+# pointer Async Bytes at 1024,190 window 1098x818
+# pointer Unavailable at 1026,190 window 1098x818
+# unavailable enabled=false error=true key=Size
+# pointer Name at 266,190 window 1098x818
+# pointer Size at 855,190 window 1098x818
+ok 2 /creation-sorting/integration
+# slow test /creation-sorting/integration executed in 152.39 secs
+# End of creation-sorting tests
+
+(gvfsd-metadata:494706): GVFS-WARNING **: 13:20:00.563: apply_journal_to_builder: found wrong sized entry, possible journal corruption
+
+A connection to the bus can't be made

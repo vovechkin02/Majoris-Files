@@ -1,0 +1,4 @@
+ninja: Entering directory `/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build'
+ninja: no work to do.
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /usr/bin/ninja -C /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build -j 8

@@ -58,6 +58,7 @@ namespace MajorisFiles {
             var keys = new Gtk.EventControllerKey();
             keys.key_pressed.connect((key, code, mods) => {
                 if (key == Gdk.Key.Escape) { cancel_requested(); return true; }
+                if (key == Gdk.Key.Tab || key == Gdk.Key.ISO_Left_Tab) { commit_requested(); return false; }
                 if (key == Gdk.Key.F2) { toggle_selection(); return true; }
                 return false;
             });

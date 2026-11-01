@@ -99,7 +99,7 @@ namespace MajorisFiles {
             menu.append("Shared Folders", "win.shared-folders");
             menu.append("Recover Previous Replaced Files…", "win.recover-replacements");
             menu.append("Recover Interrupted Batch Rename…", "win.recover-rename");
-            foreach (var entry in new string[] {"New Window|app.new-window", "New Tab|win.new-tab", "Reopen Closed Tab|win.reopen", "Duplicate Tab|win.duplicate-tab", "New Folder|win.new-folder", "New Empty File|win.new-file", "Show Hidden Files|win.hidden", "Preview Pane|win.preview", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified", "Descending Order|win.descending", "Save Search|win.save-search", "Preferences|win.preferences", "Keyboard Shortcuts|win.shortcuts"})
+            foreach (var entry in new string[] {"New Window|app.new-window", "New Tab|win.new-tab", "Reopen Closed Tab|win.reopen", "Duplicate Tab|win.duplicate-tab", "New Folder|win.new-folder", "New File|win.new-file", "Show Hidden Files|win.hidden", "Preview Pane|win.preview", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified", "Descending Order|win.descending", "Save Search|win.save-search", "Preferences|win.preferences", "Keyboard Shortcuts|win.shortcuts"})
             {
                 var parts = entry.split("|", 2);
                 menu.append(parts[0], parts[1]);
@@ -274,10 +274,15 @@ namespace MajorisFiles {
             action("tags", () => set_tags.begin());
             action("quick-preview", () => quick_preview());
             action("save-search", () => save_search.begin());
-            action("sort-name", () => current.set_sort("Name", true));
-            action("sort-size", () => current.set_sort("Size", true));
-            action("sort-modified", () => current.set_sort("Modified", true));
-            action("descending", () => current.set_sort("Name", false));
+            foreach (var key in new string[] {"Name", "Size", "Modified"}) {
+                string sort_column = key;
+                var sort_action = new SimpleAction.stateful("sort-" + key.down(), null, new Variant.boolean(false));
+                sort_action.activate.connect(() => { if (current != null) current.set_sort(sort_column, true); });
+                add_action(sort_action);
+            }
+            var descending = new SimpleAction.stateful("descending", null, new Variant.boolean(false));
+            descending.activate.connect(() => { if (current != null) current.set_sort(current.sort_key, !current.ascending); });
+            add_action(descending);
             action("checksum", () => checksum.begin());
             action("split", () => { var items = current.selected();
                                     if(items.size == 1 && !items[0].directory)
@@ -332,14 +337,18 @@ namespace MajorisFiles {
         }
         public void update_commands() {
             if (current != null) {
+                foreach (var key in new string[] {"Name", "Size", "Modified"}) {
+                    var sort_action = lookup_action("sort-" + key.down()) as SimpleAction;
+                    if (sort_action != null) sort_action.set_state(new Variant.boolean(current.sort_key == key));
+                }
+                var direction = lookup_action("descending") as SimpleAction;
+                if (direction != null) direction.set_state(new Variant.boolean(!current.ascending));
                 var share_menu = new Menu();
                 if (command_available("share-folder")) share_menu.append(_("Share Folder…"), "win.share-folder");
                 var provider_menu = providers.menu(current.selected(), true);
                 if (provider_menu.get_n_items() > 0) share_menu.append_section(null, provider_menu);
-                var existing = current.share_button.menu_model as Menu;
-                if (existing == null) current.share_button.menu_model = share_menu;
-                else if (!MenuPresentation.equal(existing, share_menu)) { existing.remove_all(); for (int i = 0; i < share_menu.get_n_items(); i++) existing.append_item(new MenuItem.from_model(share_menu, i)); }
-                current.share_button.sensitive = share_menu.get_n_items() > 0 && current.selected().size > 0;
+                var existing = current.share_menu;
+                if (!MenuPresentation.equal(existing, share_menu)) { existing.remove_all(); for (int i = 0; i < share_menu.get_n_items(); i++) existing.append_item(new MenuItem.from_model(share_menu, i)); }
             }
             foreach (var name in new string[] {"new-folder", "new-file", "paste", "split", "join", "rename", "share-folder", "cut", "copy", "trash", "delete", "favorite", "properties", "quick-preview"}) {
                 var command = lookup_action(name) as SimpleAction;
@@ -391,6 +400,7 @@ namespace MajorisFiles {
                     });
             });
             tabs.selected_page = page;
+            browser.sorting_changed.connect(update_commands);
             browser.rename_requested.connect((state) => commit_inline_rename.begin(browser, state));
             browser.selection_changed.connect(() => { var window = browser.get_root() as FilesWindow; if (window != null) window.update_commands(); });
             browser.location_changed.connect(() => { var window = browser.get_root() as FilesWindow; if (window != null) window.update_commands(); });
@@ -445,8 +455,8 @@ namespace MajorisFiles {
                 var creation = new Menu();
                 if (trash) creation.append(_("Empty Trash"), "win.empty-trash");
                 else if (writable) {
-                    creation.append(_("New Folder…"), "win.new-folder");
-                    creation.append(_("New File…"), "win.new-file");
+                    creation.append(_("New Folder"), "win.new-folder");
+                    creation.append(_("New File"), "win.new-file");
                     var formats = get_clipboard().get_formats();
                     if (formats.contain_mime_type("text/uri-list") || formats.contain_mime_type("x-special/gnome-copied-files") || formats.contain_gtype(typeof(Gdk.FileList)))
                         creation.append(_("Paste"), "win.paste");
@@ -457,7 +467,7 @@ namespace MajorisFiles {
                 display.append_submenu(_("Group By…"), browser.group_menu());
                 display.append_submenu(_("View…"), browser.view_menu());
                 MenuPresentation.section(menu, display);
-                var location = new Menu(); location.append(_("Refresh"), "context.refresh");
+                var location = new Menu();
                 if (browser.location.is_native()) location.append(_("Open in Terminal"), "win.terminal");
                 MenuPresentation.section(menu, location);
                 return;
@@ -576,32 +586,18 @@ namespace MajorisFiles {
                 Dialogs.error(this, e.message);
             }
         }
-        async void create_folder()
-        {
-            var name = yield Dialogs.prompt(this, "New Folder");
-            if (name == null)
-                return;
+        async void create_folder() { yield create_item(true); }
+        async void create_file() { yield create_item(false); }
+        async void create_item(bool folder) {
+            var browser = current;
+            if (browser == null || !browser.accepts_destination) return;
+            var parent = browser.location;
+            var context = browser.active_selection;
+            uint epoch = browser.start_creation();
             try {
-                yield operations.new_folder(current.location, name);
-            }
-            catch (Error e) {
-                Dialogs.error(this, e.message);
-            }
-        }
-        async void create_file()
-        {
-            var name = yield Dialogs.prompt(this, "New Empty File");
-            if (name == null)
-                return;
-            try {
-                if (!Paths.valid_name(name))
-                    throw new FileError.INVALID("Invalid filename");
-                var stream = yield current.location.get_child(name).create_async(FileCreateFlags.NONE, Priority.DEFAULT, null);
-                yield stream.close_async(Priority.DEFAULT, null);
-            }
-            catch (Error e) {
-                Dialogs.error(this, e.message);
-            }
+                var file = yield operations.create_default(parent, folder);
+                if (current == browser) yield browser.edit_created(file, parent, epoch, context);
+            } catch (Error e) { Dialogs.error(this, e.message); }
         }
         async void rename()
         {

@@ -10,16 +10,15 @@ Debian metadata.
 
 | Source | Universal Toolbar contents |
 |---|---|
-| `src/views/browser.vala` — navigation | Sidebar toggle; history group; Up, Other Locations and Refresh group; separator; existing location stack; Search; Search Options; narrow Search action. |
-| `src/views/browser.vala` — commands | New Folder/Cut/Copy/Paste group; separator; Rename/Share/Trash group; expanding spacer; Sort; segmented Grid/List/Columns/Gallery; View Settings; Preview; narrow File Actions menu. Chooser mode retains only its reduced view controls. |
+| `src/views/browser.vala` — navigation | Sidebar toggle; history group; Up and Other Locations group; separator; existing location stack; Search; Search Options; narrow Search action. |
+| `src/views/browser.vala` — commands | Expanding spacer; Sort; segmented Grid/List/Columns/Gallery; View Settings; Preview; narrow File Actions menu. Chooser mode retains only its reduced view controls. |
 | `src/preview/pdf.vala` | Previous page, page counter, next page, zoom in/out. Counter uses the public metadata class. Compact density. |
 | `src/preview/sandbox.vala` | Image zoom in/out, fit and preview-only rotation. Compact density; persistent rotation remains a separate file action. |
 | `src/preview/animation.vala` | Play/pause, zoom in/out and fit. Compact density; animation timers/cancellation/reduced-motion behavior remain native. |
 
 All strips use the public append/group/separator/spacer APIs. Existing callbacks,
-GActions, tooltips and accessible labels remain application-owned. The New Folder
-icon-and-label child has the documented 8px gap and 16px artwork and opts into
-`majoris-toolbar-action`. Standalone controls are designated by `append_control`;
+GActions, tooltips and accessible labels remain application-owned. File actions
+remain in context/application menus and the narrow overflow. Standalone controls are designated by `append_control`;
 custom composites use `append_widget`.
 
 The location stack still contains its existing breadcrumb box, entry, scroller
@@ -38,14 +37,15 @@ activation; file-content quick preview and its action name/shortcut are retained
 ## Responsive layout
 
 Standard density is used for both browser rows. At the existing 650px breakpoint,
-Up/Refresh hide but remain available through Alt+Up/F5. Other Locations and
+Up hides but remains available through Alt+Up. F5 still reloads internally;
+Refresh has no visible toolbar or context-menu entry. Other Locations and
 Collections remains visible, preserving access to tags, saved searches and devices. The same SearchEntry
 is moved into a Search popover using public mutation methods; Ctrl+F opens it.
 Returning to a wide window reinserts the entry beside the location stack.
 
-File operations, selection actions and Sort move into a native overflow MenuModel
-using the same `win.*` actions and current Share model. Their original groups and
-separator explicitly hide together. The view segments and settings remain readily
+File operations and Sort remain available in a native overflow MenuModel
+using the same `win.*` actions and current Share model. No operation/selection
+toolbar groups or their separators are constructed. The view segments and settings remain readily
 accessible. EXTERNAL horizontal scrollers provide a final keyboard-focus scrolling
 fallback without a visible scrollbar. No fixed toolbar heights or negative offsets
 are imposed; larger fonts can increase allocations.

@@ -1,6 +1,7 @@
 namespace MajorisFiles {
     public class ChooserWindow : Adw.Window {
         public Browser browser;
+        OperationManager creation_operations;
         public ChooserOptions options;
         public signal void completed(uint response, Variant results);
         Gtk.Entry filename = new Gtk.Entry();
@@ -21,6 +22,7 @@ namespace MajorisFiles {
             Object(title: options.save ? "Save As" : (options.directory ? "Select Folder" : "Open"), default_width: 960, default_height: 660, modal: options.modal);
             this.options = options;
             this.metadata = metadata;
+            creation_operations = new OperationManager(metadata);
             volumes = VolumeMonitor.get();
             mount_removed = volumes.mount_removed.connect((mount) => {
                 var root = mount.get_root();
@@ -45,6 +47,7 @@ namespace MajorisFiles {
             default_height = state.dimension("height", 660, 400, 1600);
             browser.sidebar_width = state.dimension("sidebar-width", 180, 120, 420);
             browser.folders_only = options.directory;
+            browser.rename_requested.connect((state) => rename_created.begin(state));
             var toolbar = new Adw.ToolbarView();
             var header = new Adw.HeaderBar();
             toolbar.add_top_bar(header);
@@ -132,7 +135,9 @@ namespace MajorisFiles {
                                           return true;
                 });
             var keys = new Gtk.EventControllerKey();
-            keys.key_pressed.connect((key, code, mods) => { if (key == Gdk.Key.Escape)
+            keys.key_pressed.connect((key, code, mods) => {
+                                                            if (browser.inline_rename != null) return false;
+                                                            if (key == Gdk.Key.Escape)
                                                             {
                                                                 finish(1, new VariantBuilder(VariantType.VARDICT).end());
                                                                 return true;
@@ -212,27 +217,36 @@ namespace MajorisFiles {
             completed(response, results);
             destroy();
         }
-        async void create_folder()
-        {
-            if (!browser.accepts_destination) return;
-            var destination = browser.location;
-            var name = yield Dialogs.prompt(this, "New Folder");
-            if (name == null || finished || !browser.location.equal(destination) || !browser.accepts_destination)
-                return;
+        async void rename_created(InlineRename state) {
             try {
-                if (!Paths.valid_name(name))
-                    throw new FileError.INVALID("Invalid folder name");
-                yield browser.location.get_child(name).make_directory_async(Priority.DEFAULT, token);
-            }
-            catch (Error e) {
-                if (!finished)
-                    Dialogs.error(this, e.message);
-            }
+                var info = yield state.item.file.query_info_async("id::file", FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
+                if (state.cancelled || browser.inline_rename != state) return;
+                var identity = state.item.info.get_attribute_string("id::file");
+                if (identity != null && identity != info.get_attribute_string("id::file"))
+                    throw new IOError.NOT_FOUND("The created folder has been replaced; select it again.");
+                var result = yield creation_operations.rename(state.item.file, state.proposed);
+                browser.finish_inline_rename(state, result);
+            } catch (Error e) { browser.retry_inline_rename(state, e.message); }
         }
+        async void create_folder() {
+            if (!browser.accepts_destination || finished) return;
+            var parent = browser.location;
+            var context = browser.active_selection;
+            uint epoch = browser.start_creation();
+            try {
+                var file = yield creation_operations.create_default(parent, true);
+                if (!finished) yield browser.edit_created(file, parent, epoch, context);
+            } catch (Error e) { if (!finished) Dialogs.error(this, e.message); }
+        }
+
         public async void accept_selection()
         {
             if (finished || accepting)
                 return;
+            if (browser.inline_rename != null) {
+                browser.submit_inline_rename();
+                if (browser.inline_rename != null) return;
+            }
             accepting = true;
             uint generation = location_generation;
             var selection_token = token;

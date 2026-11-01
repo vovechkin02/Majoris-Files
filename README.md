@@ -33,3 +33,12 @@ The shared GTK component requirements, measured dimensions and native validation
 The remaining Details section, metadata and focus investigations are documented in [Details corrections](docs/details-corrections.md).
 
 The [Properties interface](docs/properties.md) uses one General page with embedded Open With and native Sharing, Permissions and Details subpages.
+
+New Folder (Ctrl+Shift+N) and New File create an item immediately and open its
+existing inline filename editor. Enter commits, Escape keeps the default-named
+item, and Tab or leaving the editor commits a valid name. Default names use
+`New Folder` / `New File`, then `(2)`, `(3)`, with exclusive creation.
+File actions remain in context menus, the application menu and compact overflow;
+the secondary toolbar contains sorting and view controls. Details column headers
+change the shared sort order and show native GTK direction indicators.
+See [creation and sorting](docs/creation-sorting.md) for implementation and checks.

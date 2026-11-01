@@ -1,0 +1,1409 @@
+Log of Meson test suite run on 2026-11-01T13:17:39.565235
+
+Inherited environment: GTK_A11Y=none SHELL=/bin/bash WSL2_GUI_APPS_ENABLED=1 WSL_DISTRO_NAME=Debian NAME=DESKTOP-M1VDLVQ PERF_EXEC_PATH=/usr/lib/linux-tools/6.18.54.1-microsoft-standard-WSL2/libexec/perf-core PWD=/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files LOGNAME=administrator HOME=/home/administrator LANG=en_US.UTF-8 WSL_INTEROP=/run/WSL/494822_interop WAYLAND_DISPLAY=wayland-0 TERM=xterm-256color USER=administrator DISPLAY=:0 SHLVL=1 XDG_RUNTIME_DIR=/run/user/1000 WSLENV='' XDG_DATA_DIRS=/home/administrator/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/usr/lib/linux-tools/6.18.54.1-microsoft-standard-WSL2/bin:/mnt/c/Users/Admin/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell:/mnt/c/Users/Admin/.codex/tmp/arg0-windows/codex-arg0snlXuG:/mnt/c/Users/Admin/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/libheif/libheif/bin:/mnt/c/Users/Admin/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/jxrlib/jxrlib/bin:/mnt/c/Users/Admin/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/poppler/Library/bin:/mnt/c/Users/Admin/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/mnt/c/Program Files (x86)/VMware/VMware Player/bin/:/mnt/c/Program Files/Python315/Scripts/:/mnt/c/Program Files/Python315/:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA App/NvDLISR:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files/WSL/:/mnt/c/Program Files/nodejs/:/mnt/c/Program Files/Microsoft SQL Server/170/Tools/Binn/:/mnt/c/Program Files/Microsoft SQL Server/Client SDK/ODBC/170/Tools/Binn/:/mnt/c/Program Files (x86)/IncrediBuild:/mnt/c/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/dotnet/:/mnt/c/Users/Admin/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell:/mnt/c/Users/Admin/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/Admin/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/Admin/AppData/Roaming/npm:/mnt/c/Users/Admin/AppData/Local/Unity/bin:/mnt/c/Users/Admin/AppData/Local/GitHubDesktop/bin:/mnt/c/Users/Admin/.dotnet/tools:/mnt/c/Users/Admin/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/mnt/c/Users/Admin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin:/mnt/c/Users/Admin/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/git/cmd:/mnt/c/Users/Admin/AppData/Local/OpenAI/Codex/bin/57159798136552f4:/mnt/c/Users/Admin/AppData/Local/OpenAI/Codex/bin/22cfb1d302613eae' DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus HOSTTYPE=x86_64 PULSE_SERVER=unix:/mnt/wslg/PulseServer _=/usr/bin/meson 
+
+==================================== 1/22 ====================================
+test:         core
+start time:   02:17:39
+duration:     0.07s
+result:       exit status 0
+command:      MALLOC_PERTURB_=193 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MESON_TEST_ITERATION=1 /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/core-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02Sf0531515fca866e6b222f587cd7dc68c
+1..20
+# Start of accounts tests
+ok 1 /accounts/empty-description
+ok 2 /accounts/platform-directory-parser
+# End of accounts tests
+# Start of paths tests
+ok 3 /paths/optional-remote-attributes
+ok 4 /paths/validation
+ok 5 /paths/natural
+# End of paths tests
+# Start of history tests
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ?gio-vfs?
+ok 6 /history/branch
+# End of history tests
+# Start of chooser tests
+ok 7 /chooser/options
+ok 8 /chooser/malformed
+ok 9 /chooser/filter-extension
+ok 10 /chooser/response
+ok 11 /chooser/private-state
+ok 12 /chooser/save-files-validation
+# End of chooser tests
+# Start of metadata tests
+ok 13 /metadata/persistence
+ok 14 /metadata/tags-and-recovery
+# End of metadata tests
+# Start of split tests
+ok 15 /split/sizing
+ok 16 /split/malformed-manifest
+# End of split tests
+# Start of clipboard tests
+ok 17 /clipboard/file-formats
+# End of clipboard tests
+# Start of search tests
+ok 18 /search/predicates-and-persistence
+# End of search tests
+# Start of checksum tests
+ok 19 /checksum/supplied-values
+# End of checksum tests
+# Start of rename tests
+ok 20 /rename/templates-and-modes
+# End of rename tests
+==============================================================================
+
+==================================== 2/22 ====================================
+test:         image-decoders
+start time:   02:17:39
+duration:     0.11s
+result:       exit status 0
+command:      MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MALLOC_PERTURB_=187 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MESON_TEST_ITERATION=1 /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/image-decoder-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02Sf2918948eba8bd050d3ad6d3eaaed98b
+1..7
+# Start of image tests
+ok 1 /image/icc-alpha
+ok 2 /image/dng
+ok 3 /image/corrupt-and-transfer-functions
+# Transfer 0 rendered midpoint 128
+ok 4 /image/heic
+# Transfer 16 rendered midpoint 152
+ok 5 /image/avif-pq
+# Transfer 18 rendered midpoint 124
+ok 6 /image/avif-hlg
+ok 7 /image/animated-avif
+# End of image tests
+==============================================================================
+
+==================================== 3/22 ====================================
+test:         firewall
+start time:   02:17:39
+duration:     0.01s
+result:       exit status 0
+command:      MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MESON_TEST_ITERATION=1 MALLOC_PERTURB_=17 /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/firewall-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02S3f8af6047243b54c57c395c1ae17149f
+1..3
+# Start of firewall tests
+ok 1 /firewall/owned-policy-scope
+ok 2 /firewall/empty-versus-unmanaged
+# End of firewall tests
+# Start of sharing tests
+ok 3 /sharing/client-status-privacy
+# End of sharing tests
+==============================================================================
+
+==================================== 4/22 ====================================
+test:         cloud
+start time:   02:17:39
+duration:     0.28s
+result:       exit status 0
+command:      MALLOC_PERTURB_=133 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MESON_TEST_ITERATION=1 /usr/bin/dbus-run-session -- ./cloud-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02S995acbd98c8319e79f212e3694042c0b
+1..1
+# Start of cloud tests
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ?gio-vfs?
+ok 1 /cloud/provider-workflow
+# End of cloud tests
+----------------------------------- stderr -----------------------------------
+dbus-daemon[494836]: [session uid=1000 pid=494836 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=494838 comm="./cloud-tests" label="kernel")
+dbus-daemon[494836]: [session uid=1000 pid=494836 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[494836]: [session uid=1000 pid=494836 pidfd=5] Activating service name='org.gtk.vfs.Metadata' requested by ':1.0' (uid=1000 pid=494838 comm="./cloud-tests" label="kernel")
+dbus-daemon[494836]: [session uid=1000 pid=494836 pidfd=5] Successfully activated service 'org.gtk.vfs.Metadata'
+A connection to the bus can't be made
+==============================================================================
+
+==================================== 5/22 ====================================
+test:         archive-crash
+start time:   02:17:39
+duration:     0.34s
+result:       exit status 0
+command:      MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MALLOC_PERTURB_=128 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MESON_TEST_ITERATION=1 /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/archive-crash-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02S3ae1f2008ba4ecb62b130bc05eeb1083
+1..1
+# Start of archive tests
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ?gio-vfs?
+ok 1 /archive/process-crash-publication
+# End of archive tests
+==============================================================================
+
+==================================== 6/22 ====================================
+test:         replacement-crash
+start time:   02:17:39
+duration:     1.41s
+result:       exit status 0
+command:      MALLOC_PERTURB_=147 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MESON_TEST_ITERATION=1 /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/replacement-crash-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02S2d8a2c6786e8631c1500da2815613048
+1..1
+# Start of replacement tests
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ?gio-vfs?
+# Verified process exit at prepared
+# Verified process exit at writing
+# Verified process exit at written
+# Verified process exit at staged
+# Verified process exit at exchanged
+# Verified process exit at published
+# Verified process exit at cleaned
+ok 1 /replacement/process-crash-boundaries
+# slow test /replacement/process-crash-boundaries executed in 1.38 secs
+# End of replacement tests
+==============================================================================
+
+==================================== 7/22 ====================================
+test:         filesystem
+start time:   02:17:39
+duration:     1.49s
+result:       exit status 0
+command:      MALLOC_PERTURB_=144 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MESON_TEST_ITERATION=1 /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/filesystem-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02Sc8c13e8ca5f431c37dce74b65ba407f3
+1..12
+# Start of filesystem tests
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ?gio-vfs?
+ok 1 /filesystem/split-join
+ok 2 /filesystem/missing-parts
+ok 3 /filesystem/operations
+ok 4 /filesystem/durable-retry
+ok 5 /filesystem/archive-roundtrip
+ok 6 /filesystem/content-counts-and-identity
+ok 7 /filesystem/chooser-destinations-and-import
+ok 8 /filesystem/replacement-recovery
+ok 9 /filesystem/batch-rename-swap-undo
+# End of filesystem tests
+# Start of search tests
+# Tracker-DEBUG: Saving DB locale as: 'C'
+# Tracker-DEBUG: Cleaning up stale resource URIs
+# Tracker-DEBUG: Freed 1 readonly interfaces
+ok 10 /search/indexed-document-content
+# Tracker-DEBUG: Saving DB locale as: 'C'
+# Complete indexed scope: 2 results, 0 filesystem directories scanned
+# Mixed scope: 3 results, 1 unindexed directories scanned
+# Tracker-DEBUG: Cleaning up stale resource URIs
+# Tracker-DEBUG: Freed 1 readonly interfaces
+ok 11 /search/coverage-and-unicode
+# End of search tests
+# Start of archive tests
+ok 12 /archive/sevenzip-volumes-and-encryption
+# End of archive tests
+==============================================================================
+
+==================================== 8/22 ====================================
+test:         session
+start time:   02:17:39
+duration:     1.60s
+result:       exit status 0
+command:      GSETTINGS_BACKEND=memory MALLOC_PERTURB_=232 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 GSK_RENDERER=cairo GDK_BACKEND=x11 MESON_TEST_ITERATION=1 /usr/bin/dbus-run-session -- /usr/bin/xvfb-run -a /usr/bin/python3 /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/tests/session.py ./majoris-files
+----------------------------------- stdout -----------------------------------
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+Crash recovery restored tab locations, views, and selection; opt-out respected.
+----------------------------------- stderr -----------------------------------
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=495157 comm="./majoris-files" label="kernel")
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=495157 comm="./majoris-files" label="kernel")
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.2' (uid=1000 pid=495222 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.2' (uid=1000 pid=495222 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+fusermount3: failed to access mountpoint /run/user/1000/doc: Permission denied
+error: fuse init failed: Can't mount path /run/user/1000/doc
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.221: Document portal fuse mount point unknown: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name :1.4 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.221: Choosing gtk.portal for org.freedesktop.impl.portal.Lockdown as a last-resort fallback
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.2' (uid=1000 pid=495222 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.5' (uid=1000 pid=495247 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[495257]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=495247 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[495257]: Successfully activated service 'org.a11y.atspi.Registry'
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.303: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.303: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.304: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.304: Choosing gtk.portal for org.freedesktop.impl.portal.Settings as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.305: Choosing gtk.portal for org.freedesktop.impl.portal.FileChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.306: Choosing gtk.portal for org.freedesktop.impl.portal.AppChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.307: Choosing gtk.portal for org.freedesktop.impl.portal.Print as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.308: Choosing gtk.portal for org.freedesktop.impl.portal.Notification as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.309: Choosing gtk.portal for org.freedesktop.impl.portal.Inhibit as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.310: Choosing gtk.portal for org.freedesktop.impl.portal.Access as a last-resort fallback
+[W][13:17:40.313966] pw.conf      | [          conf.c: 1182 try_load_conf()] can't load config client.conf: No such file or directory
+[E][13:17:40.314367] pw.conf      | [          conf.c: 1215 pw_conf_load_conf_for_context()] can't load config client.conf: No such file or directory
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.314: Failed connect to PipeWire: Couldn't create PipeWire context
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.315: Choosing gtk.portal for org.freedesktop.impl.portal.Account as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.316: Choosing gtk.portal for org.freedesktop.impl.portal.Email as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495222): xdg-desktop-portal-WARNING **: 13:17:40.317: Choosing gtk.portal for org.freedesktop.impl.portal.DynamicLauncher as a last-resort fallback
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=495157 comm="./majoris-files" label="kernel")
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=495157 comm="./majoris-files" label="kernel")
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=495157 comm="./majoris-files" label="kernel")
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=495157 comm="./majoris-files" label="kernel")
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=495157 comm="./majoris-files" label="kernel")
+dbus-daemon[495079]: [session uid=1000 pid=495079 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+A connection to the bus can't be made
+==============================================================================
+
+==================================== 9/22 ====================================
+test:         theme-layout
+start time:   02:17:41
+duration:     0.14s
+result:       exit status 0
+command:      MALLOC_PERTURB_=217 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MESON_TEST_ITERATION=1 /usr/bin/python3 /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/tests/theme-layout.py
+----------------------------------- stdout -----------------------------------
+Files layout and GNOME theme ownership checks passed
+==============================================================================
+
+=================================== 10/22 ====================================
+test:         sidebar
+start time:   02:17:41
+duration:     0.36s
+result:       exit status 0
+command:      MALLOC_PERTURB_=238 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MESON_TEST_ITERATION=1 /usr/bin/dbus-run-session -- ./sidebar-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02Sa7e061ee692d09242e3db9aa5d6c9a15
+1..6
+# Start of sidebar tests
+ok 1 /sidebar/xdg-and-bookmarks
+ok 2 /sidebar/folder-location-identity
+ok 3 /sidebar/device-projection
+ok 4 /sidebar/kernel-filesystem-identity
+ok 5 /sidebar/explicit-favorites
+ok 6 /sidebar/xdg-live-update
+# End of sidebar tests
+----------------------------------- stderr -----------------------------------
+dbus-daemon[495862]: [session uid=1000 pid=495862 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=495863 comm="./sidebar-tests" label="kernel")
+dbus-daemon[495862]: [session uid=1000 pid=495862 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[495862]: [session uid=1000 pid=495862 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=495863 comm="./sidebar-tests" label="kernel")
+dbus-daemon[495862]: [session uid=1000 pid=495862 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[495862]: [session uid=1000 pid=495862 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=495863 comm="./sidebar-tests" label="kernel")
+dbus-daemon[495862]: [session uid=1000 pid=495862 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[495862]: [session uid=1000 pid=495862 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=495863 comm="./sidebar-tests" label="kernel")
+dbus-daemon[495862]: [session uid=1000 pid=495862 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[495862]: [session uid=1000 pid=495862 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=495863 comm="./sidebar-tests" label="kernel")
+dbus-daemon[495862]: [session uid=1000 pid=495862 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[495862]: [session uid=1000 pid=495862 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=495863 comm="./sidebar-tests" label="kernel")
+dbus-daemon[495862]: [session uid=1000 pid=495862 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+A connection to the bus can't be made
+==============================================================================
+
+=================================== 11/22 ====================================
+test:         portal
+start time:   02:17:40
+duration:     3.66s
+result:       exit status 0
+command:      MALLOC_PERTURB_=231 GSETTINGS_BACKEND=memory MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 GSK_RENDERER=cairo GDK_BACKEND=x11 MESON_TEST_ITERATION=1 /usr/bin/dbus-run-session -- /usr/bin/xvfb-run -a ./portal-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02S324195bcd49f3e09e1c5f3c96394d406
+1..6
+# Start of portal tests
+ok 1 /portal/roundtrip-and-isolation
+ok 2 /portal/success-close-and-authorization
+ok 3 /portal/save-files
+# End of portal tests
+# Start of extensions tests
+ok 4 /extensions/out-of-process-lifecycle
+# slow test /extensions/out-of-process-lifecycle executed in 0.65 secs
+ok 5 /extensions/nearby-registration-and-transfer
+# slow test /extensions/nearby-registration-and-transfer executed in 2.21 secs
+# End of extensions tests
+# Start of desktop tests
+ok 6 /desktop/shell-search-protocol
+# End of desktop tests
+----------------------------------- stderr -----------------------------------
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=495559 comm="./portal-tests" label="kernel")
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=495559 comm="./portal-tests" label="kernel")
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=495559 comm="./portal-tests" label="kernel")
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=495559 comm="./portal-tests" label="kernel")
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=495559 comm="./portal-tests" label="kernel")
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=495559 comm="./portal-tests" label="kernel")
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Activating service name='org.gtk.vfs.Metadata' requested by ':1.0' (uid=1000 pid=495559 comm="./portal-tests" label="kernel")
+dbus-daemon[495530]: [session uid=1000 pid=495530 pidfd=5] Successfully activated service 'org.gtk.vfs.Metadata'
+A connection to the bus can't be made
+==============================================================================
+
+=================================== 12/22 ====================================
+test:         ui
+start time:   02:17:39
+duration:     18.16s
+result:       exit status 0
+command:      GSETTINGS_BACKEND=memory MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 GSK_RENDERER=cairo GDK_BACKEND=x11 MESON_TEST_ITERATION=1 MALLOC_PERTURB_=121 /usr/bin/xvfb-run -a ./ui-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02S00a9af5a3dd12044d1ec35694168721a
+1..30
+# Start of ui tests
+ok 1 /ui/chooser-modes
+ok 2 /ui/open-single
+ok 3 /ui/system-drive-navigation
+ok 4 /ui/grid-grouped-model
+ok 5 /ui/grid-headings-and-keyboard
+ok 6 /ui/adaptive-sidebar
+ok 7 /ui/open-multiple
+ok 8 /ui/select-folder
+ok 9 /ui/save-suggested
+ok 10 /ui/select-symlink-folder
+ok 11 /ui/initial-location-recovery
+ok 12 /ui/overwrite-confirmation
+ok 13 /ui/merge-move-and-persistent-undo
+ok 14 /ui/merge-skip-all
+ok 15 /ui/merge-replace-all
+ok 16 /ui/merge-rename
+ok 17 /ui/column-selection
+ok 18 /ui/session-detail-recovery
+# slow test /ui/session-detail-recovery executed in 0.82 secs
+ok 19 /ui/disk-image-inventory
+ok 20 /ui/nearby-confirm
+ok 21 /ui/nearby-cancel
+ok 22 /ui/drop-policy
+ok 23 /ui/transferred-tab-routing
+ok 24 /ui/script-policy-and-previews
+# slow test /ui/script-policy-and-previews executed in 2.73 secs
+ok 25 /ui/sharing-policy
+ok 26 /ui/native-file-clipboard
+# End of ui tests
+# Start of sharing tests
+ok 27 /sharing/inventory-parser
+# End of sharing tests
+# Start of preview tests
+ok 28 /preview/persistent-rotation
+# PASS actual isolated decode/play/pause/seek: mp4
+# PASS actual isolated decode/play/pause/seek: hevc.mkv
+# PASS actual isolated decode/play/pause/seek: webm
+# PASS actual isolated decode/play/pause/seek: mkv
+# PASS actual isolated decode/play/pause/seek: mp3
+# PASS actual isolated decode/play/pause/seek: aac
+# PASS actual isolated decode/play/pause/seek: flac
+# PASS actual isolated decode/play/pause/seek: opus
+ok 29 /preview/isolated-codec-playback
+# slow test /preview/isolated-codec-playback executed in 7.98 secs
+# Discovering media fixture /tmp/majoris-rich-preview-TY1YX3/sample.ogv
+# Rendering video thumbnail
+# Rendering Office fixture /tmp/majoris-rich-preview-TY1YX3/sample.odt
+ok 30 /preview/media-and-office-rendering
+# slow test /preview/media-and-office-rendering executed in 4.66 secs
+# End of preview tests
+==============================================================================
+
+=================================== 13/22 ====================================
+test:         theme-integration-fallback
+start time:   02:17:42
+duration:     17.05s
+result:       exit status 0
+command:      MALLOC_PERTURB_=103 GSETTINGS_BACKEND=memory MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 GSK_RENDERER=cairo GDK_BACKEND=x11 MESON_TEST_ITERATION=1 /usr/bin/dbus-run-session -- /usr/bin/xvfb-run -a ./theme-integration /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/theme-integration-fallback
+----------------------------------- stdout -----------------------------------
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+----------------------------------- stderr -----------------------------------
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=495933 comm="./theme-integration /mnt/c/Users/Admin/Documents/G" label="kernel")
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=495933 comm="./theme-integration /mnt/c/Users/Admin/Documents/G" label="kernel")
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.2' (uid=1000 pid=495987 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.2' (uid=1000 pid=495987 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+fusermount3: failed to access mountpoint /run/user/1000/doc: Permission denied
+error: fuse init failed: Can't mount path /run/user/1000/doc
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.201: Document portal fuse mount point unknown: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name :1.4 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.201: Choosing gtk.portal for org.freedesktop.impl.portal.Lockdown as a last-resort fallback
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.2' (uid=1000 pid=495987 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.5' (uid=1000 pid=496008 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[496015]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=496008 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[496015]: Successfully activated service 'org.a11y.atspi.Registry'
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.250: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.250: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.250: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.250: Choosing gtk.portal for org.freedesktop.impl.portal.Settings as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.251: Choosing gtk.portal for org.freedesktop.impl.portal.FileChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.252: Choosing gtk.portal for org.freedesktop.impl.portal.AppChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.253: Choosing gtk.portal for org.freedesktop.impl.portal.Print as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.254: Choosing gtk.portal for org.freedesktop.impl.portal.Notification as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.255: Choosing gtk.portal for org.freedesktop.impl.portal.Inhibit as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.256: Choosing gtk.portal for org.freedesktop.impl.portal.Access as a last-resort fallback
+[W][13:17:42.257457] pw.conf      | [          conf.c: 1182 try_load_conf()] can't load config client.conf: No such file or directory
+[E][13:17:42.257532] pw.conf      | [          conf.c: 1215 pw_conf_load_conf_for_context()] can't load config client.conf: No such file or directory
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.257: Failed connect to PipeWire: Couldn't create PipeWire context
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.258: Choosing gtk.portal for org.freedesktop.impl.portal.Account as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.259: Choosing gtk.portal for org.freedesktop.impl.portal.Email as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495987): xdg-desktop-portal-WARNING **: 13:17:42.260: Choosing gtk.portal for org.freedesktop.impl.portal.DynamicLauncher as a last-resort fallback
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=495933 comm="./theme-integration /mnt/c/Users/Admin/Documents/G" label="kernel")
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=495933 comm="./theme-integration /mnt/c/Users/Admin/Documents/G" label="kernel")
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=495933 comm="./theme-integration /mnt/c/Users/Admin/Documents/G" label="kernel")
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=495933 comm="./theme-integration /mnt/c/Users/Admin/Documents/G" label="kernel")
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=495933 comm="./theme-integration /mnt/c/Users/Admin/Documents/G" label="kernel")
+dbus-daemon[495919]: [session uid=1000 pid=495919 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+A connection to the bus can't be made
+==============================================================================
+
+=================================== 14/22 ====================================
+test:         toolbars
+start time:   02:17:58
+duration:     33.45s
+result:       exit status 0
+command:      MALLOC_PERTURB_=103 GSETTINGS_BACKEND=memory MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 GSK_RENDERER=cairo GDK_BACKEND=x11 MESON_TEST_ITERATION=1 /usr/bin/dbus-run-session -- /usr/bin/xvfb-run -a ./toolbar-tests
+----------------------------------- stdout -----------------------------------
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+Address width 688 search width 223 ratio 3.09
+Native toolbar actions, composites, responsive routing, chooser, preview and mutation checks passed
+----------------------------------- stderr -----------------------------------
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=497397 comm="./toolbar-tests" label="kernel")
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=497397 comm="./toolbar-tests" label="kernel")
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.2' (uid=1000 pid=497445 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.2' (uid=1000 pid=497445 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+fusermount3: failed to access mountpoint /run/user/1000/doc: Permission denied
+error: fuse init failed: Can't mount path /run/user/1000/doc
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.199: Document portal fuse mount point unknown: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name :1.4 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.199: Choosing gtk.portal for org.freedesktop.impl.portal.Lockdown as a last-resort fallback
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.2' (uid=1000 pid=497445 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.5' (uid=1000 pid=497466 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[497473]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=497466 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[497473]: Successfully activated service 'org.a11y.atspi.Registry'
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.250: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.250: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.250: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.250: Choosing gtk.portal for org.freedesktop.impl.portal.Settings as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.251: Choosing gtk.portal for org.freedesktop.impl.portal.FileChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.252: Choosing gtk.portal for org.freedesktop.impl.portal.AppChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.253: Choosing gtk.portal for org.freedesktop.impl.portal.Print as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.254: Choosing gtk.portal for org.freedesktop.impl.portal.Notification as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.255: Choosing gtk.portal for org.freedesktop.impl.portal.Inhibit as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.256: Choosing gtk.portal for org.freedesktop.impl.portal.Access as a last-resort fallback
+[W][13:17:58.257752] pw.conf      | [          conf.c: 1182 try_load_conf()] can't load config client.conf: No such file or directory
+[E][13:17:58.257901] pw.conf      | [          conf.c: 1215 pw_conf_load_conf_for_context()] can't load config client.conf: No such file or directory
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.257: Failed connect to PipeWire: Couldn't create PipeWire context
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.258: Choosing gtk.portal for org.freedesktop.impl.portal.Account as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.259: Choosing gtk.portal for org.freedesktop.impl.portal.Email as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497445): xdg-desktop-portal-WARNING **: 13:17:58.260: Choosing gtk.portal for org.freedesktop.impl.portal.DynamicLauncher as a last-resort fallback
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=497397 comm="./toolbar-tests" label="kernel")
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=497397 comm="./toolbar-tests" label="kernel")
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=497397 comm="./toolbar-tests" label="kernel")
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=497397 comm="./toolbar-tests" label="kernel")
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=497397 comm="./toolbar-tests" label="kernel")
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Activating service name='org.gtk.vfs.Metadata' requested by ':1.0' (uid=1000 pid=497397 comm="./toolbar-tests" label="kernel")
+dbus-daemon[497381]: [session uid=1000 pid=497381 pidfd=5] Successfully activated service 'org.gtk.vfs.Metadata'
+
+(process:497397): Gtk-WARNING **: 13:18:25.782: While adding page: duplicate child name in GtkStack: Share
+A connection to the bus can't be made
+A connection to the bus can't be made
+==============================================================================
+
+=================================== 15/22 ====================================
+test:         details-corrections
+start time:   02:17:44
+duration:     56.11s
+result:       exit status 0
+command:      GSETTINGS_BACKEND=memory MALLOC_PERTURB_=156 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 GSK_RENDERER=cairo GDK_BACKEND=x11 MESON_TEST_ITERATION=1 /usr/bin/dbus-run-session -- /usr/bin/xvfb-run -a ./details-corrections /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/details-corrections-fallback
+----------------------------------- stdout -----------------------------------
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+----------------------------------- stderr -----------------------------------
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=496240 comm="./details-corrections /mnt/c/Users/Admin/Documents" label="kernel")
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=496240 comm="./details-corrections /mnt/c/Users/Admin/Documents" label="kernel")
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.2' (uid=1000 pid=496291 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.2' (uid=1000 pid=496291 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+fusermount3: failed to access mountpoint /run/user/1000/doc: Permission denied
+error: fuse init failed: Can't mount path /run/user/1000/doc
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.804: Document portal fuse mount point unknown: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name :1.4 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.804: Choosing gtk.portal for org.freedesktop.impl.portal.Lockdown as a last-resort fallback
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.2' (uid=1000 pid=496291 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.5' (uid=1000 pid=496312 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[496319]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=496312 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[496319]: Successfully activated service 'org.a11y.atspi.Registry'
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.849: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.849: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.849: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.849: Choosing gtk.portal for org.freedesktop.impl.portal.Settings as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.850: Choosing gtk.portal for org.freedesktop.impl.portal.FileChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.851: Choosing gtk.portal for org.freedesktop.impl.portal.AppChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.852: Choosing gtk.portal for org.freedesktop.impl.portal.Print as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.853: Choosing gtk.portal for org.freedesktop.impl.portal.Notification as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.854: Choosing gtk.portal for org.freedesktop.impl.portal.Inhibit as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.854: Choosing gtk.portal for org.freedesktop.impl.portal.Access as a last-resort fallback
+[W][13:17:44.856171] pw.conf      | [          conf.c: 1182 try_load_conf()] can't load config client.conf: No such file or directory
+[E][13:17:44.856288] pw.conf      | [          conf.c: 1215 pw_conf_load_conf_for_context()] can't load config client.conf: No such file or directory
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.856: Failed connect to PipeWire: Couldn't create PipeWire context
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.857: Choosing gtk.portal for org.freedesktop.impl.portal.Account as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.857: Choosing gtk.portal for org.freedesktop.impl.portal.Email as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:496291): xdg-desktop-portal-WARNING **: 13:17:44.858: Choosing gtk.portal for org.freedesktop.impl.portal.DynamicLauncher as a last-resort fallback
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=496240 comm="./details-corrections /mnt/c/Users/Admin/Documents" label="kernel")
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=496240 comm="./details-corrections /mnt/c/Users/Admin/Documents" label="kernel")
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=496240 comm="./details-corrections /mnt/c/Users/Admin/Documents" label="kernel")
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=496240 comm="./details-corrections /mnt/c/Users/Admin/Documents" label="kernel")
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=496240 comm="./details-corrections /mnt/c/Users/Admin/Documents" label="kernel")
+dbus-daemon[496222]: [session uid=1000 pid=496222 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+A connection to the bus can't be made
+==============================================================================
+
+=================================== 16/22 ====================================
+test:         menus
+start time:   02:18:40
+duration:     18.49s
+result:       exit status 0
+command:      GSETTINGS_BACKEND=memory MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 GSK_RENDERER=cairo GDK_BACKEND=x11 MESON_TEST_ITERATION=1 MALLOC_PERTURB_=23 /usr/bin/dbus-run-session -- /usr/bin/xvfb-run -a ./menu-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02Sbe9e3ff7af0327fb73047cf662676f79
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ‘gio-vfs’
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+# Adwaita-DEBUG: Setting org.freedesktop.appearance.accent-color of type (ddd) not found
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for ‘gsettings-backend’
+1..1
+# Start of menus tests
+# Sidebar popup: 142x44 items=1
+# Sidebar popup: 142x44 items=1
+# Keyboard context key=Menu focus=GtkListItemWidget
+# Keyboard context key=shift+F10 focus=GtkListItemWidget
+ok 1 /menus/context-and-presentation
+# slow test /menus/context-and-presentation executed in 18.20 secs
+# End of menus tests
+----------------------------------- stderr -----------------------------------
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=498389 comm="./menu-tests" label="kernel")
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=498389 comm="./menu-tests" label="kernel")
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.2' (uid=1000 pid=498439 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.2' (uid=1000 pid=498439 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+fusermount3: failed to access mountpoint /run/user/1000/doc: Permission denied
+error: fuse init failed: Can't mount path /run/user/1000/doc
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.922: Document portal fuse mount point unknown: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name :1.4 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.922: Choosing gtk.portal for org.freedesktop.impl.portal.Lockdown as a last-resort fallback
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.2' (uid=1000 pid=498439 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.5' (uid=1000 pid=498460 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[498467]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=498460 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[498467]: Successfully activated service 'org.a11y.atspi.Registry'
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.969: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.969: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.969: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.970: Choosing gtk.portal for org.freedesktop.impl.portal.Settings as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.970: Choosing gtk.portal for org.freedesktop.impl.portal.FileChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.971: Choosing gtk.portal for org.freedesktop.impl.portal.AppChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.972: Choosing gtk.portal for org.freedesktop.impl.portal.Print as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.973: Choosing gtk.portal for org.freedesktop.impl.portal.Notification as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.974: Choosing gtk.portal for org.freedesktop.impl.portal.Inhibit as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.975: Choosing gtk.portal for org.freedesktop.impl.portal.Access as a last-resort fallback
+[W][13:18:40.976375] pw.conf      | [          conf.c: 1182 try_load_conf()] can't load config client.conf: No such file or directory
+[E][13:18:40.976452] pw.conf      | [          conf.c: 1215 pw_conf_load_conf_for_context()] can't load config client.conf: No such file or directory
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.976: Failed connect to PipeWire: Couldn't create PipeWire context
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.977: Choosing gtk.portal for org.freedesktop.impl.portal.Account as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.978: Choosing gtk.portal for org.freedesktop.impl.portal.Email as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498439): xdg-desktop-portal-WARNING **: 13:18:40.978: Choosing gtk.portal for org.freedesktop.impl.portal.DynamicLauncher as a last-resort fallback
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=498389 comm="./menu-tests" label="kernel")
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=498389 comm="./menu-tests" label="kernel")
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=498389 comm="./menu-tests" label="kernel")
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=498389 comm="./menu-tests" label="kernel")
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=498389 comm="./menu-tests" label="kernel")
+dbus-daemon[498375]: [session uid=1000 pid=498375 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+A connection to the bus can't be made
+==============================================================================
+
+=================================== 17/22 ====================================
+test:         tags
+start time:   02:18:59
+duration:     2.27s
+result:       exit status 0
+command:      MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MALLOC_PERTURB_=80 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MESON_TEST_ITERATION=1 /usr/bin/dbus-run-session -- ./tag-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02S9933f07d8d084eaedad13e9518146fc9
+1..6
+# Start of tags tests
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ?gio-vfs?
+ok 1 /tags/defaults
+ok 2 /tags/migration
+ok 3 /tags/bulk-lifecycle-sidebar
+# 10,000-file bulk/query/rename: 0.049 seconds
+ok 4 /tags/performance
+# 1,000-definition / 10,000-file migration: 1.442 seconds
+ok 5 /tags/large-migration
+# slow test /tags/large-migration executed in 1.45 secs
+ok 6 /tags/external-updates
+# End of tags tests
+----------------------------------- stderr -----------------------------------
+dbus-daemon[498799]: [session uid=1000 pid=498799 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=498802 comm="./tag-tests" label="kernel")
+dbus-daemon[498799]: [session uid=1000 pid=498799 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[498799]: [session uid=1000 pid=498799 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=498802 comm="./tag-tests" label="kernel")
+dbus-daemon[498799]: [session uid=1000 pid=498799 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[498799]: [session uid=1000 pid=498799 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=498802 comm="./tag-tests" label="kernel")
+dbus-daemon[498799]: [session uid=1000 pid=498799 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[498799]: [session uid=1000 pid=498799 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=498802 comm="./tag-tests" label="kernel")
+dbus-daemon[498799]: [session uid=1000 pid=498799 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[498799]: [session uid=1000 pid=498799 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=498802 comm="./tag-tests" label="kernel")
+dbus-daemon[498799]: [session uid=1000 pid=498799 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[498799]: [session uid=1000 pid=498799 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=498802 comm="./tag-tests" label="kernel")
+dbus-daemon[498799]: [session uid=1000 pid=498799 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+A connection to the bus can't be made
+==============================================================================
+
+=================================== 18/22 ====================================
+test:         redesign
+start time:   02:17:41
+duration:     104.86s
+result:       exit status 0
+command:      GSETTINGS_BACKEND=memory MALLOC_PERTURB_=50 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 GSK_RENDERER=cairo GDK_BACKEND=x11 MESON_TEST_ITERATION=1 /usr/bin/dbus-run-session -- /usr/bin/xvfb-run -a ./redesign-tests
+----------------------------------- stdout -----------------------------------
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+TAP version 14
+# random seed: R02S0e3d74447aafefb4be6a7e89dc599e10
+1..4
+# Start of redesign tests
+ok 1 /redesign/native-layout-and-schemes
+ok 2 /redesign/collections-search-and-actions
+# slow test /redesign/collections-search-and-actions executed in 4.88 secs
+ok 3 /redesign/path-editing-and-history
+# slow test /redesign/path-editing-and-history executed in 3.29 secs
+Grid None Compact width 600 position 0 adjustment 0/26000 page 612
+Grid None Compact width 600 position 750 adjustment 12492/26000 page 612
+Grid None Compact width 600 position 1499 adjustment 25388/26000 page 612
+Grid None Compact width 600 position 0 adjustment 0/26000 page 612
+Grid None Compact width 1100 position 0 adjustment 0/15600 page 612
+Grid None Compact width 1100 position 750 adjustment 7292/15600 page 612
+Grid None Compact width 1100 position 1499 adjustment 14988/15600 page 612
+Grid None Compact width 1100 position 0 adjustment 0/15600 page 612
+Grid None Standard width 600 position 0 adjustment 0/40800 page 612
+Grid None Standard width 600 position 750 adjustment 19924/40800 page 612
+Grid None Standard width 600 position 1499 adjustment 40188/40800 page 612
+Grid None Standard width 600 position 0 adjustment 0/40800 page 612
+Grid None Standard width 1100 position 0 adjustment 0/29240 page 612
+Grid None Standard width 1100 position 750 adjustment 14076/29240 page 612
+Grid None Standard width 1100 position 1499 adjustment 28628/29240 page 612
+Grid None Standard width 1100 position 0 adjustment 0/29240 page 612
+Grid None Large width 600 position 0 adjustment 0/174000 page 612
+Grid None Large width 600 position 750 adjustment 86620/174000 page 612
+Grid None Large width 600 position 1499 adjustment 173388/174000 page 612
+Grid None Large width 600 position 0 adjustment 0/174000 page 612
+Grid None Large width 1100 position 0 adjustment 0/87000 page 612
+Grid None Large width 1100 position 750 adjustment 43004/87000 page 612
+Grid None Large width 1100 position 1499 adjustment 86388/87000 page 612
+Grid None Large width 1100 position 0 adjustment 0/87000 page 612
+Grid Type Compact width 600 position 0 adjustment 108/54036 page 612
+Grid Type Compact width 600 position 750 adjustment 15732/32436 page 612
+Grid Type Compact width 600 position 1499 adjustment 31896/32508 page 612
+Grid Type Compact width 600 position 0 adjustment 36/32436 page 612
+Grid Type Compact width 1100 position 0 adjustment 0/20340 page 612
+Grid Type Compact width 1100 position 750 adjustment 9576/20340 page 612
+Grid Type Compact width 1100 position 1499 adjustment 19728/20340 page 612
+Grid Type Compact width 1100 position 0 adjustment 36/20340 page 612
+Grid Type Standard width 600 position 0 adjustment 0/70036 page 612
+Grid Type Standard width 600 position 750 adjustment 34668/70140 page 612
+Grid Type Standard width 600 position 1499 adjustment 69528/70140 page 612
+Grid Type Standard width 600 position 0 adjustment 36/70036 page 612
+Grid Type Standard width 1100 position 0 adjustment 0/42036 page 612
+Grid Type Standard width 1100 position 750 adjustment 20564/42036 page 612
+Grid Type Standard width 1100 position 1499 adjustment 41528/42140 page 612
+Grid Type Standard width 1100 position 0 adjustment 36/42036 page 612
+Grid Type Large width 600 position 0 adjustment 0/177036 page 612
+Grid Type Large width 600 position 750 adjustment 88360/177236 page 612
+Grid Type Large width 600 position 1499 adjustment 176624/177236 page 612
+Grid Type Large width 600 position 0 adjustment 36/177036 page 612
+Grid Type Large width 1100 position 0 adjustment 0/88536 page 612
+Grid Type Large width 1100 position 750 adjustment 43992/88736 page 612
+Grid Type Large width 1100 position 1499 adjustment 88124/88736 page 612
+Grid Type Large width 1100 position 0 adjustment 36/88536 page 612
+Grid Modified Date Compact width 600 position 0 adjustment 108/54036 page 612
+Grid Modified Date Compact width 600 position 750 adjustment 15732/32436 page 612
+Grid Modified Date Compact width 600 position 1499 adjustment 31896/32508 page 612
+Grid Modified Date Compact width 600 position 0 adjustment 36/32436 page 612
+Grid Modified Date Compact width 1100 position 0 adjustment 0/20340 page 612
+Grid Modified Date Compact width 1100 position 750 adjustment 9576/20340 page 612
+Grid Modified Date Compact width 1100 position 1499 adjustment 19728/20340 page 612
+Grid Modified Date Compact width 1100 position 0 adjustment 36/20340 page 612
+Grid Modified Date Standard width 600 position 0 adjustment 0/70036 page 612
+Grid Modified Date Standard width 600 position 750 adjustment 34668/70140 page 612
+Grid Modified Date Standard width 600 position 1499 adjustment 69528/70140 page 612
+Grid Modified Date Standard width 600 position 0 adjustment 36/70036 page 612
+Grid Modified Date Standard width 1100 position 0 adjustment 0/42036 page 612
+Grid Modified Date Standard width 1100 position 750 adjustment 20564/42036 page 612
+Grid Modified Date Standard width 1100 position 1499 adjustment 41528/42140 page 612
+Grid Modified Date Standard width 1100 position 0 adjustment 36/42036 page 612
+Grid Modified Date Large width 600 position 0 adjustment 0/177036 page 612
+Grid Modified Date Large width 600 position 750 adjustment 88360/177236 page 612
+Grid Modified Date Large width 600 position 1499 adjustment 176624/177236 page 612
+Grid Modified Date Large width 600 position 0 adjustment 36/177036 page 612
+Grid Modified Date Large width 1100 position 0 adjustment 0/88536 page 612
+Grid Modified Date Large width 1100 position 750 adjustment 43992/88736 page 612
+Grid Modified Date Large width 1100 position 1499 adjustment 88124/88736 page 612
+Grid Modified Date Large width 1100 position 0 adjustment 36/88536 page 612
+ok 4 /redesign/large-grid-viewport
+# slow test /redesign/large-grid-viewport executed in 96.06 secs
+# End of redesign tests
+----------------------------------- stderr -----------------------------------
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=495718 comm="./redesign-tests" label="kernel")
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=495718 comm="./redesign-tests" label="kernel")
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.2' (uid=1000 pid=495779 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.2' (uid=1000 pid=495779 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+fusermount3: failed to access mountpoint /run/user/1000/doc: Permission denied
+error: fuse init failed: Can't mount path /run/user/1000/doc
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.447: Document portal fuse mount point unknown: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name :1.4 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.447: Choosing gtk.portal for org.freedesktop.impl.portal.Lockdown as a last-resort fallback
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.2' (uid=1000 pid=495779 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.5' (uid=1000 pid=495800 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[495807]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=495800 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[495807]: Successfully activated service 'org.a11y.atspi.Registry'
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.498: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.498: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.499: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.499: Choosing gtk.portal for org.freedesktop.impl.portal.Settings as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.500: Choosing gtk.portal for org.freedesktop.impl.portal.FileChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.501: Choosing gtk.portal for org.freedesktop.impl.portal.AppChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.502: Choosing gtk.portal for org.freedesktop.impl.portal.Print as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.502: Choosing gtk.portal for org.freedesktop.impl.portal.Notification as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.503: Choosing gtk.portal for org.freedesktop.impl.portal.Inhibit as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.504: Choosing gtk.portal for org.freedesktop.impl.portal.Access as a last-resort fallback
+[W][13:17:41.506123] pw.conf      | [          conf.c: 1182 try_load_conf()] can't load config client.conf: No such file or directory
+[E][13:17:41.506244] pw.conf      | [          conf.c: 1215 pw_conf_load_conf_for_context()] can't load config client.conf: No such file or directory
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.506: Failed connect to PipeWire: Couldn't create PipeWire context
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.507: Choosing gtk.portal for org.freedesktop.impl.portal.Account as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.507: Choosing gtk.portal for org.freedesktop.impl.portal.Email as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:495779): xdg-desktop-portal-WARNING **: 13:17:41.508: Choosing gtk.portal for org.freedesktop.impl.portal.DynamicLauncher as a last-resort fallback
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=495718 comm="./redesign-tests" label="kernel")
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=495718 comm="./redesign-tests" label="kernel")
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=495718 comm="./redesign-tests" label="kernel")
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=495718 comm="./redesign-tests" label="kernel")
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=495718 comm="./redesign-tests" label="kernel")
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Activating service name='org.gtk.vfs.Metadata' requested by ':1.0' (uid=1000 pid=495718 comm="./redesign-tests" label="kernel")
+dbus-daemon[495686]: [session uid=1000 pid=495686 pidfd=5] Successfully activated service 'org.gtk.vfs.Metadata'
+A connection to the bus can't be made
+==============================================================================
+
+=================================== 19/22 ====================================
+test:         properties
+start time:   02:18:31
+duration:     57.63s
+result:       exit status 0
+command:      GSK_RENDERER=cairo GSETTINGS_BACKEND=memory MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MALLOC_PERTURB_=88 GDK_BACKEND=x11 MESON_TEST_ITERATION=1 /usr/bin/dbus-run-session -- /usr/bin/xvfb-run -a ./properties-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02Sef5c6b5466ae6abf49f9606bfd0e0eb9
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+# Adwaita-DEBUG: Setting org.freedesktop.appearance.accent-color of type (ddd) not found
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for ‘gsettings-backend’
+1..1
+# Start of properties tests
+# stage: general-document
+# stage: general-long-name
+# stage: general-large-text-narrow
+# stage: permissions-basic
+# stage: permissions-advanced
+# GLib-GIO-DEBUG: ensure_dir: Ensuring /tmp/majoris-properties-HK9DY3/config
+# stage: application-chooser
+# GLib-GIO-DEBUG: ensure_dir: Ensuring /tmp/majoris-properties-HK9DY3/config
+# GLib-GIO-DEBUG: ensure_dir: Ensuring /tmp/majoris-properties-HK9DY3/config
+# stage: general-folder
+# stage: sharing-disabled
+# stage: sharing-enabled
+# stage: sharing-advanced
+# stage: general-image
+# stage: details-image
+# stage: details-multimedia
+# stage: details-video
+# stage: general-multiple
+# stage: remote
+# stage: cloud
+ok 1 /properties/redesign
+# slow test /properties/redesign executed in 56.57 secs
+# End of properties tests
+----------------------------------- stderr -----------------------------------
+dbus-daemon[498145]: [session uid=1000 pid=498145 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=498160 comm="./properties-tests" label="kernel")
+dbus-daemon[498145]: [session uid=1000 pid=498145 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[498145]: [session uid=1000 pid=498145 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=498160 comm="./properties-tests" label="kernel")
+dbus-daemon[498145]: [session uid=1000 pid=498145 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.3' (uid=1000 pid=498235 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[498145]: [session uid=1000 pid=498145 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[498145]: [session uid=1000 pid=498145 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.3' (uid=1000 pid=498235 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[498145]: [session uid=1000 pid=498145 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+fusermount3: failed to access mountpoint /run/user/1000/doc: Permission denied
+error: fuse init failed: Can't mount path /run/user/1000/doc
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.432: Document portal fuse mount point unknown: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name :1.5 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.432: Choosing gtk.portal for org.freedesktop.impl.portal.Lockdown as a last-resort fallback
+dbus-daemon[498145]: [session uid=1000 pid=498145 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.3' (uid=1000 pid=498235 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[498145]: [session uid=1000 pid=498145 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.6' (uid=1000 pid=498256 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[498145]: [session uid=1000 pid=498145 pidfd=5] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[498263]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=498256 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[498263]: Successfully activated service 'org.a11y.atspi.Registry'
+dbus-daemon[498145]: [session uid=1000 pid=498145 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.476: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.476: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.476: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.476: Choosing gtk.portal for org.freedesktop.impl.portal.Settings as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.477: Choosing gtk.portal for org.freedesktop.impl.portal.FileChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.478: Choosing gtk.portal for org.freedesktop.impl.portal.AppChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.479: Choosing gtk.portal for org.freedesktop.impl.portal.Print as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.480: Choosing gtk.portal for org.freedesktop.impl.portal.Notification as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.480: Choosing gtk.portal for org.freedesktop.impl.portal.Inhibit as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.481: Choosing gtk.portal for org.freedesktop.impl.portal.Access as a last-resort fallback
+[W][13:18:32.482920] pw.conf      | [          conf.c: 1182 try_load_conf()] can't load config client.conf: No such file or directory
+[E][13:18:32.482992] pw.conf      | [          conf.c: 1215 pw_conf_load_conf_for_context()] can't load config client.conf: No such file or directory
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.483: Failed connect to PipeWire: Couldn't create PipeWire context
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.483: Choosing gtk.portal for org.freedesktop.impl.portal.Account as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.484: Choosing gtk.portal for org.freedesktop.impl.portal.Email as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:498235): xdg-desktop-portal-WARNING **: 13:18:32.485: Choosing gtk.portal for org.freedesktop.impl.portal.DynamicLauncher as a last-resort fallback
+dbus-daemon[498145]: [session uid=1000 pid=498145 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'
+A connection to the bus can't be made
+==============================================================================
+
+=================================== 20/22 ====================================
+test:         tags-ui
+start time:   02:19:01
+duration:     42.07s
+result:       exit status 0
+command:      ADW_DISABLE_PORTAL=1 GSETTINGS_BACKEND=memory MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 GSK_RENDERER=cairo GDK_BACKEND=x11 MESON_TEST_ITERATION=1 MALLOC_PERTURB_=121 /usr/bin/dbus-run-session -- /usr/bin/xvfb-run -a ./tag-ui-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02Sf88607ab14a6203c5b98098460e23fb2
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ‘gio-vfs’
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for ‘gsettings-backend’
+1..2
+# Start of tags tests
+# Row properties: selectable=true visible=true child=true mapped=true mode=1 index=0 parent=true
+# Delete selection: true / sensitive=true / rooted=true
+# Delete after cancel: selected=true sensitive=true
+ok 1 /tags/native-ui
+# slow test /tags/native-ui executed in 37.81 secs
+# 1,000-tag / 10,000-file assignment window: 0.991 seconds
+# 10,000-file checkbox assignment and state refresh: 0.140 seconds
+ok 2 /tags/large-assignment-ui
+# slow test /tags/large-assignment-ui executed in 4.00 secs
+# End of tags tests
+----------------------------------- stderr -----------------------------------
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=498874 comm="./tag-ui-tests" label="kernel")
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=498874 comm="./tag-ui-tests" label="kernel")
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=498874 comm="./tag-ui-tests" label="kernel")
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=498874 comm="./tag-ui-tests" label="kernel")
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=498874 comm="./tag-ui-tests" label="kernel")
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=498874 comm="./tag-ui-tests" label="kernel")
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Activating service name='org.gtk.vfs.Metadata' requested by ':1.0' (uid=1000 pid=498874 comm="./tag-ui-tests" label="kernel")
+dbus-daemon[498860]: [session uid=1000 pid=498860 pidfd=5] Successfully activated service 'org.gtk.vfs.Metadata'
+A connection to the bus can't be made
+
+(gvfsd-metadata:499594): GVFS-WARNING **: 13:19:43.535: apply_journal_to_builder: found wrong sized entry, possible journal corruption
+
+==============================================================================
+
+=================================== 21/22 ====================================
+test:         inline-rename
+start time:   02:17:59
+duration:     144.61s
+result:       exit status 0
+command:      GSETTINGS_BACKEND=memory MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MALLOC_PERTURB_=59 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 GSK_RENDERER=cairo GDK_BACKEND=x11 MESON_TEST_ITERATION=1 /usr/bin/dbus-run-session -- /usr/bin/xvfb-run -a ./inline-rename-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02S5a0347809e97d8ba3177bed474651dfa
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ‘gio-vfs’
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+# Adwaita-DEBUG: Setting org.freedesktop.appearance.accent-color of type (ddd) not found
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for ‘gsettings-backend’
+1..5
+# Start of inline-rename tests
+ok 1 /inline-rename/stems
+# mode=Grid selected=1 state=true eligible=false
+# mode=Grid selected=1 state=true eligible=false
+# mode=Grid selected=1 state=true eligible=false
+# mode=Grouped Grid selected=1 state=true eligible=false
+# mode=Grouped Grid selected=1 state=true eligible=false
+# mode=Grouped Grid selected=1 state=true eligible=false
+# mode=List selected=1 state=true eligible=false
+# mode=List selected=1 state=true eligible=false
+# mode=List selected=1 state=true eligible=false
+# mode=Columns selected=1 state=true eligible=false
+# mode=Columns selected=1 state=true eligible=false
+# mode=Columns selected=1 state=true eligible=false
+# mode=Gallery selected=1 state=true eligible=false
+# mode=Gallery selected=1 state=true eligible=false
+# mode=Gallery selected=1 state=true eligible=false
+ok 2 /inline-rename/views-and-recycling
+# slow test /inline-rename/views-and-recycling executed in 15.03 secs
+ok 3 /inline-rename/cell-state
+# key=F2
+# key=ctrl+a
+# key=F2
+# key=F2
+# key=Escape
+# rename mode=Grid selected=1 eligible=true enabled=true
+# key=Return
+# key=Return
+# key=Return
+# key=Return
+# key=ctrl+z
+# key=ctrl+shift+z
+# key=ctrl+a
+# key=ctrl+c
+# key=End
+# key=ctrl+v
+# key=ctrl+a
+# key=ctrl+x
+# key=ctrl+v
+# key=Tab
+# key=Return
+# key=Return
+# key=F2
+# key=ctrl+a
+# key=F2
+# key=F2
+# key=Escape
+# rename mode=List selected=1 eligible=true enabled=true
+# key=Return
+# key=Return
+# key=Return
+# key=Return
+# key=ctrl+z
+# key=ctrl+shift+z
+# key=ctrl+a
+# key=ctrl+c
+# key=End
+# key=ctrl+v
+# key=ctrl+a
+# key=ctrl+x
+# key=ctrl+v
+# key=Tab
+# key=Return
+# key=Return
+# key=F2
+# key=ctrl+a
+# key=F2
+# key=F2
+# key=Escape
+# rename mode=Columns selected=1 eligible=true enabled=true
+# key=Return
+# key=Return
+# key=Return
+# key=Return
+# key=ctrl+z
+# key=ctrl+shift+z
+# key=ctrl+a
+# key=ctrl+c
+# key=End
+# key=ctrl+v
+# key=ctrl+a
+# key=ctrl+x
+# key=ctrl+v
+# key=Tab
+# key=Return
+# key=Return
+# key=F2
+# key=ctrl+a
+# key=F2
+# key=F2
+# key=Escape
+# rename mode=Gallery selected=1 eligible=true enabled=true
+# key=Return
+# key=Return
+# key=Return
+# key=Return
+# key=ctrl+z
+# key=ctrl+shift+z
+# key=ctrl+a
+# key=ctrl+c
+# key=End
+# key=ctrl+v
+# key=ctrl+a
+# key=ctrl+x
+# key=ctrl+v
+# key=Tab
+# key=Return
+# key=Return
+ok 4 /inline-rename/native-interactions
+# slow test /inline-rename/native-interactions executed in 125.48 secs
+ok 5 /inline-rename/permission-denied
+# slow test /inline-rename/permission-denied executed in 3.57 secs
+# End of inline-rename tests
+----------------------------------- stderr -----------------------------------
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=497553 comm="./inline-rename-tests" label="kernel")
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=497553 comm="./inline-rename-tests" label="kernel")
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.2' (uid=1000 pid=497601 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.2' (uid=1000 pid=497601 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+fusermount3: failed to access mountpoint /run/user/1000/doc: Permission denied
+error: fuse init failed: Can't mount path /run/user/1000/doc
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.220: Document portal fuse mount point unknown: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name :1.4 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.220: Choosing gtk.portal for org.freedesktop.impl.portal.Lockdown as a last-resort fallback
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.2' (uid=1000 pid=497601 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.5' (uid=1000 pid=497622 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[497629]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=497622 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[497629]: Successfully activated service 'org.a11y.atspi.Registry'
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.264: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.265: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.265: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.265: Choosing gtk.portal for org.freedesktop.impl.portal.Settings as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.266: Choosing gtk.portal for org.freedesktop.impl.portal.FileChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.267: Choosing gtk.portal for org.freedesktop.impl.portal.AppChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.268: Choosing gtk.portal for org.freedesktop.impl.portal.Print as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.268: Choosing gtk.portal for org.freedesktop.impl.portal.Notification as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.269: Choosing gtk.portal for org.freedesktop.impl.portal.Inhibit as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.270: Choosing gtk.portal for org.freedesktop.impl.portal.Access as a last-resort fallback
+[W][13:17:59.271951] pw.conf      | [          conf.c: 1182 try_load_conf()] can't load config client.conf: No such file or directory
+[E][13:17:59.272023] pw.conf      | [          conf.c: 1215 pw_conf_load_conf_for_context()] can't load config client.conf: No such file or directory
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.272: Failed connect to PipeWire: Couldn't create PipeWire context
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.272: Choosing gtk.portal for org.freedesktop.impl.portal.Account as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.273: Choosing gtk.portal for org.freedesktop.impl.portal.Email as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:497601): xdg-desktop-portal-WARNING **: 13:17:59.274: Choosing gtk.portal for org.freedesktop.impl.portal.DynamicLauncher as a last-resort fallback
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=497553 comm="./inline-rename-tests" label="kernel")
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=497553 comm="./inline-rename-tests" label="kernel")
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=497553 comm="./inline-rename-tests" label="kernel")
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=497553 comm="./inline-rename-tests" label="kernel")
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=497553 comm="./inline-rename-tests" label="kernel")
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Activating service name='org.gtk.vfs.Metadata' requested by ':1.0' (uid=1000 pid=497553 comm="./inline-rename-tests" label="kernel")
+dbus-daemon[497539]: [session uid=1000 pid=497539 pidfd=5] Successfully activated service 'org.gtk.vfs.Metadata'
+
+(gvfsd-metadata:497773): GVFS-WARNING **: 13:20:22.990: apply_journal_to_builder: found wrong sized entry, possible journal corruption
+
+A connection to the bus can't be made
+==============================================================================
+
+=================================== 22/22 ====================================
+test:         creation-sorting
+start time:   02:19:26
+duration:     124.47s
+result:       exit status 0
+command:      MALLOC_PERTURB_=81 GSETTINGS_BACKEND=memory MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 GSK_RENDERER=cairo GDK_BACKEND=x11 MESON_TEST_ITERATION=1 /usr/bin/dbus-run-session -- /usr/bin/xvfb-run -a ./creation-sorting-tests
+----------------------------------- stdout -----------------------------------
+TAP version 14
+# random seed: R02S60b4b39b0f32c5ff145c2932f2694b87
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for ‘gio-vfs’
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+# Adwaita-DEBUG: Setting org.freedesktop.appearance.accent-color of type (ddd) not found
+# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for ‘gsettings-backend’
+1..2
+# Start of creation-sorting tests
+ok 1 /creation-sorting/history
+# ready mode=Grid folder=true enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-WT6XX3
+# creation mode=Grid folder=true epoch=3 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Grid folder=false enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-WT6XX3
+# creation mode=Grid folder=false epoch=6 state=true selected=1 cell=true focus=true writable=true
+# ready mode=List folder=true enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-WT6XX3
+# creation mode=List folder=true epoch=10 state=true selected=1 cell=true focus=true writable=true
+# ready mode=List folder=false enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-WT6XX3
+# creation mode=List folder=false epoch=13 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Columns folder=true enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-WT6XX3
+# creation mode=Columns folder=true epoch=17 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Columns folder=false enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-WT6XX3
+# creation mode=Columns folder=false epoch=20 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Gallery folder=true enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-WT6XX3
+# creation mode=Gallery folder=true epoch=24 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Gallery folder=false enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-WT6XX3
+# creation mode=Gallery folder=false epoch=27 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Grouped Grid folder=true enabled=true loading=false writable=true destination=true current=true location=file:///tmp/majoris-creation-WT6XX3
+# creation mode=Grouped Grid folder=true epoch=31 state=true selected=1 cell=true focus=true writable=true
+# ready mode=Grouped Grid folder=false enabled=true loading=true writable=true destination=true current=true location=file:///tmp/majoris-creation-WT6XX3
+# creation mode=Grouped Grid folder=false epoch=34 state=true selected=1 cell=true focus=true writable=true
+# pointer column at 556,470 window 1090x810
+# pointer Name at 247,169 window 1090x810
+# pointer Name at 247,169 window 1090x810
+# pointer Size at 751,169 window 1090x810
+# pointer Size at 751,169 window 1090x810
+# pointer Type at 812,169 window 1090x810
+# pointer Type at 812,169 window 1090x810
+# pointer Modified at 962,169 window 1090x810
+# pointer Modified at 962,169 window 1090x810
+# pointer Created at 960,169 window 1090x810
+# pointer Created at 960,169 window 1090x810
+# pointer Accessed at 964,169 window 1090x810
+# pointer Accessed at 964,169 window 1090x810
+# pointer Byte Count at 1032,169 window 1090x810
+# pointer Byte Count at 1032,169 window 1090x810
+# pointer Name at 247,169 window 1090x810
+# pointer Name at 247,169 window 1090x810
+# pointer Non-sortable at 1048,169 window 1090x810
+# pointer Async Bytes at 1029,169 window 1090x810
+# pointer Async Bytes at 1029,169 window 1090x810
+# pointer Unavailable at 1031,169 window 1090x810
+# unavailable enabled=false error=true key=Size
+# pointer Name at 247,169 window 1090x810
+# pointer Size at 907,169 window 1090x810
+ok 2 /creation-sorting/integration
+# slow test /creation-sorting/integration executed in 124.05 secs
+# End of creation-sorting tests
+----------------------------------- stderr -----------------------------------
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=499437 comm="./creation-sorting-tests" label="kernel")
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=499437 comm="./creation-sorting-tests" label="kernel")
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.2' (uid=1000 pid=499485 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.2' (uid=1000 pid=499485 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+fusermount3: failed to access mountpoint /run/user/1000/doc: Permission denied
+error: fuse init failed: Can't mount path /run/user/1000/doc
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.266: Document portal fuse mount point unknown: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name :1.4 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.266: Choosing gtk.portal for org.freedesktop.impl.portal.Lockdown as a last-resort fallback
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.2' (uid=1000 pid=499485 comm="/usr/libexec/xdg-desktop-portal" label="kernel")
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.5' (uid=1000 pid=499506 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[499513]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=499506 comm="/usr/libexec/xdg-desktop-portal-gtk" label="kernel")
+dbus-daemon[499513]: Successfully activated service 'org.a11y.atspi.Registry'
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.314: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.314: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.314: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.314: Choosing gtk.portal for org.freedesktop.impl.portal.Settings as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.315: Choosing gtk.portal for org.freedesktop.impl.portal.FileChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.316: Choosing gtk.portal for org.freedesktop.impl.portal.AppChooser as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.317: Choosing gtk.portal for org.freedesktop.impl.portal.Print as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.318: Choosing gtk.portal for org.freedesktop.impl.portal.Notification as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.319: Choosing gtk.portal for org.freedesktop.impl.portal.Inhibit as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.319: Choosing gtk.portal for org.freedesktop.impl.portal.Access as a last-resort fallback
+[W][13:19:26.321248] pw.conf      | [          conf.c: 1182 try_load_conf()] can't load config client.conf: No such file or directory
+[E][13:19:26.321330] pw.conf      | [          conf.c: 1215 pw_conf_load_conf_for_context()] can't load config client.conf: No such file or directory
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.321: Failed connect to PipeWire: Couldn't create PipeWire context
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.322: Choosing gtk.portal for org.freedesktop.impl.portal.Account as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.322: Choosing gtk.portal for org.freedesktop.impl.portal.Email as a last-resort fallback
+
+(/usr/libexec/xdg-desktop-portal:499485): xdg-desktop-portal-WARNING **: 13:19:26.323: Choosing gtk.portal for org.freedesktop.impl.portal.DynamicLauncher as a last-resort fallback
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Activating service name='org.gtk.vfs.Metadata' requested by ':1.0' (uid=1000 pid=499437 comm="./creation-sorting-tests" label="kernel")
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Successfully activated service 'org.gtk.vfs.Metadata'
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Activating service name='org.gtk.vfs.UDisks2VolumeMonitor' requested by ':1.0' (uid=1000 pid=499437 comm="./creation-sorting-tests" label="kernel")
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Activating service name='org.gtk.vfs.GoaVolumeMonitor' requested by ':1.0' (uid=1000 pid=499437 comm="./creation-sorting-tests" label="kernel")
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Activating service name='org.gtk.vfs.AfcVolumeMonitor' requested by ':1.0' (uid=1000 pid=499437 comm="./creation-sorting-tests" label="kernel")
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Activating service name='org.gtk.vfs.MTPVolumeMonitor' requested by ':1.0' (uid=1000 pid=499437 comm="./creation-sorting-tests" label="kernel")
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Activating service name='org.gtk.vfs.GPhoto2VolumeMonitor' requested by ':1.0' (uid=1000 pid=499437 comm="./creation-sorting-tests" label="kernel")
+dbus-daemon[499423]: [session uid=1000 pid=499423 pidfd=5] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+A connection to the bus can't be made
+==============================================================================
+
+
+Ok:                 22  
+Expected Fail:      0   
+Fail:               0   
+Unexpected Pass:    0   
+Skipped:            0   
+Timeout:            0   

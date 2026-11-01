@@ -13,6 +13,7 @@ namespace MajorisFiles {
         }
         public signal void failed(string message);
         public signal void loaded();
+        signal void settled();
         public signal void resetting(File target);
         Cancellable pending = new Cancellable();
         FileMonitor? monitor;
@@ -23,6 +24,7 @@ namespace MajorisFiles {
             generation++;
             pending.cancel();
             loading = false;
+            settled();
             if (monitor != null)
                 monitor.cancel();
             if (reload_source != 0)
@@ -37,6 +39,24 @@ namespace MajorisFiles {
             generation++;
             location = file;
             items.remove_all();
+        }
+        // Query the actual created object, then merge by GFile identity. Enumeration
+        // and monitor delivery may have happened on either side of the operation.
+        public async void reconcile_created(File file) throws Error {
+            while (loading) {
+                ulong handler = settled.connect(() => reconcile_created.callback());
+                yield;
+                disconnect(handler);
+            }
+            uint epoch = generation;
+            var parent = file.get_parent();
+            if (parent == null || !parent.equal(location)) return;
+            var info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
+            if (!parent.equal(location)) return;
+            if (epoch != generation) { yield reconcile_created(file); return; }
+            for (uint i = 0; i < items.get_n_items(); i++)
+                if (((FileItem)items.get_item(i)).file.equal(file)) return;
+            items.append(new FileItem(file, info));
         }
         public async void open(File folder, Gtk.Window? parent = null)
         {
@@ -67,6 +87,7 @@ namespace MajorisFiles {
                     var batch = yield enumerator.next_files_async(128, Priority.DEFAULT, token);
                     if (epoch != generation || batch == null)
                         break;
+                    var additions = new Gee.ArrayList<Object>();
                     foreach (var info in batch)
                     {
                         var item = new FileItem(folder.get_child(info.get_name()), info);
@@ -83,8 +104,10 @@ namespace MajorisFiles {
                         }
                         if(epoch != generation || token.is_cancelled())
                             break;
-                        items.append(item);
+                        additions.add(item);
                     }
+                    if (epoch == generation && !token.is_cancelled() && additions.size > 0)
+                        items.splice(items.get_n_items(), 0, additions.to_array());
                 }
                 yield enumerator.close_async(Priority.DEFAULT, null);
                 enumerator = null;
@@ -115,6 +138,7 @@ namespace MajorisFiles {
             {
                 loading = false;
                 loaded();
+                settled();
             }
         }
         ~DirectoryModel()

@@ -1,0 +1,31 @@
+ 1/22 core                       OK               0.07s
+ 2/22 image-decoders             OK               0.11s
+ 3/22 firewall                   OK               0.01s
+ 4/22 cloud                      OK               0.28s
+ 5/22 archive-crash              OK               0.34s
+ 6/22 replacement-crash          OK               1.41s
+ 7/22 filesystem                 OK               1.49s
+ 8/22 session                    OK               1.60s
+ 9/22 theme-layout               OK               0.14s
+10/22 sidebar                    OK               0.36s
+11/22 portal                     OK               3.66s
+12/22 ui                         OK              18.16s
+13/22 theme-integration-fallback OK              17.05s
+14/22 toolbars                   OK              33.45s
+15/22 details-corrections        OK              56.11s
+16/22 menus                      OK              18.49s
+17/22 tags                       OK               2.27s
+18/22 redesign                   OK             104.86s
+19/22 properties                 OK              57.63s
+20/22 tags-ui                    OK              42.07s
+21/22 inline-rename              OK             144.61s
+22/22 creation-sorting           OK             124.47s
+
+Ok:                 22  
+Expected Fail:      0   
+Fail:               0   
+Unexpected Pass:    0   
+Skipped:            0   
+Timeout:            0   
+
+Full log written to /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build/meson-logs/testlog.txt

@@ -1,5 +1,68 @@
 namespace MajorisFiles {
     public class Browser : Gtk.Box {
+        public uint creation_epoch { get; private set; }
+        public uint start_creation() { cancel_inline_rename(); return ++creation_epoch; }
+        File? created_file;
+        File? created_parent;
+        Gtk.MultiSelection? created_context;
+        DirectoryModel? created_model;
+        uint created_epoch;
+        ulong created_items_handler;
+        ulong created_loaded_handler;
+        ulong created_failed_handler;
+        void clear_created_edit() {
+            if (created_context != null && created_items_handler != 0) created_context.disconnect(created_items_handler);
+            if (created_model != null && created_loaded_handler != 0) created_model.disconnect(created_loaded_handler);
+            if (created_model != null && created_failed_handler != 0) created_model.disconnect(created_failed_handler);
+            created_items_handler = 0; created_loaded_handler = 0; created_failed_handler = 0;
+            created_file = null; created_parent = null; created_context = null; created_model = null;
+        }
+        void activate_created_edit() {
+            if (created_file == null) return;
+            if (created_epoch != creation_epoch || !location.equal(created_parent) || active_selection != created_context || !get_mapped()) {
+                clear_created_edit(); return;
+            }
+            if (created_model.loading) return;
+            var context = created_context;
+            for (uint i = 0; i < context.get_n_items(); i++) {
+                var item = context.get_item(i) as FileItem;
+                if (item == null || !item.file.equal(created_file)) continue;
+                if (item.info.has_attribute("access::can-rename") && !item.info.get_attribute_boolean("access::can-rename")) {
+                    clear_created_edit(); error(_("The item was created, but this location does not allow renaming it.")); return;
+                }
+                if (context == selection) initial_selection = created_file;
+                // Keep the transaction tied to the found object even if a grouped
+                // selection notification causes GTK to rebuild/recycle its row.
+                clear_created_edit();
+                inline_rename = new InlineRename(item, context);
+                reconciling_inline_rename = true;
+                context.select_item(i, true);
+                reconciling_inline_rename = false;
+                begin_inline_rename(true);
+                return;
+            }
+        }
+        public async void edit_created(File file, File parent, uint epoch, Gtk.MultiSelection context) throws Error {
+            if (epoch != creation_epoch || !location.equal(parent) || active_selection != context || !get_mapped()) return;
+            DirectoryModel? model = null;
+            if (directory.location.equal(parent)) model = directory;
+            foreach (var candidate in column_models) if (candidate.location.equal(parent)) model = candidate;
+            if (model == null) return;
+            clear_created_edit();
+            created_file = file; created_parent = parent; created_epoch = epoch;
+            created_context = context; created_model = model;
+            created_items_handler = context.items_changed.connect(() => activate_created_edit());
+            created_loaded_handler = model.loaded.connect(activate_created_edit);
+            created_failed_handler = model.failed.connect(() => clear_created_edit());
+            try {
+                yield model.reconcile_created(file);
+                if (created_epoch == epoch) activate_created_edit();
+            } catch (Error e) {
+                if (created_epoch == epoch) clear_created_edit();
+                if (epoch != creation_epoch || !location.equal(parent) || !get_mapped()) return;
+                throw e;
+            }
+        }
         public InlineRename? inline_rename;
         public Adw.StatusPage tag_empty = new Adw.StatusPage();
         ulong tags_definitions_handler;
@@ -12,7 +75,7 @@ namespace MajorisFiles {
         public signal void rename_requested(InlineRename transaction);
         public bool can_inline_rename() {
             var chosen = selected();
-            return !chooser_mode && chosen.size == 1 && inline_rename == null &&
+            return chosen.size == 1 && inline_rename == null &&
                 !chosen[0].file.has_uri_scheme("majoris") && !chosen[0].file.has_uri_scheme("recent") &&
                 !chosen[0].file.has_uri_scheme("trash") &&
                 (!chosen[0].info.has_attribute("access::can-rename") || chosen[0].info.get_attribute_boolean("access::can-rename"));
@@ -28,10 +91,14 @@ namespace MajorisFiles {
                 cell.render(rename_matches(cell) && cell.get_mapped() ? inline_rename : null, focus && rename_matches(cell) && cell.get_mapped());
             }
         }
-        public void begin_inline_rename() {
-            if (inline_rename != null) { if (!inline_rename.pending) foreach(var cell in filename_cells) if(rename_matches(cell)) cell.toggle_selection(); return; }
-            if (!can_inline_rename()) return;
-            inline_rename = new InlineRename(selected()[0], active_selection);
+        public void begin_inline_rename(bool resume = false) {
+            if (!resume && created_file != null) { creation_epoch++; clear_created_edit(); }
+            if (inline_rename != null && !resume) { if (!inline_rename.pending) foreach(var cell in filename_cells) if(rename_matches(cell)) cell.toggle_selection(); return; }
+            if (inline_rename == null) {
+                if (!can_inline_rename()) return;
+                inline_rename = new InlineRename(selected()[0], active_selection);
+            }
+            if (inline_rename.context != active_selection) return;
             render_rename(true);
             // scroll_to realizes an offscreen selection without relying on a row-local identity.
             for (uint i = 0; i < active_selection.get_n_items(); i++) {
@@ -65,6 +132,8 @@ namespace MajorisFiles {
             for (var child = widget.get_first_child(); child != null; child = child.get_next_sibling()) scroll_rename_column(child, position, context);
         }
         public void cancel_inline_rename() {
+            creation_epoch++;
+            clear_created_edit();
             if (inline_rename == null) return;
             inline_rename.cancelled = true; inline_rename = null;
             render_rename(); selection_changed();
@@ -97,7 +166,7 @@ namespace MajorisFiles {
             if (inline_rename != state || state.cancelled) return;
             var context = state.context;
             bool return_focus = false;
-            foreach (var cell in filename_cells) if (rename_matches(cell) && cell.entry.has_focus) return_focus = true;
+            foreach (var cell in filename_cells) if (rename_matches(cell) && get_root() != null && get_root().get_focus() != null && (get_root().get_focus() == cell.entry || get_root().get_focus().is_ancestor(cell.entry))) return_focus = true;
             cancel_inline_rename();
             if (return_focus) file_surface.grab_focus();
             reconcile_rename.begin(state, result, context);
@@ -167,7 +236,7 @@ namespace MajorisFiles {
         public string view_mode = "Grid";
         public MetadataStore metadata;
         public Places places;
-        public Gtk.MenuButton share_button = new Gtk.MenuButton();
+        public Menu share_menu = new Menu();
         public PreviewPane preview = new PreviewPane();
         public Gtk.Entry path = new Gtk.Entry();
         public Gtk.SearchEntry search_entry = new Gtk.SearchEntry();
@@ -178,6 +247,9 @@ namespace MajorisFiles {
         public signal void error(string message);
         Gtk.CustomFilter filter;
         Gtk.CustomSorter sorter;
+        SimpleAction sort_choice_action;
+        SimpleAction sort_direction_action;
+        Menu sort_choices = new Menu();
         Gtk.CustomSorter group_sorter;
         string group_key = "None";
         uint group_refresh;
@@ -243,8 +315,8 @@ namespace MajorisFiles {
         bool everywhere;
         bool search_results;
         Gtk.ToggleButton recursive_button;
-        bool ascending = true;
-        string sort_key = "Name";
+        public bool ascending = true;
+        public string sort_key = "Name";
         bool rank_results = true;
         SharedFoldersState shares = SharedFoldersState.get_default();
         ulong shares_changed;
@@ -315,11 +387,16 @@ namespace MajorisFiles {
             filtered = new Gtk.FilterListModel(directory.items, filter);
             sorted = new Gtk.SortListModel(filtered, sorter);
             var context_actions = new SimpleActionGroup();
+            sort_choice_action = new SimpleAction.stateful("sort", VariantType.STRING, new Variant.string(sort_key));
+            sort_choice_action.activate.connect((value) => set_sort(value.get_string(), true));
+            context_actions.add_action(sort_choice_action);
+            sort_direction_action = new SimpleAction.stateful("descending", null, new Variant.boolean(!ascending));
+            sort_direction_action.activate.connect(() => set_sort(sort_key, !ascending));
+            context_actions.add_action(sort_direction_action);
             var refresh_action = new SimpleAction("refresh", null); refresh_action.activate.connect(() => navigate(location, false)); context_actions.add_action(refresh_action);
             var group_action = new SimpleAction("group", VariantType.STRING); group_action.activate.connect((value) => set_group(value.get_string())); context_actions.add_action(group_action);
             var view_action = new SimpleAction("view", VariantType.STRING); view_action.activate.connect((value) => set_view(value.get_string())); context_actions.add_action(view_action);
             insert_action_group("context", context_actions);
-            MenuPresentation.button(share_button);
             group_sorter = new Gtk.CustomSorter((a, b) => FileGroups.compare((FileItem)a, (FileItem)b, group_key, metadata));
             sorted.items_changed.connect(() => update_status());
             selection = new Gtk.MultiSelection(sorted);
@@ -348,9 +425,7 @@ namespace MajorisFiles {
             locations.popover = locations_popup;
             locations_popup.notify["visible"].connect(() => { if (locations_popup.visible) populate_locations(locations_popup); });
             navigation_extras.append_control(locations);
-            navigation_extras.append_control(button("view-refresh-symbolic", _("Refresh"), () => navigate(directory.location, false)));
             var up_control = navigation_extras.get_first_child();
-            var refresh_control = navigation_extras.get_last_child();
             path.hexpand = true;
             path.placeholder_text = _("Location or URI");
             path.tooltip_text = _("Location (Ctrl+L)");
@@ -496,49 +571,13 @@ namespace MajorisFiles {
             append(navigation_adaptive);
             var commands = new Majoris.Ui.Toolbar();
             commands.divider = true;
-            Majoris.Ui.ToolbarGroup? operations_group = null;
-            Majoris.Ui.ToolbarGroup? selection_group = null;
-            Gtk.Separator? operations_separator = null;
             Gtk.MenuButton? sort_control = null;
             if (!chooser_mode) {
-                operations_group = commands.append_group();
-                operations_separator = commands.append_separator();
-                selection_group = commands.append_group();
-                string[] labels = {"New Folder", "Cut", "Copy", "Paste", "Rename", "Share", "Move to Trash"};
-                string[] icons = {"folder-new-symbolic", "edit-cut-symbolic", "edit-copy-symbolic", "edit-paste-symbolic", "document-edit-symbolic", "emblem-shared-symbolic", "user-trash-symbolic"};
-                string[] actions = {"new-folder", "cut", "copy", "paste", "rename", "share-folder", "trash"};
-                for (int i = 0; i < actions.length; i++) {
-                    var control = new Gtk.Button();
-                    if (i == 0) {
-                        var face = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8);
-                        var image = new Gtk.Image.from_icon_name(icons[i]);
-                        image.pixel_size = 16;
-                        face.append(image);
-                        face.append(new Gtk.Label(_(labels[i])));
-                        control.child = face;
-                        control.add_css_class("majoris-toolbar-action");
-                    } else control.icon_name = icons[i];
-                    control.tooltip_text = _(labels[i]);
-                    control.update_property(Gtk.AccessibleProperty.LABEL, _(labels[i]), -1);
-                    control.action_name = "win." + actions[i];
-                    if (actions[i] == "share-folder") {
-                        share_button.icon_name = "emblem-shared-symbolic";
-                        share_button.tooltip_text = _("Share");
-                        share_button.update_property(Gtk.AccessibleProperty.LABEL, _("Share"), -1);
-                        selection_group.append_control(share_button);
-                    } else if (i < 4) operations_group.append_control(control);
-                    else selection_group.append_control(control);
-                }
                 var sort = new Gtk.MenuButton();
             MenuPresentation.button(sort);
                 sort.label = _("Sort");
                 sort.tooltip_text = _("Sort");
-                var sort_menu = new Menu();
-                sort_menu.append(_("Name"), "win.sort-name");
-                sort_menu.append(_("Size"), "win.sort-size");
-                sort_menu.append(_("Modified"), "win.sort-modified");
-                sort_menu.append(_("Descending Order"), "win.descending");
-                sort.menu_model = sort_menu;
+                sort.menu_model = sort_menu();
                 sort_control = sort;
             }
             commands.append_spacer();
@@ -681,7 +720,7 @@ namespace MajorisFiles {
             overflow.tooltip_text = _("File Actions");
             overflow.update_property(Gtk.AccessibleProperty.LABEL, overflow.tooltip_text, -1);
             var overflow_menu = new Menu();
-            foreach (var entry in new string[] {"New Folder|win.new-folder", "Cut|win.cut", "Copy|win.copy", "Paste|win.paste", "Rename|win.rename", "Move to Trash|win.trash", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified"}) {
+            foreach (var entry in new string[] {"New Folder|win.new-folder", "New File|win.new-file", "Cut|win.cut", "Copy|win.copy", "Paste|win.paste", "Rename|win.rename", "Move to Trash|win.trash", "Sort by Name|win.sort-name", "Sort by Size|win.sort-size", "Sort by Modified|win.sort-modified"}) {
                 var parts = entry.split("|"); overflow_menu.append(_(parts[0]), parts[1]);
             }
             overflow.menu_model = overflow_menu;
@@ -691,8 +730,8 @@ namespace MajorisFiles {
             overflow.notify["active"].connect(() => {
                 while (overflow_menu.get_n_items() > overflow_base_items) overflow_menu.remove(overflow_base_items);
                 share_overflow.remove_all();
-                if (share_button.menu_model != null && share_button.menu_model.get_n_items() > 0) {
-                    share_overflow.append_submenu(_("Share"), share_button.menu_model);
+                if (share_menu != null && share_menu.get_n_items() > 0) {
+                    share_overflow.append_submenu(_("Share"), share_menu);
                     overflow_menu.append_section(null, share_overflow);
                 }
             });
@@ -755,10 +794,8 @@ namespace MajorisFiles {
             var breakpoint = new Adw.Breakpoint(Adw.BreakpointCondition.parse("max-width: 650px"));
             breakpoint.apply.connect(() => {
                 up_control.visible = false;
-                refresh_control.visible = false;
                 if (!chooser_mode) {
-                    operations_group.visible = false; selection_group.visible = false;
-                    operations_separator.visible = false; sort_control.visible = false;
+                    sort_control.visible = false;
                     overflow.visible = true;
                 }
                 preferred_sidebar_width = body.position;
@@ -770,10 +807,8 @@ namespace MajorisFiles {
             });
             breakpoint.unapply.connect(() => {
                 up_control.visible = true;
-                refresh_control.visible = true;
                 if (!chooser_mode) {
-                    operations_group.visible = true; selection_group.visible = true;
-                    operations_separator.visible = true; sort_control.visible = true;
+                    sort_control.visible = true;
                     overflow.visible = false;
                 }
                 sidebar_overlay.show_sidebar = false;
@@ -860,6 +895,16 @@ namespace MajorisFiles {
                 detail_columns[title] = column;
                 column.notify["fixed-width"].connect(save_display);
             }
+            foreach (var key in detail_columns.keys) attach_header_sorter(key, detail_columns[key]);
+            ((Gtk.ColumnViewSorter)list.sorter).changed.connect(() => {
+                if (syncing_headers) return;
+                var native = (Gtk.ColumnViewSorter)details.sorter;
+                foreach (var key in detail_columns.keys) if (detail_columns[key] == native.get_primary_sort_column()) {
+                    set_sort(key, native.get_primary_sort_order() == Gtk.SortType.ASCENDING);
+                    break;
+                }
+            });
+            sync_headers();
             list.activate.connect(activate_position);
             views.add_named(scrolled(list), "List");
             views.add_named(scrolled(columns), "Columns");
@@ -903,6 +948,7 @@ namespace MajorisFiles {
                                                           foreach(var item in selected())
                                                               remembered_selection.add(item.file);
                 });
+            directory.notify["writable"].connect(() => selection_changed());
             directory.failed.connect((message) => {
                 location_error.title = _("Cannot load ") + directory.location.get_parse_name() + ": " + message;
                 location_error.revealed = true;
@@ -915,6 +961,7 @@ namespace MajorisFiles {
                                              if(column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn&&!column_sort_pending)set_sort(sort_key,ascending);
                                              if (view_mode == "Columns" && !keep_columns)
                                                  build_columns();
+                                             if (inline_rename != null && !inline_rename.pending) begin_inline_rename(true);
                 });
             search.found.connect((item) => directory.items.append(item));
             search.progress.connect((folders, skipped) => {
@@ -1023,7 +1070,7 @@ namespace MajorisFiles {
                 if(column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn&&!((ExternalColumn)column_providers[sort_key]).sort_ready&&!column_sort_pending)set_sort(sort_key,ascending);
                 if(group_key == "Tags" && group_refresh == 0)
                     group_refresh = Idle.add(() => { group_refresh = 0;
-                                                     var chosen=selection_uris();
+                                                     var chosen=capture_sort_selection();
                                                      group_sorter.changed(Gtk.SorterChange.DIFFERENT);
                                                      restore_reordered(chosen);
                                                      return Source.REMOVE;
@@ -1372,31 +1419,38 @@ namespace MajorisFiles {
                 return "—";
             return new DateTime.from_unix_local((int64)item.info.get_attribute_uint64(attribute)).format("%x %X");
         }
-        int compare_items(FileItem x, FileItem y)
+        int compare_items(FileItem x, FileItem y) { return compare_key(x, y, sort_key, ascending); }
+        int compare_key(FileItem x, FileItem y, string key, bool direction)
         {
             if (search_results && rank_results && x.relevance != y.relevance)
                 return x.relevance > y.relevance ? -1 : 1;
             if(folders_first && x.directory != y.directory)
                 return x.directory ? -1 : 1;
             int result;
-            if(column_providers.has_key(sort_key))
-                result = column_providers[sort_key].compare(x, y, metadata);
-            else if(sort_key == "Size")
+            if(column_providers.has_key(key))
+                result = column_providers[key].compare(x, y, metadata);
+            else if(key == "Size")
                 result = x.bytes < y.bytes ? -1 : x.bytes == y.bytes ? 0 : 1;
-            else if(sort_key == "Recent Date") {
+            else if(key == "Recent Date") {
                 uint64 a = x.info.get_attribute_uint64("majoris::recent"), b = y.info.get_attribute_uint64("majoris::recent");
                 result = a < b ? -1 : a == b ? 0 : 1;
             }
-            else if(sort_key == "Modified" || sort_key == "Created" || sort_key == "Accessed")
+            else if(key == "Modified" || key == "Created" || key == "Accessed")
             {
-                var attribute = sort_key == "Created" ? "time::created" : sort_key == "Accessed" ? "time::access" : "time::modified";
+                var attribute = key == "Created" ? "time::created" : key == "Accessed" ? "time::access" : "time::modified";
                 uint64 first = x.info.get_attribute_uint64(attribute), second = y.info.get_attribute_uint64(attribute);
                 result = first < second ? -1 : first == second ? 0 : 1;
+                if (result == 0) {
+                    uint32 first_usec = x.info.get_attribute_uint32(attribute + "-usec");
+                    uint32 second_usec = y.info.get_attribute_uint32(attribute + "-usec");
+                    result = first_usec < second_usec ? -1 : first_usec == second_usec ? 0 : 1;
+                }
             }
-            else result = Paths.natural_compare(column_text(x, sort_key), column_text(y, sort_key));
+            else result = Paths.natural_compare(column_text(x, key), column_text(y, key));
             if(result == 0)
                 result = Paths.natural_compare(x.name, y.name);
-            return ascending ? result : -result;
+            if (result == 0) result = strcmp(x.file.get_uri(), y.file.get_uri());
+            return direction ? result : -result;
         }
         void save_display()
         {
@@ -1478,6 +1532,7 @@ namespace MajorisFiles {
             sorter.changed(Gtk.SorterChange.DIFFERENT);
             display_changed();
             loading_display = false;
+            sync_headers();
             if(column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn){string key=sort_key;sort_key="Name";column_sort_token.cancel();column_sort_token=new Cancellable();column_sort_pending=true;prepare_external_sort.begin(key,ascending,location,column_sort_token);}
         }
         public void set_density(string density) {
@@ -1552,8 +1607,9 @@ namespace MajorisFiles {
             folders.title = _("Folders First");
             folders.active = folders_first;
             group.add(folders);
-            folders.notify["active"].connect(() => { folders_first = folders.active;
+            folders.notify["active"].connect(() => { var chosen = capture_sort_selection(); folders_first = folders.active;
                                                      sorter.changed(Gtk.SorterChange.DIFFERENT);
+                                                     restore_reordered(chosen);
                                                      save_display();
                 });
             var sort = new Adw.ComboRow();
@@ -1563,12 +1619,20 @@ namespace MajorisFiles {
                 if(column_titles[i] == sort_key)
                     sort.selected = i;
             group.add(sort);
-            sort.notify["selected"].connect(() => set_sort(column_titles[sort.selected], ascending));
+            bool syncing_settings = false;
+            sort.notify["selected"].connect(() => { if (!syncing_settings) set_sort(column_titles[sort.selected], ascending); });
             var direction = new Adw.SwitchRow();
             direction.title = _("Descending Order");
             direction.active = !ascending;
             group.add(direction);
-            direction.notify["active"].connect(() => set_sort(sort_key, !direction.active));
+            direction.notify["active"].connect(() => { if (!syncing_settings) set_sort(sort_key, !direction.active); });
+            ulong sort_handler = sorting_changed.connect(() => {
+                syncing_settings = true;
+                for (uint i = 0; i < column_titles.length; i++) if (column_titles[i] == sort_key) sort.selected = i;
+                direction.active = !ascending;
+                syncing_settings = false;
+            });
+            dialog.closed.connect(() => disconnect(sort_handler));
             var columns_group = new Adw.PreferencesGroup();
             columns_group.title = _("List Columns");
             page.add(columns_group);
@@ -1611,15 +1675,34 @@ namespace MajorisFiles {
             }
             dialog.present(this);
         }
+        public signal void sorting_changed();
+        bool syncing_headers;
+        void attach_header_sorter(string key, Gtk.ColumnViewColumn column) {
+            column.sorter = new Gtk.CustomSorter((a, b) => compare_key((FileItem)a, (FileItem)b, key, true));
+        }
+        void sync_headers() {
+            if (details == null) return;
+            syncing_headers = true;
+            // sort_by_column promotes a column but retains secondary columns.
+            // Browser has one sort key, so clear the native stack first.
+            details.sort_by_column(null, Gtk.SortType.ASCENDING);
+            details.sort_by_column(detail_columns.has_key(sort_key) ? detail_columns[sort_key] : null,
+                ascending ? Gtk.SortType.ASCENDING : Gtk.SortType.DESCENDING);
+            syncing_headers = false;
+            sort_choice_action.set_state(new Variant.string(sort_key));
+            sort_direction_action.set_state(new Variant.boolean(!ascending));
+            sorting_changed();
+        }
         public void set_sort(string key, bool ascending)
         {
             column_sort_token.cancel();column_sort_token=new Cancellable();
             if(column_providers.has_key(key)&&column_providers[key] is ExternalColumn){column_sort_pending=true;prepare_external_sort.begin(key,ascending,directory.location,column_sort_token);return;}
             column_sort_pending=false;
             if(sort_key!=key&&column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn)((ExternalColumn)column_providers[sort_key]).release_sort();
-            var chosen=selection_uris();
+            var chosen=capture_sort_selection();
             sort_key = key;
             this.ascending = ascending;
+            sync_headers();
             sorter.changed(Gtk.SorterChange.DIFFERENT);
             restore_reordered(chosen);
             save_display();
@@ -1632,16 +1715,16 @@ namespace MajorisFiles {
                 while(directory.loading||!directory.location.equal(expected)){token.set_error_if_cancelled();if(get_monotonic_time()>deadline)throw new IOError.TIMED_OUT("Folder did not finish loading for extension sorting");Timeout.add(50,()=>{prepare_external_sort.callback();return Source.REMOVE;});yield;}
                 uint revision=column_model_revision;var column=(ExternalColumn)column_providers[key];yield column.prepare_sort(directory.items,token);token.set_error_if_cancelled();
                 if(revision!=column_model_revision||!directory.location.equal(expected)){if(sort_key==key)set_sort("Name",direction);throw new IOError.BUSY("Folder changed while extension sort values were loading; choose the sort again");}
-                var chosen=selection_uris();if(sort_key!=key&&column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn)((ExternalColumn)column_providers[sort_key]).release_sort();
-                sort_key=key;ascending=direction;sorter.changed(Gtk.SorterChange.DIFFERENT);restore_reordered(chosen);save_display();session_changed();
+                var chosen=capture_sort_selection();if(sort_key!=key&&column_providers.has_key(sort_key)&&column_providers[sort_key] is ExternalColumn)((ExternalColumn)column_providers[sort_key]).release_sort();
+                sort_key=key;ascending=direction;sync_headers();sorter.changed(Gtk.SorterChange.DIFFERENT);restore_reordered(chosen);save_display();session_changed();
             }catch(Error e){if(!(e is IOError.CANCELLED))error(e.message);}
-            finally{if(column_sort_token==token){column_sort_pending=false;update_status();}}
+            finally{if(column_sort_token==token){column_sort_pending=false;sync_headers();update_status();}}
         }
         public void set_group(string mode)
         {
             if(!(mode in group_modes))
                 return;
-            var chosen=selection_uris();
+            var chosen=capture_sort_selection();
             group_key = mode;
             grid_rows.mode = mode;
             sorted.section_sorter = mode == "None" ? null : group_sorter;
@@ -1653,6 +1736,18 @@ namespace MajorisFiles {
             save_display();
             session_changed();
         }
+        Gee.HashMap<Gtk.MultiSelection, Gee.HashSet<string>> column_sort_selection = new Gee.HashMap<Gtk.MultiSelection, Gee.HashSet<string>>();
+        Gee.HashSet<string> capture_sort_selection(){
+            column_sort_selection.clear();
+            foreach (var context in column_selections.values) {
+                var uris = new Gee.HashSet<string>();
+                for (uint i = 0; i < context.get_n_items(); i++) if (context.is_selected(i))
+                    uris.add(((FileItem)context.get_item(i)).file.get_uri());
+                column_sort_selection[context] = uris;
+            }
+            reconciling_inline_rename = true;
+            return selection_uris();
+        }
         Gee.HashSet<string> selection_uris(){
             var result=new Gee.HashSet<string>();var iterator=Gtk.BitsetIter();uint position;
             if(iterator.init_first(selection.get_selection(),out position))do{var item=selection.get_item(position) as FileItem;if(item!=null)result.add(item.file.get_uri());}while(iterator.next(out position));return result;
@@ -1661,6 +1756,16 @@ namespace MajorisFiles {
             var selected=new Gtk.Bitset.empty();var mask=new Gtk.Bitset.empty();mask.add_range(0,selection.get_n_items());
             for(uint i=0;i<selection.get_n_items();i++){var item=selection.get_item(i) as FileItem;if(item!=null&&uris.contains(item.file.get_uri()))selected.add(i);}
             selection.set_selection(selected,mask);grid_anchor=uint.MAX;
+            foreach (var context in column_sort_selection.keys) {
+                var chosen = new Gtk.Bitset.empty(); var all = new Gtk.Bitset.empty();
+                all.add_range(0, context.get_n_items());
+                for (uint i = 0; i < context.get_n_items(); i++)
+                    if (column_sort_selection[context].contains(((FileItem)context.get_item(i)).file.get_uri())) chosen.add(i);
+                context.set_selection(chosen, all);
+            }
+            column_sort_selection.clear();
+            reconciling_inline_rename = false;
+            if (inline_rename != null && !inline_rename.pending) begin_inline_rename(true);
         }
         void update_group_headers()
         {
@@ -1699,16 +1804,22 @@ namespace MajorisFiles {
             var column = new Gtk.ColumnViewColumn(title, text_factory((item) => provider.text(item, metadata)));
             column.resizable = true;
             column.visible = false;
+            attach_header_sorter(title, column);
             details.append_column(column);
             detail_columns[title] = column;
             column.notify["fixed-width"].connect(save_display);
+            rebuild_sort_menu();
             load_display(directory.location);
         }
         public string extension_columns_signature="";
         public bool has_column(string title){return detail_columns.has_key(title);}
         public void remove_extension_columns(Gee.Set<string> retained){
             var obsolete=new Gee.ArrayList<string>();foreach(var title in column_providers.keys)if(column_providers[title] is ExternalColumn&&!retained.contains(title))obsolete.add(title);
+            if (obsolete.size > 0 && column_sort_pending) {
+                column_sort_token.cancel(); column_sort_pending = false; sync_headers();
+            }
             foreach(var title in obsolete){if(sort_key==title)set_sort("Name",ascending);details.remove_column(detail_columns[title]);detail_columns.unset(title);column_providers.unset(title);var names=new Gee.ArrayList<string>();foreach(var name in column_titles)if(name!=title)names.add(name);column_titles=names.to_array();}
+            rebuild_sort_menu();
         }
         public void set_view(string mode, bool remember = true)
         {
@@ -1759,7 +1870,7 @@ namespace MajorisFiles {
                 bool writable = directory.writable;
                 if (view_mode == "Columns" && column_folder != null)
                     foreach (var model in column_models) if (model.location.equal(column_folder)) writable = model.writable;
-                return writable && !location.has_uri_scheme("majoris") && !location.has_uri_scheme("recent") && !location.has_uri_scheme("trash");
+                return writable && !search_results && !location.has_uri_scheme("majoris") && !location.has_uri_scheme("recent") && !location.has_uri_scheme("trash");
             }
         }
         public bool virtual_collection {
@@ -1808,7 +1919,7 @@ namespace MajorisFiles {
             load_display(file);
             if (file.has_uri_scheme("recent")) {
                 set_group("Recent Date");
-                sort_key = "Recent Date"; ascending = false;
+                sort_key = "Recent Date"; ascending = false; sync_headers();
                 sorter.changed(Gtk.SorterChange.DIFFERENT);
             }
             if (virtual_collection) {
@@ -1964,7 +2075,12 @@ namespace MajorisFiles {
                 var model = cell.context;
                 for (uint i = 0; i < model.get_n_items(); i++) {
                     if (model.get_item(i) == cell.item) {
-                        if (view_mode == "Columns") column_selection = model as Gtk.MultiSelection;
+                        if (view_mode == "Columns") foreach (var surface in column_selections.keys)
+                            if (column_selections[surface] == model) {
+                                activate_column_context(surface, (Gtk.MultiSelection)model,
+                                    loaded_columns.has_key(surface) ? loaded_columns[surface].location : directory.location);
+                                break;
+                            }
                         if (!model.is_selected(i)) model.select_item(i, true);
                         return;
                     }
@@ -1989,7 +2105,17 @@ namespace MajorisFiles {
             return null;
         }
         public Menu sort_menu() {
-            var menu = new Menu(); menu.append(_("Name"), "win.sort-name"); menu.append(_("Size"), "win.sort-size"); menu.append(_("Modified"), "win.sort-modified"); menu.append(_("Descending Order"), "win.descending"); return menu;
+            rebuild_sort_menu();
+            return sort_choices;
+        }
+        void rebuild_sort_menu() {
+            sort_choices.remove_all();
+            foreach (var key in column_titles) {
+                var item = new MenuItem(_(key), null);
+                item.set_action_and_target_value("context.sort", new Variant.string(key));
+                sort_choices.append_item(item);
+            }
+            sort_choices.append(_("Descending Order"), "context.descending");
         }
         public Menu group_menu() {
             var menu = new Menu();
@@ -2153,9 +2279,17 @@ namespace MajorisFiles {
             }
             columns.remove(widget);
         }
+        void activate_column_context(Gtk.Widget scroll, Gtk.MultiSelection context, File folder, bool notify = true) {
+            if (view_mode != "Columns" || virtual_collection || scroll.get_parent() != columns) return;
+            File target = context == selection ? directory.location : loaded_columns.has_key(scroll) ? loaded_columns[scroll].location : folder;
+            bool changed = active_selection != context || !location.equal(target);
+            if (changed) { creation_epoch++; clear_created_edit(); }
+            column_selection = context; column_folder = target;
+            if (changed && notify) { selection_changed(); session_changed(); update_status(); }
+        }
         Gtk.Widget append_column(File folder, ListModel items)
         {
-            var selected = items == sorted ? selection : new Gtk.MultiSelection(items);
+            var selected = items == sorted ? selection : new Gtk.MultiSelection(new Gtk.SortListModel(items, sorter));
             var list = new Gtk.ListView(selected, factory(false, selected));
             style_data_view(list, "majoris-data-list");
             list.single_click_activate = metadata.state("single-click", "false") == "true";
@@ -2169,6 +2303,16 @@ namespace MajorisFiles {
             columns.append(scroll);
             column_selections[scroll] = selected;
             column_generations[scroll] = 0;
+            weak Browser owner = this;
+            weak Gtk.Widget surface = scroll;
+            var focus = new Gtk.EventControllerFocus();
+            focus.enter.connect(() => { if (owner != null && surface != null) owner.activate_column_context(surface, selected, folder); });
+            scroll.add_controller(focus);
+            var context_click = new Gtk.GestureClick();
+            context_click.button = 0;
+            context_click.propagation_phase = Gtk.PropagationPhase.CAPTURE;
+            context_click.pressed.connect(() => { if (owner != null && surface != null) owner.activate_column_context(surface, selected, folder); });
+            scroll.add_controller(context_click);
             column_handlers[scroll] = selected.selection_changed.connect(() => {
                 if(reconciling_inline_rename || (selected == selection && directory.loading) || (loaded_columns.has_key(scroll) && loaded_columns[scroll].loading) || view_mode != "Columns" || scroll.get_parent() != columns)
                     return;
@@ -2181,8 +2325,7 @@ namespace MajorisFiles {
                     column_models.remove(pending_columns[scroll]);
                     pending_columns.unset(scroll);
                 }
-                column_selection = selected;
-                column_folder = loaded_columns.has_key(scroll) ? loaded_columns[scroll].location : directory.location;
+                activate_column_context(scroll, selected, folder, false);
                 selection_changed();
                 session_changed();
                 update_status();
@@ -2198,7 +2341,7 @@ namespace MajorisFiles {
                        preview.show_item.begin(item);
                 }
             });
-            list.activate.connect((position) => { var item = items.get_item(position) as FileItem;
+            list.activate.connect((position) => { var item = selected.get_item(position) as FileItem;
                                                   if (item != null)
                                                       activate_item.begin(item);
                 });
@@ -2234,7 +2377,9 @@ namespace MajorisFiles {
                 for (uint i = 0; i < context.get_n_items(); i++)
                     if (remembered.contains(((FileItem)context.get_item(i)).info.get_name())) context.select_item(i, false);
                 reconciling_inline_rename = false;
-                if (column_selection == context) { column_folder = model.location; selection_changed(); update_status(); }
+                if (column_selection == context) { column_folder = model.location; selection_changed(); update_status();
+                    if (inline_rename != null && !inline_rename.pending) begin_inline_rename(true);
+                }
             });
             restore_column(child, folder);
         }

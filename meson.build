@@ -183,3 +183,8 @@ tag_ui_tests = executable('tag-ui-tests', 'tests/tags-ui.vala', 'tests/native-ev
 if xvfb.found()
   test('tags-ui', find_program('dbus-run-session'), args: ['--', xvfb, '-a', tag_ui_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none', 'ADW_DISABLE_PORTAL=1'], timeout: 180)
 endif
+
+creation_sorting_tests = executable('creation-sorting-tests', 'tests/creation-sorting.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
+if xvfb.found() and find_program('xdotool', required: false).found()
+  test('creation-sorting', find_program('dbus-run-session'), args: ['--', xvfb, '-a', creation_sorting_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none'], timeout: 180)
+endif

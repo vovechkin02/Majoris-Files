@@ -1,7 +1,7 @@
 namespace MajorisFiles {
     public delegate void ConflictPresentation(Adw.AlertDialog dialog, File source, File destination);
     public enum OperationKind {
-        COPY, MOVE, TRASH, DELETE, CREATE_FOLDER, RENAME, LINK, EDIT_FILE
+        COPY, MOVE, TRASH, DELETE, CREATE_FOLDER, RENAME, LINK, EDIT_FILE, CREATE_FILE
     }
     public class Job : Object {
         public string title {
@@ -290,7 +290,7 @@ namespace MajorisFiles {
                     var entry = entries.get_child_value(i);
                     uint kind = entry.get_child_value(0).get_uint32();
                     string source = entry.get_child_value(1).get_string(), destination = entry.get_child_value(2).get_string();
-                    if(kind > OperationKind.EDIT_FILE || kind == OperationKind.DELETE || Uri.parse_scheme(source) == null || Uri.parse_scheme(destination) == null)
+                    if(kind > OperationKind.CREATE_FILE || kind == OperationKind.DELETE || Uri.parse_scheme(source) == null || Uri.parse_scheme(destination) == null)
                         continue;
                     var restored = new JournalEntry((OperationKind)kind, File.new_for_uri(source), File.new_for_uri(destination));
                     if(version_two)
@@ -1139,11 +1139,16 @@ namespace MajorisFiles {
             for (int i = 0; i < records.size; i++) {
                 var record = records[i];
                 if (reverse) { record.source_identity = yield file_identity(outputs[i]); undo_stack.remove(record); redo_stack.add(record); }
-                else { record.destination_identity = yield file_identity(outputs[i]); redo_stack.remove(record); undo_stack.add(record); }
+                else {
+                    string previous = record.destination_identity;
+                    record.destination_identity = yield file_identity(outputs[i]);
+                    retarget_redo_identity(record.destination, previous, record.destination_identity);
+                    redo_stack.remove(record); undo_stack.add(record);
+                }
             }
             persist_history_checked(true);rename_checkpoint("committed"); changed(); return true;
         }
-        public async void new_folder(File parent, string name, string? group = null) throws Error
+        public async File new_folder(File parent, string name, string? group = null) throws Error
         {
             if(history_busy)
                 throw new IOError.BUSY("Wait for undo or redo to finish");
@@ -1155,6 +1160,26 @@ namespace MajorisFiles {
             redo_stack.clear();
             persist_history();
             changed();
+            return file;
+        }
+        public async File new_file(File parent, string name, string? group = null) throws Error {
+            if (history_busy) throw new IOError.BUSY("Wait for undo or redo to finish");
+            if (!Paths.valid_name(name)) throw new FileError.INVALID("Invalid filename");
+            var file = parent.get_child(name);
+            var stream = yield file.create_async(FileCreateFlags.NONE, Priority.DEFAULT, null);
+            yield stream.close_async(Priority.DEFAULT, null);
+            yield record(OperationKind.CREATE_FILE, parent, file, group);
+            redo_stack.clear(); persist_history(); changed();
+            return file;
+        }
+        public async File create_default(File parent, bool folder) throws Error {
+            string base_name = folder ? _("New Folder") : _("New File");
+            for (uint number = 1; ; number++) {
+                string name = number == 1 ? base_name : "%s (%u)".printf(base_name, number);
+                try {
+                    return folder ? yield new_folder(parent, name) : yield new_file(parent, name);
+                } catch (IOError.EXISTS e) { /* Atomic create lost a race; try the next name. */ }
+            }
         }
         public async void undo(Gtk.Window? parent = null) throws Error
         {
@@ -1225,6 +1250,12 @@ namespace MajorisFiles {
                 metadata.relocate(entry.destination, entry.source);
                 if (entry.kind == OperationKind.RENAME) renamed(entry.destination, entry.source);
             }
+            else if (entry.kind == OperationKind.CREATE_FILE) {
+                var info = yield entry.destination.query_info_async("standard::size,standard::type", FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
+                if (info.get_file_type() != FileType.REGULAR || info.get_size() != 0)
+                    throw new FileError.INTEGRITY("The created file contains data; it was kept");
+                yield entry.destination.trash_async(Priority.DEFAULT, null);
+            }
             else if (entry.kind == OperationKind.CREATE_FOLDER || entry.kind == OperationKind.LINK)
                 yield entry.destination.delete_async(Priority.DEFAULT, null);
             else if (entry.kind == OperationKind.COPY)
@@ -1266,6 +1297,13 @@ namespace MajorisFiles {
                     application.release();
             }
         }
+        // Recreated objects receive a new backend identity. Only retarget a
+        // dependent redo step that still names this exact object and old guard.
+        void retarget_redo_identity(File file, string previous, string replacement) {
+            foreach (var dependent in redo_stack)
+                if (dependent.source.equal(file) && dependent.source_identity == previous)
+                    dependent.source_identity = replacement;
+        }
         async void redo_entry() throws Error
         {
             if (redo_stack.size == 0)
@@ -1300,6 +1338,10 @@ namespace MajorisFiles {
             }
             else if (entry.kind == OperationKind.CREATE_FOLDER)
                 yield entry.destination.make_directory_async(Priority.DEFAULT, null);
+            else if (entry.kind == OperationKind.CREATE_FILE) {
+                var stream = yield entry.destination.create_async(FileCreateFlags.NONE, Priority.DEFAULT, null);
+                yield stream.close_async(Priority.DEFAULT, null);
+            }
             else if(entry.kind == OperationKind.LINK)
                 yield entry.destination.make_symbolic_link_async(entry.source.get_path(), Priority.DEFAULT, null);
             else if (entry.kind == OperationKind.COPY)
@@ -1307,7 +1349,9 @@ namespace MajorisFiles {
                 var job = new Job("Redo Copy");
                 yield transfer(entry.source, entry.destination, false, job);
             }
+            string previous = entry.destination_identity;
             entry.destination_identity = yield file_identity(entry.destination);
+            retarget_redo_identity(entry.destination, previous, entry.destination_identity);
             redo_stack.remove(entry);
             undo_stack.add(entry);
             persist_history();

@@ -1,0 +1,1220 @@
+ninja: Entering directory `/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build'
+[1/1478] Compiling Vala source ../tests/firewall.vala ../sharing-service/firewall.vala ../sharing-service/clients.vala
+[2/1474] Compiling Vala source ../sharing-service/main.vala ../sharing-service/firewall.vala ../sharing-service/clients.vala ../sharing-service/visibility.vala
+[3/1469] Compiling Vala source ../tests/replacement-crash.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala
+[4/1438] Compiling Vala source ../tests/core.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala
+[5/1407] Compiling Vala source ../tests/cloud.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala
+[6/1376] Compiling Vala source ../tests/archive-crash.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala
+[7/1345] Compiling Vala source ../tests/performance.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala
+[8/1314] Compiling Vala source ../tests/filesystem.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala
+../tests/filesystem.vala:423.52-423.71: warning: unreachable code detected
+  423 |                                                    return Source.REMOVE;
+      |                                                    ^~~~~~~~~~~~~~~~~~~~  
+../tests/filesystem.vala:481.52-481.71: warning: unreachable code detected
+  481 |                                                    return Source.REMOVE;
+      |                                                    ^~~~~~~~~~~~~~~~~~~~  
+Compilation succeeded - 2 warning(s)
+[9/1283] Compiling Vala source ../src/portal/main.vala ../src/portal/backend.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+Compilation succeeded - 6 warning(s)
+[10/1210] Compiling Vala source ../src/application/main.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+Compilation succeeded - 6 warning(s)
+[11/1138] Compiling Vala source ../tests/places.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala
+[12/1107] Compiling Vala source ../tests/visual.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+Compilation succeeded - 6 warning(s)
+[13/1035] Compiling Vala source ../tests/ui.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/ui.vala:277.14-277.17: warning: Local variable `poll' declared but never used
+  277 |         uint poll = Timeout.add(50, () => { var dialog = window.visible_dialog as Adw.AlertDialog;
+      |              ^~~~                                                                                  
+../tests/ui.vala:286.57-286.76: warning: unreachable code detected
+  286 |                                                         return Source.REMOVE;
+      |                                                         ^~~~~~~~~~~~~~~~~~~~  
+../tests/ui.vala:549.14-549.17: warning: Local variable `poll' declared but never used
+  549 |         uint poll = Timeout.add(20, () => {
+      |              ^~~~                           
+../tests/ui.vala:696.57-696.76: warning: unreachable code detected
+  696 |                                                         return Source.REMOVE;
+      |                                                         ^~~~~~~~~~~~~~~~~~~~  
+Compilation succeeded - 10 warning(s)
+[14/963] Compiling Vala source ../tests/remote.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/remote.vala:6.105-6.124: warning: unreachable code detected
+    6 |     uint watchdog=Timeout.add_seconds(90,()=>{stderr.printf("Remote fixture timeout\n");Process.exit(2);return Source.REMOVE;});
+      |                                                                                                         ^~~~~~~~~~~~~~~~~~~~    
+Compilation succeeded - 7 warning(s)
+[15/891] Compiling Vala source ../tests/flatpak-host.vala ../src/portal/backend.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+Compilation succeeded - 6 warning(s)
+[16/818] Compiling Vala source ../tests/portal.vala ../src/portal/backend.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/portal.vala:70.5-70.36: warning: unhandled error `GLib.Error'
+   70 |     mock_portal_bus.flush_sync(null);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+../tests/portal.vala:2.21-2.36: warning: Field `FixturePeer.id' never used
+    2 | struct FixturePeer {public string id;public string name;}
+      |                     ^~~~~~~~~~~~~~~~                      
+../tests/portal.vala:2.38-2.55: warning: Field `FixturePeer.name' never used
+    2 | struct FixturePeer {public string id;public string name;}
+      |                                      ^~~~~~~~~~~~~~~~~~   
+../tests/portal.vala:426.57-426.76: warning: unreachable code detected
+  426 |                                                         return Source.REMOVE;
+      |                                                         ^~~~~~~~~~~~~~~~~~~~  
+Compilation succeeded - 10 warning(s)
+[17/745] Compiling Vala source ../tests/redesign.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+Compilation succeeded - 6 warning(s)
+[18/673] Compiling Vala source ../tests/theme-integration.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+Compilation succeeded - 10 warning(s)
+[19/600] Compiling Vala source ../tests/tags.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala
+../tests/tags.vala:5.31-5.50: warning: Support of params-arrays is experimental
+    5 | Gee.ArrayList<File> file_list(params string[] uris) { var result = new Gee.ArrayList<File>(); foreach (var uri in uris) result.add(File.new_for_uri(uri)); return result; }
+      |                               ^~~~~~~~~~~~~~~~~~~~                                                                                                                          
+Compilation succeeded - 1 warning(s)
+[20/569] Compiling Vala source ../tests/details-corrections.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+Compilation succeeded - 10 warning(s)
+[21/496] Compiling C object majoris-files.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from majoris-files.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[22/496] Compiling Vala source ../tests/toolbars.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../tests/toolbars.vala:42.18-42.44: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   42 |     int height = widget.get_allocated_height();
+      |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~    
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/toolbars.vala:101.9-101.24: warning: `Gtk.StyleContext' has been deprecated since 4.10
+  101 |         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_USER + 2);
+      |         ^~~~~~~~~~~~~~~~                                                                                                 
+../tests/toolbars.vala:110.84-110.107: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+  110 |             assert(Environment.get_variable("MAJORIS_TOOLBAR_LARGE_TEXT") == "1" ? bar.get_allocated_height() >= 40 : bar.get_allocated_height() == 40);
+      |                                                                                    ^~~~~~~~~~~~~~~~~~~~~~~~                                              
+../tests/toolbars.vala:110.119-110.142: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+  110 |             assert(Environment.get_variable("MAJORIS_TOOLBAR_LARGE_TEXT") == "1" ? bar.get_allocated_height() >= 40 : bar.get_allocated_height() == 40);
+      |                                                                                                                       ^~~~~~~~~~~~~~~~~~~~~~~~           
+../tests/toolbars.vala:116.28-116.55: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+  116 |     double ratio = (double)location.get_allocated_width() / browser.search_entry.get_allocated_width();
+      |                            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~                                                 
+../tests/toolbars.vala:116.61-116.100: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+  116 |     double ratio = (double)location.get_allocated_width() / browser.search_entry.get_allocated_width();
+      |                                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+../tests/toolbars.vala:117.68-117.95: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+  117 |     stdout.printf("Address width %d search width %d ratio %.2f\n", location.get_allocated_width(), browser.search_entry.get_allocated_width(), ratio);
+      |                                                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~                                                        
+../tests/toolbars.vala:117.100-117.139: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+  117 |     stdout.printf("Address width %d search width %d ratio %.2f\n", location.get_allocated_width(), browser.search_entry.get_allocated_width(), ratio);
+      |                                                                                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~            
+../tests/toolbars.vala:128.16-128.43: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+  128 |         assert(location.get_allocated_width() > 2.8 * browser.search_entry.get_allocated_width());
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~                                                        
+../tests/toolbars.vala:128.55-128.94: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+  128 |         assert(location.get_allocated_width() > 2.8 * browser.search_entry.get_allocated_width());
+      |                                                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+Compilation succeeded - 20 warning(s)
+[23/423] Compiling Vala source ../tests/inline-rename.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:7.1-7.26: warning: Method `find_component' never used
+    7 | Gtk.Widget? find_component(Gtk.Widget widget, string name) {
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+Compilation succeeded - 11 warning(s)
+[24/350] Compiling Vala source ../tests/properties.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/properties.vala:177.5-177.20: warning: `Gtk.StyleContext' has been deprecated since 4.10
+  177 |     Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), larger_text, Gtk.STYLE_PROVIDER_PRIORITY_USER + 10);
+      |     ^~~~~~~~~~~~~~~~                                                                                                          
+../tests/properties.vala:181.5-181.20: warning: `Gtk.StyleContext' has been deprecated since 4.10
+  181 |     Gtk.StyleContext.remove_provider_for_display(Gdk.Display.get_default(), larger_text); window.present(); yield pause_layout();
+      |     ^~~~~~~~~~~~~~~~                                                                                                              
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/properties.vala:30.23-30.41: warning: Field `TestProperty.title' never used
+   30 | struct TestProperty { public string title; public string value; }
+      |                       ^~~~~~~~~~~~~~~~~~~                         
+../tests/properties.vala:30.44-30.62: warning: Field `TestProperty.value' never used
+   30 | struct TestProperty { public string title; public string value; }
+      |                                            ^~~~~~~~~~~~~~~~~~~    
+../tests/native-evidence.vala:7.1-7.26: warning: Method `find_component' never used
+    7 | Gtk.Widget? find_component(Gtk.Widget widget, string name) {
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+Compilation succeeded - 15 warning(s)
+[25/277] Compiling Vala source ../tests/menus.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/menus.vala:95.13-95.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   95 |             Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_USER);
+      |             ^~~~~~~~~~~~~~~~                                                                                             
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:7.1-7.26: warning: Method `find_component' never used
+    7 | Gtk.Widget? find_component(Gtk.Widget widget, string name) {
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../tests/native-evidence.vala:71.1-71.18: warning: Method `capture' never used
+   71 | async void capture(Gtk.Window window,string output,string name) throws Error {
+      | ^~~~~~~~~~~~~~~~~~                                                             
+Compilation succeeded - 13 warning(s)
+[26/204] Compiling Vala source ../tests/tags-ui.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/tags-ui.vala:44.201-44.216: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   44 |         var theme = Environment.get_variable("MAJORIS_TAG_THEME"); if (theme != null) { var css = new Gtk.CssProvider(); css.load_from_path(theme + "/gtk-4.0/" + (dark ? "gtk-dark.css" : "gtk.css")); Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_USER); }
+      |                                                                                                                                                                                                         ^~~~~~~~~~~~~~~~                                                                                               
+../tests/tags-ui.vala:52.65-52.76: warning: `Gtk.Dialog' has been deprecated since 4.10
+   52 |         var toplevels = Gtk.Window.get_toplevels(); Gtk.Dialog? color_dialog = null;
+      |                                                                 ^~~~~~~~~~~~         
+../tests/tags-ui.vala:53.66-53.74: warning: `Gtk.Dialog' has been deprecated since 4.10
+   53 |         for (uint i = 0; i < toplevels.get_n_items(); i++) { var candidate = toplevels.get_item(i) as Gtk.Dialog; if (candidate != null && candidate is Gtk.ColorChooser && candidate.visible) { color_dialog = candidate; break; } }
+      |                                                                  ^~~~~~~~~                                                                                                                                                            
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/tags-ui.vala:113.113-113.120: warning: Local variable `original' declared but never used
+  113 |     browser.navigate(root); while (browser.directory.loading) yield pause_layout(); browser.select_file(a); var original = metadata.tags_for(a);
+      |                                                                                                                 ^~~~~~~~                         
+../tests/native-evidence.vala:7.1-7.26: warning: Method `find_component' never used
+    7 | Gtk.Widget? find_component(Gtk.Widget widget, string name) {
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../tests/native-evidence.vala:71.1-71.18: warning: Method `capture' never used
+   71 | async void capture(Gtk.Window window,string output,string name) throws Error {
+      | ^~~~~~~~~~~~~~~~~~                                                             
+Compilation succeeded - 16 warning(s)
+[27/131] Compiling C object majoris-files-portal.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from majoris-files-portal.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[28/131] Compiling C object ui-tests.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from ui-tests.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[29/131] Compiling C object visual-check.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from visual-check.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[30/131] Compiling C object remote-check.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from remote-check.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[31/131] Compiling C object flatpak-host.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from flatpak-host.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[32/131] Compiling C object portal-tests.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from portal-tests.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[33/131] Compiling Vala source ../tests/creation-sorting.vala ../tests/native-evidence.vala ../src/utils/paths.vala ../src/models/file-item.vala ../src/models/directory-model.vala ../src/navigation/history.vala ../src/metadata/store.vala ../src/sidebar/places.vala ../src/search/search.vala ../src/operations/manager.vala ../src/chooser/options.vala ../src/split/split.vala ../src/dialogs/dialogs.vala ../src/models/counts.vala ../src/utils/i18n.vala ../src/operations/permissions.vala ../src/search/indexed.vala ../src/operations/replacements.vala ../src/operations/durability.vala ../src/operations/rename-plan.vala ../src/operations/rename-recovery.vala ../src/archive/archive.vala ../src/archive/sevenzip.vala ../src/chooser/state.vala ../src/chooser/import.vala ../src/operations/clipboard.vala ../src/operations/drop-policy.vala ../src/navigation/completion.vala ../src/models/accounts.vala ../src/sidebar/cloud.vala ../src/cloud/files.vala ../src/views/browser.vala ../src/preview/preview.vala ../src/window/window.vala ../src/chooser/window.vala ../src/search/filters.vala ../src/metadata/tags-dialog.vala ../src/metadata/details.vala ../src/views/home.vala ../src/window/theme.vala ../src/application/launcher.vala ../src/application/shell-search.vala ../src/preview/archive.vala ../src/preview/office.vala ../src/preview/animation.vala ../src/preview/sandbox.vala ../src/preview/playback.vala ../src/devices/disk-images.vala ../src/views/column-provider.vala ../src/views/file-groups.vala ../src/views/grid-rows.vala ../src/views/filename-cell.vala preview-config.vala ../src/actions/registry.vala ../src/actions/rotation.vala ../src/extensions/manager.vala ../src/actions/desktop.vala ../src/actions/nearby.vala ../src/dialogs/permissions.vala ../src/dialogs/properties.vala ../src/dialogs/associations.vala ../src/dialogs/preferences.vala ../src/dialogs/shortcuts.vala ../src/dialogs/split.vala ../src/dialogs/checksum.vala ../src/dialogs/sevenzip.vala ../src/dialogs/batch-rename.vala ../src/sharing/settings.vala ../src/portal/parent.vala ../src/preview/pdf.vala ../src/preview/thumbnail.vala ../src/sharing/sharing.vala ../src/window/extra-actions.vala ../src/application/file-manager.vala
+../src/metadata/details.vala:24.13-24.44: warning: unhandled error `GLib.Error'
+   24 |             foreach (var key in fields.keys) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+../src/window/theme.vala:11.13-11.28: warning: `Gtk.StyleContext' has been deprecated since 4.10
+   11 |             Gtk.StyleContext.add_provider_for_display(display, layout, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+      |             ^~~~~~~~~~~~~~~~                                                                                     
+../src/sharing/settings.vala:24.9-24.23: warning: MajorisFiles.SharingPage.snapshot hides inherited field `Gtk.Widget.snapshot'. Use the `new' keyword if hiding was intentional
+   24 |         string snapshot = "";
+      |         ^~~~~~~~~~~~~~~       
+../src/sharing/settings.vala:335.9-335.25: warning: MajorisFiles.SharingPage.remove hides inherited method `Adw.PreferencesPage.remove'. Use the `new' keyword if hiding was intentional
+  335 |         async void remove()
+      |         ^~~~~~~~~~~~~~~~~   
+../src/metadata/tags-dialog.vala:77.9-77.38: warning: MajorisFiles.TagManageRow.focus hides inherited field `Gtk.Widget.focus'. Use the `new' keyword if hiding was intentional
+   77 |         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../src/dialogs/shortcuts.vala:25.9-25.25: warning: MajorisFiles.ShortcutsDialog.add_shortcut hides inherited method `Gtk.Widget.add_shortcut'. Use the `new' keyword if hiding was intentional
+   25 |         void add_shortcut(Adw.PreferencesGroup group, string entry)
+      |         ^~~~~~~~~~~~~~~~~                                           
+../tests/native-evidence.vala:16.31-16.51: warning: `Gtk.Widget.get_allocation' has been deprecated since 4.12
+   16 |     Gtk.Allocation allocation;widget.get_allocation(out allocation);
+      |                               ^~~~~~~~~~~~~~~~~~~~~                  
+../tests/native-evidence.vala:32.64-32.89: warning: `Gtk.Widget.get_allocated_width' has been deprecated since 4.12
+   32 |     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());
+      |                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:33.65-33.91: warning: `Gtk.Widget.get_allocated_height' has been deprecated since 4.12
+   33 |     json.set_member_name("allocated_height");json.add_int_value(widget.get_allocated_height());
+      |                                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:36.57-36.85: warning: `Gtk.Widget.get_allocated_baseline' has been deprecated since 4.12
+   36 |     json.set_member_name("baseline");json.add_int_value(widget.get_allocated_baseline());
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
+../tests/native-evidence.vala:7.1-7.26: warning: Method `find_component' never used
+    7 | Gtk.Widget? find_component(Gtk.Widget widget, string name) {
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~                                   
+../tests/native-evidence.vala:71.1-71.18: warning: Method `capture' never used
+   71 | async void capture(Gtk.Window window,string output,string name) throws Error {
+      | ^~~~~~~~~~~~~~~~~~                                                             
+Compilation succeeded - 12 warning(s)
+[34/58] Compiling C object redesign-tests.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from redesign-tests.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[35/58] Compiling C object theme-integration.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from theme-integration.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[36/58] Compiling C object details-corrections.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from details-corrections.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[37/58] Compiling C object toolbar-tests.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from toolbar-tests.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[38/58] Compiling C object inline-rename-tests.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from inline-rename-tests.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[39/58] Compiling C object properties-tests.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from properties-tests.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[40/58] Compiling C object menu-tests.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from menu-tests.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[41/58] Compiling C object tag-ui-tests.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from tag-ui-tests.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[42/58] Compiling C object creation-sorting-tests.p/meson-generated_src_window_window.c.o
+../src/window/window.vala: In function ‘majoris_files_files_window_construct’:
+../src/window/window.vala:64:59: warning: passing argument 3 of ‘gtk_list_box_bind_model’ from incompatible pointer type [-Wincompatible-pointer-types]
+   64 |             jobs.bind_model(operations.jobs, (obj) => { var job = (Job)obj;
+      |                                                           ^~~~~~~~~~~~~~~~~                            
+      |                                                           |
+      |                                                           GtkWidget * (*)(GObject *, void *) {aka struct _GtkWidget * (*)(struct _GObject *, void *)}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:179,
+                 from /usr/include/libadwaita-1/adwaita.h:9,
+                 from creation-sorting-tests.p/src/window/window.c:6:
+/usr/include/gtk-4.0/gtk/gtklistbox.h:267:89: note: expected ‘GtkListBoxCreateWidgetFunc’ {aka ‘struct _GtkWidget * (*)(void *, void *)’} but argument is of type ‘GtkWidget * (*)(GObject *, void *)’ {aka ‘struct _GtkWidget * (*)(struct _GObject *, void *)’}
+  267 |                                                           GtkListBoxCreateWidgetFunc    create_widget_func,
+      |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+../src/window/window.vala:95:40: warning: passing argument 2 of ‘gtk_menu_button_set_popover’ from incompatible pointer type [-Wincompatible-pointer-types]
+   95 |             progress.popover = popover;
+      |                                        ^      
+      |                                        |
+      |                                        GtkPopover * {aka struct _GtkPopover *}
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:191:
+/usr/include/gtk-4.0/gtk/gtkmenubutton.h:60:61: note: expected ‘GtkWidget *’ {aka ‘struct _GtkWidget *’} but argument is of type ‘GtkPopover *’ {aka ‘struct _GtkPopover *’}
+   60 |                                              GtkWidget     *popover);
+      |                                              ~~~~~~~~~~~~~~~^~~~~~~
+../src/window/window.vala:294:73: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  294 |             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
+      |                                                                         ^~~~~~  
+      |                                                                         |
+      |                                                                         gchar ** {aka char **}
+In file included from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/window/window.vala:303:69: warning: passing argument 3 of ‘gtk_application_set_accels_for_action’ from incompatible pointer type [-Wincompatible-pointer-types]
+  303 |                 app.set_accels_for_action("win." + names[i], {shortcuts[i]});
+      |                                                                     ^~~~~~~~
+      |                                                                     |
+      |                                                                     gchar ** {aka char **}
+/usr/include/gtk-4.0/gtk/gtkapplication.h:131:88: note: expected ‘const char * const*’ but argument is of type ‘gchar **’ {aka ‘char **’}
+  131 |                                                                   const char * const  *accels);
+      |                                                                   ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+[43/58] Linking target majoris-files
+[44/58] Linking target majoris-files-portal
+[45/58] Linking target visual-check
+[46/58] Linking target ui-tests
+[47/58] Linking target remote-check
+[48/58] Linking target flatpak-host
+[49/58] Linking target redesign-tests
+[50/58] Linking target portal-tests
+[51/58] Linking target details-corrections
+[52/58] Linking target theme-integration
+[53/58] Linking target toolbar-tests
+[54/58] Linking target inline-rename-tests
+[55/58] Linking target properties-tests
+[56/58] Linking target menu-tests
+[57/58] Linking target tag-ui-tests
+[58/58] Linking target creation-sorting-tests
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /usr/bin/ninja -C /mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/build -j 8

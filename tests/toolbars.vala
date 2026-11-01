@@ -42,13 +42,6 @@ void geometry(Gtk.Widget widget, bool compact = false) {
     int height = widget.get_allocated_height();
     assert(large ? height >= (compact ? 28 : 32) : height == (compact ? 28 : 32));
 }
-async void respond(FilesWindow window, string value) {
-    yield pause_layout();
-    var dialog = window.visible_dialog as Adw.AlertDialog; assert(dialog != null);
-    ((Gtk.Entry)dialog.extra_child).text = value; dialog.response("apply"); dialog.close();
-    yield pause_layout();
-    assert(window.visible_dialog == null);
-}
 Gtk.Button? labelled(Gtk.Widget widget, string text) {
     if(widget is Gtk.Button && ((Gtk.Button)widget).label == text) return (Gtk.Button)widget;
     for(var child=widget.get_first_child();child!=null;child=child.get_next_sibling()){var found=labelled(child,text);if(found!=null)return found;}
@@ -106,9 +99,6 @@ async void run_toolbar_fixture(string? output) throws Error {
         var css = new Gtk.CssProvider();
         css.load_from_string(".toolbar-regression-large-text { font-size: 32px; }");
         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_USER + 2);
-        var large_action = (Gtk.Button)tool(window.current,"New Folder");
-        large_action.add_css_class("toolbar-regression-large-text");
-        ((Gtk.Label)((Gtk.Box)large_action.child).get_last_child()).label = "New Folder gjpqy";
         window.current.search_entry.add_css_class("toolbar-regression-large-text");
     }
     window.set_default_size(1100, 820); window.present(); yield pause_layout();
@@ -169,24 +159,28 @@ async void run_toolbar_fixture(string? output) throws Error {
         window.maximize(); yield pause_layout(); yield capture(window,output,"maximised");
         window.unmaximize(); window.set_default_size(1100,820); yield pause_layout();
     }
-    click(browser, "New Folder"); yield respond(window, "made-by-toolbar");
+    foreach (var name in new string[] {"Refresh", "New Folder", "Cut", "Copy", "Paste", "Rename", "Share", "Move to Trash"}) assert(tool(browser, name) == null);
+    window.activate_action("new-folder", null); yield pause_layout();
+    assert(window.visible_dialog == null);
+    var created_entry = inline_editor(browser); assert(created_entry != null && window.get_focus() != null && (window.get_focus() == created_entry || window.get_focus().is_ancestor(created_entry)));
+    created_entry.text = "made-by-toolbar"; created_entry.activate(); yield pause_layout();
     assert(folder.get_child("made-by-toolbar").query_exists());
     browser.select_file(folder.get_child("alpha.txt")); yield pause_layout();
-    click(browser, "Rename"); yield pause_layout();
+    window.activate_action("rename", null); yield pause_layout();
     var rename_entry = inline_editor(browser); assert(rename_entry != null);
     rename_entry.text = "renamed.txt"; rename_entry.activate(); yield pause_layout();
     assert(folder.get_child("renamed.txt").query_exists());
-    browser.select_file(folder.get_child("renamed.txt")); click(browser, "Cut");
-    browser.navigate(folder.get_child("child")); yield pause_layout(); click(browser, "Paste"); yield pause_layout();
+    browser.select_file(folder.get_child("renamed.txt")); window.activate_action("cut", null);
+    browser.navigate(folder.get_child("child")); yield pause_layout(); window.activate_action("paste", null); yield pause_layout();
     assert(folder.get_child("child/renamed.txt").query_exists() && !folder.get_child("renamed.txt").query_exists());
     click(browser, "Back"); yield pause_layout(); assert(browser.location.equal(folder));
     click(browser, "Forward"); yield pause_layout(); assert(browser.location.equal(folder.get_child("child")));
     click(browser, "Parent Folder"); yield pause_layout(); assert(browser.location.equal(folder));
-    FileUtils.set_contents(folder.get_child("refresh.txt").get_path(), "refresh"); click(browser, "Refresh"); yield pause_layout();
-    browser.select_file(folder.get_child("beta.txt")); click(browser, "Copy");
-    browser.navigate(folder.get_child("child")); yield pause_layout(); click(browser, "Paste"); yield pause_layout();
+    FileUtils.set_contents(folder.get_child("refresh.txt").get_path(), "refresh"); yield pause_layout();
+    browser.select_file(folder.get_child("beta.txt")); window.activate_action("copy", null);
+    browser.navigate(folder.get_child("child")); yield pause_layout(); window.activate_action("paste", null); yield pause_layout();
     assert(folder.get_child("child/beta.txt").query_exists());
-    browser.select_file(folder.get_child("child/beta.txt")); click(browser, "Move to Trash"); yield pause_layout();
+    browser.select_file(folder.get_child("child/beta.txt")); window.activate_action("trash", null); yield pause_layout();
     assert(!folder.get_child("child/beta.txt").query_exists());
     browser.edit_location(); browser.path.text = folder.get_path(); browser.path.activate(); yield pause_layout();
     assert(browser.location.equal(folder));
@@ -213,8 +207,9 @@ async void run_toolbar_fixture(string? output) throws Error {
     var sort = (Gtk.MenuButton)tool(browser, "Sort"); sort.popup(); yield pause_layout(); assert(sort.popover.visible); sort.popdown();
     window.activate_action("sort-size", null); click(browser, "View Settings"); yield pause_layout(); assert(window.visible_dialog != null); window.visible_dialog.close(); yield pause_layout();
     click(browser, "Preview"); assert(browser.preview.visible); click(browser, "Preview");
-    browser.select_file(folder.get_child("child")); window.update_commands(); assert(browser.share_button.sensitive);
-    browser.share_button.popup(); yield pause_layout(); assert(browser.share_button.popover.visible); browser.share_button.popdown();
+    browser.select_file(folder.get_child("child")); window.update_commands(); assert(window.command_available("share-folder"));
+    assert(browser.share_menu != null && browser.share_menu.get_n_items() > 0);
+    assert(((SimpleAction)window.lookup_action("share-folder")).enabled);
     // Both tab-specific view callbacks and window GActions keep their routing.
     window.new_tab(folder.get_child("child")); yield pause_layout(); var second = window.current;
     second.set_view("Gallery"); assert_segments(second, "Gallery");
