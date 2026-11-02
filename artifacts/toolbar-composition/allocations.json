@@ -1,0 +1,1340 @@
+{
+  "dark": {
+    "files-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "open-chooser-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "recovery-revealed": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "save-chooser-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    }
+  },
+  "dark-2x": {
+    "files-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "open-chooser-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "recovery-revealed": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "save-chooser-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    }
+  },
+  "dark-large-text": {
+    "files-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        51,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "open-chooser-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "recovery-revealed": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        51,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "save-chooser-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    }
+  },
+  "light": {
+    "files-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "open-chooser-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "recovery-revealed": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "save-chooser-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    }
+  },
+  "light-2x": {
+    "files-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "open-chooser-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "recovery-revealed": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "save-chooser-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    }
+  },
+  "light-large-text": {
+    "files-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        51,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "files-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "open-chooser-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "open-chooser-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "recovery-revealed": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        51,
+        40
+      ],
+      "tab_height": 40,
+      "vertical_gap": 0
+    },
+    "save-chooser-1100": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-480": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-650": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    },
+    "save-chooser-800": {
+      "adjacent_control_gaps": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "toolbar_heights": [
+        40,
+        40
+      ],
+      "tab_height": null,
+      "vertical_gap": 0
+    }
+  }
+}

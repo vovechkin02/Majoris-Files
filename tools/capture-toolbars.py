@@ -20,7 +20,7 @@ if len(sys.argv) > 1 and sys.argv[1] == '--worker':
     raise SystemExit(0)
 theme = Path(sys.argv[1]).resolve()
 runtime = Path(tempfile.mkdtemp(prefix='majoris-toolbar-capture-'))
-output = root / 'artifacts/toolbar-integration'
+output = Path(os.environ.get('MAJORIS_TOOLBAR_OUTPUT', root / 'artifacts/toolbar-integration'))
 for palette in ('light', 'dark'):
     config = runtime / palette / 'config'
     gtk = config / 'gtk-4.0'
@@ -43,6 +43,8 @@ for palette in ('light', 'dark'):
                MAJORIS_VISUAL_DARK='1' if palette == 'dark' else '0')
     subprocess.run(['fc-cache', '-f', str(fonts)], env=env, check=True)
     for suffix, scale, dpi in (('', '1', '1'), ('-2x', '2', '1'), ('-large-text', '1', '2')):
+        if os.environ.get('MAJORIS_TOOLBAR_VARIANTS') and palette + suffix not in os.environ['MAJORIS_TOOLBAR_VARIANTS'].split(','):
+            continue
         target = output / (palette + suffix)
         target.mkdir(parents=True, exist_ok=True)
         runenv = dict(env, GDK_SCALE=scale, GDK_DPI_SCALE=dpi,

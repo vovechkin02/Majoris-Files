@@ -36,7 +36,6 @@ for name in ("pdf", "sandbox", "animation"):
     assert "controls.compact = true" in preview
 assert not list((root / "src").rglob("toolbar.vala"))
 assert "files-location" not in browser
-print("Files layout and GNOME theme ownership checks passed")
 
 for family in ("majoris-data-grid", "majoris-data-list", "majoris-data-column",
                "majoris-data-tile", "majoris-data-artwork", "majoris-data-thumbnail",
@@ -60,3 +59,21 @@ assert 'var headers = group_key == "None" ? null : section_headers;' in browser
 assert 'set_state_flags' not in browser
 assert 'add_css_class("selected")' not in browser
 assert 'add_css_class("focused")' not in browser
+
+# Files specifies toolbar membership; the public Theme API specifies geometry.
+assert "append_group(" not in browser
+assert "append_separator(" not in browser
+assert "var up_control = button(" in browser
+assert "toolbar.append_control(up_control)" in browser
+assert "commands.append_spacer()" in browser
+assert "address_fields.column_spacing = 8" in browser
+window = (root / "src/window/window.vala").read_text()
+assert window.count("toolbar.add_top_bar(") == 1
+assert "toolbar.add_top_bar(header)" in window
+assert "new Gtk.Box(Gtk.Orientation.VERTICAL, 0)" in window
+assert "toolbar.content = document_content" in window
+assert window.index("document_content.append(tabbar)") < window.index("document_content.append(recovery_banner)") < window.index("document_content.append(tabs)")
+assert 'tabbar.view = tabs' in window
+assert 'tabbar.add_css_class("majoris-document-tabs")' in window
+
+print("Files layout and GNOME theme ownership checks passed")

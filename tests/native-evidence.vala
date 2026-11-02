@@ -27,6 +27,10 @@ void record_tree(Gtk.Widget widget, Json.Builder json) {
     json.set_member_name("selected");json.add_boolean_value((widget.get_state_flags() & Gtk.StateFlags.SELECTED)!=0);
     json.set_member_name("has_focus");json.add_boolean_value(widget.has_focus);
     json.set_member_name("overflow");json.add_string_value(widget.overflow.to_string());
+    json.set_member_name("widget_type");json.add_string_value(widget.get_type().name());
+    json.set_member_name("tooltip");json.add_string_value(widget.tooltip_text ?? "");
+    json.set_member_name("margin_start");json.add_int_value(widget.margin_start);
+    json.set_member_name("margin_end");json.add_int_value(widget.margin_end);
     json.set_member_name("node");json.add_string_value(widget.get_css_name());
     json.set_member_name("classes");json.begin_array();foreach(var name in widget.get_css_classes())json.add_string_value(name);json.end_array();
     json.set_member_name("allocated_width");json.add_int_value(widget.get_allocated_width());

@@ -421,20 +421,19 @@ namespace MajorisFiles {
             selection = new Gtk.MultiSelection(sorted);
             var toolbar = new Majoris.Ui.Toolbar();
             toolbar.divider = true;
-            var history_controls = toolbar.append_group();
-            history_controls.append_control(button("go-previous-symbolic", _("Back"), () => { var file = history.back();
+            toolbar.append_control(button("go-previous-symbolic", _("Back"), () => { var file = history.back();
                                                                           if (file != null)
                                                                               navigate(file, false);
                 }));
-            history_controls.append_control(button("go-next-symbolic", _("Forward"), () => { var file = history.forward();
+            toolbar.append_control(button("go-next-symbolic", _("Forward"), () => { var file = history.forward();
                                                                          if (file != null)
                                                                              navigate(file, false);
                 }));
-            var navigation_extras = toolbar.append_group();
-            navigation_extras.append_control(button("go-up-symbolic", _("Parent Folder"), () => { var parent = location.get_parent();
+            var up_control = button("go-up-symbolic", _("Parent Folder"), () => { var parent = location.get_parent();
                                                                              if (parent != null)
                                                                                  navigate(parent);
-                }));
+                });
+            toolbar.append_control(up_control);
             var locations = new Gtk.MenuButton();
             MenuPresentation.button(locations);
             locations.icon_name="folder-open-symbolic";
@@ -443,8 +442,7 @@ namespace MajorisFiles {
             var locations_popup = new Gtk.PopoverMenu.from_model(new Menu()); locations_popup.has_arrow = false;
             locations.popover = locations_popup;
             locations_popup.notify["visible"].connect(() => { if (locations_popup.visible) populate_locations(locations_popup); });
-            navigation_extras.append_control(locations);
-            var up_control = navigation_extras.get_first_child();
+            toolbar.append_control(locations);
             path.hexpand = true;
             path.placeholder_text = _("Location or URI");
             path.tooltip_text = _("Location (Ctrl+L)");
@@ -507,7 +505,6 @@ namespace MajorisFiles {
             crumbs_scroll.set_child(breadcrumbs);
             location_bar.add_named(crumbs_scroll, "breadcrumbs");
             location_bar.visible_child_name = "breadcrumbs";
-            toolbar.append_separator();
             // Four equal tracks allocate three to the address and one to search.
             var address_fields = new Gtk.Grid();
             address_fields.column_homogeneous = true;

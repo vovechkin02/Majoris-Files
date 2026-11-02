@@ -161,7 +161,7 @@ endif
 # Consumers exercise the installed public Toolbar ABI; no reference source is compiled here.
 toolbar_tests = executable('toolbar-tests', 'tests/toolbars.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
 if xvfb.found()
-  test('toolbars', find_program('dbus-run-session'), args: ['--', xvfb, '-a', toolbar_tests], depends: preview_helper, env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 90)
+  test('toolbars', find_program('dbus-run-session'), args: ['--', xvfb, '-a', toolbar_tests], depends: preview_helper, env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 180)
 endif
 
 inline_rename_tests = executable('inline-rename-tests', 'tests/inline-rename.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)

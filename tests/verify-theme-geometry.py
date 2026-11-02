@@ -2,6 +2,78 @@
 import json
 from pathlib import Path
 
+def verify_toolbars(directory):
+    def walk(node):
+        yield node
+        for child in node.get('children', []):
+            yield from walk(child)
+    reports = {}
+    for variant in sorted(directory.iterdir()):
+        if not variant.is_dir(): continue
+        rows = {}
+        for path in sorted(variant.glob('*.json')):
+            if not (path.stem.startswith(('files-', 'open-chooser-', 'save-chooser-')) or path.stem == 'recovery-revealed'): continue
+            assert path.with_suffix('.png').is_file(), path
+            tree = json.loads(path.read_text())
+            nodes = list(walk(tree))
+            bars = [n for n in nodes if 'majoris-toolbar' in n['classes']]
+            assert len(bars) == 2, path
+            large = variant.name.endswith('large-text')
+            assert all(b['allocated_height'] >= 40 if large else b['allocated_height'] == 40 for b in bars), path
+            controls = [n for n in nodes if any(c in n['classes'] for c in ('majoris-toolbar-control', 'majoris-toolbar-field', 'majoris-toolbar-select'))]
+            assert controls and all(c['allocated_height'] >= 32 if large else c['allocated_height'] == 32 for c in controls), path
+            gaps = []
+            for bar in bars:
+                children = bar['children']
+                assert round(children[0]['absolute_x'] - bar['absolute_x']) == 8, path
+                last = children[-1]
+                assert round(bar['absolute_x'] + bar['bounds_width'] - last['absolute_x'] - last['bounds_width']) == 8, path
+                previous = None
+                for child in bar['children']:
+                    assert child['widget_type'] != 'MajorisUiToolbarGroup', path
+                    assert child['node'] != 'separator', path
+                    assert child['margin_start'] == child['margin_end'] == 0, path
+                    if 'majoris-toolbar-spacer' in child['classes']:
+                        previous = None
+                        continue
+                    if previous:
+                        gap = round(child['absolute_x'] - previous['absolute_x'] - previous['bounds_width'])
+                        assert gap == 4, (path, gap)
+                        gaps.append(gap)
+                    previous = child
+                    if 'majoris-toolbar-segmented' in child['classes']:
+                        for a, b in zip(child['children'], child['children'][1:]):
+                            assert round(b['absolute_x'] - a['absolute_x'] - a['bounds_width']) == 2, path
+            def vertical(a, b):
+                gap = round(b['absolute_y'] - a['absolute_y'] - a['bounds_height'])
+                assert gap == 0, (path, 'vertical gap', gap)
+                return gap
+            vertical(bars[0], bars[1])
+            browser = next(n for n in nodes if n['widget_type'] == 'MajorisFilesBrowser')
+            surfaces = [n for n in browser['children'] if n['bounds_height'] > 0]
+            for a, b in zip(surfaces, surfaces[1:]): vertical(a, b)
+            tabs = next((n for n in nodes if 'majoris-document-tabs' in n['classes']), None)
+            if tabs:
+                assert tabs['allocated_height'] == 40, path
+                if path.stem == 'recovery-revealed':
+                    banner = next(n for n in nodes if n['widget_type'] == 'AdwBanner')
+                    vertical(tabs, banner); vertical(banner, bars[0])
+                else: vertical(tabs, bars[0])
+            rows[path.stem] = {'adjacent_control_gaps': gaps, 'toolbar_heights': [b['allocated_height'] for b in bars],
+                               'tab_height': tabs['allocated_height'] if tabs else None, 'vertical_gap': 0}
+        expected = {f'{mode}-{width}' for mode in ('files', 'open-chooser', 'save-chooser') for width in (480, 650, 800, 1100)} | {'recovery-revealed'}
+        assert set(rows) == expected, (variant, expected - set(rows))
+        assert 'Native toolbar actions, composites, responsive routing, chooser, preview and mutation checks passed' in (variant / 'native.log').read_text(), variant
+        reports[variant.name] = rows
+    assert set(reports) == {'light', 'dark', 'light-2x', 'dark-2x', 'light-large-text', 'dark-large-text'}, set(reports)
+    (directory / 'allocations.json').write_text(json.dumps(reports, indent=2) + '\n')
+    print('Native toolbar control and document composition geometry passed:', ', '.join(reports))
+
+import sys
+if len(sys.argv) > 1 and sys.argv[1] == '--toolbars':
+    verify_toolbars(Path(sys.argv[2]) if len(sys.argv) > 2 else Path(__file__).resolve().parents[1] / 'artifacts/toolbar-composition')
+    raise SystemExit(0)
+
 root=Path(__file__).resolve().parents[1]/'artifacts/theme-integration'
 def walk(node):
     yield node

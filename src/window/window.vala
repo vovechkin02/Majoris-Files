@@ -125,13 +125,17 @@ namespace MajorisFiles {
                 if(tabs.n_pages == 0)
                     close();
             });
-            toolbar.add_top_bar(tabbar);
             recovery_banner.title=_("File recovery is available");recovery_banner.button_label=_("Review");
             recovery_banner.button_clicked.connect(()=>{reviewed_recovery=operations.recovery_signature();recovery_banner.revealed=false;FileOperationsPresentation.show(operations);});
-            toolbar.add_top_bar(recovery_banner);
             operations.recovery_changed.connect(refresh_recovery);
             refresh_recovery();
-            toolbar.content = tabs;
+            var document_content = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+            document_content.append(tabbar);
+            document_content.append(recovery_banner);
+            document_content.append(tabs);
+            tabs.vexpand = true;
+            document_content.vexpand = true;
+            toolbar.content = document_content;
             var overview = new Adw.TabOverview();
             overview.view = tabs;
             overview.child = toolbar;

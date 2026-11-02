@@ -76,8 +76,8 @@ async void right_click(Gtk.Window window, Gtk.Widget widget) throws Error {
     string? result; yield search.communicate_utf8_async(null, null, out result, null);
     assert(search.get_successful());
     var input = new Subprocess.newv({"xdotool", "mousemove", "--window", result.strip(),
-        ((int)(bounds.origin.x + bounds.size.width / 2)).to_string(),
-        ((int)(bounds.origin.y + bounds.size.height / 2)).to_string(), "click", "3"}, SubprocessFlags.NONE);
+        ((int)((bounds.origin.x + bounds.size.width / 2) * window.scale_factor)).to_string(),
+        ((int)((bounds.origin.y + bounds.size.height / 2) * window.scale_factor)).to_string(), "click", "3"}, SubprocessFlags.NONE);
     yield input.wait_check_async(null); yield pause_layout();
 }
 Gtk.Popover? visible_popup(Gtk.Widget widget) {
@@ -86,6 +86,67 @@ Gtk.Popover? visible_popup(Gtk.Widget widget) {
         var popup = visible_popup(child); if(popup != null) return popup;
     }
     return null;
+}
+Graphene.Rect bounds(Gtk.Widget widget) {
+    Graphene.Rect result;
+    assert(widget.compute_bounds((Gtk.Widget)widget.get_root(), out result));
+    return result;
+}
+void joined(Gtk.Widget before, Gtk.Widget after) {
+    var a = bounds(before); var b = bounds(after);
+    assert((int)b.origin.y == (int)(a.origin.y + a.size.height));
+}
+void toolbar_spacing(Majoris.Ui.Toolbar bar) {
+    Gtk.Widget? previous = null;
+    bool themed = Environment.get_variable("MAJORIS_TOOLBAR_GEOMETRY") == "1";
+    for(var child = bar.get_first_child(); child != null; child = child.get_next_sibling()) {
+        assert(!(child is Gtk.Separator) && !(child is Majoris.Ui.ToolbarGroup));
+        assert(child.margin_start == 0 && child.margin_end == 0);
+        assert(!child.has_css_class("majoris-toolbar-group-gap"));
+        if(!child.get_mapped()) continue;
+        if(child.has_css_class("majoris-toolbar-spacer")) { previous = null; continue; }
+        if(previous != null) {
+            var a = bounds(previous); var b = bounds(child);
+            int gap = (int)(b.origin.x - a.origin.x - a.size.width);
+            stdout.printf("Adjacent toolbar gap: %d\n", gap);
+            if(themed) assert(gap == 4);
+        }
+        previous = child;
+    }
+    var segments = find_component(bar, "majoris-toolbar-segmented");
+    if(segments != null && themed) {
+        for(var child = segments.get_first_child(); child.get_next_sibling() != null; child = child.get_next_sibling()) {
+            var a = bounds(child); var b = bounds(child.get_next_sibling());
+            assert((int)(b.origin.x - a.origin.x - a.size.width) == 2);
+        }
+    }
+}
+Gtk.Widget? native_type(Gtk.Widget root, Type type) {
+    if(root.get_type().is_a(type)) return root;
+    for(var child = root.get_first_child(); child != null; child = child.get_next_sibling()) {
+        var found = native_type(child, type); if(found != null) return found;
+    }
+    return null;
+}
+async void layout_matrix(Gtk.Window window, Browser browser, string? output, string prefix) throws Error {
+    foreach(int width in new int[]{480, 650, 800, 1100}) {
+        window.set_default_size(width, 820); yield pause_layout();
+        var bars = new Gee.ArrayList<Majoris.Ui.Toolbar>(); collect_bars(browser, bars);
+        foreach(var bar in bars) toolbar_spacing(bar);
+        joined(bars[0], bars[1]);
+        assert(tool(browser, "Parent Folder").visible == (width > 650));
+        if(tool(browser, "Sort") != null) assert(tool(browser, "Sort").visible == (width > 650));
+        var scroll = bars[0].get_ancestor(typeof(Gtk.ScrolledWindow)) as Gtk.ScrolledWindow;
+        assert(scroll != null && scroll.hadjustment.upper >= scroll.hadjustment.page_size);
+        assert(bars[0].get_allocated_height() == scroll.get_allocated_height());
+        assert(scroll.get_parent().get_allocated_height() == scroll.get_allocated_height());
+        var tabbar = native_type(window, typeof(Adw.TabBar));
+        if(tabbar != null) {
+            joined(tabbar, bars[0]);
+            if(Environment.get_variable("MAJORIS_TOOLBAR_GEOMETRY") == "1") assert(tabbar.get_allocated_height() == 40);
+        }
+        if(output != null) yield capture(window, output, "%s-%d".printf(prefix, width));
+    }
 }
 async void run_toolbar_fixture(string? output) throws Error {
     var folder = File.new_for_path(DirUtils.make_tmp("majoris-toolbar-files-XXXXXX"));
@@ -105,10 +166,18 @@ async void run_toolbar_fixture(string? output) throws Error {
     var browser = window.current;
     var bars = new Gee.ArrayList<Majoris.Ui.Toolbar>(); collect_bars(browser, bars); assert(bars.size == 2);
     foreach (var bar in bars) {
-        assert(!bar.compact && bar.spacing == 0 && bar.divider);
+        assert(!bar.compact && bar.divider);
         if (Environment.get_variable("MAJORIS_TOOLBAR_GEOMETRY") == "1")
             assert(Environment.get_variable("MAJORIS_TOOLBAR_LARGE_TEXT") == "1" ? bar.get_allocated_height() >= 40 : bar.get_allocated_height() == 40);
     }
+    yield layout_matrix(window, browser, output, "files");
+    var banner = native_type(window, typeof(Adw.Banner)) as Adw.Banner;
+    var document_tabs = native_type(window, typeof(Adw.TabBar));
+    assert(banner != null && !banner.revealed);
+    banner.revealed = true; yield pause_layout();
+    joined(document_tabs, banner); joined(banner, bars[0]); joined(bars[0], bars[1]);
+    if(output != null) yield capture(window, output, "recovery-revealed");
+    banner.revealed = false; yield pause_layout(); joined(document_tabs, bars[0]);
     geometry(tool(browser, "Back")); geometry(browser.search_entry);
     var location = find_component(browser, "majoris-location-bar");
     assert(location != null && !location.has_css_class("majoris-toolbar-control"));
@@ -124,7 +193,16 @@ async void run_toolbar_fixture(string? output) throws Error {
         }
         Graphene.Rect search_bounds;
         assert(browser.search_entry.compute_bounds(window, out search_bounds));
-        assert(search_bounds.origin.x + search_bounds.size.width <= window.get_width());
+        if(Environment.get_variable("MAJORIS_TOOLBAR_LARGE_TEXT") == "1") {
+            // A deliberately enlarged individual field can exceed the viewport;
+            // the native horizontal adjustment must keep its trailing controls reachable.
+            var navigation = bars[0].get_ancestor(typeof(Gtk.ScrolledWindow)) as Gtk.ScrolledWindow;
+            var adjustment = navigation.hadjustment;
+            adjustment.value = adjustment.upper;
+            yield pause_layout();
+            assert(adjustment.value == double.max(0, adjustment.upper - adjustment.page_size));
+            adjustment.value = 0;
+        } else assert(search_bounds.origin.x + search_bounds.size.width <= window.get_width());
         assert(location.get_allocated_width() > 2.8 * browser.search_entry.get_allocated_width());
     }
     yield right_click(window, location);
@@ -241,8 +319,36 @@ async void run_toolbar_fixture(string? output) throws Error {
         var chooser=new ChooserWindow(opts,metadata,new Places(metadata));chooser.present();yield pause_layout();
         var chooser_bars=new Gee.ArrayList<Majoris.Ui.Toolbar>();collect_bars(chooser.browser,chooser_bars);assert(chooser_bars.size==2);
         assert(tool(chooser.browser,"New Folder")==null && tool(chooser.browser,"Preview")==null);
+        yield layout_matrix(chooser, chooser.browser, output, save ? "save-chooser" : "open-chooser");
         if(output!=null)yield capture(chooser,output,save?"save-chooser":"open-chooser");chooser.cancel_request();
     }
+    // Exercise the native tab hierarchy after reparenting its strip and content.
+    window.tabs.selected_page = window.tabs.get_nth_page(0);
+    window.activate_action("tab-duplicate", null); yield pause_layout();
+    assert(window.tabs.n_pages == 3);
+    var duplicate = window.tabs.selected_page;
+    window.activate_action("tab-pin", null); assert(duplicate.pinned);
+    window.activate_action("tab-pin", null); assert(!duplicate.pinned);
+    window.tabs.reorder_page(duplicate, 2);
+    window.activate_action("tab-left", null); assert(window.tabs.get_page_position(duplicate) == 1);
+    window.activate_action("tab-right", null); assert(window.tabs.get_page_position(duplicate) == 2);
+    click(window, "Tab Overview"); yield pause_layout();
+    assert(((Adw.TabOverview)native_type(window, typeof(Adw.TabOverview))).open);
+    click(window, "Tab Overview"); yield pause_layout();
+    window.activate_action("tab-detach", null); yield pause_layout();
+    assert(window.tabs.n_pages == 2);
+    var detached = duplicate.child.get_root() as FilesWindow;
+    assert(detached != null && detached != window && detached.tabs.n_pages == 1);
+    detached.current.cancel(); detached.destroy();
+    window.tabs.selected_page = window.tabs.get_nth_page(0);
+    yield keyboard(window, "ctrl+Page_Down", tool(browser, "Back"));
+    assert(window.tabs.selected_page == window.tabs.get_nth_page(1));
+    window.activate_action("tab-close", null); yield pause_layout(); assert(window.tabs.n_pages == 1);
+    window.new_tab(folder); window.new_tab(folder); yield pause_layout();
+    window.tabs.selected_page = window.tabs.get_nth_page(0);
+    window.activate_action("tab-close-right", null); yield pause_layout(); assert(window.tabs.n_pages == 1);
+    window.new_tab(folder); window.new_tab(folder); yield pause_layout();
+    window.activate_action("tab-close-others", null); yield pause_layout(); assert(window.tabs.n_pages == 1);
     // Compact native preview controls retain real decoder/rendering semantics.
     var pixels=new Gdk.Pixbuf(Gdk.Colorspace.RGB,false,8,80,40);pixels.fill(0x6366f1ff);
     var image=folder.get_child("image.png");pixels.save(image.get_path(),"png");
