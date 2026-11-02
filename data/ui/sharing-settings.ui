@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesSharingPage" parent="AdwPreferencesPage">
+    <child>
+      <object class="AdwPreferencesGroup" id="group">
+        <child>
+          <object class="AdwSwitchRow" id="enabled">
+            <property name="title" translatable="yes">Share this folder</property>
+            <property name="subtitle" translatable="yes">Allow other devices on your network to access this folder.</property>
+            <property name="sensitive">false</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwActionRow" id="state_row">
+            <property name="title" translatable="yes">Sharing Status</property>
+            <property name="subtitle-selectable">true</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="reconcile">
+            <property name="label" translatable="yes">Reload Sharing State</property>
+            <property name="visible">false</property>
+          </object>
+        </child>
+        <property name="description" translatable="yes">Network permissions also depend on filesystem permissions. Write access permits creating, modifying and deleting content.</property>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesGroup" id="configuration">
+        <child>
+          <object class="AdwEntryRow" id="share_name">
+            <property name="title" translatable="yes">Share Name</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwSwitchRow" id="writable">
+            <property name="title" translatable="yes">Read and Write</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwActionRow" id="address">
+            <property name="title" translatable="yes">Network Address</property>
+            <property name="subtitle" translatable="yes">Loading sharing state…</property>
+            <property name="subtitle-selectable">true</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwExpanderRow" id="allowed">
+            <child>
+              <object class="AdwSwitchRow" id="everyone">
+                <property name="title" translatable="yes">All Authenticated Users</property>
+                <property name="active">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPreferencesGroup" id="accounts">
+                <property name="title" translatable="yes">Allowed Accounts</property>
+                <property name="description" translatable="yes">Select at least one account when access for all authenticated users is disabled. Samba credentials must be configured for each account.</property>
+                <property name="sensitive">true</property>
+              </object>
+            </child>
+            <property name="title" translatable="yes">Allowed Users</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwExpanderRow" id="advanced">
+            <child>
+              <object class="AdwSwitchRow" id="guest">
+                <property name="title" translatable="yes">Allow Guest Access</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="hidden">
+                <property name="title" translatable="yes">Hide from network browsing</property>
+                <property name="subtitle" translatable="yes">Direct access still requires the configured authentication and permissions.</property>
+                <property name="sensitive">false</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="firewall">
+                <property name="label" translatable="yes">Allow SMB on Home and Work Networks…</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="close_firewall">
+                <property name="label" translatable="yes">Close Files-owned SMB Firewall Access…</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="reload">
+                <property name="label" translatable="yes">Reload Sharing State</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="clients">
+                <property name="label" translatable="yes">Inspect Connected Clients…</property>
+              </object>
+            </child>
+            <property name="title" translatable="yes">Advanced Sharing Settings</property>
+            <property name="subtitle" translatable="yes">Guest access, visibility, firewall and diagnostics</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="buttons">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">8</property>
+            <child>
+              <object class="GtkButton" id="apply">
+                <property name="label" translatable="yes">Share Folder</property>
+                <style>
+                  <class name="suggested-action" />
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="stop">
+                <property name="label" translatable="yes">Stop Sharing</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <property name="title" translatable="yes">Share Details</property>
+        <property name="visible">false</property>
+      </object>
+    </child>
+    <property name="title" translatable="yes">Sharing</property>
+    <property name="icon-name">folder-remote-symbolic</property>
+  </template>
+</interface>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <object class="GtkScrolledWindow" id="root">
+    <property name="hexpand">true</property>
+    <property name="vexpand">true</property>
+  </object>
+</interface>

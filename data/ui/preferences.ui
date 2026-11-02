@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesPreferencesDialog" parent="AdwPreferencesDialog">
+    <property name="title" translatable="yes">Preferences</property>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title" translatable="yes">General</property>
+        <property name="icon-name">preferences-system-symbolic</property>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Browsing</property>
+            <child>
+              <object class="AdwSwitchRow" id="setting_1">
+                <property name="title" translatable="yes">Single Click to Open</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_2">
+                <property name="title" translatable="yes">Folders First by Default</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_3">
+                <property name="title" translatable="yes">Warn When Changing File Extensions</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_4">
+                <property name="title" translatable="yes">Confirm Permanent Deletion</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_5">
+                <property name="title" translatable="yes">Restore Tabs After an Unexpected Exit</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_6">
+                <property name="title" translatable="yes">Notify About Background Operations</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_7">
+                <property name="title" translatable="yes">Enable User Scripts</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title" translatable="yes">View</property>
+        <property name="icon-name">view-grid-symbolic</property>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Defaults for New Folders</property>
+            <child>
+              <object class="AdwComboRow" id="setting_8">
+                <property name="title" translatable="yes">Default View</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Grid</item>
+                      <item translatable="yes">List</item>
+                      <item translatable="yes">Columns</item>
+                      <item translatable="yes">Gallery</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwComboRow" id="setting_9">
+                <property name="title" translatable="yes">Default Icon Density</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Compact</item>
+                      <item translatable="yes">Standard</item>
+                      <item translatable="yes">Large</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_10">
+                <property name="title" translatable="yes">Remember Folder Settings</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_11">
+                <property name="title" translatable="yes">Show Hidden Files</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_12">
+                <property name="title" translatable="yes">Show File Extensions</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_13">
+                <property name="title" translatable="yes">Item Selection Checkboxes</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title" translatable="yes">Preview</property>
+        <property name="icon-name">document-preview-symbolic</property>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Previews and Thumbnails</property>
+            <child>
+              <object class="AdwComboRow" id="setting_14">
+                <property name="title" translatable="yes">Thumbnails</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Local</item>
+                      <item translatable="yes">All</item>
+                      <item translatable="yes">Never</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSpinRow" id="setting_25">
+                <property name="title" translatable="yes">Remote Thumbnail Download Limit (MiB)</property>
+                <property name="adjustment">
+                  <object class="GtkAdjustment">
+                    <property name="lower">1</property>
+                    <property name="upper">128</property>
+                    <property name="step_increment">1</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_15">
+                <property name="title" translatable="yes">Show Preview Pane by Default</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_16">
+                <property name="title" translatable="yes">Auto-play Media Previews</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title" translatable="yes">Network</property>
+        <property name="icon-name">network-workgroup-symbolic</property>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Remote Content</property>
+            <child>
+              <object class="AdwSpinRow" id="setting_17">
+                <property name="title" translatable="yes">File Dialog Download Limit (GiB)</property>
+                <property name="adjustment">
+                  <object class="GtkAdjustment">
+                    <property name="lower">1</property>
+                    <property name="upper">1024</property>
+                    <property name="step_increment">1</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSpinRow" id="setting_18">
+                <property name="title" translatable="yes">File Dialog Download Timeout (minutes)</property>
+                <property name="adjustment">
+                  <object class="GtkAdjustment">
+                    <property name="lower">1</property>
+                    <property name="upper">1440</property>
+                    <property name="step_increment">1</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwComboRow" id="setting_19">
+                <property name="title" translatable="yes">Remote Previews</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Never</item>
+                      <item translatable="yes">On Request</item>
+                      <item translatable="yes">Automatic</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSpinRow" id="setting_20">
+                <property name="title" translatable="yes">Remote Preview Download Limit (MiB)</property>
+                <property name="adjustment">
+                  <object class="GtkAdjustment">
+                    <property name="lower">1</property>
+                    <property name="upper">1024</property>
+                    <property name="step_increment">1</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Sharing</property>
+            <child>
+              <object class="AdwActionRow" id="setting_31">
+                <property name="title" translatable="yes">Shared Folders…</property>
+                <child type="suffix">
+                  <object class="GtkButton" id="setting_31_open">
+                    <property name="label" translatable="yes">Open</property>
+                    <property name="valign">center</property>
+                    <property name="action-name">win.shared-folders</property>
+                    <accessibility>
+                      <property name="label" translatable="yes">Shared Folders…</property>
+                    </accessibility>
+                  </object>
+                </child>
+                <property name="activatable-widget">setting_31_open</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow" id="setting_32">
+                <property name="title" translatable="yes">SMB Account Password…</property>
+                <child type="suffix">
+                  <object class="GtkButton" id="setting_32_open">
+                    <property name="label" translatable="yes">Open</property>
+                    <property name="valign">center</property>
+                    <property name="action-name">win.smb-password</property>
+                    <accessibility>
+                      <property name="label" translatable="yes">SMB Account Password…</property>
+                    </accessibility>
+                  </object>
+                </child>
+                <property name="activatable-widget">setting_32_open</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title" translatable="yes">Tags</property>
+        <property name="icon-name">tag-symbolic</property>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Tags</property>
+            <child>
+              <object class="AdwActionRow" id="setting_30">
+                <property name="title" translatable="yes">Manage Tags…</property>
+                <child type="suffix">
+                  <object class="GtkButton" id="setting_30_open">
+                    <property name="label" translatable="yes">Open</property>
+                    <property name="valign">center</property>
+                    <property name="action-name">win.manage-tags</property>
+                    <accessibility>
+                      <property name="label" translatable="yes">Manage Tags…</property>
+                    </accessibility>
+                  </object>
+                </child>
+                <property name="activatable-widget">setting_30_open</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title" translatable="yes">Search</property>
+        <property name="icon-name">system-search-symbolic</property>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Search Scope</property>
+            <child>
+              <object class="AdwSwitchRow" id="setting_21">
+                <property name="title" translatable="yes">Use the System Search Index</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_22">
+                <property name="title" translatable="yes">Always Scan the Filesystem Exhaustively</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_23">
+                <property name="title" translatable="yes">Rank Search Results by Relevance</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwComboRow" id="setting_24">
+                <property name="title" translatable="yes">Recursive Search by Default</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Never</item>
+                      <item translatable="yes">Local</item>
+                      <item translatable="yes">Always</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title" translatable="yes">Extensions</property>
+        <property name="icon-name">application-x-addon-symbolic</property>
+        <child>
+          <object class="AdwPreferencesGroup" id="extensions">
+            <property name="title" translatable="yes">Installed External Extensions</property>
+            <property name="description" translatable="yes">Extensions run as separate user services. Enable only providers you trust; they receive selected file locations. Reopen Files to add or remove extension columns.</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title" translatable="yes">Home</property>
+        <property name="icon-name">go-home-symbolic</property>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Home Sections</property>
+            <child>
+              <object class="AdwSwitchRow" id="setting_26">
+                <property name="title" translatable="yes">Favorites</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_27">
+                <property name="title" translatable="yes">Recent</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_28">
+                <property name="title" translatable="yes">Recent Downloads</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="setting_29">
+                <property name="title" translatable="yes">Recommended</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesAclDialog" parent="AdwAlertDialog">
+    <responses>
+      <response id="cancel" translatable="yes">Cancel</response>
+      <response id="apply" appearance="suggested" translatable="yes">Apply ACL</response>
+    </responses>
+    <property name="close-response">cancel</property>
+    <property name="default-response">apply</property>
+    <property name="heading" translatable="yes">Access Control List</property>
+    <property name="body" translatable="yes">Advanced POSIX ACL entries. Changes can remove access.</property>
+    <property name="extra-child">
+      <object class="GtkScrolledWindow">
+        <property name="height-request">260</property>
+        <property name="child">
+          <object class="GtkTextView" id="view">
+            <property name="monospace">true</property>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

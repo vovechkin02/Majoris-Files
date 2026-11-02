@@ -1,49 +1,72 @@
 namespace MajorisFiles {
+    [GtkTemplate (ui = "/com/majoris/files/ui/preferences.ui")]
     public class PreferencesDialog : Adw.PreferencesDialog {
+        private bool template_disposing;
         MetadataStore metadata;
-        public PreferencesDialog(MetadataStore metadata)
-        {
+        [GtkChild] private unowned Adw.PreferencesGroup extensions;
+        [GtkChild] private unowned Adw.SwitchRow setting_1;
+        [GtkChild] private unowned Adw.SwitchRow setting_2;
+        [GtkChild] private unowned Adw.SwitchRow setting_3;
+        [GtkChild] private unowned Adw.SwitchRow setting_4;
+        [GtkChild] private unowned Adw.SwitchRow setting_5;
+        [GtkChild] private unowned Adw.SwitchRow setting_6;
+        [GtkChild] private unowned Adw.SwitchRow setting_7;
+        [GtkChild] private unowned Adw.ComboRow setting_8;
+        [GtkChild] private unowned Adw.ComboRow setting_9;
+        [GtkChild] private unowned Adw.SwitchRow setting_10;
+        [GtkChild] private unowned Adw.SwitchRow setting_11;
+        [GtkChild] private unowned Adw.SwitchRow setting_12;
+        [GtkChild] private unowned Adw.SwitchRow setting_13;
+        [GtkChild] private unowned Adw.ComboRow setting_14;
+        [GtkChild] private unowned Adw.SwitchRow setting_15;
+        [GtkChild] private unowned Adw.SwitchRow setting_16;
+        [GtkChild] private unowned Adw.SpinRow setting_17;
+        [GtkChild] private unowned Adw.SpinRow setting_18;
+        [GtkChild] private unowned Adw.ComboRow setting_19;
+        [GtkChild] private unowned Adw.SpinRow setting_20;
+        [GtkChild] private unowned Adw.SwitchRow setting_21;
+        [GtkChild] private unowned Adw.SwitchRow setting_22;
+        [GtkChild] private unowned Adw.SwitchRow setting_23;
+        [GtkChild] private unowned Adw.ComboRow setting_24;
+        [GtkChild] private unowned Adw.SpinRow setting_25;
+        [GtkChild] private unowned Adw.SwitchRow setting_26;
+        [GtkChild] private unowned Adw.SwitchRow setting_27;
+        [GtkChild] private unowned Adw.SwitchRow setting_28;
+        [GtkChild] private unowned Adw.SwitchRow setting_29;
+        [GtkChild] private unowned Adw.ActionRow setting_30;
+        [GtkChild] private unowned Adw.ActionRow setting_31;
+        [GtkChild] private unowned Adw.ActionRow setting_32;
+        public PreferencesDialog(MetadataStore metadata) {
             this.metadata = metadata;
-            title = "Preferences";
-            var general = page("General", "preferences-system-symbolic");
-            var browsing = group(general, "Browsing");
-            toggle(browsing, "Single Click to Open", "single-click", false);
-            toggle(browsing, "Folders First by Default", "default-folders-first", true);
-            toggle(browsing, "Warn When Changing File Extensions", "extension-warning", true);
-            toggle(browsing, "Confirm Permanent Deletion", "confirm-delete", true);
-            toggle(browsing, "Restore Tabs After an Unexpected Exit", "restore-session", true);
-            toggle(browsing, "Notify About Background Operations", "notifications", true);
-            toggle(browsing, "Enable User Scripts", "scripts-enabled", false);
-            var view = group(page("View", "view-grid-symbolic"), "Defaults for New Folders");
-            choice(view, "Default View", "default-view", {"Grid", "List", "Columns", "Gallery"}, "Grid");
-            choice(view, "Default Icon Density", "default-density", {"Compact", "Standard", "Large"}, "Standard");
-            toggle(view, "Remember Folder Settings", "remember-folder-settings", true);
-            toggle(view, "Show Hidden Files", "show-hidden", false);
-            toggle(view, "Show File Extensions", "show-extensions", true);
-            toggle(view, "Item Selection Checkboxes", "default-checkboxes", false);
-            var preview = group(page("Preview", "document-preview-symbolic"), "Previews and Thumbnails");
-            choice(preview, "Thumbnails", "thumbnail-policy", {"Local", "All", "Never"}, "Local");
-            var limit = new Adw.SpinRow.with_range(1, 128, 1);
-            limit.title = _("Remote Thumbnail Download Limit (MiB)");
-            uint value = 8;
-            uint.try_parse(metadata.state("remote-thumbnail-limit", "8"), out value);
-            limit.value = value.clamp(1, 128);
-            limit.notify["value"].connect(() => metadata.set_state("remote-thumbnail-limit", ((uint)limit.value).to_string()));
-            preview.add(limit);
-            toggle(preview, "Show Preview Pane by Default", "preview-pane-default", false);
-            toggle(preview, "Auto-play Media Previews", "autoplay-media", false);
-            var network_page=page("Network", "network-workgroup-symbolic");
-            command(group(page(_("Tags"),"tag-symbolic"),_("Tags")),_("Manage Tags…"),"win.manage-tags");
-            var network = group(network_page, "Remote Content");
-            number(network, "File Dialog Download Limit (GiB)", "remote-import-limit-gib", 10, 1, 1024);
-            number(network, "File Dialog Download Timeout (minutes)", "remote-import-timeout-minutes", 30, 1, 1440);
-            choice(network, "Remote Previews", "remote-preview-policy", {"Never", "On Request", "Automatic"}, "On Request");
-            number(network, "Remote Preview Download Limit (MiB)", "remote-preview-limit-mib", 16, 1, 1024);
-            var sharing=group(network_page,_("Sharing"));
-            command(sharing,_("Shared Folders…"),"win.shared-folders");command(sharing,_("SMB Account Password…"),"win.smb-password");
-            var search = group(page("Search", "system-search-symbolic"), "Search Scope");
-            var extensions = group(page("Extensions", "application-x-addon-symbolic"), "Installed External Extensions");
-            extensions.description = _("Extensions run as separate user services. Enable only providers you trust; they receive selected file locations. Reopen Files to add or remove extension columns.");
+            toggle(setting_1, "single-click", false);
+            toggle(setting_2, "default-folders-first", true);
+            toggle(setting_3, "extension-warning", true);
+            toggle(setting_4, "confirm-delete", true);
+            toggle(setting_5, "restore-session", true);
+            toggle(setting_6, "notifications", true);
+            toggle(setting_7, "scripts-enabled", false);
+            choice(setting_8, "default-view", {"Grid", "List", "Columns", "Gallery"}, "Grid");
+            choice(setting_9, "default-density", {"Compact", "Standard", "Large"}, "Standard");
+            toggle(setting_10, "remember-folder-settings", true);
+            toggle(setting_11, "show-hidden", false);
+            toggle(setting_12, "show-extensions", true);
+            toggle(setting_13, "default-checkboxes", false);
+            choice(setting_14, "thumbnail-policy", {"Local", "All", "Never"}, "Local");
+            toggle(setting_15, "preview-pane-default", false);
+            toggle(setting_16, "autoplay-media", false);
+            number(setting_17, "remote-import-limit-gib", 10, 1, 1024);
+            number(setting_18, "remote-import-timeout-minutes", 30, 1, 1440);
+            choice(setting_19, "remote-preview-policy", {"Never", "On Request", "Automatic"}, "On Request");
+            number(setting_20, "remote-preview-limit-mib", 16, 1, 1024);
+            toggle(setting_21, "indexed-search", true);
+            toggle(setting_22, "exhaustive-search", false);
+            toggle(setting_23, "rank-search-results", true);
+            choice(setting_24, "recursive-search", {"Never", "Local", "Always"}, "Never");
+            number(setting_25, "remote-thumbnail-limit", 8, 1, 128);
+            toggle(setting_26, "home-favorites", true);
+            toggle(setting_27, "home-recent", true);
+            toggle(setting_28, "home-downloads", true);
+            toggle(setting_29, "home-recommended", true);
             foreach (var extension in ExtensionManager.get_default(metadata).extensions) {
                 var row = new Adw.SwitchRow(); row.title = extension.name;
                 row.subtitle = extension.id + (extension.failure == "" ? "" : " · Unavailable: " + extension.failure);
@@ -51,59 +74,33 @@ namespace MajorisFiles {
                 row.notify["active"].connect(() => extension.set_enabled(row.active));
                 extensions.add(row);
             }
-            toggle(search, "Use the System Search Index", "indexed-search", true);
-            toggle(search, "Always Scan the Filesystem Exhaustively", "exhaustive-search", false);
-            toggle(search, "Rank Search Results by Relevance", "rank-search-results", true);
-            choice(search, "Recursive Search by Default", "recursive-search", {"Never", "Local", "Always"}, "Never");
-            var home = group(page("Home", "go-home-symbolic"), "Home Sections");
-            foreach(var key in new string[] {"favorites", "recent", "downloads", "recommended"})
-                toggle(home, key == "favorites" ? "Favorites" : key == "recent" ? "Recent" : key == "downloads" ? "Recent Downloads" : "Recommended", "home-" + key, true);
         }
-        void command(Adw.PreferencesGroup group,string title,string action){var row=new Adw.ActionRow();row.title=title;var button=new Gtk.Button.with_label(_("Open"));button.valign=Gtk.Align.CENTER;button.action_name=action;button.update_property(Gtk.AccessibleProperty.LABEL,title,-1);row.add_suffix(button);row.activatable_widget=button;group.add(row);}
-        Adw.PreferencesPage page(string title, string icon)
+        void number(Adw.SpinRow row, string key, uint fallback, uint minimum, uint maximum)
         {
-            var result = new Adw.PreferencesPage();
-            result.title = title;
-            result.icon_name = icon;
-            add(result);
-            return result;
-        }
-        void number(Adw.PreferencesGroup group, string title, string key, uint fallback, uint minimum, uint maximum)
-        {
-            var row = new Adw.SpinRow.with_range(minimum, maximum, 1);
-            row.title = title;
             uint value = fallback;
             uint.try_parse(metadata.state(key, fallback.to_string()), out value);
             row.value = value.clamp(minimum, maximum);
             row.notify["value"].connect(() => metadata.set_state(key, ((uint)row.value).to_string()));
-            group.add(row);
         }
-        Adw.PreferencesGroup group(Adw.PreferencesPage page, string title)
+        void toggle(Adw.SwitchRow row, string key, bool fallback)
         {
-            var result = new Adw.PreferencesGroup();
-            result.title = title;
-            page.add(result);
-            return result;
-        }
-        void toggle(Adw.PreferencesGroup group, string title, string key, bool fallback)
-        {
-            var row = new Adw.SwitchRow();
-            row.title = title;
             row.active = metadata.state(key, fallback ? "true" : "false") == "true";
             row.notify["active"].connect(() => metadata.set_state(key, row.active ? "true" : "false"));
-            group.add(row);
         }
-        void choice(Adw.PreferencesGroup group, string title, string key, string[] values, string fallback)
+        void choice(Adw.ComboRow row, string key, string[] values, string fallback)
         {
-            var row = new Adw.ComboRow();
-            row.title = title;
-            row.model = new Gtk.StringList(values);
             string selected = metadata.state(key, fallback);
             for(uint i = 0; i < values.length; i++)
                 if(values[i] == selected)
                     row.selected = i;
             row.notify["selected"].connect(() => metadata.set_state(key, values[row.selected]));
-            group.add(row);
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                dispose_template(typeof(PreferencesDialog));
+            }
+            base.dispose();
         }
     }
 }

@@ -13,14 +13,11 @@ namespace MajorisFiles {
             data.append(bytes.get_data());
             data.append({0});
             string text = ((string)data.data).make_valid();
-            var view = new Gtk.TextView();
-            view.editable = false;
-            view.monospace = true;
-            view.wrap_mode = Gtk.WrapMode.WORD_CHAR;
-            view.buffer.text = text;
-            var scroll = new Gtk.ScrolledWindow();
-            scroll.set_child(view);
+            var builder = new Gtk.Builder.from_resource("/com/majoris/files/ui/archive-preview.ui");
+            var scroll = (Gtk.ScrolledWindow)builder.get_object("root");
+            ((Gtk.TextView)scroll.child).buffer.text = text;
             return scroll;
+
         }
     }
     public class MarkdownPreview : Object, PreviewProvider {
@@ -110,7 +107,10 @@ namespace MajorisFiles {
             return view;
         }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/preview-markdown.ui")]
     public class MarkdownView : Gtk.Box {
+        private bool template_disposing;
+        [GtkChild] private unowned Gtk.Label message;
         public Gtk.Widget source {
             get;
             private set;
@@ -119,27 +119,33 @@ namespace MajorisFiles {
             get;
             private set;
         }
+
+        [GtkChild] private unowned Gtk.StackSwitcher switcher;
+        [GtkChild] private unowned Gtk.Stack views;
         public MarkdownView(Gtk.Widget source, Gtk.TextView? rendered, string failure)
         {
             Object(orientation: Gtk.Orientation.VERTICAL, spacing: 6);
             this.source = source;
             this.rendered = rendered;
-            var views = new Gtk.Stack();
-            views.vexpand = true;
+
             views.add_titled(source, "source", "Source");
             if(rendered != null)
                 views.add_titled(Browser.scrolled(rendered), "rendered", "Rendered");
-            var switcher = new Gtk.StackSwitcher();
+
             switcher.stack = views;
-            append(switcher);
-            append(views);
+
             views.visible_child_name = rendered != null ? "rendered" : "source";
             if(failure != "")
             {
-                var message = new Gtk.Label(_("Rendered preview unavailable\n") + failure);
-                message.wrap = true;
-                append(message);
+                message.label = _("Rendered preview unavailable\n") + failure; message.visible = true;
             }
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                dispose_template(typeof(MarkdownView));
+            }
+            base.dispose();
         }
     }
 }

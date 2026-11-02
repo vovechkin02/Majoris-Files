@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesMetadataPage" parent="AdwPreferencesPage">
+    <child>
+      <object class="AdwPreferencesGroup" id="file_group">
+        <child>
+          <object class="AdwExpanderRow" id="file_information">
+            <property name="title" translatable="yes">File Information</property>
+            <property name="subtitle" translatable="yes">Name, location, exact timestamps and ownership</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesGroup" id="storage">
+        <property name="title" translatable="yes">Storage</property>
+        <child>
+          <object class="AdwActionRow" id="exact_size">
+            <property name="title" translatable="yes">Exact Size</property>
+            <property name="use-markup">false</property>
+            <property name="subtitle-selectable">true</property>
+            <property name="subtitle-lines">2</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwActionRow" id="allocated">
+            <property name="title" translatable="yes">Size on Disk</property>
+            <property name="use-markup">false</property>
+            <property name="subtitle-selectable">true</property>
+            <property name="subtitle-lines">2</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesGroup" id="filesystem">
+        <child>
+          <object class="AdwExpanderRow" id="attributes">
+            <property name="title" translatable="yes">Additional Filesystem Attributes</property>
+          </object>
+        </child>
+        <property name="title" translatable="yes">Filesystem</property>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesGroup" id="loading">
+        <property name="description" translatable="yes">Loading metadata…</property>
+      </object>
+    </child>
+    <property name="title" translatable="yes">Details</property>
+    <property name="icon-name">dialog-information-symbolic</property>
+  </template>
+</interface>

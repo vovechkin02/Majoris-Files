@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesShortcutsDialog" parent="AdwPreferencesDialog">
+    <property name="title" translatable="yes">Keyboard Shortcuts</property>
+    <child>
+      <object class="AdwPreferencesPage">
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Browsing</property>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">New Window</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;n</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">New Tab</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;t</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Close Tab</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;w</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Reopen Closed Tab</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;&lt;Shift&gt;t</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Back</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Alt&gt;Left</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Forward</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Alt&gt;Right</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Parent Folder</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Alt&gt;Up</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Edit Location</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;l</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Search</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;f</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Show or Hide Locations</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">F9</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Show Hidden Files</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;h</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Files and Selection</property>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">New Folder</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;&lt;Shift&gt;n</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Select All</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;a</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Rename</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">F2</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Move to Trash</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">Delete</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Permanently Delete</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Shift&gt;Delete</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Copy</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;c</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Cut</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;x</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Paste</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;v</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Undo</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;z</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Redo</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Control&gt;&lt;Shift&gt;z</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Properties</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">&lt;Alt&gt;Return</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Quick Preview</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">space</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Close Preview</property>
+                <child type="suffix">
+                  <object class="GtkShortcutLabel">
+                    <property name="accelerator">Escape</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

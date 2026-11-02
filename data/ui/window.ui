@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesFilesWindow" parent="AdwApplicationWindow">
+    <property name="title" translatable="yes">Files</property>
+    <property name="default-width">1100</property>
+    <property name="default-height">740</property>
+    <property name="content">
+      <object class="AdwTabOverview" id="overview">
+        <property name="view">tabs</property>
+        <property name="child">
+          <object class="AdwToolbarView">
+            <child type="top">
+              <object class="AdwHeaderBar">
+                <property name="title-widget">
+                  <object class="AdwWindowTitle">
+                    <property name="title" translatable="yes">Files</property>
+                  </object>
+                </property>
+                <child type="start">
+                  <object class="GtkButton">
+                    <property name="icon-name">tab-new-symbolic</property>
+                    <property name="tooltip-text" translatable="yes">New Tab</property>
+                    <property name="action-name">win.new-tab</property>
+                  </object>
+                </child>
+                <child type="end">
+                  <object class="GtkButton" id="operations_button">
+                    <property name="icon-name">folder-download-symbolic</property>
+                    <property name="tooltip-text" translatable="yes">File Operations</property>
+                  </object>
+                </child>
+                <child type="end">
+                  <object class="GtkMenuButton" id="menu_button">
+                    <property name="icon-name">open-menu-symbolic</property>
+                    <property name="tooltip-text" translatable="yes">Main Menu</property>
+                  </object>
+                </child>
+                <child type="end">
+                  <object class="GtkButton">
+                    <property name="icon-name">view-grid-symbolic</property>
+                    <property name="tooltip-text" translatable="yes">Tab Overview</property>
+                    <signal name="clicked" handler="toggle_overview" swapped="no" />
+                  </object>
+                </child>
+              </object>
+            </child>
+            <property name="content">
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="vexpand">true</property>
+                <child>
+                  <object class="AdwTabBar">
+                    <property name="view">tabs</property>
+                    <property name="autohide">false</property>
+                    <property name="expand-tabs">false</property>
+                    <style>
+                      <class name="majoris-document-tabs" />
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwBanner" id="recovery_banner">
+                    <property name="title" translatable="yes">File recovery is available</property>
+                    <property name="button-label" translatable="yes">Review</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwTabView" id="tabs">
+                    <property name="vexpand">true</property>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

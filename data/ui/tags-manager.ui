@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesTagsDialog" parent="AdwPreferencesDialog">
+    <child>
+      <object class="AdwPreferencesPage" id="page">
+        <child>
+          <object class="AdwPreferencesGroup" id="group">
+            <child>
+              <object class="GtkListBox" id="list">
+                <property name="selection-mode">single</property>
+                <style>
+                  <class name="boxed-list" />
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="controls">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">8</property>
+                <child>
+                  <object class="GtkButton" id="rename_button">
+                    <property name="label" translatable="yes">Rename</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="delete_button">
+                    <property name="label" translatable="yes">Delete Tag</property>
+                    <style>
+                      <class name="destructive-action" />
+                    </style>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <property name="header-suffix">
+              <object class="GtkButton" id="new_button">
+                <property name="label" translatable="yes">New Tag</property>
+              </object>
+            </property>
+            <property name="title" translatable="yes">Tags</property>
+          </object>
+        </child>
+        <property name="description" translatable="yes">Create and organise tags for your files and folders. Drag rows to reorder, or use Alt+Up and Alt+Down.</property>
+      </object>
+    </child>
+    <property name="title" translatable="yes">Manage Tags</property>
+    <property name="content-width">560</property>
+    <property name="content-height">570</property>
+    <property name="search-enabled">false</property>
+  </template>
+</interface>

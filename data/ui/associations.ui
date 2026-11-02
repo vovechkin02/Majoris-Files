@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesAssociationsPage" parent="AdwPreferencesPage">
+    <child>
+      <object class="AdwPreferencesGroup" id="group">
+        <child>
+          <object class="AdwActionRow" id="default_row">
+            <property name="title" translatable="yes">Default Application</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="reset">
+            <property name="label" translatable="yes">Reset Association</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="choose">
+            <property name="label" translatable="yes">Choose Another Application…</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <property name="title" translatable="yes">Open With</property>
+    <property name="icon-name">application-x-executable-symbolic</property>
+  </template>
+</interface>

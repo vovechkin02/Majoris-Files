@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesApplicationChoiceRow" parent="AdwActionRow">
+    <property name="use-markup">false</property>
+    <property name="subtitle-selectable">true</property>
+    <property name="subtitle-lines">2</property>
+    <property name="activatable-widget">choice</property>
+    <child type="prefix">
+      <object class="GtkImage" id="icon">
+        <property name="pixel-size">32</property>
+      </object>
+    </child>
+    <child type="suffix">
+      <object class="GtkCheckButton" id="choice">
+        <property name="valign">center</property>
+      </object>
+    </child>
+  </template>
+</interface>

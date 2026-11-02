@@ -25,20 +25,10 @@ namespace MajorisFiles {
             }
             yield input.close_async(Priority.LOW, null);
             bytes[count] = 0;
-            var buffer = new GtkSource.Buffer(null);
+            var box = new TextPreviewWidget(); var buffer = box.buffer;
             buffer.language = GtkSource.LanguageManager.get_default().guess_language(item.name, item.mime);
-            buffer.highlight_syntax = true;
-            var view = new GtkSource.View.with_buffer(buffer);
-            view.show_line_numbers = true;
-            view.editable = false;
-            view.monospace = true;
-            view.wrap_mode = Gtk.WrapMode.WORD_CHAR;
-            var box = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
             string[] encodings = {"Automatic", "UTF-8", "UTF-16LE", "UTF-16BE", "WINDOWS-1252", "ISO-8859-1"};
-            var encoding = new Gtk.DropDown.from_strings(encodings);
-            encoding.tooltip_text = _("Text Encoding");
-            var status = new Gtk.Label("");
-            status.wrap = true;
+            var encoding = box.encoding; var status = box.status;
             Callback update = () => {
                 try {
                     string selected = encodings[encoding.selected];
@@ -60,12 +50,6 @@ namespace MajorisFiles {
             };
             encoding.notify["selected"].connect(() => update());
             update();
-            box.append(encoding);
-            box.append(status);
-            var scroll = new Gtk.ScrolledWindow();
-            scroll.set_child(view);
-            scroll.vexpand = true;
-            box.append(scroll);
             return box;
         }
     }
@@ -106,41 +90,26 @@ namespace MajorisFiles {
             // PCM from the isolated GStreamer decoder enter this process.
             var media = IsolatedPlayback.open(item,token);
             media.set_volume(0.5);
-            if (item.mime.has_prefix("audio/"))
-            {
-                var audio = new Gtk.Box(Gtk.Orientation.VERTICAL, 12);
-                var icon = new Gtk.Image.from_icon_name("audio-x-generic-symbolic");
-                icon.pixel_size = 96;
-                icon.vexpand = true;
-                audio.append(icon);
-                var name = new Gtk.Label(item.name);
-                name.wrap = true;
-                name.selectable = true;
-                audio.append(name);
-                var controls = new Gtk.MediaControls(media);
-                audio.append(controls);
-                add_error(audio,media);
-                add_metadata.begin(audio, item, token);
-                if (metadata != null && metadata.state("autoplay-media", "false") == "true")
-                    media.play();
-                return audio;
+            var box = new MediaPreviewWidget();
+            bool audio = item.mime.has_prefix("audio/");
+            box.icon.visible = box.name_label.visible = box.controls.visible = audio;
+            box.video.visible = !audio;
+            if (audio) {
+                box.spacing = 12; box.name_label.label = item.name; box.controls.media_stream = media;
+                if (metadata != null && metadata.state("autoplay-media", "false") == "true") media.play();
+            } else {
+                box.video.media_stream = media;
+                box.video.autoplay = metadata != null && metadata.state("autoplay-media", "false") == "true";
             }
-            var video = new Gtk.Video.for_media_stream(media);
-            video.autoplay = metadata != null && metadata.state("autoplay-media", "false") == "true";
-            var box = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
-            video.vexpand = true;
-            box.append(video);
-            add_error(box,media);
+            add_error(box.error_label, media);
             add_metadata.begin(box, item, token);
             return box;
         }
-        static void add_error(Gtk.Box box,Gtk.MediaStream media){
-            var label=new Gtk.Label("");label.wrap=true;label.visible=false;
+        static void add_error(Gtk.Label label,Gtk.MediaStream media){
             media.notify["error"].connect(()=>{if(media.get_error()!=null){label.label=_("Media preview unavailable: ")+media.get_error().message;label.visible=true;}});
             if(media.get_error()!=null){label.label=_("Media preview unavailable: ")+media.get_error().message;label.visible=true;}
-            box.append(label);
         }
-        async void add_metadata(Gtk.Box box, FileItem item, Cancellable token)
+        async void add_metadata(MediaPreviewWidget box, FileItem item, Cancellable token)
         {
             try {
                 var fields = yield RichMetadata.load(item, token);
@@ -149,23 +118,40 @@ namespace MajorisFiles {
             }
             catch (Error e) {
                 if (!token.is_cancelled()) {
-                    var label = new Gtk.Label(_("Metadata unavailable: ") + e.message);
-                    label.wrap = true;
-                    box.append(label);
+                    box.metadata_error.label = _("Metadata unavailable: ") + e.message; box.metadata_error.visible = true;
                 }
             }
         }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/preview.ui")]
     public class PreviewPane : Gtk.Box {
+        private bool template_disposing;
+        [GtkChild] private unowned Gtk.Button request_button;
+        [GtkChild] private unowned Gtk.ProgressBar download_progress;
+        [GtkChild] private unowned Gtk.Label unavailable_label;
+        [GtkChild] private unowned Gtk.Box fallback;
+        [GtkChild] private unowned Gtk.Image fallback_icon;
+        [GtkChild] private unowned Gtk.Label fallback_info;
+        FileItem? requested_item;
+        bool request_connected;
+        [GtkChild] private unowned Gtk.Box content_box;
+        [GtkChild] private unowned Gtk.Label title_label;
         MetadataStore? metadata;
         Cancellable token = new Cancellable();
         Gee.ArrayList<PreviewProvider> providers = new Gee.ArrayList<PreviewProvider>();
         uint generation;
         public PreviewPane(MetadataStore? metadata = null)
         {
-            Object(orientation: Gtk.Orientation.VERTICAL, spacing: 8);
-            width_request = 280;
+            Object();
+            configure(metadata);
+        }
+        public void configure(MetadataStore? metadata) {
+            if (!request_connected) {
+                request_connected = true;
+                request_button.clicked.connect(() => { if (requested_item != null) show_item.begin(requested_item, true); });
+            }
             this.metadata = metadata;
+            providers.clear();
             providers.add(new ImagePreview());
             providers.add(new MarkdownPreview());
             providers.add(new TextPreview());
@@ -183,16 +169,20 @@ namespace MajorisFiles {
         }
         void clear()
         {
-            while (get_first_child() != null)
+            title_label.visible = false;
+            request_button.visible = download_progress.visible = unavailable_label.visible = fallback.visible = false;
+            requested_item = null;
+            download_progress.fraction = 0; download_progress.text = "";
+            while (content_box.get_first_child() != null)
             {
-                var child = get_first_child();
+                var child = content_box.get_first_child();
                 if (child is Gtk.Video)
                 {
                     var stream = ((Gtk.Video)child).media_stream;
                     if (stream != null)
                         stream.pause();
                 }
-                remove(child);
+                content_box.remove(child);
             }
         }
         public async void show_item(owned FileItem item, bool remote_requested = false)
@@ -201,22 +191,19 @@ namespace MajorisFiles {
             token = new Cancellable();
             var pending = token;
             uint epoch = generation;
-            var label = new Gtk.Label(item.name);
-            label.wrap = true;
-            append(label);
+            title_label.label = item.name; title_label.visible = true; requested_item = item;
             File? staging = null;
             try {
                 var cloud = yield CloudFiles.get_default().query(item.file, pending);
                 if (cloud.online_only) {
                     if (!remote_requested) {
-                        var download = new Gtk.Button.with_label(_("Download Cloud Preview"));
-                        download.clicked.connect(() => show_item.begin(item, true)); append(download); return;
+                        request_button.label = _("Download Cloud Preview"); request_button.visible = true; return;
                     }
                     uint limit = 16;
                     if (metadata != null) uint.try_parse(metadata.state("remote-preview-limit-mib", "16"), out limit);
-                    var progress = new Gtk.ProgressBar(); progress.show_text = true; append(progress);
-                    var file = yield CloudFiles.get_default().materialize(item.file, (uint64)limit.clamp(1, 1024) * 1024 * 1024, pending, (fraction, message) => { progress.fraction = fraction < 0 ? 0 : fraction; progress.text = message; });
-                    remove(progress);
+                    var progress = download_progress; progress.visible = true;
+                    var file = yield CloudFiles.get_default().materialize(item.file, (uint64)limit.clamp(1, 1024) * 1024 * 1024, pending, (fraction, message) => { if (pending == token && epoch == generation) { progress.fraction = fraction < 0 ? 0 : fraction; progress.text = message; } });
+                    progress.visible = false;
                     var info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.LOW, pending);
                     item = new FileItem(file, info);
                 }
@@ -225,9 +212,7 @@ namespace MajorisFiles {
                     if (policy == "Never")
                         throw new FileError.UNSUPPORTED("Remote previews are disabled in Preferences");
                     if (policy != "Automatic" && !remote_requested) {
-                        var download = new Gtk.Button.with_label(_("Download Preview"));
-                        download.clicked.connect(() => show_item.begin(item, true));
-                        append(download);
+                        request_button.label = _("Download Preview"); request_button.visible = true;
                         return;
                     }
                     uint limit = 16;
@@ -252,26 +237,32 @@ namespace MajorisFiles {
                         if (pending.is_cancelled() || epoch != generation)
                             return;
                         widget.vexpand = true;
-                        append(widget);
+                        content_box.append(widget);
                         return;
                     }
-                append(new Gtk.Image.from_gicon(item.info.get_icon()));
-                append(new Gtk.Label(Paths.size(item.bytes) + "\n" + item.mime));
+                fallback_icon.set_from_gicon(item.info.get_icon());
+                fallback_info.label = Paths.size(item.bytes) + "\n" + item.mime; fallback.visible = true;
             }
             catch (Error e) {
                 if (staging != null)
                     try { yield OperationManager.remove_tree(staging, new Cancellable()); } catch (Error ignored) {}
                 if (!pending.is_cancelled() && epoch == generation)
                 {
-                    var message = new Gtk.Label(_("Preview unavailable\n") + e.message);
-                    message.wrap = true;
-                    append(message);
+                    unavailable_label.label = _("Preview unavailable\n") + e.message; unavailable_label.visible = true;
                 }
             }
         }
         ~PreviewPane()
         {
             token.cancel();
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                if (token != null) token.cancel();
+                dispose_template(typeof(PreviewPane));
+            }
+            base.dispose();
         }
     }
 }

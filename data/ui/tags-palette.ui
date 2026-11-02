@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesTagPalette" parent="GtkPopover">
+    <property name="has-arrow">false</property>
+    <property name="child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">8</property>
+        <child>
+          <object class="GtkFlowBox" id="palette">
+            <property name="selection-mode">none</property>
+            <property name="max-children-per-line">4</property>
+            <property name="min-children-per-line">3</property>
+            <property name="homogeneous">true</property>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="tooltip-text" translatable="yes">Red</property>
+                <property name="child">
+                  <object class="MajorisFilesTagMarker">
+                    <property name="color">#EF4444</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="tooltip-text" translatable="yes">Orange</property>
+                <property name="child">
+                  <object class="MajorisFilesTagMarker">
+                    <property name="color">#F97316</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="tooltip-text" translatable="yes">Yellow</property>
+                <property name="child">
+                  <object class="MajorisFilesTagMarker">
+                    <property name="color">#F59E0B</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="tooltip-text" translatable="yes">Green</property>
+                <property name="child">
+                  <object class="MajorisFilesTagMarker">
+                    <property name="color">#22C55E</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="tooltip-text" translatable="yes">Blue</property>
+                <property name="child">
+                  <object class="MajorisFilesTagMarker">
+                    <property name="color">#3B82F6</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="tooltip-text" translatable="yes">Purple</property>
+                <property name="child">
+                  <object class="MajorisFilesTagMarker">
+                    <property name="color">#A855F7</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="tooltip-text" translatable="yes">Grey</property>
+                <property name="child">
+                  <object class="MajorisFilesTagMarker">
+                    <property name="color">#9CA3AF</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkToggleButton">
+                <property name="tooltip-text" translatable="yes">No Colour</property>
+                <property name="child">
+                  <object class="MajorisFilesTagMarker">
+                    <property name="color" />
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="custom">
+            <property name="label" translatable="yes">Custom Colour…</property>
+          </object>
+        </child>
+      </object>
+    </property>
+  </template>
+</interface>

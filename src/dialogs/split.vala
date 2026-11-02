@@ -1,54 +1,52 @@
 namespace MajorisFiles {
+    [GtkTemplate (ui = "/com/majoris/files/ui/split.ui")]
     public class SplitDialog : Adw.PreferencesDialog {
+        private bool template_disposing;
         FileItem item;
         File destination;
         Gtk.Window owner_window;
         OperationManager operations;
-        Adw.ComboRow method = new Adw.ComboRow();
-        Adw.ComboRow units = new Adw.ComboRow();
-        Gtk.SpinButton amount = new Gtk.SpinButton.with_range(1, 1000000000, 1);
-        Adw.ActionRow estimate = new Adw.ActionRow();
+        [GtkChild]
+        private unowned Adw.ComboRow method;
+        [GtkChild]
+        private unowned Adw.ComboRow units;
+        [GtkChild]
+        private unowned Gtk.SpinButton amount;
+        [GtkChild]
+        private unowned Adw.ActionRow estimate;
         Cancellable token = new Cancellable();
-        Adw.SwitchRow manifest = new Adw.SwitchRow();
+        [GtkChild]
+        private unowned Adw.SwitchRow manifest;
+
+        [GtkChild] private unowned Gtk.Button choose;
+        [GtkChild] private unowned Adw.ActionRow explanation;
+        [GtkChild] private unowned Adw.PreferencesGroup group;
+        [GtkChild] private unowned Adw.PreferencesPage page;
+        [GtkChild] private unowned Adw.ComboRow preset;
+        [GtkChild] private unowned Adw.ActionRow source;
+        [GtkChild] private unowned Gtk.Button start;
+        [GtkChild] private unowned Adw.ActionRow target;
+        [GtkChild] private unowned Adw.ActionRow value;
         public SplitDialog(Gtk.Window owner_window, FileItem item, File destination, OperationManager operations)
         {
             this.owner_window = owner_window;
             this.item = item;
             this.destination = destination;
             this.operations = operations;
-            title = "Split File";
-            var page = new Adw.PreferencesPage();
-            var group = new Adw.PreferencesGroup();
-            page.add(group);
-            add(page);
-            var source = new Adw.ActionRow();
+
             source.title = item.name;
             source.subtitle = Paths.size(item.bytes);
-            group.add(source);
-            var target = new Adw.ActionRow();
-            target.title = _("Destination");
+
             target.subtitle = destination.get_parse_name();
-            var choose = new Gtk.Button.with_label(_("Choose…"));
-            target.add_suffix(choose);
-            group.add(target);
+
             choose.clicked.connect(() => choose_destination.begin(target));
-            method.title = _("Split By");
-            method.model = new Gtk.StringList({"Part Size", "Number of Parts", "Destination Filesystem Limit"});
-            group.add(method);
-            var preset = new Adw.ComboRow();
-            preset.title = _("Preset");
-            preset.model = new Gtk.StringList({"Custom", "25 MB", "100 MB", "500 MB", "1 GB", "2 GB", "4 GB"});
-            group.add(preset);
-            var value = new Adw.ActionRow();
-            value.title = _("Amount");
-            amount.value = 2048;
-            amount.digits = 0;
-            value.add_suffix(amount);
-            group.add(value);
-            units.title = _("Size Unit");
-            units.model = new Gtk.StringList({"Bytes", "KiB", "MiB", "GiB"});
-            units.selected = 2;
-            group.add(units);
+
+
+
+
+
+
+
             preset.notify["selected"].connect(() => {
                 if(preset.selected == 0)
                     return;
@@ -58,21 +56,7 @@ namespace MajorisFiles {
                 amount.value = sizes[preset.selected];
                 update_estimate.begin();
             });
-            // Decimal presets may exceed the custom unit's initial spin range.
-            amount.set_range(1, 4000000000);
-            estimate.title = _("Estimated Output");
-            group.add(estimate);
-            var explanation = new Adw.ActionRow();
-            explanation.title = _("Original kept");
-            explanation.subtitle = _("Parts are streamed to new files. Existing outputs are never overwritten. Up to 10,000 parts.");
-            group.add(explanation);
-            manifest.title = _("Include SHA-256 Manifest");
-            manifest.subtitle = _("Recommended: verifies every part and the reconstructed file. Without it, missing final parts cannot be detected.");
-            manifest.active = true;
-            group.add(manifest);
-            var start = new Gtk.Button.with_label(_("Split File"));
-            start.add_css_class("suggested-action");
-            group.add(start);
+
             start.clicked.connect(() => split.begin(start));
             amount.value_changed.connect(() => update_estimate.begin());
             units.notify["selected"].connect(() => update_estimate.begin());
@@ -161,6 +145,14 @@ namespace MajorisFiles {
                     Dialogs.error(owner_window, e.message);
                 start.sensitive = true;
             }
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                if (token != null) token.cancel();
+                dispose_template(typeof(SplitDialog));
+            }
+            base.dispose();
         }
     }
 }

@@ -1,9 +1,13 @@
 namespace MajorisFiles {
     // User colour data is drawn directly; all control styling stays in the theme.
+    [GtkTemplate (ui = "/com/majoris/files/ui/tag-marker.ui")]
     public class TagMarker : Gtk.DrawingArea {
+        private bool template_disposing;
         public string color { get; set; default = ""; }
         public TagMarker(string color = "") {
-            this.color = color; width_request = 18; height_request = 18; valign = Gtk.Align.CENTER;
+            this.color = color;
+        }
+        construct {
             notify["color"].connect(queue_draw);
             set_draw_func(draw_marker);
         }
@@ -13,28 +17,39 @@ namespace MajorisFiles {
             cr.set_source_rgba(rgba.red, rgba.green, rgba.blue, 1); cr.arc(width / 2.0, height / 2.0, 5, 0, Math.PI * 2);
             if (marker.color == "") { cr.set_line_width(1.5); cr.stroke(); } else cr.fill();
         }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                dispose_template(typeof(TagMarker));
+            }
+            base.dispose();
+        }
     }
 
+    [GtkTemplate (ui = "/com/majoris/files/ui/tags-palette.ui")]
     public class TagPalette : Gtk.Popover {
+        private bool template_disposing;
+        static construct { typeof(TagMarker).ensure(); }
+        [GtkChild] private unowned Gtk.FlowBox palette;
+        [GtkChild] private unowned Gtk.Button custom;
         public signal void chosen(string color);
         public signal void failed(string message);
         public TagPalette(string current) {
-            has_arrow = false; build_palette(this, current);
+            build_palette(this, current);
         }
         static void build_palette(TagPalette palette_owner, string current) {
             weak TagPalette owner = palette_owner;
-            var box = new Gtk.Box(Gtk.Orientation.VERTICAL, 8); palette_owner.child = box;
-            var palette = new Gtk.FlowBox(); palette.selection_mode = Gtk.SelectionMode.NONE; palette.max_children_per_line = 4; palette.min_children_per_line = 3; palette.homogeneous = true; box.append(palette);
-            string[] names = {_("Red"), _("Orange"), _("Yellow"), _("Green"), _("Blue"), _("Purple"), _("Grey"), _("No Colour")};
             string[] colors = {"#EF4444", "#F97316", "#F59E0B", "#22C55E", "#3B82F6", "#A855F7", "#9CA3AF", ""};
             string normalized = current; try { normalized = MetadataStore.validate_tag_color(current); } catch (Error e) {}
             for (int i = 0; i < colors.length; i++) {
-                string color = colors[i]; var button = new Gtk.ToggleButton(); button.child = new TagMarker(color); button.tooltip_text = names[i];
-                button.update_property(Gtk.AccessibleProperty.LABEL, names[i], -1); button.active = normalized == color;
-                button.clicked.connect(() => { if (owner != null) { owner.chosen(color); owner.popdown(); } }); palette.append(button);
+                string color = colors[i];
+                var button = (Gtk.ToggleButton)palette_owner.palette.get_child_at_index(i).child;
+                button.active = normalized == color;
+                button.clicked.connect(() => { if (owner != null) { owner.chosen(color); owner.popdown(); } });
             }
             bool custom_selected = normalized != "" && !(normalized in colors);
-            var custom = new Gtk.Button.with_label(custom_selected ? _("Custom Colour… (Selected)") : _("Custom Colour…")); box.append(custom);
+            var custom = palette_owner.custom;
+            custom.label = custom_selected ? _("Custom Colour… (Selected)") : _("Custom Colour…");
             custom.clicked.connect(() => {
                 if (owner == null) return;
                 // Keep the palette alive only for the native chooser's bounded task.
@@ -47,48 +62,77 @@ namespace MajorisFiles {
                 });
             });
         }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                child = null;
+                dispose_template(typeof(TagPalette));
+            }
+            base.dispose();
+        }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/tag-name-editor.ui")]
     public class TagNameEditor : Gtk.Box {
-        public Gtk.Entry entry = new Gtk.Entry();
-        public Gtk.Label error_label = new Gtk.Label("");
+        private bool template_disposing;
+        [GtkChild]
+        public unowned Gtk.Entry entry;
+        [GtkChild]
+        public unowned Gtk.Label error_label;
         public signal void submitted(string name);
         public signal void cancelled();
-        public TagNameEditor() {
-            Object(orientation: Gtk.Orientation.VERTICAL, spacing: 4);
-            entry.hexpand = true; entry.placeholder_text = _("Tag name"); entry.update_property(Gtk.AccessibleProperty.LABEL, _("Tag name"), -1);
-            append(entry); error_label.wrap = true; error_label.xalign = 0; error_label.visible = false; error_label.add_css_class("error"); append(error_label);
+
+        public TagNameEditor() { }
+        construct {
+              entry.update_property(Gtk.AccessibleProperty.LABEL, _("Tag name"), -1);
+
             entry.activate.connect(() => submitted(entry.text));
             var keys = new Gtk.EventControllerKey(); keys.propagation_phase = Gtk.PropagationPhase.CAPTURE; keys.key_pressed.connect((key, code, mods) => { if (key == Gdk.Key.Escape) { cancelled(); return true; } return false; }); entry.add_controller(keys);
         }
         public void show_error(string message) { error_label.label = message; error_label.visible = true; entry.add_css_class("error"); entry.grab_focus(); }
         public void reset(string name = "") { error_label.visible = false; entry.remove_css_class("error"); entry.text = name; }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                dispose_template(typeof(TagNameEditor));
+            }
+            base.dispose();
+        }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/tags-manager-row.ui")]
     public class TagManageRow : Gtk.ListBoxRow {
+        private bool template_disposing;
+        static construct { typeof(TagNameEditor).ensure(); typeof(TagMarker).ensure(); }
         public TagDefinition? tag;
-        public TagNameEditor editor = new TagNameEditor();
-        public Gtk.Label label = new Gtk.Label("");
-        public Gtk.Switch sidebar_switch = new Gtk.Switch();
-        public Gtk.MenuButton color_button = new Gtk.MenuButton();
-        public TagMarker marker = new TagMarker();
-        Gtk.Stack name_stack = new Gtk.Stack();
+        [GtkChild]
+        public unowned TagNameEditor editor;
+        [GtkChild]
+        public unowned Gtk.Label label;
+        [GtkChild]
+        public unowned Gtk.Switch sidebar_switch;
+        [GtkChild]
+        public unowned Gtk.MenuButton color_button;
+        [GtkChild]
+        public unowned TagMarker marker;
+        [GtkChild]
+        private unowned Gtk.Stack name_stack;
         MetadataStore metadata;
         public bool editing { get; private set; }
         bool updating;
         Gtk.EventControllerFocus focus = new Gtk.EventControllerFocus();
         public signal void draft_cancelled();
+
+        [GtkChild] private unowned Gtk.Box box;
         public TagManageRow(MetadataStore store, TagDefinition? tag = null) {
             this.metadata = store; this.tag = tag;
-            var box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 12); child = box;
-            color_button.child = marker; color_button.valign = Gtk.Align.CENTER; MenuPresentation.button(color_button); box.append(color_button);
+
+              MenuPresentation.button(color_button);
             color_button.set_create_popup_func(create_palette);
-            label.xalign = 0; label.ellipsize = Pango.EllipsizeMode.END; label.hexpand = true; name_stack.hexpand = true;
-            name_stack.add_named(label, "label"); name_stack.add_named(editor, "editor"); box.append(name_stack);
-            sidebar_switch.valign = Gtk.Align.CENTER; sidebar_switch.tooltip_text = _("Show in Sidebar"); box.append(sidebar_switch);
+
             editor.submitted.connect(commit);
             editor.cancelled.connect(() => { editing = false; if (this.tag == null) draft_cancelled(); else name_stack.visible_child_name = "label"; });
             focus.leave.connect(on_focus_leave); editor.entry.add_controller(focus);
             sidebar_switch.notify["active"].connect(() => {
-                if (updating || this.tag == null) return;
+                if (template_disposing || updating || this.tag == null) return;
                 try { var latest = metadata.tag_by_id(this.tag.id); if (latest != null) metadata.update_tag(latest.id, latest.name, latest.color, sidebar_switch.active); }
                 catch (Error e) { begin_edit(); editor.show_error(e.message); }
             });
@@ -111,7 +155,7 @@ namespace MajorisFiles {
             try { var latest = metadata.tag_by_id(tag.id); if (latest != null) metadata.update_tag(latest.id, latest.name, color, latest.sidebar_visible); }
             catch (Error e) { begin_edit(); editor.show_error(e.message); }
         }
-        void on_focus_leave() { Idle.add(() => { if (editing && !focus.contains_focus && get_root() != null) commit(editor.entry.text); return Source.REMOVE; }); }
+        void on_focus_leave() { Idle.add(() => { if (!template_disposing && editing && !focus.contains_focus && get_root() != null) commit(editor.entry.text); return Source.REMOVE; }); }
         bool accept_reorder(Value value, double x, double y) {
             string? text = value.get_string(); int64 id = 0;
             if (text == null || !text.has_prefix("majoris-tag:") || !int64.try_parse(text.substring(12), out id) || tag == null) return false;
@@ -140,31 +184,46 @@ namespace MajorisFiles {
                 editing = false; update(tag);
             } catch (Error e) { editor.show_error(e.message); }
         }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                child = null;
+                dispose_template(typeof(TagManageRow));
+            }
+            base.dispose();
+        }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/tags-manager.ui")]
     public class TagsDialog : Adw.PreferencesDialog {
+        private bool template_disposing;
         MetadataStore metadata;
-        public Gtk.ListBox list = new Gtk.ListBox();
-        public Gtk.Button new_button = new Gtk.Button.with_label(_("New Tag"));
-        public Gtk.Button rename_button = new Gtk.Button.with_label(_("Rename"));
-        public Gtk.Button delete_button = new Gtk.Button.with_label(_("Delete Tag"));
+        [GtkChild]
+        public unowned Gtk.ListBox list;
+        [GtkChild]
+        public unowned Gtk.Button new_button;
+        [GtkChild]
+        public unowned Gtk.Button rename_button;
+        [GtkChild]
+        public unowned Gtk.Button delete_button;
         Gee.ArrayList<TagManageRow> rows = new Gee.ArrayList<TagManageRow>();
         ulong handler;
         uint refresh_source;
+
+        [GtkChild] private unowned Gtk.Box controls;
+        [GtkChild] private unowned Adw.PreferencesGroup group;
+        [GtkChild] private unowned Adw.PreferencesPage page;
         public TagsDialog(MetadataStore store) {
-            this.metadata = store; title = _("Manage Tags"); content_width = 560; content_height = 570; search_enabled = false;
-            var page = new Adw.PreferencesPage(); page.description = _("Create and organise tags for your files and folders. Drag rows to reorder, or use Alt+Up and Alt+Down."); add(page);
-            var group = new Adw.PreferencesGroup(); group.title = _("Tags"); group.header_suffix = new_button; page.add(group);
-            list.selection_mode = Gtk.SelectionMode.SINGLE; list.add_css_class("boxed-list");
-            list.set_sort_func(compare_rows); group.add(list);
-            var controls = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8); controls.append(rename_button); controls.append(delete_button); group.add(controls);
-            delete_button.add_css_class("destructive-action");
+            this.metadata = store;
+
+            list.set_sort_func(compare_rows);
+
             new_button.clicked.connect(() => {
                 foreach (var row in rows) if (row.tag == null) { row.begin_edit(); return; }
                 var row = make_row(null); rows.add(row); list.append(row); list.select_row(row); row.begin_edit();
             });
             rename_button.clicked.connect(() => { var row = list.get_selected_row() as TagManageRow; if (row != null) row.begin_edit(); });
             delete_button.clicked.connect(() => delete_selected.begin());
-            list.row_selected.connect(() => { var row = list.get_selected_row() as TagManageRow; rename_button.sensitive = row != null && row.tag != null; delete_button.sensitive = rename_button.sensitive; });
+            list.row_selected.connect(() => { if (template_disposing || list == null) return; var row = list.get_selected_row() as TagManageRow; rename_button.sensitive = row != null && row.tag != null; delete_button.sensitive = rename_button.sensitive; });
             var keys = new Gtk.EventControllerKey(); keys.propagation_phase = Gtk.PropagationPhase.CAPTURE; keys.key_pressed.connect((key, code, mods) => {
                 var row = list.get_selected_row() as TagManageRow; if (row == null || row.editing) return false;
                 if (key == Gdk.Key.F2) { row.begin_edit(); return true; }
@@ -189,7 +248,13 @@ namespace MajorisFiles {
             if (handler != 0) { metadata.disconnect(handler); handler = 0; }
             if (refresh_source != 0) { Source.remove(refresh_source); refresh_source = 0; }
         }
-        protected override void dispose() { disconnect_metadata(); base.dispose(); }
+        protected override void dispose() {
+            if (template_disposing) { base.dispose(); return; }
+            template_disposing = true;
+            disconnect_metadata();
+            dispose_template(typeof(TagsDialog));
+            base.dispose();
+        }
         void schedule_refresh() { if (refresh_source == 0) refresh_source = Idle.add(() => { refresh_source = 0; refresh(); return Source.REMOVE; }); }
         TagManageRow make_row(TagDefinition? tag) { var row = new TagManageRow(metadata, tag); row.draft_cancelled.connect(remove_drafts); return row; }
         void remove_drafts() {
@@ -218,31 +283,40 @@ namespace MajorisFiles {
             if ((yield confirm.choose(this, null)) == "delete") try { metadata.remove_tag(id); } catch (Error e) { add_toast(new Adw.Toast(e.message)); }
         }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/tags-assignment.ui")]
     public class TagAssignmentDialog : Adw.PreferencesDialog {
+        private bool template_disposing;
+        static construct { typeof(TagNameEditor).ensure(); }
         MetadataStore metadata;
         public Gee.ArrayList<File> files = new Gee.ArrayList<File>();
-        public Gtk.SearchEntry search = new Gtk.SearchEntry();
-        public Gtk.ListBox list = new Gtk.ListBox();
-        public TagNameEditor creator = new TagNameEditor();
-        public Gtk.Button new_button = new Gtk.Button.with_label(_("New Tag"));
-        public Gtk.Button manage_button = new Gtk.Button.with_label(_("Manage Tags…"));
+        [GtkChild]
+        public unowned Gtk.SearchEntry search;
+        [GtkChild]
+        public unowned Gtk.ListBox list;
+        [GtkChild] public unowned TagNameEditor creator;
+        [GtkChild]
+        public unowned Gtk.Button new_button;
+        [GtkChild]
+        public unowned Gtk.Button manage_button;
         Gee.HashMap<string, Gtk.CheckButton> checks = new Gee.HashMap<string, Gtk.CheckButton>();
         Gee.HashMap<string, Adw.ActionRow> rows = new Gee.HashMap<string, Adw.ActionRow>();
         bool updating;
         ulong definitions_handler;
         ulong assignments_handler;
         Gee.HashMap<string, ulong?> toggled_handlers = new Gee.HashMap<string, ulong?>();
+
+        [GtkChild] private unowned Gtk.Box controls;
+        [GtkChild] private unowned Adw.PreferencesGroup group;
+        [GtkChild] private unowned Adw.PreferencesPage page;
         public TagAssignmentDialog(MetadataStore store, Gee.List<FileItem> selection) {
-            this.metadata = store; title = _("Tags"); content_width = 420; content_height = 500; search_enabled = false;
+            this.metadata = store;
             foreach (var item in selection) files.add(item.file);
-            var page = new Adw.PreferencesPage(); add(page); var group = new Adw.PreferencesGroup(); page.add(group);
-            search.placeholder_text = _("Search tags…"); group.add(search);
-            list.selection_mode = Gtk.SelectionMode.NONE; list.add_css_class("boxed-list");
-            list.set_sort_func(compare_rows); group.add(list);
+
+            list.set_sort_func(compare_rows);
             list.set_filter_func(filter_for(search));
-            search.search_changed.connect(() => list.invalidate_filter());
-            creator.visible = false; group.add(creator);
-            var controls = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8); controls.append(new_button); controls.append(manage_button); group.add(controls);
+            search.search_changed.connect(() => { if (!template_disposing && list != null) list.invalidate_filter(); });
+
+
             new_button.clicked.connect(() => { creator.visible = true; creator.reset(search.text); creator.entry.grab_focus(); });
             creator.cancelled.connect(() => creator.visible = false);
             creator.submitted.connect((name) => {
@@ -266,7 +340,7 @@ namespace MajorisFiles {
         static ulong bind_toggle(Gtk.CheckButton check, TagAssignmentDialog dialog, int64 id) {
             weak TagAssignmentDialog owner = dialog; weak Gtk.CheckButton toggle = check;
             return check.toggled.connect(() => {
-                if (owner == null || toggle == null || owner.updating) return;
+                if (owner == null || toggle == null || owner.template_disposing || owner.updating) return;
                 bool assigned = toggle.active || toggle.inconsistent;
                 try { owner.metadata.set_tag_for_files(owner.files, id, assigned); }
                 catch (Error e) { owner.add_toast(new Adw.Toast(e.message)); owner.refresh_states(); }
@@ -282,7 +356,13 @@ namespace MajorisFiles {
             if (assignments_handler != 0) { metadata.disconnect(assignments_handler); assignments_handler = 0; }
             foreach (var id in toggled_handlers.keys) if (checks.has_key(id)) checks[id].disconnect(toggled_handlers[id]); toggled_handlers.clear();
         }
-        protected override void dispose() { disconnect_metadata(); base.dispose(); }
+        protected override void dispose() {
+            if (template_disposing) { base.dispose(); return; }
+            template_disposing = true;
+            disconnect_metadata();
+            dispose_template(typeof(TagAssignmentDialog));
+            base.dispose();
+        }
         public Gtk.CheckButton? checkbox(int64 id) { return checks[id.to_string()]; }
         public void refresh() {
             updating = true;
@@ -292,8 +372,9 @@ namespace MajorisFiles {
             for (int i = 0; i < tags.size; i++) {
                 var tag = tags[i]; var row = rows[tag.id.to_string()];
                 if (row == null) {
-                    row = new Adw.ActionRow(); row.use_markup = false;
-                    var check = new Gtk.CheckButton(); var marker = new TagMarker(); row.add_prefix(check); row.add_prefix(marker); row.set_data<TagMarker>("marker", marker); row.activatable_widget = check;
+                    var presentation = new TagAssignmentRow(); row = presentation;
+                    var check = presentation.check;
+                    row.set_data<TagMarker>("marker", presentation.marker);
                     int64 id = tag.id; toggled_handlers[id.to_string()] = bind_toggle(check, this, id);
                     checks[id.to_string()] = check; rows[id.to_string()] = row; list.append(row);
                 }

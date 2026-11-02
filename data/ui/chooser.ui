@@ -1,0 +1,89 @@
+<interface domain="majoris-files">
+  <template class="MajorisFilesChooserWindow" parent="AdwWindow">
+    <property name="content">
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar">
+            <child type="start">
+              <object class="GtkButton" id="new_folder">
+                <property name="icon-name">folder-new-symbolic</property>
+                <property name="tooltip-text" translatable="yes">New Folder</property>
+                <property name="sensitive">false</property>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkButton" id="preview_button">
+                <property name="icon-name">view-reveal-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Preview Pane</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <property name="content">
+          <object class="GtkBox" id="box">
+            <property name="orientation">vertical</property>
+            <property name="spacing">8</property>
+            <child>
+              <object class="GtkProgressBar" id="transfer_progress">
+                <property name="show-text">true</property>
+                <property name="visible">false</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">8</property>
+                <child>
+                  <object class="GtkLabel" id="filename_label">
+                    <property name="label" translatable="yes">Name:</property>
+                    <property name="mnemonic-widget">filename</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="filename">
+                    <property name="hexpand">true</property>
+                    <property name="tooltip-text" translatable="yes">Filename</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkDropDown" id="filters">
+                    <property name="tooltip-text" translatable="yes">File Type</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="hexpand">true</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="cancel_button">
+                    <property name="label" translatable="yes">Cancel</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="accept">
+                    <style>
+                      <class name="suggested-action" />
+                    </style>
+                  </object>
+                </child>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="margin-top">8</property>
+                <property name="margin-bottom">12</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="summary">
+                <property name="wrap">true</property>
+                <property name="visible">false</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

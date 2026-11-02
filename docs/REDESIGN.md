@@ -8,14 +8,11 @@ session restoration, chooser and portal integrations retain their existing code.
 ## Theme ownership
 
 GNOME installs, manages and activates Majoris Theme in light and dark appearances.
-Files neither bundles theme stylesheets/assets nor changes GNOME settings. The
-FilesTheme.ensure() entry point registers only data/theme/files.css at application
-priority. It does not observe StyleManager or switch theme resources.
-
-The resource manifest includes only Files-owned layout CSS. Navigation and command
-rows each use 6px vertical and 12px horizontal CSS padding. Navigation has zero
-widget margins and retains 4px child spacing. Section and status padding are the
-only other application rules; generic controls and appearance belong to GNOME.
+Files neither bundles theme stylesheets/assets nor changes GNOME settings. UI
+composition is bundled as GtkBuilder XML; Files registers no application CSS
+provider. Shared Majoris.Toolbar APIs own toolbar setup and presentation, and the
+status area uses the existing Majoris statusbar contract. See
+[the current architecture](architecture.md) and [migration report](gtkbuilder-migration.md).
 
 The location stack uses majoris-location-bar, breadcrumb buttons use
 majoris-location-crumb, and the current folder uses majoris-location-current.

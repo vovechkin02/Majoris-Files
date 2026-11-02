@@ -52,7 +52,8 @@ are imposed; larger fonts can increase allocations.
 
 Navigation and commands both request the Theme's inset divider. There are no
 Files border/padding rules for either toolbar, and no doubled outer wrapper padding.
-The only remaining application layout CSS is `.files-status`.
+Files supplies no application stylesheet. The XML-defined status area uses the
+shared `majoris-statusbar` contract.
 
 ## Audit boundaries
 
@@ -147,8 +148,8 @@ failure was observed in the tested matrix.
 - `src/window/window.vala`: focus-aware quick-preview availability so native
   toolbar controls retain Space activation and content retains quick preview.
 - `meson.build`, `debian/control`: packaged SDK/GTK requirements and native tests.
-- `data/theme/files.css`: removal of the obsolete navigation/command inset rule;
-  only the status row inset remains.
+- The subsequent GtkBuilder migration removed `data/theme/files.css` and its
+  provider entirely; status presentation now comes from the shared Theme.
 - `tests/{toolbars,redesign}.vala`, `tests/theme-layout.py`: native behavior and
   geometry contracts, updated ownership assertions.
 - `tools/{capture-toolbars,report-toolbars,verify-toolbar-runtime}.py`: reproducible

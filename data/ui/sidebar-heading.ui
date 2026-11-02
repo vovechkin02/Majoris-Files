@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <object class="GtkLabel" id="root">
+    <property name="halign">start</property>
+    <style>
+      <class name="majoris-sidebar-heading" />
+    </style>
+  </object>
+</interface>

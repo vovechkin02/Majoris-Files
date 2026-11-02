@@ -2,8 +2,10 @@ namespace MajorisFiles {
     public interface SessionRecorder : Object {
         public abstract void queue_session_save();
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/window.ui")]
     public class FilesWindow : Adw.ApplicationWindow {
-        public Adw.TabView tabs = new Adw.TabView();
+        private bool template_disposing;
+        [GtkChild] public unowned Adw.TabView tabs;
         MetadataStore metadata;
         Places places;
         OperationManager operations;
@@ -12,9 +14,12 @@ namespace MajorisFiles {
         QuickActionRegistry providers = new QuickActionRegistry();
         ExtensionManager extension_manager;
         Adw.TabPage? menu_page;
-        Adw.Banner recovery_banner=new Adw.Banner("");
+        [GtkChild] private unowned Adw.Banner recovery_banner;
         string reviewed_recovery="";
-        Gtk.Button operations_button;
+        [GtkChild] private unowned Gtk.Button operations_button;
+        [GtkChild] private unowned Gtk.MenuButton menu_button;
+        [GtkChild] private unowned Adw.TabOverview overview;
+
         PreferencesDialog? preferences_dialog;
         TagsDialog? tags_dialog;
         public Browser? current {
@@ -24,11 +29,12 @@ namespace MajorisFiles {
         }
         public FilesWindow(Gtk.Application app, MetadataStore metadata, Places places, OperationManager operations, File? initial = null, bool blank = false)
         {
-            Object(application: app, title: _("Files"), default_width: 1100, default_height: 740);
+            Object(application: app);
             this.metadata = metadata;
             this.places = places;
             this.operations = operations;
             operations.renamed.connect((source, result) => {
+                if (template_disposing) return;
                 for (int i = 0; i < tabs.n_pages; i++)
                     ((Browser)tabs.get_nth_page(i).child).reconcile_history_rename(source, result);
             });
@@ -36,7 +42,7 @@ namespace MajorisFiles {
             extension_manager = ExtensionManager.get_default(metadata);
             foreach(var extension in extension_manager.extensions)if("nearby" in extension.capabilities)providers.register_nearby(new ExternalNearby(extension));
             foreach (var extension in extension_manager.extensions) providers.register_provider(extension);
-            metadata.changed.connect(()=>{for(int i=0;i<tabs.n_pages;i++){ var browser=(Browser)tabs.get_nth_page(i).child; extension_manager.columns.begin(browser); tabs.get_nth_page(i).title = location_title(browser.location); }});
+            metadata.changed.connect(()=>{if(template_disposing)return;for(int i=0;i<tabs.n_pages;i++){ var browser=(Browser)tabs.get_nth_page(i).child; extension_manager.columns.begin(browser); tabs.get_nth_page(i).title = location_title(browser.location); }});
             close_request.connect(() => { for(int i = 0; i < tabs.n_pages; i++)
                                               ((Browser)tabs.get_nth_page(i).child).cancel();
                                           return false;
@@ -54,34 +60,11 @@ namespace MajorisFiles {
                     });
             });
             add_action(provider_action);
-            var toolbar = new Adw.ToolbarView();
-            var header = new Adw.HeaderBar();
-            header.title_widget = new Adw.WindowTitle("Files", "");
-            header.pack_start(Browser.button("tab-new-symbolic", _("New Tab"), () => new_tab(current.location)));
-            var progress = new Gtk.Button.from_icon_name("folder-download-symbolic"); operations_button = progress;
-            progress.tooltip_text = _("File Operations");
-            operations.bind_property("activity-icon", progress, "icon-name", BindingFlags.SYNC_CREATE);
-            progress.clicked.connect(() => FileOperationsPresentation.show(operations));
-            header.pack_end(progress);
-            var menu = application_menu();
-            var menu_button = new Gtk.MenuButton();
+            operations.bind_property("activity-icon", operations_button, "icon-name", BindingFlags.SYNC_CREATE);
+            operations_button.clicked.connect(() => FileOperationsPresentation.show(operations));
             MenuPresentation.button(menu_button);
-            menu_button.icon_name = "open-menu-symbolic";
-            menu_button.menu_model = menu;
-            header.pack_end(menu_button);
-            toolbar.add_top_bar(header);
-            var tabbar = new Adw.TabBar();
-            tabbar.add_css_class("majoris-document-tabs");
-            tabbar.view = tabs;
-            tabbar.autohide = false;
-            tabbar.expand_tabs = false;
-            var tab_menu = new Menu();
-            foreach(var entry in new string[] {"Duplicate|win.tab-duplicate", "Pin / Unpin|win.tab-pin", "Move Left|win.tab-left", "Move Right|win.tab-right", "Move to New Window|win.tab-detach", "Close Other Tabs|win.tab-close-others", "Close Tabs to the Right|win.tab-close-right", "Close|win.tab-close"})
-            {
-                var parts = entry.split("|");
-                tab_menu.append(parts[0], parts[1]);
-            }
-            tabs.menu_model = tab_menu;
+            menu_button.menu_model = application_menu();
+            tabs.menu_model = (Menu) new Gtk.Builder.from_resource("/com/majoris/files/ui/menus.ui").get_object("tab_menu");
             tabs.setup_menu.connect((page) => menu_page = page);
             action("tab-duplicate", () => { var page = menu_page ?? tabs.selected_page;
                                             if(page != null)
@@ -125,22 +108,9 @@ namespace MajorisFiles {
                 if(tabs.n_pages == 0)
                     close();
             });
-            recovery_banner.title=_("File recovery is available");recovery_banner.button_label=_("Review");
             recovery_banner.button_clicked.connect(()=>{reviewed_recovery=operations.recovery_signature();recovery_banner.revealed=false;FileOperationsPresentation.show(operations);});
             operations.recovery_changed.connect(refresh_recovery);
             refresh_recovery();
-            var document_content = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
-            document_content.append(tabbar);
-            document_content.append(recovery_banner);
-            document_content.append(tabs);
-            tabs.vexpand = true;
-            document_content.vexpand = true;
-            toolbar.content = document_content;
-            var overview = new Adw.TabOverview();
-            overview.view = tabs;
-            overview.child = toolbar;
-            content = overview;
-            header.pack_end(Browser.button("view-grid-symbolic", _("Tab Overview"), () => overview.open = !overview.open));
             tabs.close_page.connect((page) => { var browser = page.child as Browser;
                                                 if (browser != null)
                                                 {
@@ -157,7 +127,7 @@ namespace MajorisFiles {
                                                window.present();
                                                return window.tabs;
                 });
-            tabs.notify["selected-page"].connect(() => { for (int i = 0; i < tabs.n_pages; i++) { var browser = tabs.get_nth_page(i).child as Browser; if (browser != null && browser != current) browser.cancel_inline_rename(); } update_commands(); var recorder = app as SessionRecorder;
+            tabs.notify["selected-page"].connect(() => { if (template_disposing) return; for (int i = 0; i < tabs.n_pages; i++) { var browser = tabs.get_nth_page(i).child as Browser; if (browser != null && browser != current) browser.cancel_inline_rename(); } update_commands(); var recorder = app as SessionRecorder;
                                                          if(recorder != null)
                                                              recorder.queue_session_save();
                 });
@@ -259,9 +229,9 @@ namespace MajorisFiles {
             app.set_accels_for_action("win.shortcuts", {"<Control>question"});
             action("manage-tags", () => {if(tags_dialog==null){tags_dialog=new TagsDialog(metadata);tags_dialog.closed.connect(()=>tags_dialog=null);}tags_dialog.present(this);});
             action("about", () => {
-                var about=new Adw.AboutDialog();about.application_name=_("Files");about.application_icon="com.majoris.files";
-                about.version=APP_VERSION;about.developer_name="Majoris Developers";about.license_type=Gtk.License.GPL_3_0;
-                about.website="https://github.com/vovechkin02/Majoris-Files";about.issue_url="https://github.com/vovechkin02/Majoris-Files/issues";
+                typeof(Adw.AboutDialog).ensure();
+                var about = (Adw.AboutDialog)new Gtk.Builder.from_resource("/com/majoris/files/ui/about.ui").get_object("about");
+                about.version = APP_VERSION;
                 about.debug_info="Application ID: com.majoris.files\nVersion: "+APP_VERSION;about.present(this);
             });
             string[] names = {
@@ -288,14 +258,13 @@ namespace MajorisFiles {
                 });
         }
         public static Menu application_menu() {
-            var menu=new Menu();var tabs=new Menu();var application=new Menu();
-            tabs.append(_("New Window"),"app.new-window");tabs.append(_("New Tab"),"win.new-tab");tabs.append(_("Reopen Closed Tab"),"win.reopen");
-            application.append(_("Preferences…"),"win.preferences");application.append(_("Keyboard Shortcuts"),"win.shortcuts");application.append(_("About Files"),"win.about");
-            menu.append_section(null,tabs);menu.append_section(null,application);return menu;
+            return (Menu) new Gtk.Builder.from_resource("/com/majoris/files/ui/menus.ui").get_object("application_menu");
         }
-        void refresh_recovery(){string signature=operations.recovery_signature();if(signature=="")reviewed_recovery="";recovery_banner.revealed=signature!=""&&signature!=reviewed_recovery;update_commands();}
+        [GtkCallback]
+        void toggle_overview() { overview.open = !overview.open; }
+        void refresh_recovery(){if(template_disposing)return;string signature=operations.recovery_signature();if(signature=="")reviewed_recovery="";recovery_banner.revealed=signature!=""&&signature!=reviewed_recovery;update_commands();}
         public bool templates_available;
-        public Menu selection_menu(){var menu=new Menu();menu.append(_("Select All"),"win.select-all");menu.append(_("Select by Pattern…"),"win.select-pattern");menu.append(_("Invert Selection"),"win.invert-selection");menu.append(_("Select None"),"win.select-none");return menu;}
+        public Menu selection_menu() { return (Menu)new Gtk.Builder.from_resource("/com/majoris/files/ui/menus.ui").get_object("selection_menu"); }
         void action(string name, owned Callback callback)
         {
             var a = new SimpleAction(name, null);
@@ -660,13 +629,10 @@ namespace MajorisFiles {
                     items.add(item);
                 }
             }
-            var window = new Adw.Window();
+            var window = new QuickPreviewWindow();
             window.title = initial.name;
             window.transient_for = this;
-            window.default_width = 720;
-            window.default_height = 560;
-            var pane = new PreviewPane(metadata);
-            window.content = pane;
+            var pane = window.pane; pane.configure(metadata);
             pane.show_item.begin(initial);
             var keys = new Gtk.EventControllerKey();
             keys.key_pressed.connect((key, code, mods) => { if (key == Gdk.Key.Escape || key == Gdk.Key.space)
@@ -739,6 +705,14 @@ namespace MajorisFiles {
         {
             if(preferences_dialog==null){preferences_dialog=new PreferencesDialog(metadata);preferences_dialog.closed.connect(()=>preferences_dialog=null);}
             preferences_dialog.present(this);
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                content = null;
+                dispose_template(typeof(FilesWindow));
+            }
+            base.dispose();
         }
     }
 }

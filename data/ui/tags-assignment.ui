@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesTagAssignmentDialog" parent="AdwPreferencesDialog">
+    <child>
+      <object class="AdwPreferencesPage" id="page">
+        <child>
+          <object class="AdwPreferencesGroup" id="group">
+            <child>
+              <object class="GtkSearchEntry" id="search">
+                <property name="placeholder-text" translatable="yes">Search tags…</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkListBox" id="list">
+                <property name="selection-mode">none</property>
+                <style>
+                  <class name="boxed-list" />
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="MajorisFilesTagNameEditor" id="creator">
+                <property name="visible">false</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="controls">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">8</property>
+                <child>
+                  <object class="GtkButton" id="new_button">
+                    <property name="label" translatable="yes">New Tag</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="manage_button">
+                    <property name="label" translatable="yes">Manage Tags…</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <property name="title" translatable="yes">Tags</property>
+    <property name="content-width">420</property>
+    <property name="content-height">500</property>
+    <property name="search-enabled">false</property>
+  </template>
+</interface>

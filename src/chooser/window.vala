@@ -1,12 +1,14 @@
 namespace MajorisFiles {
+    [GtkTemplate (ui = "/com/majoris/files/ui/chooser.ui")]
     public class ChooserWindow : Adw.Window {
+        private bool template_disposing;
         public Browser browser;
         OperationManager creation_operations;
         public ChooserOptions options;
         public signal void completed(uint response, Variant results);
-        Gtk.Entry filename = new Gtk.Entry();
-        Gtk.Button accept;
-        Gtk.DropDown? filters;
+        [GtkChild] private unowned Gtk.Entry filename;
+        [GtkChild] private unowned Gtk.Button accept;
+        [GtkChild] private unowned Gtk.DropDown filters;
         bool finished;
         bool accepting;
         uint location_generation;
@@ -16,7 +18,13 @@ namespace MajorisFiles {
         Gee.HashMap<string, Gtk.Widget> choice_widgets = new Gee.HashMap<string, Gtk.Widget>();
         ChooserState state;
         MetadataStore metadata;
-        Gtk.ProgressBar transfer_progress = new Gtk.ProgressBar();
+        [GtkChild] private unowned Gtk.ProgressBar transfer_progress;
+        [GtkChild] private unowned Gtk.Box box;
+        [GtkChild] private unowned Gtk.Label filename_label;
+        [GtkChild] private unowned Gtk.Button new_folder;
+        [GtkChild] private unowned Gtk.Button preview_button;
+        [GtkChild] private unowned Gtk.Button cancel_button;
+        [GtkChild] private unowned Gtk.Label summary;
         public ChooserWindow(ChooserOptions options, MetadataStore metadata, Places places, string application_id = "")
         {
             Object(title: options.save ? "Save As" : (options.directory ? "Select Folder" : "Open"), default_width: 960, default_height: 660, modal: options.modal);
@@ -48,75 +56,37 @@ namespace MajorisFiles {
             browser.sidebar_width = state.dimension("sidebar-width", 180, 120, 420);
             browser.folders_only = options.directory;
             browser.rename_requested.connect((state) => rename_created.begin(state));
-            var toolbar = new Adw.ToolbarView();
-            var header = new Adw.HeaderBar();
-            toolbar.add_top_bar(header);
-            var new_folder = Browser.button("folder-new-symbolic", _("New Folder"), () => create_folder.begin()); new_folder.sensitive = false; header.pack_start(new_folder);
+            new_folder.clicked.connect(() => create_folder.begin());
             browser.location_changed.connect(() => new_folder.sensitive = browser.accepts_destination);
             browser.directory.loaded.connect(() => new_folder.sensitive = browser.accepts_destination);
-            header.pack_end(Browser.button("view-reveal-symbolic", _("Preview Pane"), () => { browser.preview.visible = !browser.preview.visible;
-                                                                                           var chosen = browser.selected();
-                                                                                           if (chosen.size > 0 && browser.preview.visible)
-                                                                                               browser.preview.show_item.begin(chosen[0]);
-                }));
-            var box = new Gtk.Box(Gtk.Orientation.VERTICAL, 8);
-            box.append(browser);
-            transfer_progress.show_text = true;
-            transfer_progress.visible = false;
-            box.append(transfer_progress);
-            var footer = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8);
-            footer.margin_start = 12;
-            footer.margin_end = 12;
-            footer.margin_top = 8;
-            footer.margin_bottom = 12;
-            if (options.save && !options.save_many)
-            {
-                var label = new Gtk.Label(_("Name:"));
-                label.mnemonic_widget = filename;
-                footer.append(label);
-                filename.hexpand = true;
-                filename.text = options.current_name;
-                filename.tooltip_text = _("Filename");
-                filename.activate.connect(() => accept_selection.begin());
-                footer.append(filename);
-            }
-            if (options.filters.size > 0)
-            {
+            preview_button.clicked.connect(() => {
+                browser.preview.visible = !browser.preview.visible;
+                var chosen = browser.selected();
+                if (chosen.size > 0 && browser.preview.visible) browser.preview.show_item.begin(chosen[0]);
+            });
+            box.prepend(browser);
+            filename_label.visible = filename.visible = options.save && !options.save_many;
+            filename.text = options.current_name;
+            filename.activate.connect(() => accept_selection.begin());
+            filters.visible = options.filters.size > 0;
+            if (options.filters.size > 0) {
                 string[] names = {};
-                foreach (var filter in options.filters)
-                    names += filter.name;
-                filters = new Gtk.DropDown.from_strings(names);
+                foreach (var filter in options.filters) names += filter.name;
+                filters.model = new Gtk.StringList(names);
                 filters.selected = options.selected_filter;
-                filters.tooltip_text = _("File Type");
-                filters.notify["selected"].connect(() => { options.selected_filter = filters.selected;
-                                                           browser.chooser_filter = options.filters[(int)filters.selected];
-                                                           browser.refilter();
-                    });
+                filters.notify["selected"].connect(() => {
+                    options.selected_filter = filters.selected;
+                    browser.chooser_filter = options.filters[(int)filters.selected];
+                    browser.refilter();
+                });
                 browser.chooser_filter = options.filters[(int)filters.selected];
-                footer.append(filters);
             }
-            var spacer = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
-            spacer.hexpand = true;
-            footer.append(spacer);
-            var cancel = new Gtk.Button.with_label(_("Cancel"));
-            cancel.clicked.connect(() => finish(1, new VariantBuilder(VariantType.VARDICT).end()));
-            footer.append(cancel);
-            accept = new Gtk.Button.with_label(options.accept_label != "" ? options.accept_label : (options.save ? "Save" : options.directory ? "Select" : "Open"));
-            accept.add_css_class("suggested-action");
+            cancel_button.clicked.connect(() => finish(1, new VariantBuilder(VariantType.VARDICT).end()));
+            accept.label = options.accept_label != "" ? options.accept_label : (options.save ? _("Save") : options.directory ? _("Select") : _("Open"));
             accept.clicked.connect(() => accept_selection.begin());
-            footer.append(accept);
-            box.append(footer);
-            if (options.save_many)
-            {
-                var summary = new Gtk.Label(_("Choose a destination folder for %u files. Existing files are kept; conflicting names receive a number.").printf(options.filenames.size));
-                summary.wrap = true;
-                summary.margin_start = 12;
-                summary.margin_end = 12;
-                box.append(summary);
-            }
+            summary.visible = options.save_many;
+            summary.label = _("Choose a destination folder for %u files. Existing files are kept; conflicting names receive a number.").printf(options.filenames.size);
             add_choices(box);
-            toolbar.content = box;
-            content = toolbar;
             browser.error.connect((message) => { Dialogs.error(this, message);
                 });
             browser.activated.connect((item) => { if (options.save)
@@ -381,11 +351,9 @@ namespace MajorisFiles {
                         if (pair.get_child_value(0).get_string() == initial)
                             selected = (uint)j;
                     }
-                    var row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8);
-                    row.append(new Gtk.Label(label));
-                    var combo = new Gtk.DropDown.from_strings(labels);
+                    var row = new ChooserChoiceRow(); row.label.label = label;
+                    var combo = row.combo; combo.model = new Gtk.StringList(labels);
                     combo.selected = selected;
-                    row.append(combo);
                     box.append(row);
                     choice_widgets[id] = combo;
                 }
@@ -407,6 +375,17 @@ namespace MajorisFiles {
                     result.add("(ss)", id, value);
                 }
             return result.end();
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                finished = true;
+                if (browser != null) browser.cancel();
+                if (token != null) token.cancel();
+                content = null;
+                dispose_template(typeof(ChooserWindow));
+            }
+            base.dispose();
         }
     }
 }

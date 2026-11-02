@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesSearchFilters" parent="AdwPreferencesDialog">
+    <child>
+      <object class="AdwPreferencesPage" id="page">
+        <child>
+          <object class="AdwPreferencesGroup" id="group">
+            <child>
+              <object class="AdwComboRow" id="type_row">
+                <property name="title" translatable="yes">Type</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Any</item>
+                      <item translatable="yes">Folder</item>
+                      <item translatable="yes">Image</item>
+                      <item translatable="yes">Video</item>
+                      <item translatable="yes">Audio</item>
+                      <item translatable="yes">PDF</item>
+                      <item translatable="yes">Document</item>
+                      <item translatable="yes">Spreadsheet</item>
+                      <item translatable="yes">Archive</item>
+                      <item translatable="yes">Text</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="mime">
+                <property name="title" translatable="yes">MIME Type</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="content">
+                <property name="title" translatable="yes">Containing Text</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow" id="explanation">
+                <property name="title" translatable="yes">Content search</property>
+                <property name="subtitle" translatable="yes">Indexed document content, including PDFs and Office files, when indexed by the system. Filesystem fallback searches local text, JSON and XML up to 4 MiB.</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="minimum">
+                <property name="title" translatable="yes">Minimum Size (bytes)</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="maximum">
+                <property name="title" translatable="yes">Maximum Size (bytes)</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwComboRow" id="date_row">
+                <property name="title" translatable="yes">Date Field</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Modified</item>
+                      <item translatable="yes">Created</item>
+                      <item translatable="yes">Accessed</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="after">
+                <property name="title" translatable="yes">From (YYYY-MM-DD)</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="before">
+                <property name="title" translatable="yes">Through (YYYY-MM-DD)</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwComboRow" id="ranges">
+                <property name="title" translatable="yes">Date Range</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Custom / Any</item>
+                      <item translatable="yes">Today</item>
+                      <item translatable="yes">Yesterday</item>
+                      <item translatable="yes">Past Week</item>
+                      <item translatable="yes">Past Month</item>
+                      <item translatable="yes">Past Year</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="tag">
+                <property name="title" translatable="yes">Tag</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="owner">
+                <property name="title" translatable="yes">Owner</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="favorites">
+                <property name="title" translatable="yes">Favorites Only</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwPreferencesGroup" id="actions">
+            <child>
+              <object class="GtkBox" id="buttons">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">8</property>
+                <child>
+                  <object class="GtkButton" id="clear">
+                    <property name="label" translatable="yes">Clear Filters</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="apply">
+                    <property name="label" translatable="yes">Apply</property>
+                    <style>
+                      <class name="suggested-action" />
+                    </style>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <property name="title" translatable="yes">Search Filters</property>
+  </template>
+</interface>

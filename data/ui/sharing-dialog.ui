@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesSharingDialog" parent="AdwPreferencesDialog">
+    <property name="title" translatable="yes">Network Sharing</property>
+  </template>
+</interface>

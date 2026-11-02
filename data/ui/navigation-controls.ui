@@ -1,0 +1,162 @@
+<interface domain="majoris-files">
+  <object class="GtkButton" id="back">
+    <property name="tooltip-text" translatable="yes">Back</property>
+    <property name="icon-name">go-previous-symbolic</property>
+  </object>
+  <object class="GtkButton" id="forward">
+    <property name="tooltip-text" translatable="yes">Forward</property>
+    <property name="icon-name">go-next-symbolic</property>
+  </object>
+  <object class="GtkButton" id="up">
+    <property name="tooltip-text" translatable="yes">Parent Folder</property>
+    <property name="icon-name">go-up-symbolic</property>
+  </object>
+  <object class="GtkMenuButton" id="locations">
+    <property name="icon-name">folder-open-symbolic</property>
+    <property name="tooltip-text" translatable="yes">Other Locations and Collections</property>
+  </object>
+  <object class="GtkMenuButton" id="sort">
+    <property name="tooltip-text" translatable="yes">Sort</property>
+    <property name="label" translatable="yes">Sort</property>
+  </object>
+  <object class="GtkButton" id="settings">
+    <property name="tooltip-text" translatable="yes">View Settings</property>
+    <property name="icon-name">preferences-system-symbolic</property>
+  </object>
+  <object class="GtkButton" id="preview">
+    <property name="tooltip-text" translatable="yes">Preview</property>
+    <property name="icon-name">view-reveal-symbolic</property>
+    <property name="action-name">win.preview</property>
+  </object>
+  <object class="GtkMenuButton" id="search_options">
+    <property name="tooltip-text" translatable="yes">Search Options</property>
+    <property name="icon-name">view-filter-symbolic</property>
+    <property name="popover">
+      <object class="GtkPopover">
+        <property name="has-arrow">false</property>
+        <property name="child">
+          <object class="GtkBox" id="searches">
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkToggleButton" id="recursive_button">
+                <property name="label" translatable="yes">Include Subfolders</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="search_home">
+                <property name="label" translatable="yes">Search Home</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="search_everywhere">
+                <property name="label" translatable="yes">Search Everywhere</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="search_filters">
+                <property name="label" translatable="yes">Search Filters…</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="save_search_button">
+                <property name="label" translatable="yes">Save Search…</property>
+                <property name="action-name">win.save-search</property>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </object>
+  <object class="GtkMenuButton" id="compact_search">
+    <property name="tooltip-text" translatable="yes">Search files (Ctrl+F)</property>
+    <property name="icon-name">system-search-symbolic</property>
+    <property name="visible">false</property>
+    <property name="popover">
+      <object class="GtkPopover" id="compact_search_popup">
+        <property name="has-arrow">false</property>
+      </object>
+    </property>
+  </object>
+  <object class="GtkMenuButton" id="overflow">
+    <property name="tooltip-text" translatable="yes">File Actions</property>
+    <property name="icon-name">view-more-symbolic</property>
+    <property name="visible">false</property>
+  </object>
+  <object class="GtkBox" id="switcher">
+    <property name="valign">center</property>
+    <style>
+      <class name="majoris-toolbar-segmented" />
+    </style>
+    <child>
+      <object class="GtkToggleButton" id="grid_control">
+        <property name="icon-name">view-grid-symbolic</property>
+        <property name="tooltip-text" translatable="yes">Grid</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkToggleButton" id="list_control">
+        <property name="icon-name">view-list-symbolic</property>
+        <property name="tooltip-text" translatable="yes">List</property>
+        <property name="group">grid_control</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkToggleButton" id="columns_control">
+        <property name="icon-name">view-dual-symbolic</property>
+        <property name="tooltip-text" translatable="yes">Columns</property>
+        <property name="group">grid_control</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkToggleButton" id="gallery_control">
+        <property name="icon-name">view-paged-symbolic</property>
+        <property name="tooltip-text" translatable="yes">Gallery</property>
+        <property name="group">grid_control</property>
+      </object>
+    </child>
+  </object>
+  <object class="MajorisFilesNavigationFields" id="address_fields" />
+  <object class="GtkPopover" id="completion_popup">
+    <property name="autohide">false</property>
+    <property name="has-arrow">false</property>
+    <property name="child">
+      <object class="GtkScrolledWindow">
+        <property name="max-content-height">280</property>
+        <property name="propagate-natural-height">true</property>
+        <property name="min-content-width">380</property>
+        <property name="child">
+          <object class="GtkListBox" id="completion_list">
+            <property name="selection-mode">none</property>
+          </object>
+        </property>
+      </object>
+    </property>
+  </object>
+  <object class="GtkBox" id="empty_space">
+    <property name="hexpand">true</property>
+    <property name="width-request">32</property>
+  </object>
+  <object class="GtkDropDown" id="modes">
+    <property name="tooltip-text" translatable="yes">View</property>
+  </object>
+  <menu id="address_menu">
+    <item>
+      <attribute name="label" translatable="yes">Copy Address</attribute>
+      <attribute name="action">address.copy</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Copy Address as Text</attribute>
+      <attribute name="action">address.text</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Edit Address</attribute>
+      <attribute name="action">address.edit</attribute>
+    </item>
+  </menu>
+  <object class="GtkPopoverMenu" id="address_popup">
+    <property name="menu-model">address_menu</property>
+    <property name="has-arrow">false</property>
+  </object>
+</interface>

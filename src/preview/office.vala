@@ -32,16 +32,10 @@ namespace MajorisFiles {
                 rendering_error = e.message;
             }
             var bytes = yield PreviewSandbox.run(item, "office", {}, token);
-            var view = new Gtk.TextView();
-            view.editable = false;
-            view.wrap_mode = Gtk.WrapMode.WORD_CHAR;
-            view.buffer.text = ((string)bytes.get_data()).make_valid((ssize_t)bytes.get_size());
-            var box = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
-            var note = new Gtk.Label(_("Formatted preview unavailable: ") + rendering_error + "\nExtracted text only · Formatting and images are omitted");
-            note.wrap = true;
-            note.add_css_class("dim-label");
-            box.append(note);
-            box.append(Browser.scrolled(view));
+            var box = new PlainTextPreview();
+            box.view.buffer.text = ((string)bytes.get_data()).make_valid((ssize_t)bytes.get_size());
+            box.note.label = _("Formatted preview unavailable: ") + rendering_error + "\nExtracted text only · Formatting and images are omitted";
+            box.note.visible = true;
             return box;
         }
     }

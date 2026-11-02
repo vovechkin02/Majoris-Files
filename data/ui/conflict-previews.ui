@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesConflictPreviewPair" parent="GtkBox">
+    <property name="orientation">horizontal</property>
+    <property name="spacing">24</property>
+    <property name="homogeneous">true</property>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <child>
+          <object class="GtkPicture" id="source">
+            <property name="height-request">96</property>
+            <property name="content-fit">contain</property>
+            <property name="alternative-text" translatable="yes">Source preview</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="label" translatable="yes">Source</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <child>
+          <object class="GtkPicture" id="destination">
+            <property name="height-request">96</property>
+            <property name="content-fit">contain</property>
+            <property name="alternative-text" translatable="yes">Destination preview</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="label" translatable="yes">Destination</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

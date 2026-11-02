@@ -1,0 +1,28 @@
+<interface domain="majoris-files">
+  <template class="MajorisFilesImageView" parent="GtkBox">
+    <child>
+      <object class="GtkScrolledWindow" id="toolbar_scroll">
+        <property name="propagate-natural-height">true</property>
+        <property name="hscrollbar-policy">external</property>
+        <property name="vscrollbar-policy">never</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkScrolledWindow" id="picture_scroll">
+        <property name="child">
+          <object class="GtkPicture" id="picture">
+            <property name="content-fit">contain</property>
+          </object>
+        </property>
+        <property name="hexpand">true</property>
+        <property name="vexpand">true</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel" id="description">
+        <property name="label" />
+        <property name="wrap">true</property>
+      </object>
+    </child>
+  </template>
+</interface>

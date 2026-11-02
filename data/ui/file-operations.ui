@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesFileOperationsWindow" parent="AdwWindow">
+    <property name="content">
+      <object class="AdwToolbarView" id="toolbar">
+        <child type="top">
+          <object class="AdwHeaderBar" id="header" />
+        </child>
+        <property name="content">
+          <object class="MajorisFilesFileOperationsView" id="operations_view" />
+        </property>
+      </object>
+    </property>
+    <property name="title" translatable="yes">File Operations</property>
+    <property name="default-width">560</property>
+    <property name="default-height">540</property>
+  </template>
+</interface>

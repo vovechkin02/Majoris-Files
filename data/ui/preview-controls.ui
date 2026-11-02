@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <object class="GtkButton" id="control_1">
+    <property name="icon-name">zoom-out-symbolic</property>
+    <property name="tooltip-text" translatable="yes">Zoom Out</property>
+  </object>
+  <object class="GtkButton" id="control_2">
+    <property name="icon-name">zoom-in-symbolic</property>
+    <property name="tooltip-text" translatable="yes">Zoom In</property>
+  </object>
+  <object class="GtkButton" id="control_3">
+    <property name="icon-name">go-next-symbolic</property>
+    <property name="tooltip-text" translatable="yes">Next Page</property>
+  </object>
+  <object class="GtkButton" id="control_4">
+    <property name="icon-name">go-previous-symbolic</property>
+    <property name="tooltip-text" translatable="yes">Previous Page</property>
+  </object>
+  <object class="GtkButton" id="control_5">
+    <property name="icon-name">object-rotate-right-symbolic</property>
+    <property name="tooltip-text" translatable="yes">Rotate Preview Clockwise</property>
+  </object>
+  <object class="GtkButton" id="control_6">
+    <property name="icon-name">zoom-fit-best-symbolic</property>
+    <property name="tooltip-text" translatable="yes">Fit Image</property>
+  </object>
+  <object class="GtkButton" id="control_7">
+    <property name="icon-name">media-playback-pause-symbolic</property>
+    <property name="tooltip-text" translatable="yes">Play or Pause Animation</property>
+  </object>
+  <object class="GtkLabel" id="count">
+    <style>
+      <class name="majoris-toolbar-metadata" />
+    </style>
+  </object>
+</interface>

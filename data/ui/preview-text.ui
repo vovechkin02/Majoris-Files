@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesTextPreviewWidget" parent="GtkBox">
+    <property name="orientation">vertical</property>
+    <property name="spacing">6</property>
+    <child>
+      <object class="GtkDropDown" id="encoding">
+        <property name="tooltip-text" translatable="yes">Text Encoding</property>
+        <property name="model">
+          <object class="GtkStringList">
+            <items>
+              <item translatable="yes">Automatic</item>
+              <item>UTF-8</item>
+              <item>UTF-16LE</item>
+              <item>UTF-16BE</item>
+              <item>WINDOWS-1252</item>
+              <item>ISO-8859-1</item>
+            </items>
+          </object>
+        </property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel" id="status">
+        <property name="wrap">true</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="vexpand">true</property>
+        <property name="child">
+          <object class="GtkSourceView">
+            <property name="show-line-numbers">true</property>
+            <property name="editable">false</property>
+            <property name="monospace">true</property>
+            <property name="wrap-mode">word-char</property>
+            <property name="buffer">
+              <object class="GtkSourceBuffer" id="buffer">
+                <property name="highlight-syntax">true</property>
+              </object>
+            </property>
+          </object>
+        </property>
+      </object>
+    </child>
+  </template>
+</interface>

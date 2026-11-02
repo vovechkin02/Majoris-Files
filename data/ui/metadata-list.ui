@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesMetadataList" parent="GtkBox">
+    <property name="orientation">vertical</property>
+    <property name="spacing">4</property>
+  </template>
+</interface>

@@ -1,0 +1,34 @@
+<interface domain="majoris-files">
+  <template class="MajorisFilesDeviceHardwarePage" parent="AdwNavigationPage">
+    <property name="title" translatable="yes">Hardware Details</property>
+    <property name="child">
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar" />
+        </child>
+        <property name="content">
+          <object class="AdwPreferencesPage" id="hardware">
+            <child>
+              <object class="MajorisFilesDeviceSection" id="device_section">
+                <property name="title" translatable="yes">Device</property>
+                <property name="visible">false</property>
+              </object>
+            </child>
+            <child>
+              <object class="MajorisFilesDeviceSection" id="storage_section">
+                <property name="title" translatable="yes">Storage</property>
+                <property name="visible">false</property>
+              </object>
+            </child>
+            <child>
+              <object class="MajorisFilesDeviceSection" id="filesystem_section">
+                <property name="title" translatable="yes">Filesystem</property>
+                <property name="visible">false</property>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

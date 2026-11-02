@@ -1,0 +1,71 @@
+<interface domain="majoris-files">
+  <template class="MajorisFilesGridFileItem" parent="GtkBox">
+    <property name="orientation">vertical</property>
+    <property name="spacing">8</property>
+    <property name="halign">center</property>
+    <property name="valign">start</property>
+    <style>
+      <class name="majoris-data-tile" />
+    </style>
+    <child>
+      <object class="GtkOverlay" id="icon_area">
+        <property name="child">
+          <object class="GtkImage" id="icon">
+            <property name="halign">center</property>
+            <property name="valign">center</property>
+            <style>
+              <class name="majoris-data-thumbnail" />
+            </style>
+          </object>
+        </property>
+        <style>
+          <class name="majoris-data-artwork" />
+        </style>
+        <property name="halign">center</property>
+        <child type="overlay">
+          <object class="GtkImage" id="cloud_badge">
+            <property name="pixel-size">16</property>
+            <property name="halign">end</property>
+            <property name="valign">end</property>
+            <property name="can-target">false</property>
+            <property name="visible">false</property>
+          </object>
+        </child>
+        <child type="overlay">
+          <object class="GtkCheckButton" id="checkbox">
+            <property name="tooltip-text" translatable="yes">Select Item</property>
+            <property name="halign">start</property>
+            <property name="valign">start</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="MajorisFilesFilenameCell" id="filename">
+        <property name="hexpand">false</property>
+        <child internal-child="label">
+          <object class="GtkLabel">
+            <property name="ellipsize">end</property>
+            <property name="max-width-chars">1</property>
+            <property name="xalign">0.5</property>
+            <property name="hexpand">false</property>
+            <property name="wrap">true</property>
+            <property name="wrap-mode">word-char</property>
+            <property name="justify">center</property>
+            <property name="lines">2</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel" id="caption">
+        <property name="ellipsize">end</property>
+        <property name="max-width-chars">18</property>
+        <property name="visible">false</property>
+        <style>
+          <class name="majoris-data-metadata" />
+        </style>
+      </object>
+    </child>
+  </template>
+</interface>

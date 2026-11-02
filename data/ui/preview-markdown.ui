@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesMarkdownView" parent="GtkBox">
+    <child>
+      <object class="GtkStackSwitcher" id="switcher" />
+    </child>
+    <child>
+      <object class="GtkStack" id="views">
+        <property name="vexpand">true</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel" id="message">
+        <property name="wrap">true</property>
+        <property name="visible">false</property>
+      </object>
+    </child>
+  </template>
+</interface>

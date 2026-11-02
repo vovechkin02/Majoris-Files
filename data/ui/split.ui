@@ -1,0 +1,122 @@
+<interface domain="majoris-files">
+  <template class="MajorisFilesSplitDialog" parent="AdwPreferencesDialog">
+    <child>
+      <object class="AdwPreferencesPage" id="page">
+        <child>
+          <object class="AdwPreferencesGroup" id="group">
+            <child>
+              <object class="AdwActionRow" id="source" />
+            </child>
+            <child>
+              <object class="AdwActionRow" id="target">
+                <child type="suffix">
+                  <object class="GtkButton" id="choose">
+                    <property name="label" translatable="yes">Choose…</property>
+                  </object>
+                </child>
+                <property name="title" translatable="yes">Destination</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwComboRow" id="method">
+                <property name="title" translatable="yes">Split By</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Part Size</item>
+                      <item translatable="yes">Number of Parts</item>
+                      <item translatable="yes">Destination Filesystem Limit</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwComboRow" id="preset">
+                <property name="title" translatable="yes">Preset</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Custom</item>
+                      <item translatable="yes">25 MB</item>
+                      <item translatable="yes">100 MB</item>
+                      <item translatable="yes">500 MB</item>
+                      <item translatable="yes">1 GB</item>
+                      <item translatable="yes">2 GB</item>
+                      <item translatable="yes">4 GB</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow" id="value">
+                <child type="suffix">
+                  <object class="GtkSpinButton" id="amount">
+                    <property name="adjustment">
+                      <object class="GtkAdjustment">
+                        <property name="lower">1</property>
+                        <property name="upper">4000000000</property>
+                        <property name="step-increment">1</property>
+                        <property name="page-increment">10.0</property>
+                        <property name="value">1</property>
+                      </object>
+                    </property>
+                    <property name="value">2048</property>
+                    <property name="digits">0</property>
+                    <property name="numeric">true</property>
+                    <property name="climb-rate">1</property>
+                  </object>
+                </child>
+                <property name="title" translatable="yes">Amount</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwComboRow" id="units">
+                <property name="title" translatable="yes">Size Unit</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Bytes</item>
+                      <item translatable="yes">KiB</item>
+                      <item translatable="yes">MiB</item>
+                      <item translatable="yes">GiB</item>
+                    </items>
+                  </object>
+                </property>
+                <property name="selected">2</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow" id="estimate">
+                <property name="title" translatable="yes">Estimated Output</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow" id="explanation">
+                <property name="title" translatable="yes">Original kept</property>
+                <property name="subtitle" translatable="yes">Parts are streamed to new files. Existing outputs are never overwritten. Up to 10,000 parts.</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="manifest">
+                <property name="title" translatable="yes">Include SHA-256 Manifest</property>
+                <property name="subtitle" translatable="yes">Recommended: verifies every part and the reconstructed file. Without it, missing final parts cannot be detected.</property>
+                <property name="active">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="start">
+                <property name="label" translatable="yes">Split File</property>
+                <style>
+                  <class name="suggested-action" />
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <property name="title" translatable="yes">Split File</property>
+  </template>
+</interface>

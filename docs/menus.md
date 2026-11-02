@@ -1,7 +1,7 @@
 # Native text-only menus
 
 Files owns content and actions; Majoris-Theme owns visual presentation. There are
-no new menu rules in `data/theme/files.css`.
+no application stylesheet or menu-specific CSS. Static menus live in GtkBuilder resources.
 
 The single-file menu uses native sections: Open / Open With / supported Preview /
 supported Extract; Cut / Copy / Rename / Move to Trash; Favorites / Tags; More

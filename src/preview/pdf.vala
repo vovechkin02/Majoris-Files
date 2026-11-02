@@ -18,62 +18,64 @@ namespace MajorisFiles {
             return new PdfView(item, pages, token);
         }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/preview-pdf.ui")]
     public class PdfView : Gtk.Box {
+        private bool template_disposing;
         FileItem item;
         Cancellable token;
         int pages;
-        Gtk.Picture picture = new Gtk.Picture();
-        Gtk.Label count = new Gtk.Label("");
-        Gtk.Label failure = new Gtk.Label("");
+        [GtkChild]
+        private unowned Gtk.Picture picture;
+        Gtk.Label count;
+        [GtkChild]
+        private unowned Gtk.Label failure;
         int index;
         double zoom = 1;
         bool busy;
+
+        [GtkChild] private unowned Gtk.ScrolledWindow picture_scroll;
+        [GtkChild] private unowned Gtk.ScrolledWindow toolbar_scroll;
         public PdfView(FileItem item, int pages, Cancellable token)
         {
             Object(orientation: Gtk.Orientation.VERTICAL, spacing: 6);
             this.item = item;
             this.pages = pages;
             this.token = token;
+            var ui_controls = new Gtk.Builder.from_resource("/com/majoris/files/ui/preview-controls.ui");
+            count = (Gtk.Label)ui_controls.get_object("count");
             var controls = new Majoris.Ui.Toolbar();
             controls.compact = true;
             controls.divider = true;
             var actions = controls.append_group();
-            actions.append_control(Browser.button("go-previous-symbolic", _("Previous Page"), () => { if(!busy && index > 0)
+            actions.append_control(PreviewButtons.connect((Gtk.Button)ui_controls.get_object("control_4"), () => { if(!busy && index > 0)
                                                                                             {
                                                                                                 index--;
                                                                                                 render_page.begin();
                                                                                             }
                 }));
-            count.add_css_class("majoris-toolbar-metadata");
             actions.append_widget(count);
-            actions.append_control(Browser.button("go-next-symbolic", _("Next Page"), () => { if(!busy && index + 1 < pages)
+            actions.append_control(PreviewButtons.connect((Gtk.Button)ui_controls.get_object("control_3"), () => { if(!busy && index + 1 < pages)
                                                                                     {
                                                                                         index++;
                                                                                         render_page.begin();
                                                                                     }
                 }));
-            actions.append_control(Browser.button("zoom-in-symbolic", _("Zoom In"), () => { if(!busy)
+            actions.append_control(PreviewButtons.connect((Gtk.Button)ui_controls.get_object("control_2"), () => { if(!busy)
                                                                                   {
                                                                                       zoom = double.min(zoom * 1.2, 3);
                                                                                       render_page.begin();
                                                                                   }
                 }));
-            actions.append_control(Browser.button("zoom-out-symbolic", _("Zoom Out"), () => { if(!busy)
+            actions.append_control(PreviewButtons.connect((Gtk.Button)ui_controls.get_object("control_1"), () => { if(!busy)
                                                                                     {
                                                                                         zoom = double.max(zoom / 1.2, 0.25);
                                                                                         render_page.begin();
                                                                                     }
                 }));
-            var toolbar_scroll = new Gtk.ScrolledWindow();
-            toolbar_scroll.set_policy(Gtk.PolicyType.EXTERNAL, Gtk.PolicyType.NEVER);
-            toolbar_scroll.propagate_natural_height = true;
+
+
             toolbar_scroll.child = controls;
-            append(toolbar_scroll);
-            picture.content_fit = Gtk.ContentFit.CONTAIN;
-            picture.can_shrink = true;
-            append(Browser.scrolled(picture));
-            failure.wrap = true;
-            append(failure);
+
             render_page.begin();
         }
         async void render_page()
@@ -93,6 +95,14 @@ namespace MajorisFiles {
                     failure.label = _("Preview unavailable\n") + e.message;
             }
             busy = false;
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                if (token != null) token.cancel();
+                dispose_template(typeof(PdfView));
+            }
+            base.dispose();
         }
     }
 }

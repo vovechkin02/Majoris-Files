@@ -1,0 +1,93 @@
+<interface domain="majoris-files">
+  <template class="MajorisFilesSevenZipDialog" parent="AdwPreferencesDialog">
+    <child>
+      <object class="AdwPreferencesPage" id="page">
+        <child>
+          <object class="AdwPreferencesGroup" id="group">
+            <child>
+              <object class="AdwEntryRow" id="name">
+                <property name="title" translatable="yes">Archive Filename</property>
+                <property name="text">Archive.zip</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwComboRow" id="format">
+                <property name="title" translatable="yes">Archive Format</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">zip</item>
+                      <item translatable="yes">7z</item>
+                      <item translatable="yes">tar</item>
+                      <item translatable="yes">tar.gz</item>
+                      <item translatable="yes">tar.bz2</item>
+                      <item translatable="yes">tar.xz</item>
+                      <item translatable="yes">tar.zst</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSpinRow" id="size">
+                <property name="adjustment">
+                  <object class="GtkAdjustment">
+                    <property name="lower">0</property>
+                    <property name="upper">1048576</property>
+                    <property name="step-increment">1</property>
+                    <property name="page-increment">10.0</property>
+                    <property name="value">0</property>
+                  </object>
+                </property>
+                <property name="sensitive">false</property>
+                <property name="title" translatable="yes">Volume Size (MiB; 0 for one file)</property>
+                <property name="numeric">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSpinRow" id="level">
+                <property name="adjustment">
+                  <object class="GtkAdjustment">
+                    <property name="lower">0</property>
+                    <property name="upper">9</property>
+                    <property name="step-increment">1</property>
+                    <property name="page-increment">10.0</property>
+                    <property name="value">0</property>
+                  </object>
+                </property>
+                <property name="title" translatable="yes">Compression Level</property>
+                <property name="value">5</property>
+                <property name="sensitive">false</property>
+                <property name="numeric">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="encrypted">
+                <property name="title" translatable="yes">Encrypt Contents (ZIP filenames remain visible)</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow" id="target">
+                <property name="title" translatable="yes">Destination</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="browse">
+                <property name="label" translatable="yes">Choose Destination…</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="start">
+                <property name="label" translatable="yes">Create Archive</property>
+                <style>
+                  <class name="suggested-action" />
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <property name="title" translatable="yes">Compress</property>
+  </template>
+</interface>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesMetadataCell" parent="GtkBox">
+    <property name="orientation">horizontal</property>
+    <style>
+      <class name="majoris-data-cell" />
+    </style>
+    <child>
+      <object class="GtkLabel" id="label">
+        <property name="xalign">0</property>
+        <property name="ellipsize">end</property>
+        <style>
+          <class name="majoris-data-metadata" />
+        </style>
+      </object>
+    </child>
+  </template>
+</interface>

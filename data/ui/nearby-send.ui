@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesNearbySendDialog" parent="AdwAlertDialog">
+    <property name="heading" translatable="yes">Send Selected Files?</property>
+    <property name="extra-child">
+      <object class="AdwComboRow" id="target">
+        <property name="title" translatable="yes">Device</property>
+      </object>
+    </property>
+    <responses>
+      <response id="cancel" translatable="yes">Cancel</response>
+      <response id="send" translatable="yes">Send</response>
+    </responses>
+    <property name="close-response">cancel</property>
+  </template>
+</interface>

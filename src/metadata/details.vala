@@ -20,7 +20,7 @@ namespace MajorisFiles {
         }
         public static Gtk.Widget presentation(Gee.Map<string, string> fields)
         {
-            var list = new Gtk.Box(Gtk.Orientation.VERTICAL, 4);
+            var list = new MetadataList();
             foreach (var key in fields.keys) {
                 if (key == "Artwork PNG") {
                     var picture = new Gtk.Picture.for_paintable(Gdk.Texture.from_bytes(new Bytes(Base64.decode(fields[key]))));
@@ -37,26 +37,35 @@ namespace MajorisFiles {
             return list;
         }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/metadata-details.ui")]
     public class MetadataPage : Adw.PreferencesPage {
+        private bool template_disposing;
         Cancellable token = new Cancellable();
         MetadataStore? metadata;
         bool managed;
         File original_file;
         Gee.HashMap<string, Adw.ActionRow> file_rows = new Gee.HashMap<string, Adw.ActionRow>();
         Gee.HashMap<string, Adw.ActionRow> attribute_rows = new Gee.HashMap<string, Adw.ActionRow>();
-        public Adw.ActionRow exact_size;
-        public Adw.ActionRow allocated;
-        Adw.ExpanderRow file_information = new Adw.ExpanderRow();
-        Adw.PreferencesGroup loading = new Adw.PreferencesGroup();
+        [GtkChild] public unowned Adw.ActionRow exact_size;
+        [GtkChild] public unowned Adw.ActionRow allocated;
+        [GtkChild] private unowned Adw.ExpanderRow file_information;
+        [GtkChild]
+        private unowned Adw.PreferencesGroup loading;
         Gee.HashMap<string, Adw.PreferencesGroup> groups = new Gee.HashMap<string, Adw.PreferencesGroup>();
+
+        [GtkChild] private unowned Adw.ExpanderRow attributes;
+        [GtkChild] private unowned Adw.PreferencesGroup filesystem;
+        [GtkChild] private unowned Adw.PreferencesGroup storage;
+        [GtkChild] private unowned Adw.PreferencesGroup file_group;
         public MetadataPage(FileItem item, MetadataStore? metadata = null, bool managed = false) {
-            this.metadata = metadata; this.managed = managed; original_file = item.file; title = _("Details"); icon_name = "dialog-information-symbolic";
+            this.metadata = metadata; this.managed = managed; original_file = item.file;
+            groups[_("File Information")] = file_group;
             add_field(_("File Information"), _("Name"), item.name);
             add_field(_("File Information"), _("Location"), item.file.get_path() ?? item.file.get_uri());
             add_field(_("File Information"), _("Content Type"), item.mime);
-            var storage = new Adw.PreferencesGroup(); storage.title = _("Storage"); add(storage);
-            exact_size = PropertiesDialog.value_row(_("Exact Size"), item.info.has_attribute("standard::size") ? item.bytes.to_string() + _(" bytes") : _("Unavailable")); storage.add(exact_size);
-            allocated = PropertiesDialog.value_row(_("Size on Disk"), item.info.has_attribute("standard::allocated-size") ? Paths.size(item.info.get_attribute_uint64("standard::allocated-size")) : _("Unavailable")); storage.add(allocated);
+
+            exact_size.subtitle = item.info.has_attribute("standard::size") ? item.bytes.to_string() + _(" bytes") : _("Unavailable");
+            allocated.subtitle = item.info.has_attribute("standard::allocated-size") ? Paths.size(item.info.get_attribute_uint64("standard::allocated-size")) : _("Unavailable");
             var modified = item.info.has_attribute("time::modified") ? item.info.get_modification_date_time() : null; if (modified != null) add_field(_("File Information"), _("Modified"), modified.to_local().format("%c") + " · " + modified.format("%FT%T%:z"));
             var created = item.info.has_attribute("time::created") ? item.info.get_creation_date_time() : null; if (created != null) add_field(_("File Information"), _("Created"), created.to_local().format("%c"));
             var accessed = item.info.has_attribute("time::access") ? item.info.get_access_date_time() : null; if (accessed != null) add_field(_("File Information"), _("Accessed"), accessed.to_local().format("%c"));
@@ -65,10 +74,9 @@ namespace MajorisFiles {
             if (item.info.has_attribute("unix::mode")) add_field(_("File Information"), _("Mode"), "%04o".printf(item.info.get_attribute_uint32("unix::mode") & 07777));
             if (item.info.has_attribute("selinux::context")) add_field(_("File Information"), _("SELinux Context"), item.info.get_attribute_string("selinux::context"));
             if (Paths.is_symlink(item.info)) add_field(_("File Information"), _("Link Target"), item.info.get_symlink_target() ?? _("Unavailable"));
-            var filesystem = new Adw.PreferencesGroup(); filesystem.title = _("Filesystem"); add(filesystem);
-            var attributes = new Adw.ExpanderRow(); attributes.title = _("Additional Filesystem Attributes"); filesystem.add(attributes);
+
             foreach (var key in item.info.list_attributes(null)) { var row = PropertiesDialog.value_row(key, item.info.get_attribute_as_string(key) ?? _("Unavailable")); attribute_rows[key] = row; attributes.add_row(row); }
-            loading.description = _("Loading metadata…"); add(loading);
+
             load.begin(item);
         }
         public void cancel() { token.cancel(); }
@@ -148,6 +156,14 @@ namespace MajorisFiles {
                 } catch (Error e) { if (!token.is_cancelled()) add_field(_("Extension Properties"), extension.name, _("Unavailable: ") + e.message); }
             }
             if (!token.is_cancelled()) remove(loading);
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                if (token != null) token.cancel();
+                dispose_template(typeof(MetadataPage));
+            }
+            base.dispose();
         }
     }
 }

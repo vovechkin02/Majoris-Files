@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesPropertiesSubpage" parent="AdwNavigationPage">
+    <property name="child">
+      <object class="AdwToolbarView" id="view">
+        <child type="top">
+          <object class="AdwHeaderBar" />
+        </child>
+      </object>
+    </property>
+  </template>
+</interface>

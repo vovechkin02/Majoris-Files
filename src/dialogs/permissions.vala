@@ -1,11 +1,22 @@
 namespace MajorisFiles {
+    [GtkTemplate (ui = "/com/majoris/files/ui/permissions-dialog.ui")]
     public class PermissionsDialog : Adw.PreferencesDialog {
+        private bool template_disposing;
         public PermissionsDialog(Gtk.Window owner_window, Gee.List<FileItem> items) {
-            title = _("Permissions"); var page = new PermissionsPage(owner_window, items);
+            var page = new PermissionsPage(owner_window, items);
             add(page); page.applied.connect(() => close()); closed.connect(page.cancel); present(owner_window);
         }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                dispose_template(typeof(PermissionsDialog));
+            }
+            base.dispose();
+        }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/permissions.ui")]
     public class PermissionsPage : Adw.PreferencesPage {
+        private bool template_disposing;
         public signal void applied();
         public void cancel() { token.cancel(); }
         Gee.ArrayList<FileItem> items = new Gee.ArrayList<FileItem>();
@@ -14,17 +25,25 @@ namespace MajorisFiles {
         bool managed;
         bool syncing;
         bool acl_safe;
-        Adw.PreferencesGroup basic = new Adw.PreferencesGroup();
-        Adw.ActionRow owner_summary;
-        Adw.ActionRow group_summary;
+        [GtkChild]
+        private unowned Adw.PreferencesGroup basic;
+        [GtkChild] private unowned Adw.ActionRow owner_summary;
+        [GtkChild] private unowned Adw.ActionRow group_summary;
         Adw.ComboRow[] access = {};
-        public Adw.ExpanderRow advanced = new Adw.ExpanderRow();
-        public Adw.EntryRow files = new Adw.EntryRow();
-        public Adw.EntryRow folders = new Adw.EntryRow();
-        Adw.EntryRow owner = new Adw.EntryRow();
-        Adw.EntryRow owning_group = new Adw.EntryRow();
-        Adw.SwitchRow recursive = new Adw.SwitchRow();
-        public Gtk.Button apply = new Gtk.Button.with_label(_("Apply Permissions"));
+        [GtkChild]
+        public unowned Adw.ExpanderRow advanced;
+        [GtkChild]
+        public unowned Adw.EntryRow files;
+        [GtkChild]
+        public unowned Adw.EntryRow folders;
+        [GtkChild]
+        private unowned Adw.EntryRow owner;
+        [GtkChild]
+        private unowned Adw.EntryRow owning_group;
+        [GtkChild]
+        private unowned Adw.SwitchRow recursive;
+        [GtkChild]
+        public unowned Gtk.Button apply;
         Gtk.CheckButton[] checks = {};
         uint file_mask;
         uint folder_mask;
@@ -32,42 +51,61 @@ namespace MajorisFiles {
         uint folder_value;
         string initial_files = "";
         string initial_folders = "";
+
+        [GtkChild] private unowned Adw.PreferencesGroup account_group;
+        [GtkChild] private unowned Adw.PreferencesGroup actions;
+        [GtkChild] private unowned Adw.PreferencesGroup extra;
+        [GtkChild] private unowned Gtk.Grid matrix;
+        [GtkChild] private unowned Adw.ActionRow matrix_row;
+        [GtkChild] private unowned Adw.PreferencesGroup ownership;
+        [GtkChild] private unowned Adw.PreferencesGroup unavailable;
+        [GtkChild] private unowned Adw.ComboRow access_owner;
+        [GtkChild] private unowned Adw.ComboRow access_group;
+        [GtkChild] private unowned Adw.ComboRow access_others;
+        [GtkChild] private unowned Gtk.CheckButton permission_0;
+        [GtkChild] private unowned Gtk.CheckButton permission_1;
+        [GtkChild] private unowned Gtk.CheckButton permission_2;
+        [GtkChild] private unowned Gtk.CheckButton permission_3;
+        [GtkChild] private unowned Gtk.CheckButton permission_4;
+        [GtkChild] private unowned Gtk.CheckButton permission_5;
+        [GtkChild] private unowned Gtk.CheckButton permission_6;
+        [GtkChild] private unowned Gtk.CheckButton permission_7;
+        [GtkChild] private unowned Gtk.CheckButton permission_8;
+        [GtkChild] private unowned Adw.ActionRow enclosed;
+        [GtkChild] private unowned Adw.ComboRow owner_picker;
+        [GtkChild] private unowned Adw.ComboRow group_picker;
         public PermissionsPage(Gtk.Window owner_window, Gee.List<FileItem> selected, bool managed = false) {
             this.owner_window = owner_window; this.managed = managed;
             foreach (var item in selected) items.add(item);
-            title = _("Permissions"); icon_name = "changes-prevent-symbolic";
-            var ownership = new Adw.PreferencesGroup(); ownership.title = _("Ownership"); add(ownership);
-            owner_summary = PropertiesDialog.value_row(_("Owner"), common_attribute("owner::user")); ownership.add(owner_summary);
-            group_summary = PropertiesDialog.value_row(_("Group"), common_attribute("owner::group")); ownership.add(group_summary);
+
+            owner_summary.subtitle = common_attribute("owner::user");
+            group_summary.subtitle = common_attribute("owner::group");
             foreach (var item in items) if (!item.file.is_native() || Paths.is_symlink(item.info) || !item.info.has_attribute("unix::mode") || (item.info.has_attribute("access::can-write") && !item.info.get_attribute_boolean("access::can-write") && item.info.has_attribute("owner::user") && item.info.get_attribute_string("owner::user") != Environment.get_user_name())) {
-                var unavailable = new Adw.PreferencesGroup(); unavailable.add(PropertiesDialog.value_row(_("Permissions unavailable"), _("This selection does not expose editable local POSIX permissions. Symbolic links are not followed."))); add(unavailable); return;
+                unavailable.visible = true; return;
             }
-            basic.title = _("Access"); basic.description = _("Checking extended access rules…"); add(basic);
+
+            basic.visible = extra.visible = actions.visible = true;
+            access = {access_owner, access_group, access_others};
+            checks = {permission_0, permission_1, permission_2, permission_3, permission_4, permission_5, permission_6, permission_7, permission_8};
             for (int i = 0; i < 3; i++) {
-                int index = i; var row = new Adw.ComboRow(); row.use_markup = false; row.title = new string[] {_("Owner"), _("Group"), _("Others")}[i];
-                row.model = new Gtk.StringList({_("No Access"), _("Read Only"), _("Read & Write"), _("Custom"), _("Mixed")});
-                row.sensitive = false; access += row; basic.add(row);
+                int index = i; var row = access[i];
                 row.notify["selected"].connect(() => { if (!syncing && row.selected < 3) change_basic(index, row.selected); });
             }
-            var extra = new Adw.PreferencesGroup(); add(extra);
-            var enclosed = PropertiesDialog.value_row(_("Apply to enclosed files…"), _("Separate file and folder modes; confirmation required"));
-            enclosed.activatable = true; enclosed.add_suffix(new Gtk.Image.from_icon_name("go-next-symbolic"));
+
             bool has_folder = false; foreach (var item in items) has_folder = has_folder || item.directory;
-            enclosed.visible = has_folder; extra.add(enclosed);
-            advanced.title = _("Advanced Permissions"); advanced.subtitle = _("POSIX modes, ownership, ACLs and recursive changes"); extra.add(advanced);
+            enclosed.visible = has_folder;
+
             enclosed.activated.connect(() => { advanced.expanded = true; recursive.active = true; });
-            files.title = _("File Permissions (octal)"); folders.title = _("Folder Permissions (octal)");
+
             files.text = common_mode(false); folders.text = common_mode(true);
             initial_files = files.text; initial_folders = folders.text;
-            advanced.add_row(files); advanced.add_row(folders);
-            var explanation = PropertiesDialog.value_row(_("Read · Write · Execute"), _("4 = read, 2 = write, 1 = execute. Folder execute permits traversal. A blank mixed mode is preserved. Octal changes may alter effective ACL access; special bits use the fourth digit.")); explanation.subtitle_lines = 0; advanced.add_row(explanation);
-            var matrix = new Gtk.Grid(); matrix.column_spacing = 12; matrix.row_spacing = 8;
-            var matrix_row = new Adw.ActionRow(); matrix_row.title = items.size == 1 && items[0].directory ? _("Folder access bits") : _("File access bits"); advanced.add_row(matrix_row); advanced.add_row(matrix);
-            for (int c = 0; c < 3; c++) matrix.attach(new Gtk.Label(new string[] {_("Read"), _("Write"), _("Execute")}[c]), c + 1, 0, 1, 1);
+
+
+
+             matrix_row.title = items.size == 1 && items[0].directory ? _("Folder access bits") : _("File access bits");
             for (int r = 0; r < 3; r++) {
-                matrix.attach(new Gtk.Label(new string[] {_("Owner"), _("Group"), _("Others")}[r]), 0, r + 1, 1, 1);
                 for (int c = 0; c < 3; c++) {
-                    var check = new Gtk.CheckButton(); check.tooltip_text = new string[] {_("Owner"), _("Group"), _("Others")}[r] + " · " + new string[] {_("Read"), _("Write"), _("Execute")}[c]; check.update_property(Gtk.AccessibleProperty.LABEL, check.tooltip_text, -1); checks += check; matrix.attach(check, c + 1, r + 1, 1, 1);
+                    var check = checks[r * 3 + c];
                     check.toggled.connect(() => {
                         if (syncing) return;
                         var field = items.size == 1 && items[0].directory ? folders : files;
@@ -78,14 +116,13 @@ namespace MajorisFiles {
                     });
                 }
             }
-            owner.title = _("Owner UID (blank preserves owner)"); owning_group.title = _("Group GID (blank preserves group)");
-            advanced.add_row(owner); advanced.add_row(owning_group);
+
             // Account selectors share the same numeric proposal and remain advanced.
-            var account_group = new Adw.PreferencesGroup();
-            advanced.add_row(account_group); account_picker.begin(account_group, owner, true); account_picker.begin(account_group, owning_group, false);
-            recursive.title = _("Apply to Folder Contents"); recursive.subtitle = _("Only applied after confirmation"); recursive.visible = has_folder; advanced.add_row(recursive);
+
+             account_picker.begin(owner_picker, owner, true); account_picker.begin(group_picker, owning_group, false);
+              recursive.visible = has_folder;
             if (items.size == 1) { var acl = PropertiesDialog.value_row(_("Edit Access Control List…"), _("Advanced POSIX ACL entries")); acl.activatable = true; acl.activated.connect(() => edit_acl.begin(items[0].file)); advanced.add_row(acl); }
-            var actions = new Adw.PreferencesGroup(); add(actions); apply.add_css_class("suggested-action"); actions.add(apply); apply.sensitive = false;
+
             files.changed.connect(() => mode_changed(false)); folders.changed.connect(() => mode_changed(true));
             owner.changed.connect(update_apply); owning_group.changed.connect(update_apply); recursive.notify["active"].connect(update_apply);
             apply.clicked.connect(() => apply_permissions.begin());
@@ -189,20 +226,15 @@ namespace MajorisFiles {
             } catch (Error e) { if (!token.is_cancelled()) Dialogs.error(presenter(), e.message); }
             finally { update_apply(); }
         }
-        async void account_picker(Adw.PreferencesGroup group, Adw.EntryRow numeric, bool users)
+        async void account_picker(Adw.ComboRow row, Adw.EntryRow numeric, bool users)
         {
-            var row = new Adw.ComboRow(); row.use_markup = false;
-            row.title = users ? "Choose Owner Account" : "Choose Group";
             row.subtitle = _("Current: ") + common_attribute(users ? "owner::user" : "owner::group");
             applied.connect(() => row.subtitle = _("Current: ") + common_attribute(users ? "owner::user" : "owner::group"));
-            row.model = new Gtk.StringList({"Keep Current"});
-            row.enable_search = true;
-            group.add(row);
             try {
                 var accounts = yield AccountDirectory.load(users, token);
                 if(token.is_cancelled())
                     return;
-                var labels = new Gtk.StringList({"Keep Current"});
+                var labels = new Gtk.StringList({_("Keep Current")});
                 foreach(var account in accounts)
                     labels.append(account.label);
                 row.model = labels;
@@ -225,17 +257,8 @@ namespace MajorisFiles {
         {
             try {
                 var text = yield PermissionService.read_acl(file);
-                var view = new Gtk.TextView();
-                view.monospace = true;
+                var dialog = new AclDialog(); var view = dialog.view;
                 view.buffer.text = text;
-                var scroll = new Gtk.ScrolledWindow();
-                scroll.height_request = 260;
-                scroll.set_child(view);
-                var dialog = new Adw.AlertDialog(_("Access Control List"), "Advanced POSIX ACL entries. Changes can remove access.");
-                dialog.extra_child = scroll;
-                dialog.add_response("cancel", _("Cancel"));
-                dialog.add_response("apply", _("Apply ACL"));
-                dialog.close_response = "cancel";
                 if((yield dialog.choose(presenter(), token)) == "apply")
                     yield PermissionService.write_acl(file, view.buffer.text);
             }
@@ -243,6 +266,14 @@ namespace MajorisFiles {
                 if(!(e is IOError.CANCELLED))
                     Dialogs.error(presenter(), e.message);
             }
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                if (token != null) token.cancel();
+                dispose_template(typeof(PermissionsPage));
+            }
+            base.dispose();
         }
     }
 }

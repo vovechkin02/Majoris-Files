@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesValueRow" parent="AdwActionRow">
+    <property name="use-markup">false</property>
+    <property name="subtitle-selectable">true</property>
+    <property name="subtitle-lines">2</property>
+  </template>
+</interface>

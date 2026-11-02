@@ -1,0 +1,96 @@
+<interface domain="majoris-files">
+  <menu id="application_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">New Window</attribute>
+        <attribute name="action">app.new-window</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">New Tab</attribute>
+        <attribute name="action">win.new-tab</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Reopen Closed Tab</attribute>
+        <attribute name="action">win.reopen</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Preferences…</attribute>
+        <attribute name="action">win.preferences</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Keyboard Shortcuts</attribute>
+        <attribute name="action">win.shortcuts</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">About Files</attribute>
+        <attribute name="action">win.about</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="tab_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Duplicate</attribute>
+        <attribute name="action">win.tab-duplicate</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Pin / Unpin</attribute>
+        <attribute name="action">win.tab-pin</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Move Left</attribute>
+        <attribute name="action">win.tab-left</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Move Right</attribute>
+        <attribute name="action">win.tab-right</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Move to New Window</attribute>
+        <attribute name="action">win.tab-detach</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Close Other Tabs</attribute>
+        <attribute name="action">win.tab-close-others</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Close Tabs to the Right</attribute>
+        <attribute name="action">win.tab-close-right</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Close</attribute>
+        <attribute name="action">win.tab-close</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="selection_menu">
+    <item>
+      <attribute name="label" translatable="yes">Select All</attribute>
+      <attribute name="action">win.select-all</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Select by Pattern…</attribute>
+      <attribute name="action">win.select-pattern</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Invert Selection</attribute>
+      <attribute name="action">win.invert-selection</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Select None</attribute>
+      <attribute name="action">win.select-none</attribute>
+    </item>
+  </menu>
+  <menu id="custom_icon_menu">
+    <item>
+      <attribute name="label" translatable="yes">Set Custom Icon…</attribute>
+      <attribute name="action">identity.custom</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Reset to Default Icon</attribute>
+      <attribute name="action">identity.reset</attribute>
+    </item>
+  </menu>
+</interface>

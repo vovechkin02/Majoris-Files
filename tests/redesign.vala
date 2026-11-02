@@ -80,10 +80,12 @@ void layout_case() {
         assert(window.current.path.has_css_class("majoris-location-entry"));
         var current = find_class(window, "majoris-location-current");
         assert(current != null && current.has_css_class("majoris-location-crumb"));
-        var resources = resources_enumerate_children("/com/majoris/files/theme", ResourceLookupFlags.NONE);
-        assert(resources.length == 1 && resources[0] == "files.css");
-        var css = resources_lookup_data("/com/majoris/files/theme/files.css", ResourceLookupFlags.NONE);
-        assert(!((string)css.get_data()).contains(".files-navigation"));
+        var resources = resources_enumerate_children("/com/majoris/files/ui", ResourceLookupFlags.NONE);
+        assert("window.ui" in resources && "browser.ui" in resources && "menus.ui" in resources);
+        bool css_absent = false;
+        try { resources_lookup_data("/com/majoris/files/theme/files.css", ResourceLookupFlags.NONE); }
+        catch (ResourceError.NOT_FOUND e) { css_absent = true; }
+        assert(css_absent);
         window.current.cancel(); window.destroy();
     } catch (Error e) { error("%s", e.message); }
 }

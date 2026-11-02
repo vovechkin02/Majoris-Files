@@ -48,7 +48,7 @@ All added menus use native text-only GMenu models; popovers have no pointers. No
 - `tests/menus.vala`: application inventory, contextual/keyboard state, originating-tab selection/search, isolated Trash and durable recovery checks.
 - `docs/tags.md`, `docs/tags-implementation-report.md`: current tag-management entry points.
 
-No changes to `data/theme/files.css`, Majoris Theme, the sharing service, tag schema, or chooser protocol are required.
+That menu-relocation change did not alter Majoris Theme, the sharing service, tag schema, or chooser protocol. The subsequent [GtkBuilder migration](gtkbuilder-migration.md) removed Files-specific CSS entirely.
 
 ## Verification and limits
 

@@ -1,0 +1,106 @@
+<interface domain="majoris-files">
+  <template class="MajorisFilesBatchRenameDialog" parent="AdwPreferencesDialog">
+    <child>
+      <object class="AdwPreferencesPage" id="page">
+        <child>
+          <object class="AdwPreferencesGroup" id="group">
+            <child>
+              <object class="AdwComboRow" id="mode">
+                <property name="title" translatable="yes">Mode</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Find and Replace</item>
+                      <item translatable="yes">Add Text Before</item>
+                      <item translatable="yes">Add Text After</item>
+                      <item translatable="yes">Format / Template</item>
+                      <item translatable="yes">Automatic Numbering</item>
+                      <item translatable="yes">Date Insertion</item>
+                      <item translatable="yes">Metadata Insertion</item>
+                    </items>
+                  </object>
+                </property>
+                <property name="selected">3</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="pattern">
+                <property name="title" translatable="yes">Pattern / Text</property>
+                <property name="text">{stem} - {counter}{extension}</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="replacement">
+                <property name="title" translatable="yes">Replace With</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSpinRow" id="start">
+                <property name="adjustment">
+                  <object class="GtkAdjustment">
+                    <property name="lower">0</property>
+                    <property name="upper">1000000000</property>
+                    <property name="step-increment">1</property>
+                    <property name="page-increment">10.0</property>
+                    <property name="value">0</property>
+                  </object>
+                </property>
+                <property name="title" translatable="yes">Starting Number</property>
+                <property name="value">1</property>
+                <property name="numeric">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSpinRow" id="digits">
+                <property name="adjustment">
+                  <object class="GtkAdjustment">
+                    <property name="lower">1</property>
+                    <property name="upper">12</property>
+                    <property name="step-increment">1</property>
+                    <property name="page-increment">10.0</property>
+                    <property name="value">1</property>
+                  </object>
+                </property>
+                <property name="title" translatable="yes">Minimum Digits</property>
+                <property name="value">3</property>
+                <property name="numeric">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="descending">
+                <property name="title" translatable="yes">Descending Numbering</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwComboRow" id="order">
+                <property name="title" translatable="yes">Order Before Numbering</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">Selection Order</item>
+                      <item translatable="yes">Filename</item>
+                      <item translatable="yes">Modified Date</item>
+                      <item translatable="yes">Created Date</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="apply">
+                <property name="label" translatable="yes">Rename Files</property>
+              </object>
+            </child>
+            <property name="description" translatable="yes">Templates: {original}, {stem}, {extension}, {counter}, {created}, {modified}, {camera}, {artist}, {album}, {track}, {title}, {season}, {episode}. Missing metadata blocks renaming.</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwPreferencesGroup" id="preview">
+            <property name="title" translatable="yes">Before → After</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <property name="title" translatable="yes">Batch Rename</property>
+  </template>
+</interface>

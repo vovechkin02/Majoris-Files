@@ -20,10 +20,15 @@ namespace MajorisFiles {
             return dot > 0 ? name.substring(dot) : "";
         }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/filename-cell.ui")]
     public class FilenameCell : Gtk.Box {
-        Gtk.Stack stack = new Gtk.Stack();
-        public Gtk.Label label = new Gtk.Label("");
-        public Gtk.Entry entry = new Gtk.Entry();
+        private bool template_disposing;
+        [GtkChild]
+        private unowned Gtk.Stack stack;
+        [GtkChild (internal = true)]
+        public unowned Gtk.Label label;
+        [GtkChild]
+        public unowned Gtk.Entry entry;
         public FileItem? item;
         public Gtk.SelectionModel? context;
         public InlineRename? transaction;
@@ -33,13 +38,9 @@ namespace MajorisFiles {
         bool updating;
         bool whole;
         uint binding;
-        public FilenameCell() {
-            stack.hhomogeneous = true; stack.vhomogeneous = true;
-            stack.hexpand = true; append(stack);
-            entry.width_chars = 1; entry.max_width_chars = 1;
-            entry.hexpand = true;
-            stack.add_named(label, "label"); stack.add_named(entry, "entry");
-            stack.visible_child_name = "label";
+
+        public FilenameCell() { }
+        construct {
             entry.changed.connect(() => { if (!updating && transaction != null) edited(entry.text); });
             entry.activate.connect(() => commit_requested());
             var focus = new Gtk.EventControllerFocus();
@@ -92,5 +93,12 @@ namespace MajorisFiles {
             updating = false;
         }
         public void detach() { binding++; render(null); item = null; context = null; }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                dispose_template(typeof(FilenameCell));
+            }
+            base.dispose();
+        }
     }
 }

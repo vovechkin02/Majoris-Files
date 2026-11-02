@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesCopyPropertiesRow" parent="MajorisFilesPropertiesInformationRow">
+    <child type="suffix">
+      <object class="GtkButton" id="copy_button">
+        <property name="icon-name">edit-copy-symbolic</property>
+        <property name="valign">center</property>
+      </object>
+    </child>
+  </template>
+</interface>

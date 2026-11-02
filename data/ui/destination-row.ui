@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesDestinationRow" parent="AdwActionRow">
+    <property name="use-markup">false</property>
+    <property name="activatable">true</property>
+    <child type="suffix">
+      <object class="GtkImage">
+        <property name="icon-name">go-next-symbolic</property>
+      </object>
+    </child>
+  </template>
+</interface>

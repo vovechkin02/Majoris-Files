@@ -8,16 +8,8 @@ namespace MajorisFiles {
         }
         public static async string? prompt(Gtk.Widget parent, string title, string initial = "", string? body = null)
         {
-            var dialog = new Adw.AlertDialog(title, body);
-            var entry = new Gtk.Entry();
-            entry.text = initial;
-            entry.activates_default = true;
-            dialog.extra_child = entry;
-            dialog.add_response("cancel", _("Cancel"));
-            dialog.add_response("apply", _("Apply"));
-            dialog.default_response = "apply";
-            dialog.close_response = "cancel";
-            dialog.set_response_appearance("apply", Adw.ResponseAppearance.SUGGESTED);
+            var dialog = new PromptDialog(); dialog.heading = title; dialog.body = body ?? "";
+            var entry = dialog.entry; entry.text = initial;
             entry.grab_focus();
             return (yield dialog.choose(parent, null)) == "apply" ? entry.text : null;
         }
@@ -35,21 +27,9 @@ namespace MajorisFiles {
             string message = "The password is used for this operation and is not saved." + (note == "" ? "" : "\n" + note);
             while(true)
             {
-                var dialog = new Adw.AlertDialog(title, message);
-                var fields = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
-                var entry = new Adw.PasswordEntryRow();
-                entry.title = _("Password");
-                fields.append(entry);
-                var repeat = new Adw.PasswordEntryRow();
-                repeat.title = _("Confirm Password");
-                if(confirmation)
-                    fields.append(repeat);
-                dialog.extra_child = fields;
-                dialog.add_response("cancel", _("Cancel"));
-                dialog.add_response("apply", _("Continue"));
-                dialog.close_response = "cancel";
-                dialog.default_response = "apply";
-                dialog.set_response_appearance("apply", Adw.ResponseAppearance.SUGGESTED);
+                var dialog = new PasswordDialog(); dialog.heading = title; dialog.body = message;
+                var entry = dialog.entry; var repeat = dialog.repeat;
+                repeat.visible = confirmation;
                 if((yield dialog.choose(parent, null)) != "apply")
                     return null;
                 if(entry.text != "" && entry.text.length <= 4096 && (!confirmation || entry.text == repeat.text))

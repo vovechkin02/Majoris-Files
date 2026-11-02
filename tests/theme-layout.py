@@ -4,23 +4,18 @@ import xml.etree.ElementTree as ET
 
 root = Path(__file__).resolve().parents[1]
 theme = root / "data/theme"
-assert {p.relative_to(theme).as_posix() for p in theme.rglob("*") if p.is_file()} == {"files.css"}
+assert not list(theme.rglob("*.css"))
 manifest = ET.parse(root / "data/files.gresource.xml")
-assert [node.text for node in manifest.iter("file")] == ["theme/files.css"]
-css = (theme / "files.css").read_text()
-assert css.strip().splitlines() == [
-    ".files-status { padding: 4px 16px; }",
-]
-loader = (root / "src/window/theme.vala").read_text()
-assert "StyleManager" not in loader
-assert loader.count("load_from_resource(") == 1
-assert '"/com/majoris/files/theme/files.css"' in loader
+assert all(node.text.startswith("ui/") for node in manifest.iter("file"))
+assert not (root / "src/window/theme.vala").exists()
+css = ""
+ui = "\n".join(p.read_text() for p in (root / "data/ui").glob("*.ui"))
 browser = (root / "src/views/browser.vala").read_text()
 assert "toolbar.margin_" not in browser
 assert browser.count("new Majoris.Ui.Toolbar()") == 2
 assert "toolbar.append_widget(address_fields)" in browser
 assert "address_fields.attach(location_bar, 0, 0, 3, 1)" in browser
-assert "majoris-toolbar-segmented" in browser
+assert "majoris-toolbar-segmented" in ui
 assert "commands.append_widget(switcher)" in browser
 assert "majoris-toolbar-view-switcher" not in browser
 assert "files-navigation" not in browser + css
@@ -41,13 +36,13 @@ for family in ("majoris-data-grid", "majoris-data-list", "majoris-data-column",
                "majoris-data-tile", "majoris-data-artwork", "majoris-data-thumbnail",
                "majoris-data-cell", "majoris-data-metadata", "majoris-density-compact",
                "majoris-sidebar-heading", "majoris-sidebar-heading-first"):
-    assert family in browser, family
+    assert family in browser + ui, family
 assert "files-section" not in browser + css
 assert "if (chooser_mode) adaptive.add_breakpoint" not in browser
-assert "body.position = 224" in browser
+assert '<property name="position">224</property>' in ui
 assert "icon.pixel_size = grid ? icon_size : 16" in browser
 assert "box.margin_" not in browser
-assert "list.show_column_separators = false" in browser
+assert '<property name="show-column-separators">false</property>' in ui
 
 # Ungrouped native views must not create even an invisible section header.
 assert 'list.header_factory = group_headers()' not in browser
@@ -63,17 +58,23 @@ assert 'add_css_class("focused")' not in browser
 # Files specifies toolbar membership; the public Theme API specifies geometry.
 assert "append_group(" not in browser
 assert "append_separator(" not in browser
-assert "var up_control = button(" in browser
+assert 'controls.get_object("up")' in browser
 assert "toolbar.append_control(up_control)" in browser
 assert "commands.append_spacer()" in browser
-assert "address_fields.column_spacing = 8" in browser
+assert '<property name="column-spacing">8</property>' in ui
 window = (root / "src/window/window.vala").read_text()
-assert window.count("toolbar.add_top_bar(") == 1
-assert "toolbar.add_top_bar(header)" in window
-assert "new Gtk.Box(Gtk.Orientation.VERTICAL, 0)" in window
-assert "toolbar.content = document_content" in window
-assert window.index("document_content.append(tabbar)") < window.index("document_content.append(recovery_banner)") < window.index("document_content.append(tabs)")
-assert 'tabbar.view = tabs' in window
-assert 'tabbar.add_css_class("majoris-document-tabs")' in window
+window_ui = ET.parse(root / "data/ui/window.ui")
+assert window_ui.find('.//object[@class="AdwToolbarView"]') is not None
+assert len(window_ui.findall('.//child[@type="top"]')) == 1
+assert window_ui.find('.//object[@class="AdwHeaderBar"]') is not None
+assert window_ui.find('.//object[@class="AdwTabOverview"]/property[@name="view"]').text == "tabs"
+bar = window_ui.find('.//object[@class="AdwTabBar"]')
+assert bar.find('property[@name="view"]').text == "tabs"
+assert bar.find('style/class[@name="majoris-document-tabs"]') is not None
+content = window_ui.find('.//object[@class="AdwToolbarView"]/property[@name="content"]/object')
+assert [c.find("object").get("class") for c in content.findall("child")] == ["AdwTabBar", "AdwBanner", "AdwTabView"]
+assert 'new Adw.TabView' not in window
+assert 'new Adw.TabBar' not in window
+assert 'new Adw.TabOverview' not in window
 
 print("Files layout and GNOME theme ownership checks passed")

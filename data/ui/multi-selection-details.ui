@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesMultiSelectionDetails" parent="AdwPreferencesPage">
+    <child>
+      <object class="AdwPreferencesGroup">
+        <property name="title" translatable="yes">File Information</property>
+        <child>
+          <object class="AdwActionRow" id="selected">
+            <property name="title" translatable="yes">Selected Items</property>
+            <property name="subtitle-selectable">true</property>
+            <property name="subtitle-lines">2</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesGroup">
+        <property name="title" translatable="yes">Storage</property>
+        <child>
+          <object class="AdwActionRow" id="exact_size">
+            <property name="title" translatable="yes">Exact Size</property>
+            <property name="subtitle-selectable">true</property>
+            <property name="subtitle-lines">2</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwActionRow" id="allocated">
+            <property name="title" translatable="yes">Size on Disk</property>
+            <property name="subtitle-selectable">true</property>
+            <property name="subtitle-lines">2</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

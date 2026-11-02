@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesDeviceIdentity" parent="GtkBox">
+    <property name="orientation">horizontal</property>
+    <property name="spacing">12</property>
+    <child>
+      <object class="GtkImage" id="icon">
+        <property name="pixel-size">48</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label">
+        <property name="xalign">0</property>
+        <property name="wrap">true</property>
+        <property name="wrap-mode">word-char</property>
+        <property name="max-width-chars">34</property>
+        <property name="hexpand">true</property>
+        <property name="selectable">true</property>
+        <style>
+          <class name="heading" />
+        </style>
+      </object>
+    </child>
+  </template>
+</interface>

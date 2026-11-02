@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesQuickPreviewWindow" parent="AdwWindow">
+    <property name="default-width">720</property>
+    <property name="default-height">560</property>
+    <property name="content">
+      <object class="MajorisFilesPreviewPane" id="pane" />
+    </property>
+  </template>
+</interface>

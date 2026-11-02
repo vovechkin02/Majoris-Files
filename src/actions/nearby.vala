@@ -91,14 +91,8 @@ namespace MajorisFiles {
                         throw new FileError.INVALID("Invalid nearby device");
                     names.append(peer.name);
                 }
-                var target = new Adw.ComboRow();
-                target.title = _("Device");
-                target.model = names;
-                var dialog = new Adw.AlertDialog(_("Send Selected Files?"), "%d selected items will be sent by the installed Nearby Share provider.".printf(selection.size));
-                dialog.extra_child = target;
-                dialog.add_response("cancel", _("Cancel"));
-                dialog.add_response("send", _("Send"));
-                dialog.close_response = "cancel";
+                var dialog = new NearbySendDialog(); var target = dialog.target; target.model = names;
+                dialog.body = _("%d selected items will be sent by the installed Nearby Share provider.").printf(selection.size);
                 if((yield dialog.choose(parent, token)) != "send")
                     return;
                 var files = new Gee.ArrayList<File>();

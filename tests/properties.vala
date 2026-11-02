@@ -68,7 +68,7 @@ void assert_identity(PropertiesDialog dialog, string name) {
         var icons = dialog.identity_name.get_next_sibling() as Gtk.MenuButton;
         assert(icons != null && icons.label == "Icon…" && !icons.popover.has_arrow);
         assert(icons.menu_model.get_n_items() == 2 && icons.get_next_sibling() == null);
-    } else assert(dialog.identity_name.get_next_sibling() == null);
+    } else { var hidden_icons = dialog.identity_name.get_next_sibling(); assert(hidden_icons == null || !hidden_icons.is_visible()); }
     assert(titled(dialog.general, name) == null);
 }
 void collect_information(Gtk.Widget widget, Gee.ArrayList<string> titles) {
@@ -223,7 +223,8 @@ async void scenarios() throws Error {
     assert(!FileUtils.test(Path.build_filename(fixture, "launched"), FileTest.EXISTS));
     properties.close(); yield pause_layout(); assert(properties.token.is_cancelled());
     properties = new PropertiesDialog(window, selection(folder), metadata); properties.present(window); yield pause_layout();
-    assert(button_label(properties.general, "Change…") == null && titled(properties.general, "Sharing") != null);
+    var folder_change = button_label(properties.general, "Change…");
+    assert((folder_change == null || !folder_change.is_visible()) && titled(properties.general, "Sharing") != null);
     yield wait_scan(properties); assert_identity(properties, folder.name);
     assert_information_order(properties, {"Type", "Size", "Contents", "Location", "Modified"});
     assert(information_value(properties, "Type") == "File folder" && information_value(properties, "Size") == Paths.size(5));
@@ -269,7 +270,8 @@ async void scenarios() throws Error {
     details = typed(window, typeof(MetadataPage)) as MetadataPage; assert(titled(details, "Video Codec") != null && titled(details, "Audio Codec") == null);
     yield shot(window, "details-video"); properties.close(); yield pause_layout();
     properties = new PropertiesDialog(window, selection(document, folder), metadata); properties.present(window); yield pause_layout();
-    assert(titled(properties.general, "Sharing") == null && button_label(properties.general, "Change…") == null);
+    var multiple_change = button_label(properties.general, "Change…");
+    assert(titled(properties.general, "Sharing") == null && (multiple_change == null || !multiple_change.is_visible()));
     var all = (Adw.SwitchRow)titled(properties.general, "Favorite All Selected Items"); all.active = true; assert(metadata.favorite(document.file) && metadata.favorite(folder.file));
     yield wait_scan(properties); assert_identity(properties, "2 selected items");
     assert_information_order(properties, {"Type", "Size", "Location"});

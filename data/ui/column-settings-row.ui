@@ -1,0 +1,33 @@
+<interface domain="majoris-files">
+  <template class="MajorisFilesColumnSettingsRow" parent="AdwActionRow">
+    <child type="suffix">
+      <object class="GtkSwitch" id="toggle">
+        <property name="valign">center</property>
+      </object>
+    </child>
+    <child type="suffix">
+      <object class="GtkSpinButton" id="width">
+        <property name="valign">center</property>
+        <property name="tooltip-text" translatable="yes">Column Width (pixels)</property>
+        <property name="adjustment">
+          <object class="GtkAdjustment">
+            <property name="lower">40</property>
+            <property name="upper">1200</property>
+            <property name="step-increment">10</property>
+            <property name="page-increment">100.0</property>
+            <property name="value">40</property>
+          </object>
+        </property>
+        <property name="numeric">true</property>
+        <property name="climb-rate">10</property>
+      </object>
+    </child>
+    <child type="suffix">
+      <object class="GtkButton" id="up">
+        <property name="valign">center</property>
+        <property name="tooltip-text" translatable="yes">Move Column Left</property>
+        <property name="icon-name">go-up-symbolic</property>
+      </object>
+    </child>
+  </template>
+</interface>

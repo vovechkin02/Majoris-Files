@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesSharingAccountRow" parent="AdwActionRow">
+    <property name="use-markup">false</property>
+    <property name="subtitle" translatable="yes">Share-level access; filesystem permissions can further restrict it.</property>
+    <property name="activatable-widget">check</property>
+    <child type="suffix">
+      <object class="GtkCheckButton" id="check">
+        <property name="valign">center</property>
+      </object>
+    </child>
+    <child type="suffix">
+      <object class="GtkDropDown" id="access">
+        <property name="valign">center</property>
+        <property name="model">
+          <object class="GtkStringList">
+            <items>
+              <item translatable="yes">Read Only</item>
+              <item translatable="yes">Read and Write</item>
+              <item translatable="yes">No Access</item>
+            </items>
+          </object>
+        </property>
+      </object>
+    </child>
+  </template>
+</interface>

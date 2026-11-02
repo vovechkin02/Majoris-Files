@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <object class="GtkScrolledWindow" id="root">
+    <property name="child">
+      <object class="GtkTextView" id="view">
+        <property name="editable">false</property>
+        <property name="monospace">true</property>
+        <property name="wrap-mode">word-char</property>
+      </object>
+    </property>
+  </object>
+</interface>

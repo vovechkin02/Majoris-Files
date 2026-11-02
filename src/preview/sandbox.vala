@@ -104,52 +104,55 @@ namespace MajorisFiles {
             return output;
         }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/preview-image.ui")]
     public class ImageView : Gtk.Box {
+        private bool template_disposing;
         FileItem item;
         Cancellable token;
         Gdk.Texture texture;
-        Gtk.Picture picture = new Gtk.Picture();
-        Gtk.Label description = new Gtk.Label("");
+        [GtkChild]
+        private unowned Gtk.Picture picture;
+        [GtkChild]
+        private unowned Gtk.Label description;
         int angle;
         double zoom = 1;
         bool fit = true;
         bool busy;
+
+        [GtkChild] private unowned Gtk.ScrolledWindow picture_scroll;
+        [GtkChild] private unowned Gtk.ScrolledWindow toolbar_scroll;
         public ImageView(FileItem item, Gdk.Texture texture, Cancellable token)
         {
             Object(orientation: Gtk.Orientation.VERTICAL, spacing: 6);
             this.item = item;
             this.texture = texture;
             this.token = token;
+            var ui_controls = new Gtk.Builder.from_resource("/com/majoris/files/ui/preview-controls.ui");
             var controls = new Majoris.Ui.Toolbar();
             controls.compact = true;
             controls.divider = true;
             var actions = controls.append_group();
-            actions.append_control(Browser.button("zoom-in-symbolic", _("Zoom In"), () => { fit = false;
+            actions.append_control(PreviewButtons.connect((Gtk.Button)ui_controls.get_object("control_2"), () => { fit = false;
                                                                                   zoom = double.min(zoom * 1.25, 3);
                                                                                   update();
                 }));
-            actions.append_control(Browser.button("zoom-out-symbolic", _("Zoom Out"), () => { fit = false;
+            actions.append_control(PreviewButtons.connect((Gtk.Button)ui_controls.get_object("control_1"), () => { fit = false;
                                                                                     zoom = double.max(zoom / 1.25, 0.1);
                                                                                     update();
                 }));
-            actions.append_control(Browser.button("zoom-fit-best-symbolic", _("Fit Image"), () => { fit = true;
+            actions.append_control(PreviewButtons.connect((Gtk.Button)ui_controls.get_object("control_6"), () => { fit = true;
                                                                                           update();
                 }));
-            actions.append_control(Browser.button("object-rotate-right-symbolic", _("Rotate Preview Clockwise"), () => { if(!busy)
+            actions.append_control(PreviewButtons.connect((Gtk.Button)ui_controls.get_object("control_5"), () => { if(!busy)
                                                                                                                {
                                                                                                                    angle = (angle + 90) % 360;
                                                                                                                    rotate.begin();
                                                                                                                }
                 }));
-            var toolbar_scroll = new Gtk.ScrolledWindow();
-            toolbar_scroll.set_policy(Gtk.PolicyType.EXTERNAL, Gtk.PolicyType.NEVER);
-            toolbar_scroll.propagate_natural_height = true;
+
+
             toolbar_scroll.child = controls;
-            append(toolbar_scroll);
-            picture.content_fit = Gtk.ContentFit.CONTAIN;
-            append(Browser.scrolled(picture));
-            description.wrap = true;
-            append(description);
+
             update();
         }
         void update()
@@ -173,6 +176,14 @@ namespace MajorisFiles {
                     description.label = _("Preview unavailable\n") + e.message;
             }
             busy = false;
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                if (token != null) token.cancel();
+                dispose_template(typeof(ImageView));
+            }
+            base.dispose();
         }
     }
     public class FontPreview : Object, PreviewProvider {

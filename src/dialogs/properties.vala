@@ -1,7 +1,10 @@
 namespace MajorisFiles {
     // General information has its own geometry; advanced pages retain value_row().
+    [GtkTemplate (ui = "/com/majoris/files/ui/properties-row.ui")]
     public class PropertiesInformationRow : Adw.ActionRow {
-        public Gtk.Label value_label = new Gtk.Label("");
+        private bool template_disposing;
+        [GtkChild]
+        public unowned Gtk.Label value_label;
         public string value {
             owned get { return value_label.label; }
             set {
@@ -10,21 +13,28 @@ namespace MajorisFiles {
                 value_label.update_property(Gtk.AccessibleProperty.LABEL, title + ": " + value, -1);
             }
         }
+
         public PropertiesInformationRow(string title, string value) {
-            use_markup = false; this.title = title; title_lines = 1;
-            value_label.xalign = 1; value_label.valign = Gtk.Align.CENTER;
-            value_label.hexpand = true; value_label.selectable = true;
-            value_label.wrap = false;
-            value_label.lines = 1; value_label.ellipsize = Pango.EllipsizeMode.END;
-            value_label.max_width_chars = 30;
-            add_suffix(value_label); this.value = value;
+            this.title = title;
+
+             this.value = value;
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                dispose_template(typeof(PropertiesInformationRow));
+            }
+            base.dispose();
         }
     }
     // A selection snapshot and one native navigation stack own the entire lifetime.
+    [GtkTemplate (ui = "/com/majoris/files/ui/properties.ui")]
     public class PropertiesDialog : Adw.PreferencesDialog {
+        private bool template_disposing;
         public static void present_selection(Gtk.Window parent, Gee.List<FileItem> items, MetadataStore metadata) { if (items.size == 1 && !Paths.is_symlink(items[0].info)) { var place = DeviceInfoProvider.for_root(items[0].file); if (place != null) { new DevicePropertiesDialog(place).present(parent); return; } } if (items.size > 0) new PropertiesDialog(parent, items, metadata).present(parent); }
         public Gee.ArrayList<FileItem> items = new Gee.ArrayList<FileItem>();
-        public Adw.PreferencesPage general = new Adw.PreferencesPage();
+        [GtkChild]
+        public unowned Adw.PreferencesPage general;
         public Cancellable token = new Cancellable();
         MetadataStore metadata;
         Gtk.Window owner_window;
@@ -33,55 +43,61 @@ namespace MajorisFiles {
         SharingPage? sharing;
         MetadataPage? details;
         FileCounts counts = new FileCounts();
-        public Gtk.Box identity = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 12);
-        public Gtk.Label identity_name = new Gtk.Label("");
+        [GtkChild]
+        public unowned Gtk.Box identity;
+        [GtkChild]
+        public unowned Gtk.Label identity_name;
         PropertiesInformationRow? contents;
         PropertiesInformationRow size_row;
         string? scan_error;
         Adw.ActionRow? exact_size;
         Adw.ActionRow? allocated;
-        Adw.SwitchRow favorites;
-        Adw.ActionRow tags;
-        Gtk.Box tag_markers = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
-        Adw.ActionRow? association;
+        [GtkChild] private unowned Adw.ActionRow tags;
+        [GtkChild] private unowned Gtk.Box tag_markers;
+        [GtkChild] private unowned Adw.ActionRow association;
         bool updating;
         bool counting;
         bool single_size_known;
         ulong metadata_handler;
+
+        [GtkChild] private unowned Adw.PreferencesGroup additional;
+        [GtkChild] private unowned Adw.SwitchRow favorites;
+        [GtkChild] private unowned Adw.PreferencesGroup heading;
+        [GtkChild] private unowned Gtk.Image image;
+        [GtkChild] private unowned Adw.PreferencesGroup information;
+        [GtkChild] private unowned Adw.PreferencesGroup organisation;
+        [GtkChild] private unowned Adw.PreferencesGroup applications;
+        [GtkChild] private unowned Gtk.Button change;
+        [GtkChild] private unowned Gtk.Image application_icon;
+        [GtkChild] private unowned Gtk.MenuButton icons;
         public PropertiesDialog(Gtk.Window parent, Gee.List<FileItem> selected, MetadataStore metadata) {
-            title = _("Properties"); content_width = 560; content_height = 620; search_enabled = false;
             owner_window = parent; this.metadata = metadata;
             foreach (var item in selected) items.add(item);
             var cloud = CloudFiles.get_default().cached(items[0].file);
             single_size_known = items[0].info.has_attribute("standard::size") || (cloud != null && cloud.size_known);
-            general.title = _("General"); general.name = "general"; general.icon_name = "document-properties-symbolic";
-            add(general);
-            var heading = new Adw.PreferencesGroup(); general.add(heading);
+
             identity_name.label = items.size == 1 ? items[0].name : _("%d selected items").printf(items.size);
-            identity_name.wrap = true; identity_name.wrap_mode = Pango.WrapMode.WORD_CHAR;
-            identity_name.max_width_chars = 34; identity_name.hexpand = true;
-            identity_name.xalign = 0; identity_name.valign = Gtk.Align.CENTER;
-            identity_name.selectable = true; identity_name.add_css_class("heading");
+
             identity.update_property(Gtk.AccessibleProperty.LABEL, identity_name.label, -1);
-            var image = new Gtk.Image.from_icon_name("edit-copy-symbolic"); image.pixel_size = 48;
+
             if (items.size == 1) image.set_from_gicon((items[0].info.has_attribute("standard::icon") ? items[0].info.get_icon() : null) ?? new ThemedIcon("text-x-generic"));
-            identity.append(image); identity.append(identity_name);
+
             if (items.size == 1) {
-                var icons = new Gtk.MenuButton(); icons.label = _("Icon…"); MenuPresentation.button(icons);
-                var model = new Menu(); model.append(_("Set Custom Icon…"), "identity.custom"); model.append(_("Reset to Default Icon"), "identity.reset"); icons.menu_model = model;
+                icons.visible = true; MenuPresentation.button(icons);
+                icons.menu_model = (Menu)new Gtk.Builder.from_resource("/com/majoris/files/ui/menus.ui").get_object("custom_icon_menu");
                 var actions = new SimpleActionGroup();
                 var custom = new SimpleAction("custom", null); custom.activate.connect(() => change_icon.begin(false, image)); actions.add_action(custom);
                 var reset = new SimpleAction("reset", null); reset.activate.connect(() => change_icon.begin(true, image)); actions.add_action(reset);
-                icons.insert_action_group("identity", actions); identity.append(icons);
+                icons.insert_action_group("identity", actions);
             }
-            heading.add(identity);
+
             if (items.size == 1 && !items[0].directory) {
                 var thumbnails = new ThumbnailService(metadata);
                 thumbnails.texture.begin(items[0], token, (obj, res) => {
                     try { var texture = thumbnails.texture.end(res); if (!token.is_cancelled() && texture != null) image.set_from_paintable(texture); } catch (Error e) {}
                 });
             }
-            var information = new Adw.PreferencesGroup(); information.title = _("Information"); general.add(information);
+
             bool needs_scan = items.size > 1 || counted_folder(items[0]);
             information.add(information_row(_("Type"), selection_type()));
             string initial_size = _("Unavailable");
@@ -100,19 +116,19 @@ namespace MajorisFiles {
                 if (date != null) information.add(information_row(_("Modified"), date.to_local().format("%x")));
             }
             if (items.size == 1 && !items[0].directory && items[0].info.get_file_type() != FileType.MOUNTABLE) {
-                var applications = new Adw.PreferencesGroup(); applications.title = _("Open With"); general.add(applications);
-                association = value_row("", "");
-                var change = new Gtk.Button.with_label(_("Change…")); change.valign = Gtk.Align.CENTER;
-                association.add_suffix(change); association.activatable_widget = change;
-                applications.add(association); refresh_association();
+                applications.visible = true;
+
+
+
+                refresh_association();
                 change.clicked.connect(() => {
                     var chooser = new AssociationChooser(this, items[0]);
                     chooser.changed.connect(refresh_association); chooser.present(this);
                 });
             }
-            var organisation = new Adw.PreferencesGroup(); organisation.title = _("Organisation"); general.add(organisation);
-            favorites = new Adw.SwitchRow(); favorites.title = items.size == 1 ? _("Favorite") : _("Favorite All Selected Items"); organisation.add(favorites);
-            tags = value_row(_("Tags"), ""); tags.activatable = true; tag_markers.valign = Gtk.Align.CENTER; tags.add_suffix(tag_markers); tags.add_suffix(new Gtk.Image.from_icon_name("go-next-symbolic")); organisation.add(tags);
+
+             favorites.title = items.size == 1 ? _("Favorite") : _("Favorite All Selected Items");
+
             refresh_organisation();
             favorites.notify["active"].connect(() => {
                 if (updating) return;
@@ -122,7 +138,7 @@ namespace MajorisFiles {
             });
             tags.activated.connect(() => edit_tags.begin());
             metadata_handler = metadata.changed.connect(() => { if (!token.is_cancelled()) refresh_organisation(); });
-            var additional = new Adw.PreferencesGroup(); additional.title = _("Additional Information"); general.add(additional);
+
             if (items.size == 1 && shareable(items[0])) destination(additional, _("Sharing"), () => {
                 if (sharing == null) sharing = new SharingPage(owner_window, items[0].file, null, true);
                 show_subpage("sharing", _("Sharing"), sharing);
@@ -138,9 +154,9 @@ namespace MajorisFiles {
                 if (!subpages.has_key("details")) {
                     Adw.PreferencesPage page;
                     if (items.size == 1) { details = new MetadataPage(items[0], metadata, true); details.refresh_file_info.begin(); page = details; }
-                    else { page = new Adw.PreferencesPage(); var group = new Adw.PreferencesGroup(); group.title = _("File Information"); page.add(group); group.add(value_row(_("Selected Items"), items.size.to_string())); }
+                    else { var multi = new MultiSelectionDetails(); multi.selected.subtitle = items.size.to_string(); page = multi; }
                     if (details != null) { exact_size = details.exact_size; allocated = details.allocated; }
-                    else { var statistics = new Adw.PreferencesGroup(); statistics.title = _("Storage"); page.add(statistics); exact_size = value_row(_("Exact Size"), ""); allocated = value_row(_("Size on Disk"), ""); statistics.add(exact_size); statistics.add(allocated); }
+                    else { exact_size = ((MultiSelectionDetails)page).exact_size; allocated = ((MultiSelectionDetails)page).allocated; }
                     update_counts();
                     show_subpage("details", _("Details"), page);
                 } else push_subpage(subpages["details"]);
@@ -177,7 +193,7 @@ namespace MajorisFiles {
             } catch (Error e) { if (!(e is Gtk.DialogError.DISMISSED) && !(e is IOError.CANCELLED)) Dialogs.error(owner_window, e.message); }
         }
         public static Adw.ActionRow value_row(string title, string value) {
-            var row = new Adw.ActionRow(); row.use_markup = false; row.title = title; row.subtitle = value; row.subtitle_selectable = true; row.subtitle_lines = 2; return row;
+            var row = new ValueRow(); row.title = title; row.subtitle = value; return row;
         }
         static string readable_location(File location) {
             var home = File.new_for_path(Environment.get_home_dir());
@@ -193,12 +209,12 @@ namespace MajorisFiles {
             return item.info.get_file_type() != FileType.MOUNTABLE;
         }
         void destination(Adw.PreferencesGroup group, string title, owned Callback action) {
-            var row = value_row(title, ""); row.activatable = true; row.add_suffix(new Gtk.Image.from_icon_name("go-next-symbolic")); row.activated.connect(() => action()); group.add(row);
+            var row = new DestinationRow(); row.title = title; row.activated.connect(() => action()); group.add(row);
         }
         void show_subpage(string key, string title, Adw.PreferencesPage page) {
             if (!subpages.has_key(key)) {
-                var view = new Adw.ToolbarView(); view.add_top_bar(new Adw.HeaderBar()); view.content = page;
-                subpages[key] = new Adw.NavigationPage(view, title);
+                var subpage = new PropertiesSubpage(); subpage.title = title; subpage.view.content = page;
+                subpages[key] = subpage;
             }
             push_subpage(subpages[key]);
         }
@@ -233,8 +249,7 @@ namespace MajorisFiles {
             if (association == null || token.is_cancelled()) return;
             var app = AppInfo.get_default_for_type(items[0].mime, !items[0].file.is_native());
             association.title = app == null ? _("No default application") : app.get_display_name(); association.subtitle = app == null ? _("Choose an application for this file type") : _("Default application");
-            var prefix = association.get_data<Gtk.Image>("application-icon");
-            if (prefix == null) { prefix = new Gtk.Image(); prefix.pixel_size = 32; association.add_prefix(prefix); association.set_data<Gtk.Image>("application-icon", prefix); }
+            var prefix = application_icon;
             prefix.set_from_gicon(app == null ? new ThemedIcon("application-x-executable-symbolic") : app.get_icon() ?? new ThemedIcon("application-x-executable-symbolic"));
         }
         void refresh_organisation() {
@@ -247,5 +262,13 @@ namespace MajorisFiles {
             updating = false;
         }
         async void edit_tags() { if (!token.is_cancelled()) new TagAssignmentDialog(metadata, items).present(this); }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                if (token != null) token.cancel();
+                dispose_template(typeof(PropertiesDialog));
+            }
+            base.dispose();
+        }
     }
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesPromptDialog" parent="AdwAlertDialog">
+    <responses>
+      <response id="cancel" translatable="yes">Cancel</response>
+      <response id="apply" appearance="suggested" translatable="yes">Apply</response>
+    </responses>
+    <property name="close-response">cancel</property>
+    <property name="default-response">apply</property>
+    <property name="extra-child">
+      <object class="GtkEntry" id="entry">
+        <property name="activates-default">true</property>
+      </object>
+    </property>
+  </template>
+</interface>

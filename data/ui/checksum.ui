@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesChecksumDialog" parent="AdwPreferencesDialog">
+    <child>
+      <object class="AdwPreferencesPage" id="page">
+        <child>
+          <object class="AdwPreferencesGroup" id="group">
+            <child>
+              <object class="AdwComboRow" id="algorithm">
+                <property name="title" translatable="yes">Algorithm</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item translatable="yes">SHA-256</item>
+                      <item translatable="yes">SHA-512</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="expected">
+                <property name="title" translatable="yes">Expected Checksum (optional)</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow" id="result">
+                <property name="title" translatable="yes">Result</property>
+                <property name="subtitle-selectable">true</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="load">
+                <property name="label" translatable="yes">Load Checksum File…</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="calculate">
+                <property name="label" translatable="yes">Calculate / Verify</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <property name="title" translatable="yes">Checksums</property>
+  </template>
+</interface>

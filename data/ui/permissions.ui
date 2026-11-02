@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesPermissionsPage" parent="AdwPreferencesPage">
+    <child>
+      <object class="AdwPreferencesGroup" id="ownership">
+        <property name="title" translatable="yes">Ownership</property>
+        <child>
+          <object class="AdwActionRow" id="owner_summary">
+            <property name="title" translatable="yes">Owner</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwActionRow" id="group_summary">
+            <property name="title" translatable="yes">Group</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesGroup" id="basic">
+        <property name="title" translatable="yes">Access</property>
+        <property name="description" translatable="yes">Checking extended access rules…</property>
+        <property name="visible">false</property>
+        <child>
+          <object class="AdwComboRow" id="access_owner">
+            <property name="title" translatable="yes">Owner</property>
+            <property name="use-markup">false</property>
+            <property name="sensitive">false</property>
+            <property name="model">
+              <object class="GtkStringList">
+                <items>
+                  <item translatable="yes">No Access</item>
+                  <item translatable="yes">Read Only</item>
+                  <item translatable="yes">Read &amp; Write</item>
+                  <item translatable="yes">Custom</item>
+                  <item translatable="yes">Mixed</item>
+                </items>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwComboRow" id="access_group">
+            <property name="title" translatable="yes">Group</property>
+            <property name="use-markup">false</property>
+            <property name="sensitive">false</property>
+            <property name="model">
+              <object class="GtkStringList">
+                <items>
+                  <item translatable="yes">No Access</item>
+                  <item translatable="yes">Read Only</item>
+                  <item translatable="yes">Read &amp; Write</item>
+                  <item translatable="yes">Custom</item>
+                  <item translatable="yes">Mixed</item>
+                </items>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwComboRow" id="access_others">
+            <property name="title" translatable="yes">Others</property>
+            <property name="use-markup">false</property>
+            <property name="sensitive">false</property>
+            <property name="model">
+              <object class="GtkStringList">
+                <items>
+                  <item translatable="yes">No Access</item>
+                  <item translatable="yes">Read Only</item>
+                  <item translatable="yes">Read &amp; Write</item>
+                  <item translatable="yes">Custom</item>
+                  <item translatable="yes">Mixed</item>
+                </items>
+              </object>
+            </property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesGroup" id="extra">
+        <child>
+          <object class="AdwActionRow" id="enclosed">
+            <property name="title" translatable="yes">Apply to enclosed files…</property>
+            <property name="subtitle" translatable="yes">Separate file and folder modes; confirmation required</property>
+            <property name="activatable">true</property>
+            <child type="suffix">
+              <object class="GtkImage">
+                <property name="icon-name">go-next-symbolic</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwExpanderRow" id="advanced">
+            <child>
+              <object class="AdwEntryRow" id="files">
+                <property name="title" translatable="yes">File Permissions (octal)</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="folders">
+                <property name="title" translatable="yes">Folder Permissions (octal)</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Read · Write · Execute</property>
+                <property name="subtitle" translatable="yes">4 = read, 2 = write, 1 = execute. Folder execute permits traversal. A blank mixed mode is preserved. Octal changes may alter effective ACL access; special bits use the fourth digit.</property>
+                <property name="subtitle-lines">0</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow" id="matrix_row" />
+            </child>
+            <child>
+              <object class="GtkGrid" id="matrix">
+                <property name="column-spacing">12</property>
+                <property name="row-spacing">8</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Owner</property>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">1</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Group</property>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">2</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Others</property>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">3</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Read</property>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">0</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Write</property>
+                    <layout>
+                      <property name="column">2</property>
+                      <property name="row">0</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Execute</property>
+                    <layout>
+                      <property name="column">3</property>
+                      <property name="row">0</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="permission_0">
+                    <property name="tooltip-text" translatable="yes">Owner · Read</property>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">1</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="permission_1">
+                    <property name="tooltip-text" translatable="yes">Owner · Write</property>
+                    <layout>
+                      <property name="column">2</property>
+                      <property name="row">1</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="permission_2">
+                    <property name="tooltip-text" translatable="yes">Owner · Execute</property>
+                    <layout>
+                      <property name="column">3</property>
+                      <property name="row">1</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="permission_3">
+                    <property name="tooltip-text" translatable="yes">Group · Read</property>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">2</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="permission_4">
+                    <property name="tooltip-text" translatable="yes">Group · Write</property>
+                    <layout>
+                      <property name="column">2</property>
+                      <property name="row">2</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="permission_5">
+                    <property name="tooltip-text" translatable="yes">Group · Execute</property>
+                    <layout>
+                      <property name="column">3</property>
+                      <property name="row">2</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="permission_6">
+                    <property name="tooltip-text" translatable="yes">Others · Read</property>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">3</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="permission_7">
+                    <property name="tooltip-text" translatable="yes">Others · Write</property>
+                    <layout>
+                      <property name="column">2</property>
+                      <property name="row">3</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="permission_8">
+                    <property name="tooltip-text" translatable="yes">Others · Execute</property>
+                    <layout>
+                      <property name="column">3</property>
+                      <property name="row">3</property>
+                    </layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="owner">
+                <property name="title" translatable="yes">Owner UID (blank preserves owner)</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="owning_group">
+                <property name="title" translatable="yes">Group GID (blank preserves group)</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPreferencesGroup" id="account_group">
+                <child>
+                  <object class="AdwComboRow" id="owner_picker">
+                    <property name="title" translatable="yes">Choose Owner Account</property>
+                    <property name="use-markup">false</property>
+                    <property name="enable-search">true</property>
+                    <property name="model">
+                      <object class="GtkStringList">
+                        <items>
+                          <item translatable="yes">Keep Current</item>
+                        </items>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwComboRow" id="group_picker">
+                    <property name="title" translatable="yes">Choose Group</property>
+                    <property name="use-markup">false</property>
+                    <property name="enable-search">true</property>
+                    <property name="model">
+                      <object class="GtkStringList">
+                        <items>
+                          <item translatable="yes">Keep Current</item>
+                        </items>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="recursive">
+                <property name="title" translatable="yes">Apply to Folder Contents</property>
+                <property name="subtitle" translatable="yes">Only applied after confirmation</property>
+              </object>
+            </child>
+            <property name="title" translatable="yes">Advanced Permissions</property>
+            <property name="subtitle" translatable="yes">POSIX modes, ownership, ACLs and recursive changes</property>
+          </object>
+        </child>
+        <property name="visible">false</property>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesGroup" id="actions">
+        <child>
+          <object class="GtkButton" id="apply">
+            <property name="label" translatable="yes">Apply Permissions</property>
+            <property name="sensitive">false</property>
+            <style>
+              <class name="suggested-action" />
+            </style>
+          </object>
+        </child>
+        <property name="visible">false</property>
+      </object>
+    </child>
+    <property name="title" translatable="yes">Permissions</property>
+    <property name="icon-name">changes-prevent-symbolic</property>
+    <child>
+      <object class="AdwPreferencesGroup" id="unavailable">
+        <property name="visible">false</property>
+        <child>
+          <object class="AdwActionRow">
+            <property name="title" translatable="yes">Permissions unavailable</property>
+            <property name="subtitle" translatable="yes">This selection does not expose editable local POSIX permissions. Symbolic links are not followed.</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

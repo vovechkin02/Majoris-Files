@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-files">
+  <template class="MajorisFilesSharedFolderRow" parent="AdwActionRow">
+    <child type="suffix">
+      <object class="GtkBox">
+        <property name="orientation">horizontal</property>
+        <property name="spacing">4</property>
+        <property name="valign">center</property>
+        <child>
+          <object class="GtkButton" id="open">
+            <property name="icon-name">folder-open-symbolic</property>
+            <property name="tooltip-text" translatable="yes">Open Folder</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="copy">
+            <property name="icon-name">edit-copy-symbolic</property>
+            <property name="tooltip-text" translatable="yes">Copy Network Address</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="edit">
+            <property name="icon-name">document-properties-symbolic</property>
+            <property name="tooltip-text" translatable="yes">Edit Share</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="stop">
+            <property name="icon-name">process-stop-symbolic</property>
+            <property name="tooltip-text" translatable="yes">Stop Sharing</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

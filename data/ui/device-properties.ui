@@ -1,0 +1,56 @@
+<interface domain="majoris-files">
+  <template class="MajorisFilesDevicePropertiesDialog" parent="AdwPreferencesDialog">
+    <child>
+      <object class="AdwPreferencesPage" id="general">
+        <property name="title" translatable="yes">General</property>
+        <child>
+          <object class="AdwPreferencesGroup" id="loading_group">
+            <property name="visible">false</property>
+            <child>
+              <object class="MajorisFilesPropertiesInformationRow">
+                <property name="title" translatable="yes">Status</property>
+                <property name="value" translatable="yes">Loading…</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="MajorisFilesDeviceSection" id="identity_section">
+            <property name="visible">false</property>
+            <child>
+              <object class="MajorisFilesDeviceIdentity" id="identity_widget" />
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="MajorisFilesDeviceSection" id="information_section">
+            <property name="visible">false</property>
+            <property name="title" translatable="yes">Information</property>
+          </object>
+        </child>
+        <child>
+          <object class="MajorisFilesDeviceSection" id="media_section">
+            <property name="visible">false</property>
+            <property name="title" translatable="yes">Disc Information</property>
+          </object>
+        </child>
+        <child>
+          <object class="MajorisFilesDeviceSection" id="storage_section">
+            <property name="visible">false</property>
+            <property name="title" translatable="yes">Storage</property>
+          </object>
+        </child>
+        <child>
+          <object class="MajorisFilesDeviceSection" id="hardware_section">
+            <property name="visible">false</property>
+            <property name="title" translatable="yes">Hardware</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <property name="title" translatable="yes">Properties</property>
+    <property name="content-width">560</property>
+    <property name="content-height">620</property>
+    <property name="search-enabled">false</property>
+  </template>
+</interface>

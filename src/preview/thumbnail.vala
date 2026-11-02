@@ -3,20 +3,10 @@ namespace MajorisFiles {
         public static void attach(Adw.AlertDialog dialog, File source, File destination, MetadataStore metadata)
         {
             var token = new Cancellable();
-            var box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 24);
-            box.homogeneous = true;
-            dialog.extra_child = box;
+            var box = new ConflictPreviewPair(); dialog.extra_child = box;
             dialog.closed.connect(() => token.cancel());
-            foreach (var file in new File[] {source, destination}) {
-                var column = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
-                var image = new Gtk.Picture(); image.height_request = 96;
-                image.content_fit = Gtk.ContentFit.CONTAIN;
-                image.alternative_text = file.equal(source) ? _("Source preview") : _("Destination preview");
-                column.append(image);
-                var label = new Gtk.Label(file.equal(source) ? _("Source") : _("Destination"));
-                column.append(label); box.append(column);
-                load.begin(file, image, metadata, token);
-            }
+            load.begin(source, box.source, metadata, token);
+            load.begin(destination, box.destination, metadata, token);
         }
         static async void load(File file, Gtk.Picture picture, MetadataStore metadata, Cancellable token)
         {

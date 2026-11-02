@@ -1,35 +1,34 @@
 namespace MajorisFiles {
+    [GtkTemplate (ui = "/com/majoris/files/ui/checksum.ui")]
     public class ChecksumDialog : Adw.PreferencesDialog {
+        private bool template_disposing;
         File file;
         Gtk.Window parent_window;
         OperationManager operations;
-        Adw.ComboRow algorithm = new Adw.ComboRow();
-        Adw.EntryRow expected = new Adw.EntryRow();
-        Adw.ActionRow result = new Adw.ActionRow();
+        [GtkChild]
+        private unowned Adw.ComboRow algorithm;
+        [GtkChild]
+        private unowned Adw.EntryRow expected;
+        [GtkChild]
+        private unowned Adw.ActionRow result;
         Cancellable token = new Cancellable();
-        Gtk.Button calculate = new Gtk.Button.with_label(_("Calculate / Verify"));
-        Gtk.Button load = new Gtk.Button.with_label(_("Load Checksum File…"));
+        [GtkChild]
+        private unowned Gtk.Button calculate;
+        [GtkChild]
+        private unowned Gtk.Button load;
+
+        [GtkChild] private unowned Adw.PreferencesGroup group;
+        [GtkChild] private unowned Adw.PreferencesPage page;
         public ChecksumDialog(Gtk.Window parent, File file, OperationManager operations)
         {
-            title = "Checksums";
             parent_window = parent;
             this.file = file;
             this.operations = operations;
-            var page = new Adw.PreferencesPage();
-            var group = new Adw.PreferencesGroup();
+
             group.title = file.get_basename();
-            page.add(group);
-            add(page);
-            algorithm.title = _("Algorithm");
-            algorithm.model = new Gtk.StringList({"SHA-256", "SHA-512"});
-            group.add(algorithm);
-            expected.title = _("Expected Checksum (optional)");
-            group.add(expected);
-            result.title = _("Result");
-            result.subtitle_selectable = true;
-            group.add(result);
-            group.add(load);
-            group.add(calculate);
+
+
+
             calculate.clicked.connect(() => run.begin());
             load.clicked.connect(() => load_file.begin());
             closed.connect(() => token.cancel());
@@ -75,6 +74,14 @@ namespace MajorisFiles {
             catch (Error e) { result.subtitle = e.message; operations.finish(job, e); }
             token.disconnect(cancelled);
             calculate.sensitive = load.sensitive = algorithm.sensitive = expected.sensitive = true;
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                if (token != null) token.cancel();
+                dispose_template(typeof(ChecksumDialog));
+            }
+            base.dispose();
         }
     }
 }

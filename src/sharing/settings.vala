@@ -1,24 +1,39 @@
 namespace MajorisFiles {
+    [GtkTemplate (ui = "/com/majoris/files/ui/sharing-settings.ui")]
     public class SharingPage : Adw.PreferencesPage {
+        private bool template_disposing;
         Gtk.Window parent_window;
         bool managed;
-        Adw.ActionRow state_row = new Adw.ActionRow();
-        Adw.SwitchRow enabled = new Adw.SwitchRow();
-        Adw.PreferencesGroup configuration = new Adw.PreferencesGroup();
-        Adw.ExpanderRow allowed = new Adw.ExpanderRow();
-        Adw.ExpanderRow advanced = new Adw.ExpanderRow();
-        Gtk.Button reconcile = new Gtk.Button.with_label(_("Reload Sharing State"));
+        [GtkChild]
+        private unowned Adw.ActionRow state_row;
+        [GtkChild]
+        private unowned Adw.SwitchRow enabled;
+        [GtkChild]
+        private unowned Adw.PreferencesGroup configuration;
+        [GtkChild]
+        private unowned Adw.ExpanderRow allowed;
+        [GtkChild]
+        private unowned Adw.ExpanderRow advanced;
+        [GtkChild]
+        private unowned Gtk.Button reconcile;
         File folder;
         SharingManager manager = new SharingManager();
         Cancellable token = new Cancellable();
-        Adw.EntryRow share_name = new Adw.EntryRow();
-        Adw.SwitchRow everyone = new Adw.SwitchRow();
-        Adw.SwitchRow writable = new Adw.SwitchRow();
-        Adw.SwitchRow guest = new Adw.SwitchRow();
-        Adw.SwitchRow hidden = new Adw.SwitchRow();
+        [GtkChild]
+        private unowned Adw.EntryRow share_name;
+        [GtkChild]
+        private unowned Adw.SwitchRow everyone;
+        [GtkChild]
+        private unowned Adw.SwitchRow writable;
+        [GtkChild]
+        private unowned Adw.SwitchRow guest;
+        [GtkChild]
+        private unowned Adw.SwitchRow hidden;
         bool hidden_snapshot;
-        Adw.ActionRow address = new Adw.ActionRow();
-        Adw.PreferencesGroup accounts = new Adw.PreferencesGroup();
+        [GtkChild]
+        private unowned Adw.ActionRow address;
+        [GtkChild]
+        private unowned Adw.PreferencesGroup accounts;
         Gee.HashMap<string, Gtk.CheckButton> assignments = new Gee.HashMap<string, Gtk.CheckButton>();
         Gee.HashMap<string, Gtk.DropDown> levels = new Gee.HashMap<string, Gtk.DropDown>();
         string snapshot = "";
@@ -28,80 +43,53 @@ namespace MajorisFiles {
         bool monitoring;
         bool loading;
         Gee.ArrayList<Adw.ActionRow> account_rows = new Gee.ArrayList<Adw.ActionRow>();
-        Gtk.Button apply = new Gtk.Button.with_label(_("Share Folder"));
-        Gtk.Button stop = new Gtk.Button.with_label(_("Stop Sharing"));
+        [GtkChild]
+        private unowned Gtk.Button apply;
+        [GtkChild]
+        private unowned Gtk.Button stop;
         string? existing;
         string? requested;
+
+        [GtkChild] private unowned Gtk.Box buttons;
+        [GtkChild] private unowned Gtk.Button clients;
+        [GtkChild] private unowned Gtk.Button close_firewall;
+        [GtkChild] private unowned Gtk.Button firewall;
+        [GtkChild] private unowned Adw.PreferencesGroup group;
+        [GtkChild] private unowned Gtk.Button reload;
         public SharingPage(Gtk.Window parent, File folder, string? requested = null, bool managed = false)
         {
             this.managed = managed;
-            title = "Sharing";
-            icon_name = "folder-remote-symbolic";
+
             parent_window = parent;
             this.folder = folder;
             foreach (var row in new Adw.PreferencesRow[] {enabled, everyone, writable, guest, hidden, address, state_row, allowed, advanced}) row.use_markup = false;
             manager.warning_message.connect((message) => Dialogs.error(presenter(), message));
             this.requested = requested;
-            var group = new Adw.PreferencesGroup();
+
             group.title = folder.get_basename();
-            group.description = _("Network permissions also depend on filesystem permissions. Write access permits creating, modifying and deleting content.");
-            add(group);
-            enabled.title = _("Share this folder"); enabled.subtitle = _("Allow other devices on your network to access this folder.");
-            group.add(enabled); enabled.sensitive = false;
-            state_row.title = _("Sharing Status"); state_row.subtitle_selectable = true; group.add(state_row);
-            reconcile.visible = false; group.add(reconcile); reconcile.clicked.connect(() => load.begin());
-            configuration.title = _("Share Details"); configuration.visible = false; add(configuration);
-            allowed.title = _("Allowed Users");
-            advanced.title = _("Advanced Sharing Settings"); advanced.subtitle = _("Guest access, visibility, firewall and diagnostics");
+
+              reconcile.clicked.connect(() => load.begin());
+
             enabled.notify["active"].connect(() => {
                 if (loading || busy) return;
                 if (!enabled.active && existing != null) { remove.begin(); return; }
                 configuration.visible = enabled.active;
             });
-            share_name.title = _("Share Name");
+
             share_name.text = folder.get_basename();
-            configuration.add(share_name);
-            everyone.title = _("All Authenticated Users");
-            everyone.active = true;
-            allowed.add_row(everyone);
-            writable.title = _("Read and Write");
-            configuration.add(writable);
-            guest.title = _("Allow Guest Access");
-            advanced.add_row(guest);
-            hidden.title = _("Hide from network browsing");
-            hidden.subtitle = _("Direct access still requires the configured authentication and permissions.");
-            hidden.sensitive = false;
-            advanced.add_row(hidden);
-            address.title = _("Network Address");
-            address.subtitle = _("Loading sharing state…");
-            address.subtitle_selectable = true;
-            configuration.add(address);
-            configuration.add(allowed); configuration.add(advanced);
-            accounts.title = _("Allowed Accounts");
-            accounts.description = _("Select at least one account when access for all authenticated users is disabled. Samba credentials must be configured for each account.");
-            allowed.add_row(accounts);
+
             everyone.notify["active"].connect(() => {
                 guest.sensitive = everyone.active;
                 if (!everyone.active)
                     guest.active = false;
             });
-            accounts.sensitive = true;
-            var buttons = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 8);
-            apply.add_css_class("suggested-action");
-            buttons.append(apply);
-            buttons.append(stop);
-            configuration.add(buttons);
-            var firewall = new Gtk.Button.with_label(_("Allow SMB on Home and Work Networks…"));
-            advanced.add_row(firewall);
+
             firewall.clicked.connect(() => configure_firewall.begin(true));
-            var close_firewall = new Gtk.Button.with_label(_("Close Files-owned SMB Firewall Access…"));
-            advanced.add_row(close_firewall);
+
             close_firewall.clicked.connect(() => configure_firewall.begin(false));
-            var reload = new Gtk.Button.with_label(_("Reload Sharing State"));
-            advanced.add_row(reload);
+
             reload.clicked.connect(() => load.begin());
-            var clients = new Gtk.Button.with_label(_("Inspect Connected Clients…"));
-            advanced.add_row(clients);
+
             clients.clicked.connect(() => inspect_clients.begin());
             apply.sensitive = stop.sensitive = false;
             apply.clicked.connect(() => save.begin());
@@ -184,21 +172,11 @@ namespace MajorisFiles {
         }
         void account(string id, string label, bool selected, string level = "R")
         {
-            var row = new Adw.ActionRow();
-            row.title = label; row.use_markup = false;
-            row.subtitle = _("Share-level access; filesystem permissions can further restrict it.");
-            var check = new Gtk.CheckButton();
-            check.active = selected;
-            check.valign = Gtk.Align.CENTER;
-            check.tooltip_text = label;
-            row.add_suffix(check);
-            var access = new Gtk.DropDown.from_strings({"Read Only", "Read and Write", "No Access"});
-            access.selected = level == "F" ? 1 : level == "D" ? 2 : 0;
-            access.valign = Gtk.Align.CENTER;
+            var row = new SharingAccountRow(); row.title = label;
+            var check = row.check; check.active = selected; check.tooltip_text = label;
+            var access = row.access; access.selected = level == "F" ? 1 : level == "D" ? 2 : 0;
             access.tooltip_text = _("Access for ") + label;
-            row.add_suffix(access);
             levels[id] = access;
-            row.activatable_widget = check;
             accounts.add(row);
             account_rows.add(row);
             assignments[id] = check;
@@ -354,35 +332,52 @@ namespace MajorisFiles {
             enabled.sensitive = !token.is_cancelled(); configuration.visible = enabled.active; stop.visible = existing != null;
             apply.sensitive = !token.is_cancelled(); stop.sensitive = existing != null;
         }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                if (token != null) token.cancel();
+                dispose_template(typeof(SharingPage));
+            }
+            base.dispose();
+        }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/sharing-dialog.ui")]
     public class SharingDialog : Adw.PreferencesDialog {
+        private bool template_disposing;
         public SharingDialog(Gtk.Window parent, File folder, string? name = null)
         {
-            title = "Network Sharing";
             var page = new SharingPage(parent, folder, name);
             add(page);
             closed.connect(page.cancel);
             present(parent);
         }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                dispose_template(typeof(SharingDialog));
+            }
+            base.dispose();
+        }
     }
+    [GtkTemplate (ui = "/com/majoris/files/ui/shared-folders.ui")]
     public class SharedFoldersDialog : Adw.PreferencesDialog {
+        private bool template_disposing;
         Gtk.Window parent_window;
-        Adw.PreferencesGroup group = new Adw.PreferencesGroup();
+        [GtkChild]
+        private unowned Adw.PreferencesGroup group;
         Cancellable token = new Cancellable();
         SharingManager manager = new SharingManager();
         Gee.ArrayList<Adw.ActionRow> rows = new Gee.ArrayList<Adw.ActionRow>();
         bool refreshing;
         string fingerprint = "";
         uint monitor;
+
+        [GtkChild] private unowned Adw.PreferencesPage page;
+        [GtkChild] private unowned Gtk.Button refresh;
         public SharedFoldersDialog(Gtk.Window parent)
         {
-            title = "Shared Folders";
             parent_window = parent;
-            var page = new Adw.PreferencesPage();
-            page.add(group);
-            add(page);
-            var refresh = new Gtk.Button.with_label(_("Refresh Shared Folders"));
-            group.add(refresh);
+
             refresh.clicked.connect(() => refresh_state.begin());
             manager.warning_message.connect((message) => Dialogs.error(parent_window, message));
             closed.connect(() => { token.cancel(); if (monitor != 0) { Source.remove(monitor); monitor = 0; } });
@@ -405,21 +400,18 @@ namespace MajorisFiles {
                 group.description = shares.size == 0 ? "No Samba usershares are configured." : "Current Samba usershares. System smb.conf shares are managed by your administrator.";
                 foreach (var share in shares)
                 {
-                    var row = new Adw.ActionRow();
+                    var row = new SharedFolderRow();
                     row.title = share.name;
                     row.subtitle = share.path + "\n" + share.address + "\n" + (share.writable ? "Read/write" : "Read-only") + " · " + (share.guest ? "Guests allowed" : "Authentication required") + "\n" + share.acl;
-                    var actions = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
-                    actions.valign = Gtk.Align.CENTER;
-                    actions.append(Browser.button("folder-open-symbolic", _("Open Folder"), () => {
+                    row.open.clicked.connect(() => {
                         AppInfo.launch_default_for_uri_async.begin(File.new_for_path(share.path).get_uri(), null, token, (obj, res) => {
                             try { AppInfo.launch_default_for_uri_async.end(res); }
                             catch (Error e) { Dialogs.error(parent_window, e.message); }
                         });
-                    }));
-                    actions.append(Browser.button("edit-copy-symbolic", _("Copy Network Address"), () => parent_window.get_clipboard().set_text(share.address)));
-                    actions.append(Browser.button("document-properties-symbolic", _("Edit Share"), () => new SharingDialog(parent_window, File.new_for_path(share.path), share.name)));
-                    actions.append(Browser.button("process-stop-symbolic", _("Stop Sharing"), () => stop_share.begin(share, row)));
-                    row.add_suffix(actions);
+                    });
+                    row.copy.clicked.connect(() => parent_window.get_clipboard().set_text(share.address));
+                    row.edit.clicked.connect(() => new SharingDialog(parent_window, File.new_for_path(share.path), share.name));
+                    row.stop.clicked.connect(() => stop_share.begin(share, row));
                     group.add(row);
                     rows.add(row);
                 }
@@ -434,6 +426,14 @@ namespace MajorisFiles {
             row.sensitive = false;
             try { yield manager.remove(share.name); if (rows.remove(row)) group.remove(row); }
             catch (Error e) { row.sensitive = true; Dialogs.error(parent_window, e.message); }
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                if (token != null) token.cancel();
+                dispose_template(typeof(SharedFoldersDialog));
+            }
+            base.dispose();
         }
     }
 }

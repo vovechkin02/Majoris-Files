@@ -135,3 +135,124 @@ GIO entries; account discovery alone never fabricates per-file state.
 Extensions use versioned session D-Bus, bounded replies and deadlines, with no
 in-process dynamic loading. User manifests are opt-in. The complete external
 contract and its remaining limitations are in `docs/extensions.md`.
+
+## GtkBuilder composition and resource ownership
+
+Future declarative UI belongs in `data/ui/*.ui`, rather than in procedural Vala
+widget assembly. XML owns permanent hierarchy, static labels, menus, control
+properties, accessibility and shared Theme classes. Vala owns dependency
+injection, actions, filesystem work, async lifetimes, models and runtime content.
+Majoris-Theme owns visual presentation; Files does not install a CSS provider.
+
+`data/files.gresource.xml` bundles every interface under `/com/majoris/files/ui/`.
+Meson compiles the resource into `core` exactly once per executable. This is
+intentional: `Dialogs` is also used by core-only operation tests, so its prompt
+and password templates must be available without linking the complete browser.
+The application, portal, visual fixtures and separately linked tests all receive
+their own registered resource. Installed binaries never read source-tree UI files.
+
+Application-owned reusable widgets use Vala composite templates:
+
+```vala
+[GtkTemplate (ui = "/com/majoris/files/ui/example.ui")]
+public class Example : Gtk.Box {
+    [GtkChild] private unowned Gtk.Label summary;
+    public Example(MetadataStore metadata) {
+        // Bind injected state and application behavior after template initialization.
+    }
+}
+```
+
+The template GType is `MajorisFilesExample`, with a parent matching the Vala
+class. Template child IDs match the bound fields. Widgets instantiated *inside*
+another template are constructed through GObject, which does not invoke a Vala
+creation method: constructor-independent wiring belongs in `construct`, and
+dependency-dependent wiring belongs in an explicit `configure` method. Custom
+child GTypes are ensured in the owner's static construction before instance
+initialization. `FilenameCell` uses `construct` for this reason.
+
+Each template class clears its children with `dispose_template(typeof(Class))`
+before chaining to its parent's dispose method. Clear an owned native single-child
+property (`child`, `content` or `extra_child`) first, so the native parent does not
+retain a stale child pointer. Stop owned async work and disconnect external
+signals before clearing child bindings; callbacks that can run during teardown
+check the component's disposal flag.
+
+Native final types, including GtkStack and GtkScrolledWindow, are composed inside
+templates or loaded from small standalone resources. Known children in composite
+templates use GtkChild bindings; standalone resources are parsed at creation or
+factory setup, never on ordinary row updates. Template adapters live beside their
+subsystems (`views/item-widgets.vala`, `dialogs/ui-components.vala`,
+`preview/ui-components.vala`, `sharing/ui-components.vala`).
+
+## Shared controls and runtime UI
+
+Browser's permanent split views, scrollers, view stacks, native file views,
+preview panes, recovery slot and status area are in `browser.ui`. Navigation
+fields use `navigation-fields.ui`; responsive search/sidebar reparenting remains
+Vala behavior. Both toolbars remain `Majoris.Ui.Toolbar`. Static controls are
+loaded once from `navigation-controls.ui`, and enter the toolbar through
+`append_control`, `append_widget`, `append_spacer` and supported group APIs. The
+preview toolbars use the same contract with `preview-controls.ui`. Raw GtkBuilder
+packing must not bypass the shared control setup. No shared Toolbar ABI change
+or Files-specific toolbar implementation is required.
+
+Grid tiles and file rows use `grid-item.ui` and `list-item.ui`; Columns and Gallery
+reuse the latter. Metadata cells and sidebar/tag rows have their own templates.
+FilenameCell exposes its label as a GtkBuilder internal child, so Grid/List XML
+configures wrapping and alignment on the same label used by inline editing.
+SignalListItemFactory remains necessary because Browser owns identity-based edit
+transactions, selection contexts, thumbnails, controllers and explicit unbinding.
+BuilderListItemFactory cannot replace those bind/unbind responsibilities with
+simple property expressions. Templates are constructed during setup, with models
+and data updated during binding; views remain virtualized.
+
+Runtime construction is limited to models/controllers, shared Toolbar creation,
+temporary native alerts/services, data-driven breadcrumbs/completions, virtualized
+group slices, arbitrary provider metadata and native single-widget data leaves.
+Repeated multi-widget presentations use templates even when their instances are
+created in response to runtime data. The line-by-line exceptions are recorded in
+[`ui-construction-audit.md`](ui-construction-audit.md), regenerated with
+`python tools/audit-ui-construction.py` and checked by Meson.
+
+`menus.ui` defines application, tab, selection and custom-icon menus. Static
+address commands are bundled with the navigation controls. Extend those models in
+XML; compose selection/capability/provider-dependent sections in Vala. Actions
+still resolve through their original widget ancestry (`app`, `win`, `place`,
+`identity` and provider groups); resource ownership does not establish action
+scope. Popovers retain the native menu presentation without pointer arrows.
+
+## Adding and checking interfaces
+
+For a new dialog or reusable row, add its focused `.ui` file and Vala template
+adapter, preserve injected constructor parameters, and add the source to Meson's
+appropriate core/UI source set. Register the resource in `files.gresource.xml`,
+the XML path in `po/POTFILES`, and its GType in `tests/ui-resources.vala`. Static
+user-facing strings use `translatable="yes"` and the `majoris-files` domain.
+Gettext language autodetection handles both Vala and GtkBuilder XML; forcing the
+entire extraction to C# would silently omit XML messages.
+
+The default build checks XML syntax, resource coverage, duplicate IDs/properties,
+GtkChild/GtkCallback names, translation extraction membership, template parents
+and the absence of application CSS. Runtime tests register and construct every
+template, parse every standalone resource, and exercise window action ancestry
+and the overview callback. GtkBuilder's own validator checks standalone native
+resources. Existing UI, portal, operation, menu, tag, property and inline-edit
+tests continue to verify behavior. Run:
+
+```sh
+meson setup build --reconfigure
+meson compile -C build
+ADW_DISABLE_PORTAL=1 meson test -C build --num-processes 1 --print-errorlogs
+python tools/audit-ui-construction.py --check
+```
+
+Serial execution avoids exhausting a desktop session's per-user inotify limit
+when many isolated GVfs/D-Bus graphical fixtures start simultaneously. It does
+not omit or disable tests.
+
+All styling comes from GTK/libadwaita and Majoris-Theme. The status area uses the
+existing `majoris-statusbar` contract. Data, location, sidebar-heading, document-tab
+and toolbar class families match the shared Theme templates. The existing
+`files-sidebar` class is retained as a semantic test/inspection hook; it has no
+Files stylesheet or replacement styling rule.

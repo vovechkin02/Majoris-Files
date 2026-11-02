@@ -1,0 +1,17 @@
+<interface domain="majoris-files">
+  <template class="MajorisFilesDeviceUsageRow" parent="AdwPreferencesRow">
+    <property name="selectable">false</property>
+    <property name="activatable">false</property>
+    <property name="child">
+      <object class="GtkProgressBar" id="bar">
+        <accessibility>
+          <property name="label" translatable="yes">Used storage</property>
+        </accessibility>
+        <property name="margin-start">12</property>
+        <property name="margin-end">12</property>
+        <property name="margin-top">8</property>
+        <property name="margin-bottom">8</property>
+      </object>
+    </property>
+  </template>
+</interface>

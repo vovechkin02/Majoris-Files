@@ -1,0 +1,78 @@
+<interface domain="majoris-files">
+  <template class="MajorisFilesOperationJobRow" parent="GtkBox">
+    <property name="orientation">vertical</property>
+    <property name="spacing">6</property>
+    <child>
+      <object class="GtkLabel" id="message">
+        <property name="wrap">true</property>
+        <property name="wrap-mode">word-char</property>
+        <property name="xalign">0</property>
+        <property name="selectable">true</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkButton" id="recovery_button" />
+    </child>
+    <child>
+      <object class="GtkProgressBar" id="progress">
+        <property name="show-text">true</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel" id="summary">
+        <property name="wrap">true</property>
+        <property name="wrap-mode">word-char</property>
+        <property name="xalign">0</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkFlowBox" id="controls">
+        <property name="selection-mode">none</property>
+        <property name="max-children-per-line">3</property>
+        <child>
+          <object class="GtkButton" id="pause">
+            <property name="label" translatable="yes">Pause</property>
+            <property name="tooltip-text" translatable="yes">Pause at the next safe file boundary</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="cancel">
+            <property name="label" translatable="yes">Cancel</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="retry">
+            <property name="label" translatable="yes">Retry Remaining Items</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkExpander" id="details">
+        <property name="label" translatable="yes">More Details</property>
+        <property name="child">
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkLabel" id="statistics">
+                <property name="wrap">true</property>
+                <property name="wrap-mode">word-char</property>
+                <property name="xalign">0</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkDrawingArea" id="graph">
+                <property name="content-height">100</property>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </child>
+    <property name="margin-start">12</property>
+    <property name="margin-end">12</property>
+    <property name="margin-top">8</property>
+    <property name="margin-bottom">8</property>
+  </template>
+</interface>

@@ -500,11 +500,7 @@ namespace MajorisFiles {
         }
         async void smb_password()
         {
-            var dialog = new Adw.AlertDialog(_("SMB Account Password"), "Set a password for network access to your local account.");
-            var password = new Gtk.PasswordEntry();
-            dialog.extra_child = password;
-            dialog.add_response("cancel", _("Cancel"));
-            dialog.add_response("set", _("Set Password"));
+            var dialog = new SmbPasswordDialog(); var password = dialog.password;
             if((yield dialog.choose(window, null)) != "set"){password.text="";return;}
             try {
                 SharingProxy helper = yield Bus.get_proxy(BusType.SYSTEM, "com.majoris.Files.Sharing", "/com/majoris/Files/Sharing");

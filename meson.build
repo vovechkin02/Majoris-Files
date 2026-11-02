@@ -15,7 +15,7 @@ add_project_arguments('-Wno-unused-variable', '-Wno-unused-but-set-variable', '-
 core = files('src/utils/paths.vala', 'src/models/file-item.vala', 'src/models/directory-model.vala', 'src/navigation/history.vala', 'src/metadata/store.vala', 'src/sidebar/places.vala', 'src/search/search.vala', 'src/operations/manager.vala', 'src/chooser/options.vala', 'src/split/split.vala')
 ui = files('src/views/browser.vala', 'src/preview/preview.vala', 'src/window/window.vala', 'src/chooser/window.vala')
 core += configure_file(input: 'src/application/build-info.vala.in', output: 'build-info.vala', configuration: {'version': meson.project_version()})
-core += files('src/dialogs/dialogs.vala')
+core += files('src/dialogs/dialogs.vala', 'src/dialogs/prompt-widgets.vala')
 core += files('src/models/counts.vala')
 core += files('src/utils/i18n.vala')
 core += files('src/operations/permissions.vala')
@@ -37,8 +37,8 @@ core += files('src/cloud/files.vala')
 ui += files('src/search/filters.vala')
 ui += files('src/metadata/tags-dialog.vala')
 ui += files('src/metadata/details.vala')
-ui += files('src/views/home.vala', 'src/window/theme.vala')
-ui += gnome.compile_resources('files-resources', 'data/files.gresource.xml', source_dir: 'data', c_name: 'majoris_files')
+ui += files('src/views/home.vala')
+core += gnome.compile_resources('files-resources', 'data/files.gresource.xml', source_dir: 'data', c_name: 'majoris_files')
 ui += files('src/application/launcher.vala')
 ui += files('src/application/shell-search.vala')
 ui += files('src/preview/archive.vala')
@@ -52,7 +52,7 @@ ui += files('src/dialogs/device-properties.vala', 'src/operations/presentation.v
 ui += files('src/devices/disk-images.vala')
 ui += files('src/views/column-provider.vala')
 ui += files('src/views/file-groups.vala')
-ui += files('src/views/grid-rows.vala', 'src/views/filename-cell.vala')
+ui += files('src/views/grid-rows.vala', 'src/views/filename-cell.vala', 'src/views/item-widgets.vala', 'src/preview/ui-components.vala', 'src/sharing/ui-components.vala', 'src/dialogs/ui-components.vala', 'src/metadata/tag-assignment-row.vala')
 ui += configure_file(input: 'src/preview/config.vala.in', output: 'preview-config.vala', configuration: {'office_source_helper_path': meson.project_source_root() / 'src/preview/office-render.py', 'office_helper_path': get_option('prefix') / get_option('libexecdir') / 'majoris-files-office-render.py', 'helper_path': get_option('prefix') / get_option('libexecdir') / 'majoris-files-preview-helper'})
 preview_helper = executable('majoris-files-preview-helper', 'src/preview/helper.c', 'src/preview/media.c', 'src/preview/playback-worker.c', 'src/preview/image-metadata.c', 'src/preview/image-decoders.c', 'src/preview/rotation.c', 'src/archive/native.c', dependencies: [dependency('gio-2.0'), dependency('poppler-glib'), dependency('libarchive'), dependency('pangocairo'), dependency('pangoft2'), dependency('fontconfig'), dependency('gdk-pixbuf-2.0'), dependency('gexiv2'), dependency('libraw'), dependency('libheif', version: '>=1.19'), dependency('lcms2'), dependency('libturbojpeg'), dependency('gstreamer-pbutils-1.0'), dependency('gstreamer-app-1.0'), dependency('gstreamer-video-1.0'), dependency('libcmark'), dependency('json-glib-1.0')], link_args: ['-lm'], install: true, install_dir: get_option('libexecdir'))
 ui += files('src/actions/registry.vala', 'src/actions/rotation.vala')
@@ -209,4 +209,26 @@ progress_ui = executable('operation-progress-ui', 'tests/operation-progress-ui.v
 sidebar_actions_tests = executable('sidebar-actions-tests', 'tests/sidebar-actions.vala', 'tests/sidebar-device-fixtures.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
 if xvfb.found()
   test('sidebar-actions', find_program('python3'), args: [files('tests/sidebar-actions-session.py'), sidebar_actions_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GTK_A11Y=none', 'GSETTINGS_BACKEND=memory', 'ADW_DISABLE_PORTAL=1'], timeout: 180)
+endif
+
+# XML syntax/resource/binding checks run as part of the default build.
+ui_validation = custom_target('validate-ui-resources',
+  input: files('tests/ui-resources.py', 'data/files.gresource.xml'),
+  output: 'ui-resources.validated',
+  command: [find_program('python3'), '@INPUT0@', '@OUTPUT@'],
+  build_always_stale: true, build_by_default: true)
+ui_resource_tests = executable('ui-resource-tests', 'tests/ui-resources.vala', core, ui, dependencies: deps)
+test('ui-construction-audit', find_program('python3'), args: [meson.project_source_root() / 'tools/audit-ui-construction.py', '--check'])
+if xvfb.found()
+  test('ui-resources', find_program('dbus-run-session'), args: ['--', xvfb, '-a', ui_resource_tests],
+    env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none'], timeout: 60)
+endif
+
+# Standalone resources with native types also pass GTK's own validator.
+builder_tool = find_program('gtk4-builder-tool', required: true)
+if xvfb.found()
+  foreach name : ['menus.ui', 'preview-controls.ui', 'content-scroll.ui', 'section-heading.ui', 'sidebar-heading.ui', 'archive-preview.ui']
+    test('builder-' + name, xvfb, args: ['-a', builder_tool, 'validate', meson.project_source_root() / 'data/ui' / name],
+      env: ['GDK_BACKEND=x11', 'GTK_A11Y=none'], timeout: 30)
+  endforeach
 endif

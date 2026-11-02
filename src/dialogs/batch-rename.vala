@@ -1,38 +1,47 @@
 namespace MajorisFiles {
+    [GtkTemplate (ui = "/com/majoris/files/ui/batch-rename.ui")]
     public class BatchRenameDialog : Adw.PreferencesDialog {
+        private bool template_disposing;
         Gtk.Window parent_window;
         OperationManager operations;
         Gee.ArrayList<FileItem> items = new Gee.ArrayList<FileItem>();
         Gee.ArrayList<FileItem> original_order = new Gee.ArrayList<FileItem>();
         Gee.ArrayList<string> names = new Gee.ArrayList<string>();
         Gee.HashMap<string, Gee.HashMap<string, string>> metadata = new Gee.HashMap<string, Gee.HashMap<string, string>>();
-        Adw.ComboRow mode = new Adw.ComboRow();
-        Adw.ComboRow order = new Adw.ComboRow();
-        Adw.EntryRow pattern = new Adw.EntryRow();
-        Adw.EntryRow replacement = new Adw.EntryRow();
-        Adw.SpinRow start = new Adw.SpinRow.with_range(0, 1000000000, 1);
-        Adw.SpinRow digits = new Adw.SpinRow.with_range(1, 12, 1);
-        Adw.SwitchRow descending = new Adw.SwitchRow();
-        Adw.PreferencesGroup preview = new Adw.PreferencesGroup();
+        [GtkChild]
+        private unowned Adw.ComboRow mode;
+        [GtkChild]
+        private unowned Adw.ComboRow order;
+        [GtkChild]
+        private unowned Adw.EntryRow pattern;
+        [GtkChild]
+        private unowned Adw.EntryRow replacement;
+        [GtkChild]
+        private unowned Adw.SpinRow start;
+        [GtkChild]
+        private unowned Adw.SpinRow digits;
+        [GtkChild]
+        private unowned Adw.SwitchRow descending;
+        [GtkChild]
+        private unowned Adw.PreferencesGroup preview;
         Gee.ArrayList<Adw.ActionRow> rows = new Gee.ArrayList<Adw.ActionRow>();
-        Gtk.Button apply = new Gtk.Button.with_label(_("Rename Files"));
+        [GtkChild]
+        private unowned Gtk.Button apply;
         Cancellable token = new Cancellable();
         uint generation;
+
+        [GtkChild] private unowned Adw.PreferencesGroup group;
+        [GtkChild] private unowned Adw.PreferencesPage page;
         public BatchRenameDialog(Gtk.Window parent, Gee.List<FileItem> selection, OperationManager operations)
         {
-            title = "Batch Rename"; parent_window = parent; this.operations = operations;
+             parent_window = parent; this.operations = operations;
             items.add_all(selection);
             original_order.add_all(selection);
-            var page = new Adw.PreferencesPage(); var group = new Adw.PreferencesGroup(); page.add(group); add(page);
-            mode.title = _("Mode"); mode.model = new Gtk.StringList({"Find and Replace", "Add Text Before", "Add Text After", "Format / Template", "Automatic Numbering", "Date Insertion", "Metadata Insertion"}); mode.selected = 3; group.add(mode);
-            pattern.title = _("Pattern / Text"); pattern.text = "{stem} - {counter}{extension}"; group.add(pattern);
-            replacement.title = _("Replace With"); group.add(replacement);
-            start.title = _("Starting Number"); start.value = 1; group.add(start);
-            digits.title = _("Minimum Digits"); digits.value = 3; group.add(digits);
-            descending.title = _("Descending Numbering"); group.add(descending);
-            order.title = _("Order Before Numbering"); order.model = new Gtk.StringList({"Selection Order", "Filename", "Modified Date", "Created Date"}); group.add(order);
-            group.description = _("Templates: {original}, {stem}, {extension}, {counter}, {created}, {modified}, {camera}, {artist}, {album}, {track}, {title}, {season}, {episode}. Missing metadata blocks renaming.");
-            preview.title = _("Before → After"); page.add(preview); group.add(apply);
+
+
+
+
+
             mode.notify["selected"].connect(() => {
                 if (mode.selected == 5) pattern.text = "{modified} - {stem}{extension}";
                 if (mode.selected == 6) pattern.text = "{artist} - {title}{extension}";
@@ -79,7 +88,7 @@ namespace MajorisFiles {
                 if (token.is_cancelled() || current != generation) return;
             }
             foreach (var row in rows) preview.remove(row); rows.clear();
-            for (int i = 0; i < results.size; i++) { var row = new Adw.ActionRow(); row.title = descriptions[i]; row.subtitle = results[i]; row.subtitle_selectable = true; preview.add(row); rows.add(row); }
+            for (int i = 0; i < results.size; i++) { var row = new RenamePreviewRow(); row.title = descriptions[i]; row.subtitle = results[i]; preview.add(row); rows.add(row); }
             items = sorted; names = results;
             preview.description = valid ? "All names are valid. Destinations are checked again when applying." : "Resolve invalid names, collisions or missing metadata before applying.";
             apply.sensitive = valid;
@@ -90,6 +99,14 @@ namespace MajorisFiles {
             var files = new Gee.ArrayList<File>(); foreach (var item in items) files.add(item.file);
             try { yield operations.batch_rename(files, names, parent_window); close(); }
             catch (Error e) { Dialogs.error(parent_window, e.message); update.begin(); }
+        }
+        protected override void dispose() {
+            if (!template_disposing) {
+                template_disposing = true;
+                if (token != null) token.cancel();
+                dispose_template(typeof(BatchRenameDialog));
+            }
+            base.dispose();
         }
     }
 }
