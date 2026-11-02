@@ -32,7 +32,7 @@ core += files('src/operations/clipboard.vala')
 core += files('src/operations/drop-policy.vala')
 core += files('src/navigation/completion.vala')
 core += files('src/models/accounts.vala')
-core += files('src/sidebar/cloud.vala')
+core += files('src/sidebar/cloud.vala', 'src/sidebar/location.vala')
 core += files('src/cloud/files.vala')
 ui += files('src/search/filters.vala')
 ui += files('src/metadata/tags-dialog.vala')
@@ -205,3 +205,8 @@ progress_tests = executable('operation-progress-tests', 'tests/operation-progres
 test('operation-progress', progress_tests, timeout: 30)
 
 progress_ui = executable('operation-progress-ui', 'tests/operation-progress-ui.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
+
+sidebar_actions_tests = executable('sidebar-actions-tests', 'tests/sidebar-actions.vala', 'tests/sidebar-device-fixtures.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
+if xvfb.found()
+  test('sidebar-actions', find_program('python3'), args: [files('tests/sidebar-actions-session.py'), sidebar_actions_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GTK_A11Y=none', 'GSETTINGS_BACKEND=memory', 'ADW_DISABLE_PORTAL=1'], timeout: 180)
+endif

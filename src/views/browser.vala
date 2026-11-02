@@ -272,6 +272,17 @@ namespace MajorisFiles {
         Gtk.ListView grouped_grid;
         Gtk.GridView plain_grid;
         uint grid_anchor = uint.MAX;
+        public signal void sidebar_command_started(string command, Place target);
+        SimpleActionGroup place_actions = new SimpleActionGroup();
+        Gtk.PopoverMenu? place_popup;
+        Place? place_context;
+        Gtk.Widget? place_anchor;
+        uint place_cleanup;
+        bool place_dispatched;
+        bool place_busy;
+        Cancellable place_token = new Cancellable();
+        WeakRef place_properties = WeakRef(null);
+        Place? properties_context;
         Gtk.ListBox sidebar = new Gtk.ListBox();
         Gtk.Label status = new Gtk.Label("");
         Adw.Banner location_error = new Adw.Banner("");
@@ -357,6 +368,7 @@ namespace MajorisFiles {
             this.metadata = metadata;
             CloudFiles.get_default().configure(metadata);
             notify["root"].connect(() => {
+                if (get_root() != null && place_token.is_cancelled()) place_token = new Cancellable();
                 if (get_root() != null && shares_changed == 0)
                     shares_changed = shares.changed.connect(() => display_changed());
                 if (get_root() != null && cloud_changed == 0)
@@ -366,6 +378,10 @@ namespace MajorisFiles {
                     });
             });
             this.places = places;
+            sidebar.insert_action_group("place", place_actions);
+            foreach (var name in new string[]{"open", "open-tab", "mount", "unmount", "eject", "properties"}) {
+                var command = new SimpleAction(name, null); command.activate.connect(dispatch_place); place_actions.add_action(command);
+            }
             this.chooser_mode = chooser_mode;
             thumbnails = new ThumbnailService(metadata);
             show_hidden = metadata.state("show-hidden", "false") == "true";
@@ -752,7 +768,7 @@ namespace MajorisFiles {
                 string? section = null;
                 if(place != null && place.section != "" && (previous == null || previous.section != place.section))
                     section = place.section == "Folders" ? _("Folders") : place.section == "Devices" ? _("Devices") : place.section == "Tags" ? _("Tags") : null;
-                if (section != null) { var heading = new Gtk.Label(section); heading.halign = Gtk.Align.START; heading.add_css_class("majoris-sidebar-heading"); if (before == null) heading.add_css_class("majoris-sidebar-heading-first"); if(place.section=="Tags"){heading.focusable=true;var gesture=new Gtk.GestureClick();gesture.button=3;weak Gtk.Widget tag_heading=heading;gesture.pressed.connect(()=>{if(tag_heading!=null)tag_heading_menu(tag_heading);});heading.add_controller(gesture);var keys=new Gtk.EventControllerKey();keys.key_pressed.connect((key,code,state)=>{if(key==Gdk.Key.Menu||(key==Gdk.Key.F10&&(state&Gdk.ModifierType.SHIFT_MASK)!=0)){if(tag_heading!=null)tag_heading_menu(tag_heading);return true;}return false;});heading.add_controller(keys);}row.set_header(heading); }
+                if (section != null) { var heading = new Gtk.Label(section); heading.halign = Gtk.Align.START; heading.add_css_class("majoris-sidebar-heading"); if (before == null) heading.add_css_class("majoris-sidebar-heading-first"); if(place.section=="Tags"&&!chooser_mode){heading.focusable=true;var gesture=new Gtk.GestureClick();gesture.button=3;weak Gtk.Widget tag_heading=heading;weak Gtk.GestureClick tag_gesture=gesture;gesture.pressed.connect(()=>{if(tag_gesture!=null)tag_gesture.set_state(Gtk.EventSequenceState.CLAIMED);if(tag_heading!=null)tag_heading_menu(tag_heading);});heading.add_controller(gesture);var keys=new Gtk.EventControllerKey();keys.key_pressed.connect((key,code,state)=>{if(key==Gdk.Key.Menu||(key==Gdk.Key.F10&&(state&Gdk.ModifierType.SHIFT_MASK)!=0)){if(tag_heading!=null)tag_heading_menu(tag_heading);return true;}return false;});heading.add_controller(keys);}row.set_header(heading); }
                 else row.set_header(null);
             });
             body.start_child = side_scroll;
@@ -767,7 +783,7 @@ namespace MajorisFiles {
             sidebar.add_controller(side_menu);
             var sidebar_keys=new Gtk.EventControllerKey();sidebar_keys.key_pressed.connect((key,code,state)=>{
                 if(key!=Gdk.Key.Menu && !(key==Gdk.Key.F10 && (state&Gdk.ModifierType.SHIFT_MASK)!=0))return false;
-                var row=sidebar.get_selected_row();if(row==null)return false;var place=row.get_data<Place>("majoris-place");if(place==null)return false;Gtk.Allocation allocation;row.get_allocation(out allocation);place_menu(place,12,allocation.y);return true;
+                var row=sidebar.get_selected_row();if(row==null)return false;var place=row.get_data<Place>("majoris-place");if(place==null)return false;Graphene.Rect bounds;if(!row.compute_bounds(sidebar,out bounds))return false;place_menu(place,12,bounds.origin.y+bounds.size.height/2);return true;
             });sidebar.add_controller(sidebar_keys);
             places_update_handler = observe_places(places, this);
             places_presentation_handler=observe_place_presentation(places,this);
@@ -1120,32 +1136,68 @@ namespace MajorisFiles {
             scroll.vexpand = true;
             return scroll;
         }
-        async void open_place(Place place)
-        {
-            if (place.tape_sysfs != "") { new DevicePropertiesDialog(place).present(this); return; }
-            if(place.drive != null) {
-                try {
-                    if(place.drive.can_poll_for_media())yield place.drive.poll_for_media(null);
-                    var media=place.drive.get_volumes();
-                    if(media.length()==0)error(_("Insert a disc to open this drive."));
-                    else {var volume=media.data;var mount=volume.get_mount();if(mount!=null)navigate(mount.get_root());else {var target=new Place(volume.get_name(),place.file);target.volume=volume;yield open_place(target);}}
-                }catch(Error e){error(e.message);}
-                return;
+        bool available_place(Place target) {
+            foreach (var current in places.entries) {
+                if (SidebarLocations.same(current, target)) return true;
+                // Media discovery can replace an empty-drive row with that
+                // drive's volume rows while a poll/mount is pending.
+                if (target.drive != null && target.volume == null && SidebarLocations.drive(current) == target.drive) return true;
             }
-            if(place.volume != null && place.volume.can_mount())
-            {
-                try {
-                    if(place.volume.get_mount()==null)
-                        yield place.volume.mount(MountMountFlags.NONE, new Gtk.MountOperation(get_root() as Gtk.Window), null);
-                    var mount = place.volume.get_mount();
-                    if(mount != null)
-                        navigate(mount.get_root());
-                }
-                catch(Error e) {
-                    error(e.message);
-                }
+            foreach (var current in places.cloud_locations()) if (SidebarLocations.same(current, target)) return true;
+            return false;
+        }
+        void dispatch_place(SimpleAction action, Variant? parameter) {
+            var target = place_context;
+            if (target == null || (place_busy && action.name != "properties")) return;
+            place_dispatched = true;
+            sidebar_command_started(action.name, target);
+            perform_place.begin(action.name, target);
+        }
+        void update_place_actions() {
+            foreach (var name in place_actions.list_actions()) ((SimpleAction)place_actions.lookup_action(name)).set_enabled(place_context != null && (!place_busy || name == "properties"));
+        }
+        void show_place_properties(Place target) {
+            var owner = get_root() as Gtk.Window; if (owner == null) return;
+            var existing = place_properties.get() as DevicePropertiesDialog;
+            if (existing != null && properties_context != null && SidebarLocations.same(target, properties_context)) { existing.present(owner); return; }
+            var dialog = new DevicePropertiesDialog(target); place_properties.set(dialog); properties_context = target;
+            var browser_ref = WeakRef(this); var dialog_ref = WeakRef(dialog);
+            dialog.closed.connect(() => {
+                var browser = browser_ref.get() as Browser; var shown = dialog_ref.get();
+                if (browser != null && browser.place_properties.get() == shown) { browser.place_properties.set(null); browser.properties_context = null; }
+            });
+            dialog.present(owner);
+        }
+        async void perform_place(string command, Place target) {
+            // Ordinary locations and existing mounts need no asynchronous work.
+            // Keep row activation usable before rooting (including model tests),
+            // using exactly the same fast path as the shared async resolver.
+            if (command == "open" && !place_busy && !place_token.is_cancelled() && available_place(target)) {
+                var ready = SidebarLocations.ready_location(target);
+                if (ready != null) { navigate(ready); return; }
             }
-            else navigate(place.file);
+            var owner = get_root() as Gtk.Window; if (owner == null) return;
+            if (command == "properties") { show_place_properties(target); return; }
+            if (place_busy) return; place_busy = true; update_place_actions();
+            var token = place_token;
+            try {
+                if (!available_place(target)) throw new IOError.NOT_FOUND(_("This sidebar location is no longer available."));
+                if (command == "unmount" || command == "eject") yield SidebarLocations.remove(target, command == "eject", owner, token);
+                else {
+                    var destination = yield SidebarLocations.resolve(target, owner, token);
+                    token.set_error_if_cancelled();
+                    if (get_root() != owner) return;
+                    if (!available_place(target)) throw new IOError.NOT_FOUND(_("This sidebar location was disconnected."));
+                    if (command == "open-tab") open_in_tab(destination);
+                    else if (command == "open") navigate(destination);
+                    // Mount deliberately resolves without navigating or creating a tab.
+                }
+            } catch (Error e) { if (!(e is IOError.CANCELLED) && get_root() == owner) error(e.message); }
+            finally { place_busy = false; update_place_actions(); }
+        }
+        async void open_place(Place place) {
+            if (place.tape_sysfs != "") { show_place_properties(place); return; }
+            sidebar_command_started("open", place); yield perform_place("open", place);
         }
         void populate_locations(Gtk.PopoverMenu popup) {
             var model = new Menu(); var actions = new SimpleActionGroup(); int index = 0;
@@ -1155,8 +1207,8 @@ namespace MajorisFiles {
                 model.append(place.label, "locations." + id);
                 if (place.cloud != null && place.cloud.get_menu_model() != null && place.cloud.get_action_group() != null) {
                     // Provider actions keep their original namespace and targets.
-                    var provider = MenuPresentation.text_only(place.cloud.get_menu_model(), id);
-                    if (provider.get_n_items() > 0) {
+                    var provider = MenuPresentation.live_text_only(place.cloud.get_menu_model(), id);
+                    {
                         popup.insert_action_group(id, place.cloud.get_action_group());
                         model.append_submenu(_("Cloud Account Actions"), provider);
                     }
@@ -1172,59 +1224,67 @@ namespace MajorisFiles {
             foreach(var saved in metadata.saved_searches())result.add(new Place(saved.name,File.new_for_uri("majoris:///search/"+Uri.escape_string(saved.name))));
             result.add_all(places.cloud_locations());return result;
         }
-        static void tag_heading_menu(Gtk.Widget heading){var model=new Menu();model.append(_("Manage Tags…"),"win.manage-tags");var popup=new Gtk.PopoverMenu.from_model(model);popup.has_arrow=false;popup.set_parent(heading);popup.closed.connect(()=>popup.unparent());popup.popup();}
-        void place_menu(Place place, double x, double y)
-        {
-            var model = new Menu(); var actions = new SimpleActionGroup();
-            var menu = new Gtk.PopoverMenu.from_model(model); menu.has_arrow = false;
-            menu.set_parent(sidebar); menu.insert_action_group("place", actions);
-            if (place.tape_sysfs == "" && place.volume == null && place.drive == null) {
-                var open = new SimpleAction("open", null); open.activate.connect(() => open_place.begin(place)); actions.add_action(open); model.append(_("Open"), "place.open");
-            }
-            var tab = new SimpleAction("tab", null); tab.activate.connect(() => open_in_tab(place.file)); actions.add_action(tab);
-            if (place.volume == null && place.drive == null && place.tape_sysfs == "") model.append(_("Open in New Tab"), "place.tab");
-            if (!place.system && place.mount == null && place.drive != null && place.drive.can_eject()) {
-                var eject = new SimpleAction("eject-drive", null); eject.activate.connect(() => eject_drive.begin(place.drive)); actions.add_action(eject); model.append(_("Eject"), "place.eject-drive");
-            }
-            if (!place.system && place.mount != null && (place.mount.can_eject() || place.mount.can_unmount())) {
-                var unmount = new SimpleAction("unmount", null); unmount.activate.connect(() => unmount_place.begin(place)); actions.add_action(unmount); model.append(place.mount.can_eject() ? _("Eject") : _("Unmount"), "place.unmount");
-            }
-            if (place.volume != null && place.volume.can_mount()) {
-                var mount = new SimpleAction("mount", null); mount.activate.connect(() => open_place.begin(place)); actions.add_action(mount); model.append(_("Mount"), "place.mount");
-            }
-            if (place.system || place.section == "Devices" || place.mount != null || place.volume != null || place.drive != null) {
-                var properties = new SimpleAction("properties", null);
-                properties.activate.connect(() => new DevicePropertiesDialog(place).present(this)); actions.add_action(properties);
-                var section = new Menu(); section.append(_("Properties"), "place.properties"); model.append_section(null, section);
-            }
-            if (place.cloud != null && place.cloud.get_menu_model() != null && place.cloud.get_action_group() != null) {
-                menu.insert_action_group("cloudprovider", place.cloud.get_action_group());
-                var provider = MenuPresentation.text_only(place.cloud.get_menu_model()); MenuPresentation.section(model, provider);
-            }
-            var contextual=new Menu();
-            if(place.file.get_uri()=="trash:///")contextual.append(_("Empty Trash…"),"win.empty-trash");
-            if(place.file.get_uri()=="network:///")contextual.append(_("Connect to Server…"),"win.connect-server");
-            if(place.tag!=null)contextual.append(_("Manage Tags…"),"win.manage-tags");
-            if(contextual.get_n_items()>0)model.append_section(null,contextual);
-            Gdk.Rectangle rect = {(int)x, (int)y, 1, 1}; menu.pointing_to = rect;
-            menu.closed.connect(() => menu.unparent());
-            menu.popup();
+        void sidebar_menu_closed() {
+            if (place_cleanup != 0) Source.remove(place_cleanup);
+            // GtkModelButton closes the popover before dispatching its action.
+            // Keep both action scopes and the clicked target alive through that
+            // synchronous dispatch; release only the context on the next turn.
+            place_cleanup = Idle.add(() => {
+                place_cleanup = 0;
+                if (place_popup != null && !place_popup.visible) {
+                    var owner = get_root() as Gtk.Window;
+                    if (!place_dispatched && place_anchor != null && place_anchor.get_root() == owner && owner != null && (!(owner is Adw.ApplicationWindow) || ((Adw.ApplicationWindow)owner).visible_dialog == null)) place_anchor.grab_focus();
+                    place_context = null; place_anchor = null;
+                    sidebar.insert_action_group("cloudprovider", null);
+                    place_popup.menu_model = null; update_place_actions();
+                }
+                return Source.REMOVE;
+            });
         }
-        async void unmount_place(Place place)
-        {
-            try {
-                var operation = new Gtk.MountOperation(get_root() as Gtk.Window);
-                if(place.mount.can_eject())
-                    yield place.mount.eject_with_operation(MountUnmountFlags.NONE, operation, null);
-                else yield place.mount.unmount_with_operation(MountUnmountFlags.NONE, operation, null);
+        void present_sidebar_menu(MenuModel model, Place? target, Gtk.Widget? anchor, double x, double y) {
+            if (place_popup == null) {
+                place_popup = new Gtk.PopoverMenu.from_model(null); place_popup.has_arrow = false;
+                place_popup.set_parent(sidebar); place_popup.closed.connect(sidebar_menu_closed);
             }
-            catch(Error e) {
-                error(e.message);
-            }
+            place_popup.popdown();
+            if (place_cleanup != 0) { Source.remove(place_cleanup); place_cleanup = 0; }
+            place_context = target; place_anchor = anchor; place_dispatched = false;
+            sidebar.insert_action_group("cloudprovider", target != null && target.cloud != null ? target.cloud.get_action_group() : null);
+            update_place_actions(); place_popup.menu_model = model;
+            Gdk.Rectangle rect = {(int)x, (int)y, 1, 1}; place_popup.pointing_to = rect; place_popup.popup();
         }
-        async void eject_drive(Drive drive) {
-            try {yield drive.eject_with_operation(MountUnmountFlags.NONE,new Gtk.MountOperation(get_root() as Gtk.Window),null);}
-            catch(Error e){error(e.message);}
+        void tag_heading_menu(Gtk.Widget heading) {
+            Graphene.Rect bounds; if (!heading.compute_bounds(sidebar, out bounds)) return;
+            var model = new Menu(); model.append(_("Manage Tags…"), "win.manage-tags");
+            present_sidebar_menu(model, null, heading, bounds.origin.x + 12, bounds.origin.y + bounds.size.height / 2);
+        }
+        void place_menu(Place place, double x, double y) {
+            var model = new Menu(); var navigation = new Menu();
+            if (SidebarLocations.browsable(place)) { navigation.append(_("Open"), "place.open"); if (!chooser_mode) navigation.append(_("Open in New Tab"), "place.open-tab"); }
+            if (navigation.get_n_items() > 0) model.append_section(null, navigation);
+            var device = new Menu(); var mount = SidebarLocations.current_mount(place); var volume = SidebarLocations.volume(place);
+            if (!SidebarLocations.system(place)) {
+                if (SidebarLocations.can_eject(place)) device.append(_("Eject"), "place.eject");
+                else if (mount != null && mount.can_unmount()) device.append(_("Unmount"), "place.unmount");
+                if (mount == null && volume != null && volume.can_mount() && SidebarLocations.browsable(place)) device.append(_("Mount"), "place.mount");
+            }
+            if (device.get_n_items() > 0) model.append_section(null, device);
+            if (place.system || place.section == "Devices" || place.mount != null || place.volume != null || place.drive != null || place.tape_sysfs != "") {
+                var properties = new Menu(); properties.append(_("Properties"), "place.properties"); model.append_section(null, properties);
+            }
+            if (place.cloud != null && place.cloud.get_menu_model() != null && place.cloud.get_action_group() != null) model.append_section(null, MenuPresentation.live_text_only(place.cloud.get_menu_model()));
+            var contextual = new Menu();
+            if (!chooser_mode && place.file.get_uri() == "trash:///") contextual.append(_("Empty Trash…"), "win.empty-trash");
+            if (!chooser_mode && place.file.get_uri() == "network:///") contextual.append(_("Connect to Server…"), "win.connect-server");
+            if (!chooser_mode && place.tag != null) contextual.append(_("Manage Tags…"), "win.manage-tags");
+            if (contextual.get_n_items() > 0) model.append_section(null, contextual);
+            present_sidebar_menu(model, place, sidebar.get_selected_row(), x, y);
+        }
+        void cancel_sidebar() {
+            place_token.cancel();
+            if (place_popup != null) place_popup.popdown();
+            if (place_cleanup != 0) { Source.remove(place_cleanup); place_cleanup = 0; }
+            place_context = null; place_anchor = null; sidebar.insert_action_group("cloudprovider", null); update_place_actions();
         }
         public void refilter()
         {
@@ -1886,8 +1946,9 @@ namespace MajorisFiles {
         void rebuild_sidebar()
         {
             sidebar_generation++;
-            while (sidebar.get_first_child() != null)
-                sidebar.remove(sidebar.get_first_child());
+            if (place_popup != null) place_popup.popdown();
+            place_context = null; update_place_actions();
+            for (var child = sidebar.get_first_child(); child != null;) { var next = child.get_next_sibling(); if (child is Gtk.ListBoxRow) sidebar.remove(child); child = next; }
             foreach (var place in places.entries)
             {
                 var label = new Gtk.Label(place.label);
@@ -2720,6 +2781,7 @@ namespace MajorisFiles {
         }
         public void cancel()
         {
+            cancel_sidebar();
             cancel_inline_rename();
             location_bar.visible_child_name = "breadcrumbs";
             column_sort_token.cancel();column_sort_pending=false;
@@ -2784,6 +2846,7 @@ namespace MajorisFiles {
             if (cloud_changed != 0) { CloudFiles.get_default().disconnect(cloud_changed); cloud_changed = 0; }
             if (shares_changed != 0) { shares.disconnect(shares_changed); shares_changed = 0; }
             cancel();
+            if (place_popup != null && place_popup.get_parent() != null) place_popup.unparent();
             if(address_popup != null && address_popup.get_parent() != null)
                 address_popup.unparent();
             if(completion_popup.get_parent() != null)
@@ -2795,6 +2858,7 @@ namespace MajorisFiles {
             cancel_inline_rename();
             if (cloud_changed != 0) { CloudFiles.get_default().disconnect(cloud_changed); cloud_changed = 0; }
             if (shares_changed != 0) { shares.disconnect(shares_changed); shares_changed = 0; }
+            cancel_sidebar();
             base.unroot();
         }
         Icon item_icon(FileItem item)

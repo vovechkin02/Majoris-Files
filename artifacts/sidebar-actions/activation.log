@@ -1,0 +1,47 @@
+Result: OK
+GTK activation item=GtkModelButton sensitive=true
+popover closed parent=present
+dispatch open target=file:///
+result commands=1 navigated=true
+activate Open in New Tab target=file:///
+popover closed parent=present
+dispatch open-tab target=file:///
+activate Open target=file:///tmp/majoris-sidebar-actions-AYDYX3/folder
+activate Properties target=file:///
+keyboard activate Open target=file:///
+keyboard activate Open in New Tab target=file:///tmp/majoris-sidebar-actions-AYDYX3/folder
+activate Properties target=majoris:///device/sidebar-test
+activate Mount target=majoris:///device/sidebar-test
+activate Open target=file:///tmp/majoris-sidebar-actions-AYDYX3/volume-root
+activate Unmount target=file:///tmp/majoris-sidebar-actions-AYDYX3/volume-root
+activate Open in New Tab target=majoris:///device/sidebar-test
+activate Properties target=file:///tmp/majoris-sidebar-actions-AYDYX3/volume-root
+activate Eject target=file:///tmp/majoris-sidebar-actions-AYDYX3/volume-root
+activate Eject target=majoris:///device/optical-test
+activate Properties target=majoris:///device/tape-test
+activate Properties target=majoris:///device/MAJORIS_FILES_DEVICE_CATEGORY_INTERNAL_VOLUME
+activate Properties target=majoris:///device/MAJORIS_FILES_DEVICE_CATEGORY_REMOVABLE_VOLUME
+activate Properties target=majoris:///device/MAJORIS_FILES_DEVICE_CATEGORY_MEMORY_CARD
+activate Properties target=majoris:///device/MAJORIS_FILES_DEVICE_CATEGORY_FLOPPY_DRIVE
+activate Properties target=majoris:///device/MAJORIS_FILES_DEVICE_CATEGORY_OPTICAL_DRIVE
+activate Open in New Tab target=majoris:///device/optical-test
+activate Eject target=majoris:///device/optical-test
+activate Connect to Server… target=network:///
+activate Open target=majoris:///tag-id/1
+activate Manage Tags… target=majoris:///tag-id/1
+activate Empty Trash… target=trash:///
+activate Open target=file:///tmp/majoris-sidebar-actions-AYDYX3/folder
+activate Open target=file:///tmp/majoris-sidebar-actions-AYDYX3/folder
+activate Open target=file:///tmp/majoris-sidebar-actions-AYDYX3/folder
+activate Open target=file:///tmp/majoris-sidebar-actions-AYDYX3/folder
+activate Open in New Tab target=file:///tmp/majoris-sidebar-actions-AYDYX3/volume-root
+activate Open target=majoris:///device/multi
+activate Cloud Choose target=file:///tmp/majoris-sidebar-actions-AYDYX3
+activate Cloud Choose target=file:///tmp/majoris-sidebar-actions-AYDYX3/cloud-B
+PASS cloud provider parameters, disabled command, submenu, disconnection
+activate Open target=recent:///
+activate Open target=majoris:///favorites
+activate Open target=network:///
+activate Open target=trash:///
+activate Open in New Tab target=majoris:///tag-id/1
+PASS sidebar navigation, properties, device mutations, window actions, keyboard, lifecycle

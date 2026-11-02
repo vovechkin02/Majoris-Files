@@ -1,6 +1,7 @@
 namespace MajorisFiles {
     // Preserve action targets and submenu semantics while dropping decoration.
     public class MenuPresentation : Object {
+        public static MenuModel live_text_only(MenuModel source, string? alias = null) { return new TextOnlyProviderMenu(source, alias); }
         public static Menu text_only(MenuModel source, string? alias = null) {
             var result = new Menu();
             for (int i = 0; i < source.get_n_items(); i++) {
@@ -154,6 +155,47 @@ namespace MajorisFiles {
                 launcher.set_cwd(selection[0].file.get_parent().get_path());
             var process = launcher.spawnv(arguments);
             yield process.wait_check_async(null);
+        }
+    }
+}
+
+namespace MajorisFiles {
+    // Remote GDBusMenuModel children are populated lazily. A snapshot can discard
+    // an initially empty submenu and unsubscribe before its entries arrive.
+    // Project decoration at lookup time and forward native model changes instead.
+    class TextOnlyProviderMenu : MenuModel {
+        MenuModel source;
+        string? alias;
+        ulong changed_handler;
+        Gee.HashMap<MenuModel, MenuModel> children = new Gee.HashMap<MenuModel, MenuModel>();
+        public TextOnlyProviderMenu(MenuModel source, string? alias) {
+            this.source = source; this.alias = alias;
+            changed_handler = source.items_changed.connect(source_changed);
+        }
+        void source_changed(int position, int removed, int added) { children.clear(); items_changed(position, removed, added); }
+        public override bool is_mutable() { return source.is_mutable(); }
+        public override int get_n_items() { return source.get_n_items(); }
+        public override void get_item_attributes(int index, out HashTable<string, Variant>? attributes) {
+            attributes = new HashTable<string, Variant>(str_hash, str_equal);
+            var iterator = source.iterate_item_attributes(index); string name; Variant value;
+            while (iterator.get_next(out name, out value)) {
+                if (name == "icon" || name == "verb-icon") continue;
+                if (name == "action" && alias != null && value.get_string().has_prefix("cloudprovider."))
+                    value = new Variant.string(alias + value.get_string().substring("cloudprovider".length));
+                attributes[name] = value;
+            }
+        }
+        public override void get_item_links(int index, out HashTable<string, MenuModel> links) {
+            links = new HashTable<string, MenuModel>(str_hash, str_equal);
+            var iterator = source.iterate_item_links(index); string name; MenuModel model;
+            while (iterator.get_next(out name, out model)) {
+                if (!children.has_key(model)) children[model] = new TextOnlyProviderMenu(model, alias);
+                links[name] = children[model];
+            }
+        }
+        protected override void dispose() {
+            if (changed_handler != 0) { source.disconnect(changed_handler); changed_handler = 0; }
+            children.clear(); base.dispose();
         }
     }
 }
