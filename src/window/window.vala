@@ -14,7 +14,7 @@ namespace MajorisFiles {
         Adw.TabPage? menu_page;
         Adw.Banner recovery_banner=new Adw.Banner("");
         string reviewed_recovery="";
-        Gtk.MenuButton operations_button;
+        Gtk.Button operations_button;
         PreferencesDialog? preferences_dialog;
         TagsDialog? tags_dialog;
         public Browser? current {
@@ -58,14 +58,10 @@ namespace MajorisFiles {
             var header = new Adw.HeaderBar();
             header.title_widget = new Adw.WindowTitle("Files", "");
             header.pack_start(Browser.button("tab-new-symbolic", _("New Tab"), () => new_tab(current.location)));
-            var progress = new Gtk.MenuButton();operations_button=progress;
-            MenuPresentation.button(progress);
-            progress.icon_name = "folder-download-symbolic";
+            var progress = new Gtk.Button.from_icon_name("folder-download-symbolic"); operations_button = progress;
             progress.tooltip_text = _("File Operations");
-            var popover = new Gtk.Popover();
-            popover.has_arrow = false;
-            popover.child = new FileOperationsView(operations);
-            progress.popover = popover;
+            operations.bind_property("activity-icon", progress, "icon-name", BindingFlags.SYNC_CREATE);
+            progress.clicked.connect(() => FileOperationsPresentation.show(operations));
             header.pack_end(progress);
             var menu = application_menu();
             var menu_button = new Gtk.MenuButton();
@@ -131,7 +127,7 @@ namespace MajorisFiles {
             });
             toolbar.add_top_bar(tabbar);
             recovery_banner.title=_("File recovery is available");recovery_banner.button_label=_("Review");
-            recovery_banner.button_clicked.connect(()=>{reviewed_recovery=operations.recovery_signature();recovery_banner.revealed=false;operations_button.popup();});
+            recovery_banner.button_clicked.connect(()=>{reviewed_recovery=operations.recovery_signature();recovery_banner.revealed=false;FileOperationsPresentation.show(operations);});
             toolbar.add_top_bar(recovery_banner);
             operations.recovery_changed.connect(refresh_recovery);
             refresh_recovery();

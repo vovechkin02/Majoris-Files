@@ -78,14 +78,17 @@ namespace MajorisFiles {
             if (selected.size != 1) return;
             var provider = CloudFiles.get_default().provider(selected[0].file);
             if (provider == null) return;
-            var job = new Job(action_name == "pin" ? _("Make Available Offline") : action_name == "evict" ? _("Free Local Space") : _("Retry Cloud Sync"));
-            operations.jobs.append(job);
+            var job = operations.start(action_name == "pin" ? _("Make Available Offline") : action_name == "evict" ? _("Free Local Space") : _("Retry Cloud Sync"));
+            job.parent = window;
             try {
                 yield provider.perform(selected[0].file, action_name, new ImportPolicy(metadata).maximum_bytes, job.cancellable, (fraction, message) => { job.progress = fraction < 0 ? 0 : fraction; job.current = message; });
                 job.progress = 1;
             }
             catch (Error e) { job.error = e.message; job.cancelled = e is IOError.CANCELLED; }
-            job.done = true;
+            Error? failure = null;
+                if (job.cancelled) failure = new IOError.CANCELLED("Cancelled");
+                else if (job.error != "") failure = new IOError.FAILED(job.error);
+                operations.finish(job, failure);
         }
         async void rotate_image(bool clockwise) {
             var selected = current.selected(); if (selected.size != 1) return;

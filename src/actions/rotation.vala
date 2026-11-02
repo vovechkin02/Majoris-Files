@@ -9,8 +9,8 @@ namespace MajorisFiles {
                 item.info.has_attribute("unix::uid") && item.info.get_attribute_uint32("unix::uid") == effective_uid();
         }
         public static async void rotate(owned FileItem item, bool clockwise, OperationManager operations, Gtk.Window? parent = null, bool allow_lossy = false) throws Error {
-            var job = new Job(clockwise ? _("Rotate Image Clockwise") : _("Rotate Image Counterclockwise"));
-            operations.jobs.append(job);
+            var job = operations.start(clockwise ? _("Rotate Image Clockwise") : _("Rotate Image Counterclockwise"));
+            job.parent = parent;
             File? temporary = null; string temporary_identity = "";
             try {
                 var info = yield item.file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, job.cancellable);
@@ -44,7 +44,10 @@ namespace MajorisFiles {
             }
             catch (Error e) { job.error = e.message; job.cancelled = e is IOError.CANCELLED; throw e; }
             finally {
-                job.done = true;
+                Error? failure = null;
+                if (job.cancelled) failure = new IOError.CANCELLED("Cancelled");
+                else if (job.error != "") failure = new IOError.FAILED(job.error);
+                operations.finish(job, failure);
                 if (temporary != null && temporary_identity != "") {
                     cleanup.begin(temporary, temporary_identity);
                 }

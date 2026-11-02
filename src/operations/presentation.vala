@@ -8,6 +8,13 @@ namespace MajorisFiles {
         Gtk.ProgressBar progress=new Gtk.ProgressBar();
         Gtk.Button cancel=new Gtk.Button.with_label(_("Cancel"));
         Gtk.Button retry=new Gtk.Button.with_label(_("Retry Remaining Items"));
+        Gtk.Label summary = new Gtk.Label("");
+        Gtk.Label statistics = new Gtk.Label("");
+        Gtk.FlowBox controls = new Gtk.FlowBox();
+        Gtk.Button pause = new Gtk.Button.with_label(_("Pause"));
+        Gtk.DrawingArea graph = new Gtk.DrawingArea();
+        JobState announced_state = JobState.QUEUED;
+        uint timer;
         ulong handler;
         public OperationJobRow(Job job,OperationManager manager) {
             Object(orientation:Gtk.Orientation.VERTICAL,spacing:6);this.job=job;this.manager=manager;
@@ -15,26 +22,87 @@ namespace MajorisFiles {
             message.wrap=true;message.wrap_mode=Pango.WrapMode.WORD_CHAR;message.xalign=0;message.selectable=true;append(message);
             if(job.recovery_action!=""){
                 var action=new Gtk.Button.with_label(job.recovery_action=="recover-rename"?_("Review…"):_("Recover…"));
-                action.action_name="win."+job.recovery_action;append(action);
+                action.clicked.connect(() => {
+                    var app = GLib.Application.get_default() as Gtk.Application;
+                    if (app == null) return;
+                    bool found = false; foreach (var candidate in app.get_windows()) if (candidate is FilesWindow) found = true;
+                    if (!found) app.activate_action("new-window", null);
+                    foreach (var window in app.get_windows()) if (window is FilesWindow) { ((FilesWindow)window).activate_action("win." + job.recovery_action, null); return; }
+                });append(action);
             }else{
-                append(progress);append(cancel);append(retry);
+                append(progress); summary.xalign = 0; summary.wrap = true; summary.wrap_mode = Pango.WrapMode.WORD_CHAR; append(summary);
+                controls.selection_mode = Gtk.SelectionMode.NONE; controls.max_children_per_line = 3;
+                controls.insert(pause, -1); controls.insert(cancel, -1); controls.insert(retry, -1); append(controls);
+                pause.tooltip_text = _("Pause at the next safe file boundary");
+                pause.clicked.connect(() => { if (job.can_resume) job.resume(); else job.request_pause(); });
+                var details = new Gtk.Expander(_("More Details"));
+                details.notify["expanded"].connect(details_changed);
+                var content = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
+                statistics.xalign = 0; statistics.wrap = true; statistics.wrap_mode = Pango.WrapMode.WORD_CHAR; content.append(statistics);
+                graph.content_height = 100; content.append(graph); details.child = content; append(details);
+                graph.set_draw_func((area, cr, width, height) => {
+                    var color = area.get_color(); cr.set_source_rgba(color.red, color.green, color.blue, 0.8);
+                    double peak = 1; foreach (var rate in job.history) peak = double.max(peak, rate);
+                    for (int i = 0; i < job.history.size; i++) {
+                        double x = (double)i / 119 * width, y = height - job.history[i] / peak * (height - 4);
+                        if (i == 0) cr.move_to(x, y); else cr.line_to(x, y);
+                    }
+                    cr.stroke();
+                });
+                timer = Timeout.add(500, () => { if (get_mapped()) { refresh(); if (details.expanded) graph.queue_draw(); } if (job.done) { timer = 0; return Source.REMOVE; } return Source.CONTINUE; });
                 cancel.clicked.connect(()=>job.cancellable.cancel());retry.clicked.connect(retry_job);
             }
-            handler=job.notify.connect(refresh);refresh();
+            handler=job.notify.connect(job_changed);refresh();
         }
+        void details_changed(Object object, ParamSpec parameter) {
+            var details = (Gtk.Expander)object;
+            details.label = details.expanded ? _("Fewer Details") : _("More Details");
+        }
+        void job_changed() { if (job.done) refresh(); }
         void refresh() {
             string text=job.title;
-            if(job.current!="")text=job.title+"\n"+job.current;
+
             if(job.error!="")text=job.error;
             if(job.cancelled)text=_("Cancelled · ")+job.current;
             message.label=text;
             progress.fraction=job.progress.clamp(0,1);
+            progress.show_text = true;
+            string status;
+            if (job.done) status = job.cancelled ? _("Cancelled") : job.error != "" ? _("Failed") : _("Completed");
+            else if (job.state == JobState.FINALISING) status = _("Finalising…");
+            else if (job.state == JobState.PAUSED) status = _("Paused");
+            else if (job.state == JobState.PAUSING) status = _("Pausing at next file…");
+            else if (job.state == JobState.WAITING_FOR_USER) status = _("Waiting for your response");
+            else if (job.progress_known) status = "%d%%".printf((int)(job.progress * 100));
+            else status = _("Calculating…");
+            progress.text = status;
+            if (job.state != announced_state) {
+                if (get_mapped() && (job.done || job.state == JobState.WAITING_FOR_USER))
+                    announce(job.title + ": " + status + (job.error == "" ? "" : " · " + job.error), Gtk.AccessibleAnnouncementPriority.MEDIUM);
+                announced_state = job.state;
+            }
+            if (!job.done && !job.progress_known) progress.pulse();
+            summary.label = job.source_description + (job.destination_description == "" ? "" : " → " + job.destination_description);
+            if (job.items_total_known) summary.label = job.source_description + (job.destination_description == "" ? "" : " → " + job.destination_description) + "\n" + job.items_completed.to_string() + " / " + job.items_total.to_string() + _(" items");
+            if (job.bytes_total_known && job.transfer_bytes) summary.label += "\n" + GLib.format_size(job.bytes_completed) + " / " + GLib.format_size(job.bytes_total);
+            if (job.skipped_items > 0) summary.label += "\n" + job.skipped_items.to_string() + _(" items skipped");
+            statistics.label = job.current + "\n" + _("Active time: ") + "%.0f s".printf(job.active_seconds);
+            if (job.current_file_size > 0) statistics.label += "\n" + _("Current file: ") + GLib.format_size(job.current_file_completed) + " / " + GLib.format_size(job.current_file_size);
+            graph.visible = job.transfer_bytes;
+            if (job.transfer_bytes) statistics.label += "\n" + _("Speed: ") + GLib.format_size((uint64)job.bytes_per_second) + "/s";
+            if (job.eta_seconds >= 0) statistics.label += "\n" + _("Time remaining: ") + "%.0f s".printf(job.eta_seconds);
+            pause.visible = job.can_pause && !job.done;
+            pause.tooltip_text = job.current_file_size > 0 ? _("Pause at a safe transfer checkpoint; other backends pause between files") : _("Pause between files");
+            pause.sensitive = job.state != JobState.WAITING_FOR_USER && job.state != JobState.FINALISING && job.state != JobState.CALCULATING;
+            pause.label = job.can_resume ? _("Resume") : _("Pause");
+            controls.visible = !job.done || job.can_retry;
+            cancel.visible = !job.done;
             cancel.sensitive=!job.done;
             retry.visible=job.can_retry;
             retry.sensitive=!job.retrying;
         }
         void retry_job(){var parent=get_root() as Gtk.Window;if(parent==null)return;manager.retry.begin(job,parent,(o,r)=>{try{manager.retry.end(r);}catch(Error e){Dialogs.error(parent,e.message);}});}
-        protected override void dispose(){if(handler!=0){job.disconnect(handler);handler=0;}base.dispose();}
+        protected override void dispose(){if(timer!=0){Source.remove(timer);timer=0;}if(handler!=0){job.disconnect(handler);handler=0;}base.dispose();}
     }
     public class FileOperationsView : Gtk.Box {
         OperationManager manager;
@@ -43,12 +111,12 @@ namespace MajorisFiles {
         ulong handler;
         public FileOperationsView(OperationManager manager) {
             Object(orientation:Gtk.Orientation.VERTICAL,spacing:8);this.manager=manager;
-            var title=new Gtk.Label(_("File Operations"));title.add_css_class("heading");append(title);
+
             empty.margin_start=16;empty.margin_end=16;empty.margin_top=12;empty.margin_bottom=12;append(empty);
-            var sorted=new Gtk.SortListModel(manager.jobs,new Gtk.CustomSorter((a,b)=>{bool first=((Job)a).recovery_action!="",second=((Job)b).recovery_action!="";return first==second?0:first?1:-1;}));
+            var sorted=new Gtk.SortListModel(manager.jobs,new Gtk.CustomSorter((a,b)=>{bool first=((Job)a).recovery_action!="",second=((Job)b).recovery_action!="";if (first != second) return first ? 1 : -1; bool first_done=((Job)a).done, second_done=((Job)b).done; return first_done==second_done ? 0 : first_done ? 1 : -1;}));
             var jobs=new Gtk.ListBox();jobs.selection_mode=Gtk.SelectionMode.NONE;
             bind_jobs(jobs,sorted,manager);
-            scroll.min_content_width=340;scroll.max_content_height=440;scroll.propagate_natural_height=true;scroll.child=jobs;append(scroll);
+            scroll.min_content_width=340;scroll.vexpand=true;scroll.child=jobs;append(scroll);
             handler=manager.jobs.items_changed.connect(refresh);refresh();
         }
         static void bind_jobs(Gtk.ListBox jobs,Gtk.SortListModel sorted,OperationManager manager){
@@ -64,5 +132,43 @@ namespace MajorisFiles {
         }
         void refresh(){uint count=manager.jobs.get_n_items();empty.visible=count==0;scroll.visible=count>0;scroll.min_content_height=((int)count*160).clamp(0,440);}
         protected override void dispose(){if(handler!=0){manager.jobs.disconnect(handler);handler=0;}base.dispose();}
+    }
+}
+
+namespace MajorisFiles {
+    public class FileOperationsWindow : Adw.Window {
+        public FileOperationsWindow(OperationManager manager) {
+            Object(title: _("File Operations"), default_width: 560, default_height: 540);
+            var toolbar = new Adw.ToolbarView();
+            toolbar.add_top_bar(new Adw.HeaderBar());
+            toolbar.content = new FileOperationsView(manager); content = toolbar;
+            close_request.connect(() => { visible = false; application = null; return true; });
+        }
+    }
+}
+
+namespace MajorisFiles {
+    public class FileOperationsPresentation : Object {
+        static FileOperationsWindow? window;
+        static uint hiding;
+        public static void completed(OperationManager manager) {
+            if (hiding != 0) { Source.remove(hiding); hiding = 0; }
+            if (window == null || !window.visible) return;
+            for (uint i = 0; i < manager.jobs.get_n_items(); i++) {
+                var job = (Job)manager.jobs.get_item(i);
+                if (!job.done || job.error != "" || job.can_retry || job.recovery_action != "") return;
+            }
+            hiding = Timeout.add_seconds(4, () => { hiding = 0; if (window != null) { window.visible = false; window.application = null; } return Source.REMOVE; });
+        }
+        public static FileOperationsWindow get_window(OperationManager manager) {
+            if (window == null) window = new FileOperationsWindow(manager);
+            return window;
+        }
+        public static void show(OperationManager manager) {
+            if (hiding != 0) { Source.remove(hiding); hiding = 0; }
+            var progress = get_window(manager);
+            progress.application = GLib.Application.get_default() as Gtk.Application;
+            progress.present();
+        }
     }
 }

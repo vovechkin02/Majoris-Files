@@ -200,3 +200,8 @@ grid_caption_tests = executable('grid-caption-tests', 'tests/grid-captions.vala'
 if xvfb.found()
   test('grid-captions', find_program('dbus-run-session'), args: ['--', xvfb, '-a', grid_caption_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none', 'ADW_DISABLE_PORTAL=1'], timeout: 240)
 endif
+
+progress_tests = executable('operation-progress-tests', 'tests/operation-progress.vala', core, dependencies: deps)
+test('operation-progress', progress_tests, timeout: 30)
+
+progress_ui = executable('operation-progress-ui', 'tests/operation-progress-ui.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)

@@ -1,0 +1,17 @@
+dbus-daemon[686070]: [session uid=1000 pid=686070 pidfd=5] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=686084 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[686070]: [session uid=1000 pid=686070 pidfd=5] Successfully activated service 'org.gtk.vfs.Daemon'
+fuse: failed to access mountpoint /run/user/1000/gvfs: Transport endpoint is not connected
+Capturing copy-collapsed
+Capturing copy-expanded
+Capturing paused
+Capturing resumed
+Capturing conflict
+Capturing multiple-delete
+Capturing cross-filesystem-move
+Capturing trash
+Capturing failed-retry
+Capturing completed
+Capturing recovery
+dbus-daemon[686070]: [session uid=1000 pid=686070 pidfd=5] Activating service name='org.gtk.vfs.Metadata' requested by ':1.0' (uid=1000 pid=686084 comm="/mnt/c/Users/Admin/Documents/GitHub/Majoris-Files/" label="kernel")
+dbus-daemon[686070]: [session uid=1000 pid=686070 pidfd=5] Successfully activated service 'org.gtk.vfs.Metadata'
+A connection to the bus can't be made

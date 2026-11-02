@@ -30,6 +30,15 @@ namespace MajorisFiles {
             window_removed.connect(queue_session_save);
             places = new Places(metadata);
             operations = new OperationManager(metadata);
+            operations.changed.connect(() => FileOperationsPresentation.completed(operations));
+            operations.resolve_parent = () => {
+                foreach (var window in get_windows()) if (window is FilesWindow && window.visible) return window;
+                FileOperationsPresentation.show(operations);
+                return FileOperationsPresentation.get_window(operations);
+            };
+            operations.show_requested.connect(() => {
+                foreach (var window in get_windows()) if (window is FilesWindow && window.is_active) { FileOperationsPresentation.show(operations); break; }
+            });
             try {
                 shell_search = new ShellSearchProvider(this, metadata, places, operations);
                 shell_registration = get_dbus_connection().register_object("/com/majoris/files/SearchProvider", shell_search);
@@ -61,11 +70,7 @@ namespace MajorisFiles {
         }
         protected override void activate()
         {
-            if(get_active_window() != null)
-            {
-                get_active_window().present();
-                return;
-            }
+            foreach (var window in get_windows()) if (window is FilesWindow) { window.present(); return; }
             if(!activated_once && recovery_session != "" && metadata.state("restore-session", "true") == "true")
             {
                 activated_once = true;

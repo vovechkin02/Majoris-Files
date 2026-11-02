@@ -18,7 +18,7 @@ namespace MajorisFiles {
         public static File staging(ReplacementRecord record) {
             return record.backup.get_parent().get_child(record.backup.get_basename().replace(".majoris-backup-", ".majoris-stage-"));
         }
-        public static async void copy_attributes(File original, File edited, Cancellable token) throws Error {
+        public static async void copy_attributes(File original, File edited, Cancellable token, bool preserve_owner = true) throws Error {
             Error? failure = null; SourceFunc resume = copy_attributes.callback;
             new Thread<void*>("preserve-image-attributes", () => {
                 try {
@@ -26,7 +26,9 @@ namespace MajorisFiles {
                     // standard::size on some GIO backends. Copy writable file
                     // metadata explicitly; image metadata is preserved by the
                     // decoder before this filesystem step.
-                    var attributes = original.query_info("unix::mode,unix::uid,unix::gid,time::modified,time::modified-usec,time::access,time::access-usec,xattr::*", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, token);
+                    string names = "unix::mode,time::modified,time::modified-usec,time::access,time::access-usec,xattr::*";
+                    if (preserve_owner) names += ",unix::uid,unix::gid";
+                    var attributes = original.query_info(names, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, token);
                     edited.set_attributes_from_info(attributes, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, token);
                 }
                 catch (Error e) { failure = e; }
