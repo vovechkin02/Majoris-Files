@@ -1,0 +1,25 @@
+{
+  "repository": "https://github.com/vovechkin02/Majoris-Image",
+  "base_commit": "5428aa1da43c8d649cfbad79a54a83c7e18831ea",
+  "working_version": "2.0.1",
+  "uncommitted_upstream_changes": true,
+  "pkg_config": [
+    "majoris-image-1",
+    "majoris-image-gtk4-1"
+  ],
+  "soname_major": 2,
+  "working_file_sha256": {
+    "debian/changelog": "9110684270bf11f24a92eb9ed8638d37d763755284b6e148e5d8200632d2ae48",
+    "debian/control": "abb251725a31285cb704bb323716b29ca2fd9fb19c4002454c50927462a92345",
+    "docs/api-2.md": "1cdb9388050d8ddc9b7df6879cebc3e366890c215a7f720c28a4b95012bd3e24",
+    "docs/verification-files-lossless-jpeg.md": "c5e10d733a105479024eff9c9ab5a9c66f95378420c9058d699a9e7cb7dc6a2e",
+    "meson.build": "f60e5419f3fdef6d9544d717065b57e789babb03b3337d84ea5bbe138d912e0f",
+    "src/worker/lossless-jpeg.c": "e17e0656ab95b67ef9221520b4654d1bf5b49da26e39460630b9ea19a4ec634f",
+    "src/worker/lossless-jpeg.h": "83d5b023a7351fe320a21a9f76d86a97f92a4a01b9bcd94d23508b628e3ebcec",
+    "src/worker/lossless-jpeg.vala": "8b59a37a96d137eaff2217700b23d8070f8e9184fcd70759cbd305008c20d351",
+    "src/worker/meson.build": "e185d5a8afa4dd17e30164d2960bac36fad13c7a302e1a82867f42af440e0c72",
+    "src/worker/worker-dispatcher.vala": "4b584a1930ba2a252eaf4bbf6d019f81148919c31409e8a2bcb333760041d1bd",
+    "tests/integration/meson.build": "e579edfbac7bb54dd1fe4d6ca01c2fc70914402e04dae7d0905e1160274e585d",
+    "tests/integration/test-lossless-jpeg.vala": "7a5cca2af0509a457cc020a9aeb4e953db4aaa855cf9409317895ff9a01cffb1"
+  }
+}

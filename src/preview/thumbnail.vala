@@ -14,7 +14,7 @@ namespace MajorisFiles {
                 var info = yield file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.LOW, token);
                 // Honor the normal remote-download and thumbnail policy. An unavailable
                 // thumbnail leaves the labeled comparison without delaying the prompt.
-                var texture = yield new ThumbnailService(metadata).texture(new FileItem(file, info), token);
+                var texture = yield new FileThumbnailService(metadata).texture(new FileItem(file, info), token, 128, picture.get_scale_factor());
                 if (!token.is_cancelled() && texture != null) picture.paintable = texture;
             }
             catch (Error e) {} // Preview failure never changes the conflict decision.
@@ -31,14 +31,13 @@ namespace MajorisFiles {
         public abstract bool supports(FileItem item);
         public abstract async Bytes render(FileItem item, Cancellable token) throws Error;
     }
-    public class ImageThumbnail : Object, ThumbnailProvider {
-        public bool supports(FileItem item)
-        {
-            return item.mime.has_prefix("image/") && item.bytes <= 256 * 1024 * 1024;
-        }
-        public async Bytes render(FileItem item, Cancellable token) throws Error
-        {
-            return yield PreviewSandbox.run(item, "image-thumbnail", {}, token);
+    // This provider is only a handoff for policy-authorized remote staging.
+    internal class ImageKitThumbnail : Object, ThumbnailProvider {
+        int edge;
+        public ImageKitThumbnail(int edge) { this.edge = edge; }
+        public bool supports(FileItem item) { return ImageKitIntegration.is_candidate(item); }
+        public async Bytes render(FileItem item, Cancellable token) throws Error {
+            return yield ImageKitIntegration.get_default().thumbnail(item, edge, token);
         }
     }
     public class PdfThumbnail : Object, ThumbnailProvider {
@@ -51,15 +50,14 @@ namespace MajorisFiles {
             return yield PreviewSandbox.run(item, "pdf-thumbnail", {}, token);
         }
     }
-    public class ThumbnailService : Object {
+    public class FileThumbnailService : Object {
         public bool enabled = true;
         MetadataStore? metadata;
         static uint remote_active;
         Gee.ArrayList<ThumbnailProvider> providers = new Gee.ArrayList<ThumbnailProvider>();
-        public ThumbnailService(MetadataStore? metadata = null)
+        public FileThumbnailService(MetadataStore? metadata = null)
         {
             this.metadata = metadata;
-            providers.add(new ImageThumbnail());
             providers.add(new PdfThumbnail());
             providers.add(new FontThumbnail());
             providers.add(new VideoThumbnail());
@@ -68,7 +66,7 @@ namespace MajorisFiles {
         {
             providers.insert(0, provider);
         }
-        public async Gdk.Texture? texture(FileItem item, Cancellable token) throws Error {
+        public async Gdk.Texture? texture(FileItem item, Cancellable token, int logical_edge = 128, int scale = 1) throws Error {
             var cloud = yield CloudFiles.get_default().query(item.file, token);
             if (cloud.online_only || cloud.state == "unavailable" || cloud.state == "error") return null;
             string policy = metadata == null ? "Local" : metadata.state("thumbnail-policy", "Local");
@@ -80,6 +78,14 @@ namespace MajorisFiles {
             limit = limit.clamp(1, 128);
             if(!item.file.is_native() && (!item.info.has_attribute("standard::size") || item.bytes > (uint64)limit * 1024 * 1024))
                 return null;
+            if (ImageKitIntegration.is_candidate(item)) {
+                int edge = ImageKitIntegration.thumbnail_edge(logical_edge, scale);
+                Bytes encoded;
+                if (item.file.is_native()) encoded = yield ImageKitIntegration.get_default().thumbnail(item, edge, token);
+                else encoded = yield remote_preview(new ImageKitThumbnail(edge), item, Environment.get_tmp_dir(), (uint64)limit * 1024 * 1024, token);
+                token.set_error_if_cancelled();
+                return Gdk.Texture.from_bytes(encoded);
+            }
             ThumbnailProvider? provider = null;
             foreach(var candidate in providers)
                 if(candidate.supports(item))
@@ -102,7 +108,7 @@ namespace MajorisFiles {
                 if(cached_info.get_file_type() != FileType.REGULAR || cached_info.get_size() > 1024 * 1024)
                     throw new FileError.INVALID("Invalid thumbnail cache entry");
                 var cached_item = new FileItem(cached, cached_info);
-                var sanitized = yield PreviewSandbox.run(cached_item, "thumbnail-cache", {item.file.get_uri(), modified}, token);
+                var sanitized = yield PreviewSandbox.run(cached_item, "non-image-thumbnail-cache", {item.file.get_uri(), modified}, token);
                 var stream = new MemoryInputStream.from_bytes(sanitized);
                 image = yield new Gdk.Pixbuf.from_stream_async(stream, token);
                 yield stream.close_async(Priority.LOW, null);
@@ -150,6 +156,10 @@ namespace MajorisFiles {
             try {
                 token.set_error_if_cancelled();
                 output = yield temporary.create_async(FileCreateFlags.PRIVATE, Priority.LOW, transfer_token);
+                var before = yield item.file.query_info_async(FileItem.ATTRIBUTES + ",etag::value", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.LOW, transfer_token);
+                if (before.get_file_type() != FileType.REGULAR || Paths.is_symlink(before) ||
+                    !before.has_attribute("standard::size") || before.get_size() < 0 || (uint64)before.get_size() > limit)
+                    throw new IOError.NOT_SUPPORTED("Remote thumbnail requires a regular file within the download limit");
                 input = yield item.file.read_async(Priority.LOW, transfer_token);
                 uint8[] buffer = new uint8[65536];
                 uint64 total = 0;
@@ -168,10 +178,17 @@ namespace MajorisFiles {
                 input = null;
                 yield output.close_async(Priority.LOW, null);
                 output = null;
+                if (total != (uint64)before.get_size())
+                    throw new IOError.BUSY("Remote thumbnail transfer did not match the source size");
                 var info = yield temporary.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.LOW, token);
                 info.set_content_type(item.mime);
                 info.set_display_name(item.name);
                 var result = yield provider.render(new FileItem(temporary, info), token);
+                var after = yield item.file.query_info_async(FileItem.ATTRIBUTES + ",etag::value", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.LOW, token);
+                foreach (var attribute in new string[] {"etag::value", "id::file", "standard::size", "time::modified", "time::modified-usec", "time::changed", "time::changed-usec"})
+                    if (before.get_attribute_as_string(attribute) != after.get_attribute_as_string(attribute))
+                        throw new IOError.BUSY("Remote source changed during thumbnail generation");
+                token.set_error_if_cancelled();
                 yield temporary.delete_async(Priority.LOW, null);
                 return result;
             }

@@ -92,8 +92,8 @@ namespace MajorisFiles {
             }
 
             if (items.size == 1 && !items[0].directory) {
-                var thumbnails = new ThumbnailService(metadata);
-                thumbnails.texture.begin(items[0], token, (obj, res) => {
+                var thumbnails = new FileThumbnailService(metadata);
+                thumbnails.texture.begin(items[0], token, 128, image.get_scale_factor(), (obj, res) => {
                     try { var texture = thumbnails.texture.end(res); if (!token.is_cancelled() && texture != null) image.set_from_paintable(texture); } catch (Error e) {}
                 });
             }

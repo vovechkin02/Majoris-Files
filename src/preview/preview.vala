@@ -56,22 +56,13 @@ namespace MajorisFiles {
     public class ImagePreview : Object, PreviewProvider {
         public bool supports(FileItem item)
         {
-            return item.mime.has_prefix("image/");
+            return ImageKitIntegration.is_candidate(item);
         }
         public async Gtk.Widget render(FileItem item, Cancellable token) throws Error
         {
-            if (item.bytes > 256 * 1024 * 1024)
-                throw new FileError.UNSUPPORTED("This image exceeds the preview size limit");
-            if (item.mime == "image/gif" || item.mime == "image/webp" || item.mime == "image/avif" || item.mime == "image/heif" || item.mime == "image/heic") {
-                try {
-                    var animation = yield PreviewSandbox.run(item, "image-animation", {}, token);
-                    return new AnimatedImageView(animation, token);
-                }
-                catch (IOError.CANCELLED e) { throw e; }
-                catch (Error e) {} // Static files and unavailable animation decoders use the image provider.
-            }
-            var bytes = yield PreviewSandbox.run(item, "image", {"0"}, token);
-            return new ImageView(item, Gdk.Texture.from_bytes(bytes), token);
+            var preview = new ImageKitPreview();
+            yield preview.load(item, token);
+            return preview;
         }
     }
     public class MediaPreview : Object, PreviewProvider {
@@ -196,6 +187,8 @@ namespace MajorisFiles {
             try {
                 var cloud = yield CloudFiles.get_default().query(item.file, pending);
                 if (cloud.online_only) {
+                    if (metadata != null && metadata.state("remote-preview-policy", "On Request") == "Never")
+                        throw new FileError.UNSUPPORTED("Remote previews are disabled in Preferences");
                     if (!remote_requested) {
                         request_button.label = _("Download Cloud Preview"); request_button.visible = true; return;
                     }
@@ -233,9 +226,11 @@ namespace MajorisFiles {
                 foreach (var provider in providers)
                     if (provider.supports(item))
                     {
+                        unavailable_label.label = _("Loading preview…"); unavailable_label.visible = true;
                         var widget = yield provider.render(item, pending);
                         if (pending.is_cancelled() || epoch != generation)
                             return;
+                        unavailable_label.visible = false;
                         widget.vexpand = true;
                         content_box.append(widget);
                         return;

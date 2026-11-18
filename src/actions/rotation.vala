@@ -4,7 +4,7 @@ namespace MajorisFiles {
         extern static uint effective_uid();
         public static bool supports(FileItem item) {
             return item.file.is_native() && !item.directory && !Paths.is_symlink(item.info) &&
-                item.mime in new string[] {"image/png", "image/jpeg"} && item.bytes <= 256 * 1024 * 1024 &&
+                item.mime in new string[] {"image/png", "image/jpeg"} &&
                 (!item.info.has_attribute("access::can-write") || item.info.get_attribute_boolean("access::can-write")) &&
                 item.info.has_attribute("unix::uid") && item.info.get_attribute_uint32("unix::uid") == effective_uid();
         }
@@ -18,20 +18,31 @@ namespace MajorisFiles {
                 if (!supports(item)) throw new IOError.NOT_SUPPORTED("Persistent rotation requires a writable, owned local JPEG or PNG image");
                 string expected = yield DurableFiles.snapshot(item.file, job.cancellable);
                 string format = item.mime == "image/jpeg" ? "jpeg" : "png";
-                job.current = _("Rendering the saved image in the isolated helper");
-                Bytes rendered;
-                try { rendered = yield PreviewSandbox.run(item, "image-rotate", {clockwise ? "90" : "270", format, "lossless"}, job.cancellable); }
-                catch (Error e) {
+                job.current = _("Rendering the saved image with ImageKit");
+                temporary = item.file.get_parent().get_child(".majoris-edited-" + Uuid.string_random());
+                var stream = yield temporary.create_async(FileCreateFlags.PRIVATE, Priority.LOW, job.cancellable);
+                temporary_identity = yield OperationManager.file_identity(temporary);
+                yield stream.close_async(Priority.LOW, null);
+                var options = new ImageKit.ExportOptions();
+                options.format = format;
+                options.bit_depth = format == "jpeg" ? 8 : 16;
+                options.quality = 95;
+                options.lossless = true;
+                var transform = new ImageKit.RenderOptions();
+                transform.turns = clockwise ? 1 : 3;
+                var encoder = new ImageKit.EncoderRegistry();
+                try {
+                    yield encoder.encode(ImageKitIntegration.source(item), temporary, options, transform, job.cancellable);
+                } catch (ImageKit.ImageError.UNSUPPORTED e) {
                     job.cancellable.set_error_if_cancelled();
                     if (format != "jpeg") throw e;
                     bool accepted = allow_lossy;
                     if (!accepted && parent != null)
                         accepted = yield Dialogs.confirm(parent, _("Lossless rotation is unavailable"), _("The JPEG edges may not align with its compression blocks. Re-encoding can reduce image quality. The original bytes will be kept for Undo."), _("Re-encode JPEG"));
                     if (!accepted) throw new IOError.NOT_SUPPORTED("JPEG cannot be rotated losslessly without trimming; the original was left unchanged");
-                    rendered = yield PreviewSandbox.run(item, "image-rotate", {clockwise ? "90" : "270", format, "lossy"}, job.cancellable);
+                    options.lossless = false;
+                    yield encoder.encode(ImageKitIntegration.source(item), temporary, options, transform, job.cancellable);
                 }
-                temporary = item.file.get_parent().get_child(".majoris-edited-" + Uuid.string_random());
-                yield temporary.replace_contents_async(rendered.get_data(), null, false, FileCreateFlags.PRIVATE, job.cancellable, null);
                 temporary_identity = yield OperationManager.file_identity(temporary);
                 yield DurableFiles.copy_attributes(item.file, temporary, job.cancellable);
                 var attributes = new FileInfo(); int64 now = get_real_time();

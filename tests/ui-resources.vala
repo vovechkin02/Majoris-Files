@@ -4,10 +4,10 @@ namespace MajorisFiles {
     int main(string[] args) {
         Test.init(ref args);
         Adw.init();
+        ImageKit.ImageView.register_type();
         typeof(Adw.AboutDialog).ensure();
         Type[] types = {
             typeof(AclDialog),
-            typeof(AnimatedImageView),
             typeof(ApplicationChoiceRow),
             typeof(ApplicationLaunchRow),
             typeof(AssociationChooser),
@@ -31,7 +31,7 @@ namespace MajorisFiles {
             typeof(FilenameCell),
             typeof(FilesWindow),
             typeof(GridFileItem),
-            typeof(ImageView),
+            typeof(ImageKitPreview),
             typeof(ListFileItem),
             typeof(MarkdownView),
             typeof(MediaPreviewWidget),

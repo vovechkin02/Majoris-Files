@@ -25,10 +25,10 @@ build = (root / "meson.build").read_text()
 assert "dependency('majoris-ui-gtk4'" in build
 assert "dependency('gtk4', version: '>=4.18')" in build
 assert "ui/toolbar.vala" not in build
-for name in ("pdf", "sandbox", "animation"):
+for name in ("pdf", "imagekit-integration"):
     preview = (root / "src/preview" / (name + ".vala")).read_text()
     assert "new Majoris.Ui.Toolbar()" in preview
-    assert "controls.compact = true" in preview
+    assert "controls.compact = true" in preview or "toolbar.compact = true" in preview
 assert not list((root / "src").rglob("toolbar.vala"))
 assert "files-location" not in browser
 

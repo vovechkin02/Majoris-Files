@@ -1,3 +1,5 @@
 #!/usr/bin/make -f
+# ImageKit runtimes are resolved by dh_shlibdeps; the core runtime requires
+# its matching worker and Bubblewrap. The desktop thumbnailer is not required.
 %:
 	dh $@ --buildsystem=meson

@@ -17,6 +17,7 @@ namespace MajorisFiles {
         }
         protected override void startup()
         {
+            ImageKit.ImageView.register_type();
             base.startup();
             metadata = new MetadataStore();
             if(metadata.state("session-clean", "true") == "false")

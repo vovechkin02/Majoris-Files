@@ -330,16 +330,10 @@ async void rich_preview_case() throws Error
     yield gif.replace_contents_async(Base64.decode("R0lGODlhAQABAIAAAAAAAP///yH5BAAKAAAALAAAAAABAAEAAAICRAEAIfkEAAoAAAAsAAAAAAEAAQAAAgJMAQA7"), null, false, FileCreateFlags.PRIVATE, token, null);
     var gif_info = yield gif.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
     var gif_item = new FileItem(gif, gif_info);
-    var frames = yield PreviewSandbox.run(gif_item, "image-animation", {}, token);
-    var parser = new Json.Parser(); parser.load_from_data((string)frames.get_data(), (ssize_t)frames.get_size());
-    var gif_frames = parser.get_root().get_array();
-    assert(gif_frames.get_length() >= 2);
-    bool distinct = false;
-    foreach (var frame in gif_frames.get_elements())
-        if (frame.get_object().get_string_member("png") != gif_frames.get_object_element(0).get_string_member("png")) distinct = true;
-    assert(distinct);
-    var animation = yield new ImagePreview().render(gif_item, token);
-    assert(animation is AnimatedImageView);
+    var animation = (ImageKitPreview)(yield new ImagePreview().render(gif_item, token));
+    assert(animation.image_view.animated);
+    yield animation.image_view.seek_frame(1, token);
+    assert(animation.image_view.current_frame == 1);
     string? gst = Environment.find_program_in_path("gst-launch-1.0");
     if (gst != null) {
         var video = root.get_child("sample.ogv");
@@ -445,9 +439,9 @@ async void preview_case() throws Error
     var image_bytes = yield PreviewSandbox.run(pdf_item, "pdf-page", {"0", "1"}, new Cancellable());
     var texture = Gdk.Texture.from_bytes(image_bytes);
     assert(texture.get_width() == 200 && texture.get_height() == 200);
-    var thumbnail = yield new ThumbnailService().texture(pdf_item, new Cancellable());
+    var thumbnail = yield new FileThumbnailService().texture(pdf_item, new Cancellable());
     assert(thumbnail != null && thumbnail.get_width() <= 128 && thumbnail.get_height() <= 128);
-    var cached_thumbnail = yield new ThumbnailService().texture(pdf_item, new Cancellable());
+    var cached_thumbnail = yield new FileThumbnailService().texture(pdf_item, new Cancellable());
     assert(cached_thumbnail != null && cached_thumbnail.get_width() == thumbnail.get_width());
     var comparison_copy = root.get_child("comparison.pdf");
     yield pdf_file.copy_async(comparison_copy, FileCopyFlags.NONE, Priority.DEFAULT, null, null);
@@ -463,11 +457,11 @@ async void preview_case() throws Error
     assert(first_preview.alternative_text != second_preview.alternative_text);
     string cache_name = Checksum.compute_for_string(ChecksumType.MD5, pdf_item.file.get_uri()) + ".png";
     FileUtils.set_contents(Path.build_filename(Environment.get_user_cache_dir(), "thumbnails", "normal", cache_name), "corrupted thumbnail");
-    cached_thumbnail = yield new ThumbnailService().texture(pdf_item, new Cancellable());
+    cached_thumbnail = yield new FileThumbnailService().texture(pdf_item, new Cancellable());
     assert(cached_thumbnail != null);
     var thumbnail_settings = new MetadataStore(root.get_child("thumbnail-settings.db").get_path());
     thumbnail_settings.set_state("thumbnail-policy", "Never");
-    assert((yield new ThumbnailService(thumbnail_settings).texture(pdf_item, new Cancellable())) == null);
+    assert((yield new FileThumbnailService(thumbnail_settings).texture(pdf_item, new Cancellable())) == null);
     yield root.get_child("word").make_directory_async(Priority.DEFAULT, null);
     FileUtils.set_contents(root.get_child("word/document.xml").get_path(), "<w:document xmlns:w='urn:fixture'><w:p><w:r><w:t>Office café &amp; text</w:t></w:r></w:p></w:document>");
     var office_sources = new Gee.ArrayList<File>();
@@ -487,9 +481,9 @@ async void preview_case() throws Error
     image_surface.write_to_png(image_file.get_path());
     var image_info = yield image_file.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, null);
     var image_item = new FileItem(image_file, image_info);
-    image_bytes = yield PreviewSandbox.run(image_item, "image", {"90"}, new Cancellable());
-    texture = Gdk.Texture.from_bytes(image_bytes);
-    assert(texture.get_width() == 100 && texture.get_height() == 200);
+    var image_preview = (ImageKitPreview)(yield new ImagePreview().render(image_item, new Cancellable()));
+    assert(image_preview.image_view.image_width == 200 && image_preview.image_view.image_height == 100);
+    image_preview.image_view.rotate_clockwise();
     var font_file = File.new_for_path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
     if(font_file.query_exists())
     {
@@ -499,7 +493,7 @@ async void preview_case() throws Error
         image_bytes = yield PreviewSandbox.run(font_item, "font", {}, new Cancellable());
         texture = Gdk.Texture.from_bytes(image_bytes);
         assert(texture.get_width() == 1200 && texture.get_height() == 480);
-        var font_thumbnail = yield new ThumbnailService().texture(font_item, new Cancellable());
+        var font_thumbnail = yield new FileThumbnailService().texture(font_item, new Cancellable());
         assert(font_thumbnail != null && font_thumbnail.get_width() <= 128);
     }
     var preview_cancel = new Cancellable();

@@ -42,7 +42,6 @@ src/operations/replacements.vala
 src/portal/backend.vala
 src/portal/main.vala
 src/portal/parent.vala
-src/preview/animation.vala
 src/preview/archive.vala
 src/preview/office.vala
 src/preview/pdf.vala
@@ -116,7 +115,6 @@ data/ui/permissions-acl.ui
 data/ui/permissions-dialog.ui
 data/ui/permissions.ui
 data/ui/preferences.ui
-data/ui/preview-animation.ui
 data/ui/preview-controls.ui
 data/ui/preview-image.ui
 data/ui/preview-markdown.ui
@@ -154,3 +152,4 @@ data/ui/tags-palette.ui
 data/ui/value-row.ui
 data/ui/view-settings.ui
 data/ui/window.ui
+src/preview/imagekit-integration.vala

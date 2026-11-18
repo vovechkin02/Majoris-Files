@@ -3,9 +3,11 @@ namespace MajorisFiles {
         public static async Gee.HashMap<string, string> load(FileItem item, Cancellable token) throws Error
         {
             var result = new Gee.HashMap<string, string>();
-            if (!(item.mime.has_prefix("audio/") || item.mime.has_prefix("video/") || item.mime.has_prefix("image/")))
+            if (!(item.mime.has_prefix("audio/") || item.mime.has_prefix("video/") || ImageKitIntegration.is_candidate(item)))
                 return result;
-            var bytes = yield PreviewSandbox.run(item, item.mime.has_prefix("image/") ? "image-info" : "media-info", {}, token);
+            if (ImageKitIntegration.is_candidate(item))
+                return yield ImageKitIntegration.get_default().metadata(item, token);
+            var bytes = yield PreviewSandbox.run(item, "media-info", {}, token);
             if (bytes.get_size() > 512 * 1024)
                 throw new FileError.INVALID("Media metadata exceeds the limit");
             var parser = new Json.Parser();
@@ -104,10 +106,10 @@ namespace MajorisFiles {
         }
         public static string classify(string key, string mime) {
             string lower = key.down();
-            if (lower.has_prefix("exif.") || lower.has_prefix("xmp.") || lower.contains("camera") || lower.contains("lens") || lower.contains("exposure") || lower.contains("iso speed") || lower.contains("gps") || key in new string[] {"Aperture", "ISO", "Focal Length", "Capture Date"}) return _("Camera");
+            if (lower.has_prefix("exif.") || lower.has_prefix("xmp.") || lower.contains("camera") || lower.contains("lens") || lower.contains("exposure") || lower.contains("iso speed") || lower.contains("gps") || lower == "iso" || lower == "shutter" || lower == "flash" || lower == "white balance" || lower == "capture date" || lower == "focal length" || key in new string[] {"Aperture", "ISO", "Focal Length", "Capture Date"}) return _("Camera");
             if (lower.has_prefix("audio") || lower.contains("sample rate") || lower.contains("channels")) return _("Audio");
             if (lower.has_prefix("video") || lower.contains("frame rate")) return _("Video");
-            if (mime.has_prefix("image/") && (lower == "dimensions" || lower.contains("width") || lower.contains("height") || lower.contains("resolution") || lower.contains("format") || lower.contains("orientation") || lower.contains("profile") || lower.contains("depth"))) return _("Image");
+            if (mime.has_prefix("image/") && (lower == "dimensions" || lower == "pages" || lower == "animated" || lower == "alpha" || lower.contains("hdr") || lower.contains("raw") || lower.contains("colour") || lower.contains("frame") || lower.contains("loop") || lower.contains("width") || lower.contains("height") || lower.contains("resolution") || lower.contains("format") || lower.contains("orientation") || lower.contains("profile") || lower.contains("depth"))) return _("Image");
             if (lower == "duration (seconds)" || lower == "resolution" || lower == "title" || lower == "artist" || lower == "album" || lower == "copyright" || lower == "description") {
                 if (mime.has_prefix("video/")) return _("Video");
                 if (mime.has_prefix("audio/")) return _("Audio");
@@ -131,7 +133,7 @@ namespace MajorisFiles {
             try {
                 var fields = yield RichMetadata.load(item, token); token.set_error_if_cancelled();
                 var keys = new Gee.ArrayList<string>(); keys.add_all(fields.keys); keys.sort((a, b) => strcmp(a, b));
-                foreach (var key in keys) if (key != "Artwork PNG") add_field(classify(key, item.mime), key, fields[key]);
+                foreach (var key in keys) if (key != "Artwork PNG") add_field(classify(key, fields.has_key("Image Format") ? fields["Image Format"] : item.mime), key, fields[key]);
             } catch (Error e) { if (!token.is_cancelled()) add_field(_("Additional Metadata"), _("Media metadata unavailable"), e.message); }
             if (metadata != null && !token.is_cancelled()) foreach (var extension in ExtensionManager.get_default(metadata).extensions) {
                 if (!extension.enabled || !("metadata" in extension.capabilities || "properties" in extension.capabilities)) continue;

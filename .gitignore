@@ -1,3 +1,7 @@
 build/
 .reference/
 *.swp
+
+# External ImageKit inspection checkout; never vendored or built into Files.
+artifacts/imagekit-reference/
+artifacts/imagekit-verification/

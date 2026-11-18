@@ -371,7 +371,7 @@ namespace MajorisFiles {
         Gtk.ListBox completion_list;
         Cancellable completion_token = new Cancellable();
         uint completion_delay;
-        ThumbnailService thumbnails;
+        FileThumbnailService thumbnails;
         Gee.HashMap<Gtk.ListItem, Cancellable> thumbnail_jobs = new Gee.HashMap<Gtk.ListItem, Cancellable>();
         uint sidebar_generation;
 
@@ -421,7 +421,7 @@ namespace MajorisFiles {
                 var command = new SimpleAction(name, null); command.activate.connect(dispatch_place); place_actions.add_action(command);
             }
             this.chooser_mode = chooser_mode;
-            thumbnails = new ThumbnailService(metadata);
+            thumbnails = new FileThumbnailService(metadata);
             show_hidden = metadata.state("show-hidden", "false") == "true";
             hidden_preference = show_hidden;
             click_preference = metadata.state("single-click", "false") == "true";
@@ -2689,7 +2689,7 @@ namespace MajorisFiles {
             image.set_from_gicon(item_icon(item));
             var token = new Cancellable();
             thumbnail_jobs[li] = token;
-            thumbnails.texture.begin(item, token, (service, res) => {
+            thumbnails.texture.begin(item, token, int.max(32, image.pixel_size), image.get_scale_factor(), (service, res) => {
                 try {
                     var texture = thumbnails.texture.end(res);
                     if(!token.is_cancelled() && li.item == item && texture != null)

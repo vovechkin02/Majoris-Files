@@ -28,6 +28,10 @@
     <property name="icon-name">media-playback-pause-symbolic</property>
     <property name="tooltip-text" translatable="yes">Play or Pause Animation</property>
   </object>
+  <object class="GtkButton" id="control_actual">
+    <property name="icon-name">zoom-original-symbolic</property>
+    <property name="tooltip-text" translatable="yes">Actual Size</property>
+  </object>
   <object class="GtkLabel" id="count">
     <style>
       <class name="majoris-toolbar-metadata" />

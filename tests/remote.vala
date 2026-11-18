@@ -1,4 +1,10 @@
 using MajorisFiles;
+bool has_image_view(Gtk.Widget widget) {
+    if (widget is ImageKit.ImageView) return ((ImageKit.ImageView)widget).document != null;
+    for (var child = widget.get_first_child(); child != null; child = child.get_next_sibling())
+        if (has_image_view(child)) return true;
+    return false;
+}
 int main(string[] args){
     Gtk.init();Adw.init();
     var loop=new MainLoop();int status=0;
@@ -24,6 +30,28 @@ async void run(string uri) throws Error {
     var cancel=new Cancellable();refused=false;
     try{yield ChooserImport.download(large,cancel,imports,new ImportPolicy(),(done,total)=>cancel.cancel());}catch(IOError.CANCELLED e){refused=true;}assert(refused);
     var metadata=new MetadataStore(temporary.get_child("state.db").get_path());
+    var remote_image = root.get_child("image.png");
+    var image_info = yield remote_image.query_info_async(FileItem.ATTRIBUTES, FileQueryInfoFlags.NONE, Priority.DEFAULT, token);
+    var image_item = new FileItem(remote_image, image_info);
+    var thumbnails = new FileThumbnailService(metadata);
+    assert((yield thumbnails.texture(image_item, token)) == null); // Local is the default.
+    metadata.set_state("thumbnail-policy", "Never");
+    assert((yield thumbnails.texture(image_item, token)) == null);
+    metadata.set_state("thumbnail-policy", "All");
+    stdout.printf("Remote thumbnail: MIME=%s, bytes=%" + uint64.FORMAT + ", policy=%s, symlink=%s\n", image_item.mime, image_item.bytes, metadata.state("thumbnail-policy"), Paths.is_symlink(image_info).to_string());
+    var thumbnail = yield thumbnails.texture(image_item, token, 128, 2);
+    assert(thumbnail != null && thumbnail.width <= 256 && thumbnail.height <= 256);
+    var image_preview = new PreviewPane(metadata);
+    metadata.set_state("remote-preview-policy", "Never");
+    yield image_preview.show_item(image_item, true);
+    assert(!has_image_view(image_preview));
+    metadata.set_state("remote-preview-policy", "On Request");
+    yield image_preview.show_item(image_item);
+    assert(!has_image_view(image_preview));
+    yield image_preview.show_item(image_item, true);
+    assert(has_image_view(image_preview));
+    image_preview.cancel();
+    stdout.printf("PASS: remote image thumbnail policy and authorized ImageKit handoff\n");
     foreach(bool save in new bool[]{false,true,true}){
         var options=new ChooserOptions(save,new VariantBuilder(VariantType.VARDICT).end());options.initial=root;options.initial_provided=true;options.current_name="chooser-save.txt";
         var window=new ChooserWindow(options,metadata,new Places(metadata));window.present();

@@ -1,5 +1,7 @@
 <interface domain="majoris-files">
-  <template class="MajorisFilesImageView" parent="GtkBox">
+  <template class="MajorisFilesImageKitPreview" parent="GtkBox">
+    <property name="orientation">vertical</property>
+    <property name="spacing">6</property>
     <child>
       <object class="GtkScrolledWindow" id="toolbar_scroll">
         <property name="propagate-natural-height">true</property>
@@ -8,14 +10,14 @@
       </object>
     </child>
     <child>
-      <object class="GtkScrolledWindow" id="picture_scroll">
-        <property name="child">
-          <object class="GtkPicture" id="picture">
-            <property name="content-fit">contain</property>
-          </object>
-        </property>
+      <object class="ImageKitView" id="image_view">
+        <property name="fit-mode">contain</property>
+        <property name="allow-zoom">true</property>
+        <property name="allow-pan">true</property>
+        <property name="scroll-zoom-mode">control</property>
         <property name="hexpand">true</property>
         <property name="vexpand">true</property>
+        <accessibility><property name="label" translatable="yes">Image preview</property></accessibility>
       </object>
     </child>
     <child>

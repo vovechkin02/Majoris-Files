@@ -90,9 +90,8 @@ Existing structural insets separating independent operation rows, device usage c
 | `permissions-dialog.ui` | `PermissionsDialog` | `src/dialogs/permissions.vala` |
 | `permissions.ui` | `PermissionsPage` | `src/dialogs/permissions.vala` |
 | `preferences.ui` | `PreferencesDialog` | `src/dialogs/preferences.vala` |
-| `preview-animation.ui` | `AnimatedImageView` | `src/preview/animation.vala` |
 | `preview-controls.ui` | Standalone native/final-type controls or menu model | Resource-backed GtkBuilder construction/setup |
-| `preview-image.ui` | `ImageView` | `src/preview/sandbox.vala` |
+| `preview-image.ui` | `ImageKitPreview` embedding `ImageKitView` | `src/preview/imagekit-integration.vala` |
 | `preview-markdown.ui` | `MarkdownView` | `src/preview/archive.vala` |
 | `preview-media.ui` | `MediaPreviewWidget` | `src/preview/ui-components.vala` |
 | `preview-pdf.ui` | `PdfView` | `src/preview/pdf.vala` |

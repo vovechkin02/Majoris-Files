@@ -8,6 +8,7 @@ namespace MajorisFiles {
         }
         protected override void startup()
         {
+            ImageKit.ImageView.register_type();
             base.startup();
             hold();
             owner = Bus.own_name(BusType.SESSION, "org.freedesktop.impl.portal.desktop.majoris", BusNameOwnerFlags.NONE, (connection) => { try { backend = new PortalBackend(connection, this);

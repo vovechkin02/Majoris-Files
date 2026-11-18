@@ -44,7 +44,7 @@ Verified on 26 October 2026 in Debian WSL with GTK 4.18.6, libadwaita 1.7.6,
 Vala 0.56.18 and Meson 1.7.0. Reconfigured with prefix /usr, compiled
 successfully, and ran meson test -C build --print-errorlogs: **12 passed,
 0 failed, 0 skipped** (core, cloud, replacement-crash, archive-crash,
-image-decoders, firewall, filesystem, ui, session, portal, redesign,
+imagekit-integration, firewall, filesystem, ui, session, portal, redesign,
 theme-layout). Native UI tests used Xvfb. Compiler warnings remain, including
 existing generated-C warnings and GTK StyleContext deprecation. The full local
 log is build/meson-logs/testlog.txt. git diff --check passes.

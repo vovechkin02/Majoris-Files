@@ -30,7 +30,7 @@ cannot be asserted. Nautilus was a reference, not a replacement implementation.
 | Hidden shares lacked real visibility policy | Owned registry overlay sets browseable=no, preserves R/F/D ACLs, detects outside changes; narrow Polkit service. `sharing-service/visibility.vala`, `src/sharing/` | Actual Samba browse enumeration, direct hidden access, denied write, allowed write, POSIX restriction and administrator-change refusal |
 | Firewall detection could misstate the host | Read-only backend detection; only owned firewalld policy may change, only home/work; unsupported/unmanaged reported. `sharing-service/firewall.vala` | Owned-rule/refusal/privacy fixtures; live Majoris firewalld/Polkit remains unverified |
 | Replacement and batch rename interruption could strand files | Durable staging, source/target guards, native fsync and atomic exchange/fallback, journal reconciliation; batch rename fixed intent and identity. `src/operations/{manager,replacement-journal,rename-recovery,durability}.*` | Process termination at 25 replacement/rename/edit phases; real ENOSPC preserves old target/input; filesystem operation/Undo tests |
-| RAW/HEIF/AVIF/HDR paths incomplete | LibRaw embedded thumbnail/limited full decode; libheif orientation/alpha, ICC/NCLX conversion and PQ/HLG SDR tone mapping; bounded timed AVIF on libheif >=1.23. `src/preview/image-decoders.*` | DNG, HEIC, static/timed AVIF, alpha/ICC, PQ/HLG and corrupt fixtures |
+| Shared image-file processing | ImageKit API 2.0.1 owns previews, animation, thumbnails/cache, metadata and export. See `docs/imagekit-integration.md` for the pinned upstream change set and qualification. | Public API, real RAW, installed-consumer and Files integration checks |
 | Playback decoded untrusted media in UI process | Sandboxed GStreamer worker, bounded raw video/PCM protocol, cancellation, seek/pause/play, deadlines, error propagation. `src/preview/playback*`, `sandbox.vala`, `media.vala` | Actual H.264, HEVC, WebM/MKV, MP3, AAC, FLAC, Opus playback, pause/seek; malformed protocol and corrupt media |
 | Encrypted multipart extraction and remote archives incomplete | Password via stdin; bounded sandbox extraction; volume validation, fsynced publication with incomplete marker; remote files/folders staged and published by backend rename. `src/archive/` | Encrypted round trip/hash, wrong password, missing/corrupt volume, 5 crash phases; real SMB/SFTP/WebDAV creation/extraction |
 | Indexed search still walked covered trees | Conservative coverage interface; skip only authoritative covered roots, preserve uncovered/exhaustive fallback and Unicode infix semantics. `src/search/` | Actual TinySPARQL; covered/mixed/exhaustive fixtures; 10k/100k browsing and indexed search benchmarks |
@@ -41,12 +41,12 @@ cannot be asserted. Nautilus was a reference, not a replacement implementation.
 
 ## B. Dependencies and configuration
 
-`debian/control` is authoritative. Added development dependencies: libraw-dev,
-libheif-dev >=1.19, liblcms2-dev, libturbojpeg0-dev and libtiff-dev (decoder fixtures).
+`debian/control` is authoritative. Image development dependency:
+libmajoris-image-dev >=2.0.1 (API 2; core and GTK4 bindings). Standalone image codec dependencies belong to ImageKit.
 GStreamer base plugins are explicit build/runtime dependencies. Runtime decoder
 libraries are resolved by dpkg-shlibdeps; optional audio/video codecs remain the
-good/bad/libav recommendations. Timed AVIF uses a compile-time >=1.23 guard; older
-supported libheif retains static decoding. No experimental GNOME library is needed.
+good/bad/libav recommendations. Image animation and HDR capabilities are reported
+by the installed ImageKit codec stack. No experimental GNOME library is needed.
 
 The ISO must provide working GVfs/FUSE backends, document portal, bubblewrap user
 namespaces, Polkit agent, keyring and media plugins. It must select the installed
@@ -59,7 +59,7 @@ No host Samba/firewall configuration was changed by these fixtures.
 See `build/final-tests.log`, `build/meson-logs/testlog.json`, and integration logs in
 `build/`. Meson builds the application, portal, privileged service, helpers and test
 clients. The final source run and the clean Debian package build both passed 10/10 groups with no failures or skips. Desktop-file and AppStream validation, POT generation, staged installation and `git diff --check` passed. The unsigned package is `build/majoris-files_0.1.0-1_amd64.deb` (with debug symbols, buildinfo and changes alongside it). The suite has ten groups: core, cloud, replacement-crash, archive-crash,
-image-decoders, firewall, filesystem, UI, session and portal.
+imagekit-integration, firewall, filesystem, UI, session and portal.
 
 Additional executed checks: isolated actual Samba server; actual SFTP/WebDAV with
 and without FUSE; real document portal/Flatpak public and Gtk.FileDialog flows;

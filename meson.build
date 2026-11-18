@@ -3,6 +3,9 @@ gnome = import('gnome')
 majoris_ui = dependency('majoris-ui-gtk4', version: '>=0.1.0', required: true)
 add_project_arguments('-DGETTEXT_PACKAGE="majoris-files"', language: 'c')
 deps = [dependency('gtk4', version: '>=4.18'), dependency('libadwaita-1', version: '>=1.5'), dependency('gee-0.8'), dependency('gio-unix-2.0'), dependency('sqlite3'), dependency('json-glib-1.0')]
+imagekit_core = dependency('majoris-image-1', version: ['>=2.0.1', '<2.1.0'], required: true)
+imagekit_gtk = dependency('majoris-image-gtk4-1', version: ['>=2.0.1', '<2.1.0'], required: true)
+deps += [imagekit_core, imagekit_gtk]
 deps += majoris_ui
 deps += [dependency('poppler-glib'), dependency('libarchive'), dependency('gtk4-wayland'), dependency('gtk4-x11'), dependency('x11')]
 deps += dependency('libportal-gtk4', version: '>=0.7')
@@ -43,7 +46,7 @@ ui += files('src/application/launcher.vala')
 ui += files('src/application/shell-search.vala')
 ui += files('src/preview/archive.vala')
 ui += files('src/preview/office.vala')
-ui += files('src/preview/animation.vala')
+ui += files('src/preview/imagekit-integration.vala')
 ui += files('src/preview/sandbox.vala')
 ui += files('src/preview/playback.vala','src/preview/playback.c')
 deps += [dependency('gstreamer-app-1.0')]
@@ -54,7 +57,7 @@ ui += files('src/views/column-provider.vala')
 ui += files('src/views/file-groups.vala')
 ui += files('src/views/grid-rows.vala', 'src/views/filename-cell.vala', 'src/views/item-widgets.vala', 'src/preview/ui-components.vala', 'src/sharing/ui-components.vala', 'src/dialogs/ui-components.vala', 'src/metadata/tag-assignment-row.vala')
 ui += configure_file(input: 'src/preview/config.vala.in', output: 'preview-config.vala', configuration: {'office_source_helper_path': meson.project_source_root() / 'src/preview/office-render.py', 'office_helper_path': get_option('prefix') / get_option('libexecdir') / 'majoris-files-office-render.py', 'helper_path': get_option('prefix') / get_option('libexecdir') / 'majoris-files-preview-helper'})
-preview_helper = executable('majoris-files-preview-helper', 'src/preview/helper.c', 'src/preview/media.c', 'src/preview/playback-worker.c', 'src/preview/image-metadata.c', 'src/preview/image-decoders.c', 'src/preview/rotation.c', 'src/archive/native.c', dependencies: [dependency('gio-2.0'), dependency('poppler-glib'), dependency('libarchive'), dependency('pangocairo'), dependency('pangoft2'), dependency('fontconfig'), dependency('gdk-pixbuf-2.0'), dependency('gexiv2'), dependency('libraw'), dependency('libheif', version: '>=1.19'), dependency('lcms2'), dependency('libturbojpeg'), dependency('gstreamer-pbutils-1.0'), dependency('gstreamer-app-1.0'), dependency('gstreamer-video-1.0'), dependency('libcmark'), dependency('json-glib-1.0')], link_args: ['-lm'], install: true, install_dir: get_option('libexecdir'))
+preview_helper = executable('majoris-files-preview-helper', 'src/preview/helper.c', 'src/preview/media.c', 'src/preview/playback-worker.c', 'src/archive/native.c', dependencies: [dependency('gio-2.0'), dependency('poppler-glib'), dependency('libarchive'), dependency('pangocairo'), dependency('pangoft2'), dependency('fontconfig'), dependency('gdk-pixbuf-2.0'), dependency('gstreamer-pbutils-1.0'), dependency('gstreamer-app-1.0'), dependency('gstreamer-video-1.0'), dependency('libcmark'), dependency('json-glib-1.0')], link_args: ['-lm'], install: true, install_dir: get_option('libexecdir'))
 ui += files('src/actions/registry.vala', 'src/actions/rotation.vala')
 ui += files('src/extensions/manager.vala')
 ui += files('src/actions/desktop.vala')
@@ -84,8 +87,6 @@ replacement_tests = executable('replacement-crash-tests', 'tests/replacement-cra
 test('replacement-crash', replacement_tests, timeout: 60)
 archive_crash=executable('archive-crash-tests','tests/archive-crash.vala',core,dependencies:deps)
 test('archive-crash',archive_crash,timeout:60)
-image_tests = executable('image-decoder-tests', 'tests/image-decoders.c', 'src/preview/image-decoders.c', dependencies: [dependency('gio-2.0'), dependency('gdk-pixbuf-2.0'), dependency('libraw'), dependency('libheif'), dependency('lcms2'), dependency('libtiff-4'), dependency('json-glib-1.0')], link_args: ['-lm'], include_directories: include_directories('.'))
-test('image-decoders', image_tests, timeout: 60)
 firewall_tests = executable('firewall-tests', 'tests/firewall.vala', 'sharing-service/firewall.vala', 'sharing-service/clients.vala', dependencies: [dependency('gio-2.0'), dependency('json-glib-1.0')])
 test('firewall', firewall_tests)
 filesystem_tests = executable('filesystem-tests', 'tests/filesystem.vala', core, dependencies: deps)
@@ -107,7 +108,7 @@ if xvfb.found()
   dbus_run = find_program('dbus-run-session')
   python = find_program('python3')
   test('session', dbus_run, args: ['--', xvfb, '-a', python, meson.project_source_root() / 'tests/session.py', files_app], env: ['GDK_BACKEND=x11','GSK_RENDERER=cairo','GSETTINGS_BACKEND=memory'], timeout: 45)
-  test('portal', dbus_run, args: ['--', xvfb, '-a', portal_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory'], timeout: 30)
+  test('portal', dbus_run, args: ['--', xvfb, '-a', portal_tests], env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'MAJORIS_FILES_TEST_EXAMPLES=' + meson.project_source_root() / 'examples'], timeout: 30)
 endif
 install_data('data/com.majoris.files.desktop', install_dir: get_option('datadir') / 'applications')
 install_data('data/majoris-mimeapps.list',install_dir:get_option('datadir')/'applications')
@@ -231,4 +232,11 @@ if xvfb.found()
     test('builder-' + name, xvfb, args: ['-a', builder_tool, 'validate', meson.project_source_root() / 'data/ui' / name],
       env: ['GDK_BACKEND=x11', 'GTK_A11Y=none'], timeout: 30)
   endforeach
+endif
+
+imagekit_tests = executable('imagekit-integration-tests', 'tests/imagekit-integration.vala', 'tests/native-evidence.vala', core, ui, dependencies: deps)
+if xvfb.found()
+  test('imagekit-integration', find_program('python3'),
+    args: [meson.project_source_root() / 'tests/imagekit-session.py', find_program('dbus-run-session'), '--', xvfb, '-a', imagekit_tests, meson.project_source_root() / 'tests/fixtures/imagekit'],
+    env: ['GDK_BACKEND=x11', 'GSK_RENDERER=cairo', 'GSETTINGS_BACKEND=memory', 'GTK_A11Y=none'], timeout: 180)
 endif

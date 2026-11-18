@@ -123,7 +123,7 @@ async void shell_case() throws Error
 async void extension_case() throws Error
 {
     string build = Path.get_dirname(FileUtils.read_link("/proc/self/exe"));
-    string examples = Path.build_filename(build, "..", "examples");
+    string examples = Environment.get_variable("MAJORIS_FILES_TEST_EXAMPLES") ?? Path.build_filename(build, "..", "examples");
     var root = File.new_for_path(DirUtils.make_tmp("majoris-extension-XXXXXX"));
     string manifest;
     FileUtils.get_contents(Path.build_filename(examples, "checksum.extension"), out manifest);

@@ -162,6 +162,7 @@ with tempfile.TemporaryDirectory(prefix='majoris-remote-services-') as directory
     base=pathlib.Path(directory)
     for backend in ('sftp','dav'):
         ROOT=base/backend;ROOT.mkdir();(ROOT/'payload.txt').write_text('remote fixture\n');(ROOT/'large.bin').write_bytes(b'x'*(12*1024*1024));(ROOT/'disconnect.bin').write_bytes(b'x'*(12*1024*1024))
+        (ROOT/'image.png').write_bytes((pathlib.Path(__file__).parent/'fixtures/imagekit/rgb8.png').read_bytes())
         home=base/(backend+'-home');home.mkdir()
         if backend=='dav':
             server=http.server.ThreadingHTTPServer(('127.0.0.1',0),DAV)
